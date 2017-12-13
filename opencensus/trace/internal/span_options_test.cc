@@ -14,9 +14,9 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
+#include "gtest/gtest.h"
 #include "opencensus/trace/exporter/message_event.h"
 #include "opencensus/trace/exporter/status.h"
 #include "opencensus/trace/internal/span_impl.h"
