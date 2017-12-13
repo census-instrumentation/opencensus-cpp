@@ -1,5 +1,6 @@
 # OpenCensus - A stats collection and distributed tracing framework
 [![Gitter chat][gitter-image]][gitter-url]
+[![Build Status][travis-image]][travis-url]
 
 OpenCensus is a toolkit for collecting application performance and behavior data. It currently
 includes an API for tracing.
@@ -8,9 +9,6 @@ The library is in alpha stage and the API is subject to change.
 
 Please join [gitter](https://gitter.im/census-instrumentation/Lobby) for help or feedback on this
 project.
-
-[gitter-image]: https://badges.gitter.im/census-instrumentation/lobby.svg
-[gitter-url]: https://gitter.im/census-instrumentation/lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 This is not an officially supported Google product.
 
@@ -45,3 +43,8 @@ We are targeting the following compilers:
 * gcc 4.8.1
 * clang 3.4
 * MSVC 19
+
+[gitter-image]: https://badges.gitter.im/census-instrumentation/lobby.svg
+[gitter-url]: https://gitter.im/census-instrumentation/lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+[travis-image]: https://travis-ci.org/census-instrumentation/opencensus-cpp.svg?branch=master
+[travis-url]: https://travis-ci.org/census-instrumentation/opencensus-cpp
