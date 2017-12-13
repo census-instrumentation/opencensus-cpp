@@ -90,4 +90,4 @@ void BM_StartEndSpanAndSetStatus(benchmark::State& state) {
 BENCHMARK(BM_StartEndSpanAndSetStatus);
 
 }  // namespace
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();

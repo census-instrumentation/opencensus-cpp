@@ -82,4 +82,4 @@ BENCHMARK(BM_SpanIdCopyTo);
 }  // namespace
 }  // namespace trace
 }  // namespace opencensus
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();

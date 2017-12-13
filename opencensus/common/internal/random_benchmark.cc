@@ -32,4 +32,4 @@ void BM_Random64(benchmark::State& state) {
 BENCHMARK(BM_Random64);
 
 }  // namespace
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();
