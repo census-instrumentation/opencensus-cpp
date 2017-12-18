@@ -19,8 +19,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "gtest/gtest.h"
 #include "opencensus/trace/exporter/attribute_value.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/exporter/status.h"

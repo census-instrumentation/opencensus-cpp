@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/trace/internal/trace_config_impl.h"
 #include "opencensus/trace/trace_config.h"
+
+#include "opencensus/trace/internal/trace_config_impl.h"
 #include "opencensus/trace/trace_params.h"
 
 namespace opencensus {

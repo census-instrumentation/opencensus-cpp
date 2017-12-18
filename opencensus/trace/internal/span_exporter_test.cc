@@ -14,9 +14,9 @@
 
 #include "opencensus/trace/exporter/span_exporter.h"
 
-#include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/synchronization/mutex.h"
+#include "gtest/gtest.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"

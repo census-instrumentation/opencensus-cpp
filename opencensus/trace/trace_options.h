@@ -42,7 +42,7 @@ class TraceOptions final {
   // the process, e.g. to Stackdriver/Zipkin.
   bool IsSampled() const;
 
-  bool operator==(const TraceOptions &that) const;
+  bool operator==(const TraceOptions& that) const;
 
   // Returns a 2-char hex string of the TraceOptions value.
   std::string ToHex() const;

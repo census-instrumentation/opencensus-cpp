@@ -16,9 +16,9 @@
 #include <memory>
 #include <thread>
 
-#include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
+#include "gtest/gtest.h"
 #include "opencensus/trace/exporter/status.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"

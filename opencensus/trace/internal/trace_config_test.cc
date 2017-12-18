@@ -17,8 +17,8 @@
 #include <atomic>
 #include <thread>
 
-#include "gtest/gtest.h"
 #include "absl/time/clock.h"
+#include "gtest/gtest.h"
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/trace_params.h"
 
