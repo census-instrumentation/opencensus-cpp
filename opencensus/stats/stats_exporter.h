@@ -43,8 +43,7 @@ class StatsExporter final {
   // export to) and calls StatsExporter::RegisterHandler itself.
   class Handler {
    public:
-    virtual ~Handler() {}
-
+    virtual ~Handler() = default;
     virtual void ExportViewData(const ViewDescriptor& descriptor,
                                 const ViewData& data) = 0;
   };

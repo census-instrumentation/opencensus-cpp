@@ -16,6 +16,7 @@
 
 #include "absl/memory/memory.h"
 #include "absl/synchronization/mutex.h"
+#include "absl/time/clock.h"
 #include "gtest/gtest.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/sampler.h"
@@ -25,53 +26,66 @@ namespace opencensus {
 namespace trace {
 namespace {
 
-class MyExporter : public exporter::SpanExporter::Handler {
+class Counter {
  public:
-  void Export(const std::vector<exporter::SpanData>& spans) override {
-    absl::MutexLock l(&mu_);
-    num_exported_ += spans.size();
+  static Counter* Get() {
+    static Counter* global_counter = new Counter;
+    return global_counter;
   }
 
-  int num_exported() const {
+  void Increment(int n) {
     absl::MutexLock l(&mu_);
-    return num_exported_;
+    value_ += n;
+  }
+
+  int value() const {
+    absl::MutexLock l(&mu_);
+    return value_;
   }
 
  private:
+  Counter() = default;
   mutable absl::Mutex mu_;
-  int num_exported_ GUARDED_BY(mu_) = 0;
+  int value_ GUARDED_BY(mu_) = 0;
+};
+
+class MyExporter : public exporter::SpanExporter::Handler {
+ public:
+  static void Register() {
+    exporter::SpanExporter::RegisterHandler(absl::make_unique<MyExporter>());
+  }
+
+  void Export(const std::vector<exporter::SpanData>& spans) override {
+    Counter::Get()->Increment(spans.size());
+  }
 };
 
 class SpanExporterTest : public ::testing::Test {
- public:
-  SpanExporterTest() : exporter_(new MyExporter) {
-    exporter::SpanExporter::Register(
-        absl::WrapUnique<exporter::SpanExporter::Handler>(exporter_));
-  }
-
  protected:
-  MyExporter* exporter_;
+  static void SetUpTestCase() {
+    // Only register once.
+    MyExporter::Register();
+  }
 };
 
 TEST_F(SpanExporterTest, BasicExportTest) {
   ::opencensus::trace::AlwaysSampler sampler;
   ::opencensus::trace::StartSpanOptions opts = {&sampler};
-
   auto span1 = ::opencensus::trace::Span::StartSpan("Span1", nullptr, opts);
-  absl::SleepFor(absl::Milliseconds(100));
+  absl::SleepFor(absl::Milliseconds(10));
   auto span2 = ::opencensus::trace::Span::StartSpan("Span2", &span1, opts);
-  absl::SleepFor(absl::Milliseconds(200));
+  absl::SleepFor(absl::Milliseconds(20));
   auto span3 = ::opencensus::trace::Span::StartSpan("Span3", &span2);
-  absl::SleepFor(absl::Milliseconds(300));
+  absl::SleepFor(absl::Milliseconds(30));
   span3.End();
   span2.End();
   span1.End();
 
   for (int i = 0; i < 10; ++i) {
-    if (exporter_->num_exported() >= 3) break;
-    sleep(1);
+    if (Counter::Get()->value() >= 3) break;
+    absl::SleepFor(absl::Seconds(1));
   }
-  EXPECT_EQ(3, exporter_->num_exported());
+  EXPECT_EQ(3, Counter::Get()->value());
 }
 
 }  // namespace

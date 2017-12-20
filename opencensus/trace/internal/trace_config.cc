@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "opencensus/trace/trace_config.h"
-
 #include "opencensus/trace/internal/trace_config_impl.h"
 #include "opencensus/trace/trace_params.h"
 

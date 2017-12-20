@@ -111,6 +111,8 @@ struct SpanGenerator {
   }
 };
 
+Span Span::BlankSpan() { return Span(); }
+
 Span Span::StartSpan(absl::string_view name, const Span* parent,
                      const StartSpanOptions& options) {
   SpanContext parent_ctx;

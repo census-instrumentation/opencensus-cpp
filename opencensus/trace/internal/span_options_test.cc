@@ -60,36 +60,6 @@ TEST(SpanTest, StartSpanOptions) {
   EXPECT_EQ(SpanId(), SpanTestPeer::GetParentSpanId(&span));
 }
 
-#if 0
-// No BlankSpan functionality yet.
-TEST(SpanTest, BlankSpan) {
-  constexpr uint8_t trace_id[] = {1, 2, 3, 4, 5, 6, 7, 8,
-                                  9, 0, 1, 2, 3, 4, 5, 6};
-  constexpr uint8_t span_id[] = {00, 11, 22, 33, 44, 55, 66, 77};
-  Span span;
-  MessageEvent event;
-
-  EXPECT_EQ("", span.name());
-  EXPECT_EQ(SpanContext(), span.context());
-  EXPECT_FALSE(span.context().IsValid());
-
-  // Check that it does not crash with operations on a blank span.
-  span.AddMessageEvent(event);
-  span.AddLink(
-      {::opencensus::trace::Link::Type::kParentLinkedSpan,
-       ::opencensus::trace::TraceId(trace_id),
-       ::opencensus::trace::SpanId(span_id),
-       {{"test", ::opencensus::trace::AttributeValue::String("attribute")}}});
-  span.AddAnnotation(Annotation::FromDescriptionAndAttributes(
-      "This is an annotation.", {{"hello", AttributeValue::String("world")},
-                                 {"latency", AttributeValue::Int(1234)}}));
-  span.AddAttribute("bool attribute", AttributeValue::Bool(true));
-  span.SetStatus(StatusCode::CANCELLED, "error text");
-  span.End();
-  span.DebugString();
-}
-#endif
-
 TEST(SpanTest, EndAndStatus) {
   AlwaysSampler sampler;
   auto span = Span::StartSpan("test_span", nullptr, {&sampler});

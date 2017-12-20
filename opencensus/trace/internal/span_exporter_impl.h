@@ -52,7 +52,7 @@ class SpanExporterImpl {
   void AddSpan(const std::shared_ptr<opencensus::trace::SpanImpl>& span_impl);
   // Registers a handler with the exporter. This is intended to be done at
   // initialization.
-  void Register(std::unique_ptr<SpanExporter::Handler> handler);
+  void RegisterHandler(std::unique_ptr<SpanExporter::Handler> handler);
 
   static constexpr uint32_t kDefaultBufferSize = 64;
   static constexpr uint32_t kIntervalWaitTimeInMillis = 5000;
@@ -77,14 +77,13 @@ class SpanExporterImpl {
   // mutex within an AwaitWithTimeout, so we need to store the size in another
   // variable.
   std::atomic<size_t> size_;
-  std::thread t_;
   mutable absl::Mutex span_mu_;
   mutable absl::Mutex handler_mu_;
-
   std::vector<std::shared_ptr<opencensus::trace::SpanImpl>> spans_
       GUARDED_BY(span_mu_);
   std::vector<std::unique_ptr<SpanExporter::Handler>> handlers_
       GUARDED_BY(handler_mu_);
+  std::thread t_;
 };
 
 }  // namespace exporter

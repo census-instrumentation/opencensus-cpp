@@ -27,8 +27,8 @@ std::string MessageEvent::DebugString() const {
       "Type: ",
       (type_ == Type::RECEIVED) ? "RECEIVED"
                                 : ((type_ == Type::SENT) ? "SENT" : "UNKNOWN"),
-      "\nMessage Id: ", id_, "\ncompressed message size: ", compressed_size_,
-      "\nuncompressed message size: ", uncompressed_size_);
+      "  Message Id: ", id_, "  compressed message size: ", compressed_size_,
+      "  uncompressed message size: ", uncompressed_size_);
 }
 
 }  // namespace exporter
