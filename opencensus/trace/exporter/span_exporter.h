@@ -30,28 +30,17 @@ class SpanExporterImpl;
 class SpanExporter final {
  public:
   // Handlers allow different tracing services to export recorded data for
-  // sampled spans in their own format.
-  //
-  // To export data, the Handler MUST be registered to the global SpanExporter
-  // using RegisterHandler().
+  // sampled spans in their own format. The exporter should provide a static
+  // Register() method that takes any arguments needed by the exporter (e.g. a
+  // URL to export to) and calls SpanExporter::RegisterHandler itself.
   class Handler {
    public:
     virtual ~Handler() = default;
-
-   private:
-    friend class SpanExporterImpl;
-
-    // Exports sampled (see TraceOptions::IsSampled()) Spans using the immutable
-    // SpanData representation.
-    //
-    // The implementation SHOULD NOT block the calling thread. It should execute
-    // the export on a different thread if possible. This function must be
-    // thread-safe.
     virtual void Export(const std::vector<SpanData>& spans) = 0;
   };
 
-  // Register a handler that's used to export SpanData for sampled Spans.
-  static void Register(std::unique_ptr<Handler> handler);
+  // This should only be called by Handler's Register() method.
+  static void RegisterHandler(std::unique_ptr<Handler> handler);
 };
 
 }  // namespace exporter

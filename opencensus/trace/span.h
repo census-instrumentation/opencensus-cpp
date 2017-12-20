@@ -28,6 +28,7 @@
 #include "opencensus/trace/trace_params.h"
 
 namespace opencensus {
+class CensusContext;
 namespace trace {
 
 namespace exporter {
@@ -76,11 +77,9 @@ struct StartSpanOptions {
 // Span represents a trace span. It has a SpanContext. Span is thread-safe.
 class Span final {
  public:
-  // Default constructor gives a no-op Span with an invalid context. Attempts to
-  // add attributes, etc, will all be no-ops.
-  //
-  // TODO: Should we delete this and have a "static Span BlankSpan()"
-  Span() {}
+  // Constructs a no-op Span with an invalid context. Attempts to add
+  // attributes, etc, will all be no-ops.
+  static Span BlankSpan();
 
   // Constructs a root Span (if parent is nullptr) or a Span with a local
   // parent.
@@ -151,6 +150,7 @@ class Span final {
   bool IsRecording() const;
 
  private:
+  Span() {}
   Span(const SpanContext& context, SpanImpl* impl);
 
   // Returns span_impl_, only used for testing.
@@ -168,6 +168,7 @@ class Span final {
   friend class ::opencensus::trace::exporter::LocalSpanStoreImpl;
   friend class ::opencensus::trace::SpanTestPeer;
   friend class ::opencensus::trace::SpanGenerator;
+  friend class ::opencensus::CensusContext;
 };
 
 }  // namespace trace

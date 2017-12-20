@@ -62,38 +62,6 @@ TEST(TraceConfigTest, MultiThreaded) {
   }
 }
 
-// TODO: Move this to sampler_test.cc
-
-// Example of a stateful sampler class.
-class SampleEveryNth : public Sampler {
- public:
-  explicit SampleEveryNth(int nth) : state_(new State(nth)) {}
-
-  bool ShouldSample(const SpanContext* parent_context, bool has_remote_parent,
-                    const TraceId& trace_id, const SpanId& span_id,
-                    absl::string_view name,
-                    const std::vector<Span*>& parent_links) const override {
-    // The shared_ptr is const, but the underlying State it points to isn't.
-    return state_->Increment();
-  }
-
- private:
-  class State {
-   public:
-    explicit State(int nth) : nth_(nth), current_(0) {}
-    bool Increment() {
-      int prev = current_.fetch_add(1, std::memory_order_acq_rel);
-      return (prev + 1) % nth_ == 0;
-    }
-
-   private:
-    const int nth_;
-    std::atomic<int> current_;
-  };
-
-  std::shared_ptr<State> state_;
-};
-
 }  // namespace
 }  // namespace trace
 }  // namespace opencensus

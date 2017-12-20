@@ -157,18 +157,16 @@ TEST(SpanTest, ParentLinksFromOptions) {
   }
 }
 
-TEST(SpanTest, EverythingASpanCanDo) {
-  constexpr uint8_t trace_id[] = {1, 2,  3,  4,  5,  6,  7,  8,
-                                  9, 10, 11, 12, 13, 14, 15, 16};
-  constexpr uint8_t span_id[] = {1, 2, 3, 4, 5, 6, 7, 8};
-  auto ctx = SpanContext(TraceId(trace_id), SpanId(span_id));
-
+TEST(SpanTest, FullSpanTest) {
   AlwaysSampler sampler;
+  auto linked_span1 = Span::StartSpan("link1");
+  auto linked_span2 = Span::StartSpan("link2");
+  auto parent = Span::StartSpan("parent");
   auto related_span =
       Span::StartSpan("RelatedSpan", /*parent=*/nullptr, {&sampler});
   StartSpanOptions opts = {&sampler, kRecordEvents, {&related_span}};
-  auto span = ::opencensus::trace::Span::StartSpan("MyRootSpan",
-                                                   /*parent=*/nullptr, opts);
+  auto span = ::opencensus::trace::Span::StartSpan("MyRootSpan", &parent, opts);
+  auto child = Span::StartSpan("child", &span);
 
   AttributeValueRef av("value1");
   span.AddAttribute("key1", av);
@@ -182,17 +180,83 @@ TEST(SpanTest, EverythingASpanCanDo) {
   span.AddSentMessageEvent(2, 3, 4);
   span.AddReceivedMessageEvent(3, 4, 5);
 
-  span.AddParentLink(ctx);
-  span.AddParentLink(ctx, {{"attrib1", "value1"}});
-  span.AddChildLink(ctx);
-  span.AddChildLink(ctx, {{"attrib2", 123}});
+  span.AddParentLink(linked_span1.context(), {{"attrib1", "value1"}});
+  span.AddChildLink(linked_span2.context(), {{"attrib2", 123}});
 
   span.SetStatus(StatusCode::DEADLINE_EXCEEDED, "desc");
 
   EXPECT_TRUE(span.context().IsValid());
   span.End();
+  // Add a few extra things and make sure they are NOT included since the span
+  // has ended.
+  span.AddAttribute("key_invalid", "value_invalid");
+  span.AddSentMessageEvent(7, 8, 9);
+  span.AddReceivedMessageEvent(10, 11, 12);
 
-  // TODO: Check recorded data.
+  const exporter::SpanData data = SpanTestPeer::ToSpanData(&span);
+
+  EXPECT_EQ("MyRootSpan", data.name());
+  EXPECT_EQ(parent.context().span_id(), data.parent_span_id());
+  EXPECT_EQ(0, data.annotations().dropped_events_count());
+  EXPECT_EQ(0, data.message_events().dropped_events_count());
+  EXPECT_EQ(0, data.num_links_dropped());
+  EXPECT_EQ(0, data.num_attributes_dropped());
+  EXPECT_EQ(true, data.has_ended());
+  EXPECT_FALSE(data.status().ok());
+  EXPECT_EQ(false, data.has_remote_parent());
+
+  const auto& attributes = data.attributes();
+  EXPECT_EQ("value1", attributes.at("key1").string_value());
+  EXPECT_EQ("value2", attributes.at("key2").string_value());
+  EXPECT_EQ("value3", attributes.at("key3").string_value());
+  EXPECT_EQ(123, attributes.at("key4").int_value());
+  EXPECT_EQ(false, attributes.at("key5").bool_value());
+  EXPECT_EQ(attributes.end(), attributes.find("key_invalid"));
+
+  EXPECT_EQ(2, data.annotations().events().size());
+  EXPECT_EQ("hello", data.annotations()
+                         .events()[1]
+                         .event()
+                         .attributes()
+                         .at("str_attr")
+                         .string_value());
+  EXPECT_EQ(123, data.annotations()
+                     .events()[1]
+                     .event()
+                     .attributes()
+                     .at("int_attr")
+                     .int_value());
+  EXPECT_EQ(true, data.annotations()
+                      .events()[1]
+                      .event()
+                      .attributes()
+                      .at("bool_attr")
+                      .bool_value());
+
+  EXPECT_EQ(3, data.links().size());
+  auto expect_link = [](const Span& span, const exporter::Link& link,
+                        exporter::Link::Type type) {
+    EXPECT_EQ(type, link.type());
+    EXPECT_EQ(span.context().trace_id(), link.trace_id());
+    EXPECT_EQ(span.context().span_id(), link.span_id());
+  };
+  expect_link(related_span, data.links()[0],
+              exporter::Link::Type::kParentLinkedSpan);
+  expect_link(linked_span1, data.links()[1],
+              exporter::Link::Type::kParentLinkedSpan);
+  expect_link(linked_span2, data.links()[2],
+              exporter::Link::Type::kChildLinkedSpan);
+
+  EXPECT_EQ(2, data.message_events().events().size());
+  auto expect_message_event = [](uint32_t id, uint32_t compressed_size,
+                                 uint32_t uncompressed_size,
+                                 const exporter::MessageEvent& event) {
+    EXPECT_EQ(id, event.id());
+    EXPECT_EQ(compressed_size, event.compressed_size());
+    EXPECT_EQ(uncompressed_size, event.uncompressed_size());
+  };
+  expect_message_event(2, 3, 4, data.message_events().events()[0].event());
+  expect_message_event(3, 4, 5, data.message_events().events()[1].event());
 }
 
 TEST(SpanTest, ChildInheritsTraceOption) {
@@ -257,6 +321,24 @@ TEST(SpanTest, CheckSpanData) {
   EXPECT_EQ("attribute1", attributes.at("test1").string_value());
   EXPECT_EQ(true, attributes.at("test2").bool_value());
   EXPECT_EQ(333, attributes.at("test3").int_value());
+}
+
+TEST(SpanTest, BlankSpan) {
+  auto parent = Span::StartSpan("parent");
+  auto span = Span::BlankSpan();
+
+  EXPECT_EQ(SpanContext(), span.context());
+  EXPECT_FALSE(span.context().IsValid());
+
+  // Check that it does not crash with operations on a blank span.
+  span.AddSentMessageEvent(2, 3, 4);
+  span.AddReceivedMessageEvent(3, 4, 5);
+  span.AddParentLink(parent.context(), {{"test", "attribute"}});
+  span.AddAnnotation("This is an annotation.",
+                     {{"hello", "world"}, {"latency", 1234}});
+  span.AddAttribute("bool attribute", true);
+  span.SetStatus(StatusCode::CANCELLED, "error text");
+  span.End();
 }
 
 }  // namespace

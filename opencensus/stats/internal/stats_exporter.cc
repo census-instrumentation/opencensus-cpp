@@ -77,13 +77,13 @@ class StatsExporterImpl {
   }
 
   const absl::Duration export_interval_ = absl::Seconds(10);
-  std::thread t_;
 
   mutable absl::Mutex mu_;
 
   std::vector<std::unique_ptr<StatsExporter::Handler>> handlers_
       GUARDED_BY(mu_);
   std::unordered_map<std::string, std::unique_ptr<View>> views_ GUARDED_BY(mu_);
+  std::thread t_;
 };
 
 void StatsExporter::AddView(const ViewDescriptor& view) {

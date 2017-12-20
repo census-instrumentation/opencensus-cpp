@@ -23,8 +23,8 @@ namespace opencensus {
 namespace trace {
 namespace exporter {
 
-void SpanExporter::Register(std::unique_ptr<Handler> handler) {
-  SpanExporterImpl::Get()->Register(std::move(handler));
+void SpanExporter::RegisterHandler(std::unique_ptr<Handler> handler) {
+  SpanExporterImpl::Get()->RegisterHandler(std::move(handler));
 }
 
 }  // namespace exporter

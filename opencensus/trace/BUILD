@@ -153,6 +153,18 @@ cc_test(
 )
 
 cc_test(
+    name = "sampler_test",
+    srcs = ["internal/sampler_test.cc"],
+    deps = [
+        ":trace",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+        "@com_google_absl//absl/time",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "span_test",
     srcs = ["internal/span_test.cc"],
     deps = [
@@ -201,6 +213,7 @@ cc_test(
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
+        "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",
     ],
 )

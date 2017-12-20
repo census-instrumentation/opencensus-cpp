@@ -27,9 +27,9 @@ namespace exporter {
 SpanExporterImpl* SpanExporterImpl::span_exporter_ = nullptr;
 
 SpanExporterImpl* SpanExporterImpl::Get() {
-  static SpanExporterImpl* span_exporter_impl = new SpanExporterImpl(
+  static SpanExporterImpl* global_span_exporter_impl = new SpanExporterImpl(
       kDefaultBufferSize, absl::Milliseconds(kIntervalWaitTimeInMillis));
-  return span_exporter_impl;
+  return global_span_exporter_impl;
 }
 
 // Create detached worker thread
@@ -40,9 +40,9 @@ SpanExporterImpl::SpanExporterImpl(uint32_t buffer_size,
       size_(0),
       t_(&SpanExporterImpl::RunWorkerLoop, this) {}
 
-void SpanExporterImpl::Register(
+void SpanExporterImpl::RegisterHandler(
     std::unique_ptr<SpanExporter::Handler> handler) {
-  absl::MutexLock lock(&handler_mu_);
+  absl::MutexLock l(&handler_mu_);
   handlers_.emplace_back(std::move(handler));
 }
 
