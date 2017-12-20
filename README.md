@@ -3,7 +3,7 @@
 [![Build Status][travis-image]][travis-url]
 
 OpenCensus is a toolkit for collecting application performance and behavior data. It currently
-includes an API for tracing.
+includes an API for tracing and stats.
 
 This library is currently in alpha: the API is in the process of being
 finalized; much of the implementation will be replaced with a more optimized
@@ -18,12 +18,16 @@ This is not an officially supported Google product.
 
 Please refer to
 [`trace/examples/span_example.cc`](opencensus/trace/examples/span_example.cc)
+for tracing and
+[`stats/examples/view_and_recording_example.cc`](opencensus/stats/examples/view_and_recording_example.cc)
+for stats.
 
 ## Directory structure
 
 * [`opencensus/`](opencensus) prefix to get `#include` paths like `opencensus/trace/span.h`
   * [`common/`](opencensus/common) - Provides common libraries and components for OpenCensus.
   * [`doc/`](opencensus/doc) - Documentation for our APIs, coding style, etc.
+  * [`stats/`](opencensus/stats) - OpenCensus stats API.
   * [`trace/`](opencensus/trace) - OpenCensus tracing API.
 
 ## Language support
