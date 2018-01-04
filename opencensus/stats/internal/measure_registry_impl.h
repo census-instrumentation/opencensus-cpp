@@ -16,7 +16,9 @@
 #define OPENCENSUS_STATS_INTERNAL_MEASURE_REGISTRY_IMPL_H_
 
 #include <cstdint>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
