@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
+
 licenses(["notice"])  # Apache License 2.0
 
 package(default_visibility = ["//visibility:private"])
@@ -22,6 +24,7 @@ package(default_visibility = ["//visibility:private"])
 cc_library(
     name = "stats",
     hdrs = ["stats.h"],
+    copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
     deps = [
         ":core",
@@ -36,6 +39,7 @@ cc_library(
     testonly = 1,
     srcs = ["testing/test_utils.cc"],
     hdrs = ["testing/test_utils.h"],
+    copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
     deps = [
         ":core",
@@ -74,6 +78,7 @@ cc_library(
         "view_data.h",
         "view_descriptor.h",
     ],
+    copts = DEFAULT_COPTS,
     deps = [
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
@@ -91,6 +96,7 @@ cc_library(
     name = "recording",
     srcs = ["internal/recording.cc"],
     hdrs = ["recording.h"],
+    copts = DEFAULT_COPTS,
     deps = [
         ":core",
         "@com_google_absl//absl/strings",
@@ -107,6 +113,7 @@ cc_library(
         "stats_exporter.h",
         "view.h",
     ],
+    copts = DEFAULT_COPTS,
     deps = [
         ":core",
         "@com_google_absl//absl/base:core_headers",
@@ -123,6 +130,7 @@ cc_library(
 cc_test(
     name = "debug_string_test",
     srcs = ["internal/debug_string_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":core",
         "@com_google_absl//absl/time",
@@ -133,6 +141,7 @@ cc_test(
 cc_test(
     name = "distribution_test",
     srcs = ["internal/distribution_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":core",
         "@com_google_googletest//:gtest_main",
@@ -142,6 +151,7 @@ cc_test(
 cc_test(
     name = "bucket_boundaries_test",
     srcs = ["internal/bucket_boundaries_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":core",
         "@com_google_googletest//:gtest_main",
@@ -151,6 +161,7 @@ cc_test(
 cc_test(
     name = "measure_registry_test",
     srcs = ["internal/measure_registry_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":core",
         "@com_google_absl//absl/strings",
@@ -161,6 +172,7 @@ cc_test(
 cc_test(
     name = "stats_exporter_test",
     srcs = ["internal/stats_exporter_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":core",
         ":export",
@@ -173,6 +185,7 @@ cc_test(
 cc_test(
     name = "stats_manager_test",
     srcs = ["internal/stats_manager_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":core",
         ":export",
@@ -185,6 +198,7 @@ cc_test(
 cc_test(
     name = "view_data_impl_test",
     srcs = ["internal/view_data_impl_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":core",
         "@com_google_absl//absl/time",

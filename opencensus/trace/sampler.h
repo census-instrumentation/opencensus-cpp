@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "absl/base/attributes.h"
 #include "absl/strings/string_view.h"
 #include "opencensus/trace/span_context.h"
 #include "opencensus/trace/span_id.h"
@@ -67,10 +68,13 @@ class ProbabilitySampler final : public Sampler {
 // Always samples.
 class AlwaysSampler final : public Sampler {
  public:
-  bool ShouldSample(const SpanContext* parent_context, bool has_remote_parent,
-                    const TraceId& trace_id, const SpanId& span_id,
-                    absl::string_view name,
-                    const std::vector<Span*>& parent_links) const override {
+  bool ShouldSample(const SpanContext* parent_context ABSL_ATTRIBUTE_UNUSED,
+                    bool has_remote_parent ABSL_ATTRIBUTE_UNUSED,
+                    const TraceId& trace_id ABSL_ATTRIBUTE_UNUSED,
+                    const SpanId& span_id ABSL_ATTRIBUTE_UNUSED,
+                    absl::string_view name ABSL_ATTRIBUTE_UNUSED,
+                    const std::vector<Span*>& parent_links
+                        ABSL_ATTRIBUTE_UNUSED) const override {
     return true;
   }
 };
@@ -78,10 +82,13 @@ class AlwaysSampler final : public Sampler {
 // Never samples.
 class NeverSampler final : public Sampler {
  public:
-  bool ShouldSample(const SpanContext* parent_context, bool has_remote_parent,
-                    const TraceId& trace_id, const SpanId& span_id,
-                    absl::string_view name,
-                    const std::vector<Span*>& parent_links) const override {
+  bool ShouldSample(const SpanContext* parent_context ABSL_ATTRIBUTE_UNUSED,
+                    bool has_remote_parent ABSL_ATTRIBUTE_UNUSED,
+                    const TraceId& trace_id ABSL_ATTRIBUTE_UNUSED,
+                    const SpanId& span_id ABSL_ATTRIBUTE_UNUSED,
+                    absl::string_view name ABSL_ATTRIBUTE_UNUSED,
+                    const std::vector<Span*>& parent_links
+                        ABSL_ATTRIBUTE_UNUSED) const override {
     return false;
   }
 };

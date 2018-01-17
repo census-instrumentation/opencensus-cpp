@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
+
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:private"])
@@ -76,6 +78,7 @@ cc_library(
         "trace_options.h",
         "trace_params.h",
     ],
+    copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
     deps = [
         "@com_google_absl//absl/base:core_headers",
@@ -94,6 +97,7 @@ cc_library(
 cc_test(
     name = "annotation_test",
     srcs = ["internal/annotation_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_absl//absl/strings",
@@ -104,6 +108,7 @@ cc_test(
 cc_test(
     name = "attribute_value_ref_test",
     srcs = ["internal/attribute_value_ref_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_absl//absl/strings",
@@ -114,6 +119,7 @@ cc_test(
 cc_test(
     name = "attribute_value_test",
     srcs = ["internal/attribute_value_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_absl//absl/strings",
@@ -124,6 +130,7 @@ cc_test(
 cc_test(
     name = "link_test",
     srcs = ["internal/link_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_googletest//:gtest_main",
@@ -133,6 +140,7 @@ cc_test(
 cc_test(
     name = "local_span_store_test",
     srcs = ["internal/local_span_store_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_absl//absl/memory",
@@ -144,6 +152,7 @@ cc_test(
 cc_test(
     name = "running_span_store_test",
     srcs = ["internal/running_span_store_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_absl//absl/memory",
@@ -155,6 +164,7 @@ cc_test(
 cc_test(
     name = "sampler_test",
     srcs = ["internal/sampler_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_absl//absl/strings",
@@ -167,6 +177,7 @@ cc_test(
 cc_test(
     name = "span_test",
     srcs = ["internal/span_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_absl//absl/synchronization",
@@ -177,6 +188,7 @@ cc_test(
 cc_test(
     name = "span_id_test",
     srcs = ["internal/span_id_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_googletest//:gtest_main",
@@ -186,6 +198,7 @@ cc_test(
 cc_test(
     name = "span_options_test",
     srcs = ["internal/span_options_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_absl//absl/strings",
@@ -197,6 +210,7 @@ cc_test(
 cc_test(
     name = "span_context_test",
     srcs = ["internal/span_context_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_absl//absl/strings",
@@ -208,6 +222,7 @@ cc_test(
 cc_test(
     name = "span_exporter_test",
     srcs = ["internal/span_exporter_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_absl//absl/memory",
@@ -221,6 +236,7 @@ cc_test(
 cc_test(
     name = "status_test",
     srcs = ["internal/status_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_absl//absl/strings",
@@ -231,6 +247,7 @@ cc_test(
 cc_test(
     name = "trace_config_test",
     srcs = ["internal/trace_config_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_absl//absl/time",
@@ -241,6 +258,7 @@ cc_test(
 cc_test(
     name = "trace_options_test",
     srcs = ["internal/trace_options_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":trace",
         "@com_google_googletest//:gtest_main",
@@ -254,6 +272,7 @@ cc_binary(
     name = "span_benchmark",
     testonly = 1,
     srcs = ["internal/span_benchmark.cc"],
+    copts = TEST_COPTS,
     linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
@@ -266,6 +285,7 @@ cc_binary(
     name = "span_id_benchmark",
     testonly = 1,
     srcs = ["internal/span_id_benchmark.cc"],
+    copts = TEST_COPTS,
     linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
