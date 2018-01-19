@@ -30,6 +30,20 @@ cc_library(
     ],
 )
 
+# Test-only utilities.
+cc_library(
+    name = "test_utils",
+    testonly = 1,
+    srcs = ["testing/test_utils.cc"],
+    hdrs = ["testing/test_utils.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":core",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/time",
+    ],
+)
+
 cc_library(
     name = "core",
     srcs = [
