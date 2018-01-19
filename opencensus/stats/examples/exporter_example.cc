@@ -24,7 +24,8 @@
 namespace opencensus {
 namespace stats {
 
-struct StatsExporterTest {
+class StatsExporterTest {
+ public:
   static constexpr auto& ExportForTesting = StatsExporter::ExportForTesting;
 };
 

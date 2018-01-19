@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "absl/base/attributes.h"
 #include "absl/memory/memory.h"
 #include "gtest/gtest.h"
 #include "opencensus/trace/exporter/attribute_value.h"
@@ -37,14 +38,16 @@
 namespace opencensus {
 namespace trace {
 
-struct SpanTestPeer {
+class SpanTestPeer {
+ public:
   static void SetSampled(TraceOptions* opts, bool is_sampled) {
     opts->SetSampled(is_sampled);
   }
 };
 
 namespace exporter {
-struct RunningSpanStoreImplTestPeer {
+class RunningSpanStoreImplTestPeer {
+ public:
   static void ClearForTesting() {
     RunningSpanStoreImpl::Get()->ClearForTesting();
   }
@@ -53,9 +56,9 @@ struct RunningSpanStoreImplTestPeer {
 namespace {
 constexpr uint8_t trace_id[] = {1, 2,  3,  4,  5,  6,  7,  8,
                                 9, 10, 11, 12, 13, 14, 15, 16};
-constexpr uint8_t span_id1[] = {1, 0, 0, 0, 0, 0, 0, 11};
+ABSL_ATTRIBUTE_UNUSED constexpr uint8_t span_id1[] = {1, 0, 0, 0, 0, 0, 0, 11};
 constexpr uint8_t span_id2[] = {2, 0, 0, 0, 0, 0, 0, 22};
-constexpr uint8_t span_id3[] = {3, 0, 0, 0, 0, 0, 0, 33};
+ABSL_ATTRIBUTE_UNUSED constexpr uint8_t span_id3[] = {3, 0, 0, 0, 0, 0, 0, 33};
 
 TEST(RunningSpanStoreTest, ForceSamplingViaStartSpanOptions) {
   // Parent isn't sampled, child is.

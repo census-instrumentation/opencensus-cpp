@@ -22,7 +22,8 @@
 namespace opencensus {
 namespace trace {
 
-struct SpanTestPeer {
+class SpanTestPeer {
+ public:
   static void End(absl::Duration latency, Span* span) {
     // Set latency.
     span->span_impl_for_test()->EndWithLatencyForTesting(latency);
@@ -32,7 +33,8 @@ struct SpanTestPeer {
 };
 
 namespace exporter {
-struct LocalSpanStoreImplTestPeer {
+class LocalSpanStoreImplTestPeer {
+ public:
   static void ClearForTesting() {
     LocalSpanStoreImpl::Get()->ClearForTesting();
   }
