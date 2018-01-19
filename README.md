@@ -32,7 +32,7 @@ for stats.
 
 ## Language support
 
-* `libstdc++` is required.
+* STL is required. (e.g. `libstdc++', 'libc++', etc)
 * C++11 is required.
 * [`absl`](https://github.com/abseil/abseil-cpp/) is used for its building blocks.
 * [`googletest`](https://github.com/google/googletest/) is used for tests.
