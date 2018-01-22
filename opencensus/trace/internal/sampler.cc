@@ -17,6 +17,8 @@
 #include <cmath>
 #include <cstdint>
 
+#include "absl/base/attributes.h"
+
 namespace opencensus {
 namespace trace {
 
@@ -52,9 +54,11 @@ ProbabilitySampler::ProbabilitySampler(double probability)
     : threshold_(CalculateThreshold(probability)) {}
 
 bool ProbabilitySampler::ShouldSample(
-    const SpanContext* parent_context, bool has_remote_parent,
-    const TraceId& trace_id, const SpanId& span_id, absl::string_view name,
-    const std::vector<Span*>& parent_links) const {
+    const SpanContext* parent_context ABSL_ATTRIBUTE_UNUSED,
+    bool has_remote_parent ABSL_ATTRIBUTE_UNUSED, const TraceId& trace_id,
+    const SpanId& span_id ABSL_ATTRIBUTE_UNUSED,
+    absl::string_view name ABSL_ATTRIBUTE_UNUSED,
+    const std::vector<Span*>& parent_links ABSL_ATTRIBUTE_UNUSED) const {
   if (threshold_ == 0) return false;
   // All Spans within the same Trace will get the same sampling decision, so
   // full trees of Spans will be sampled.

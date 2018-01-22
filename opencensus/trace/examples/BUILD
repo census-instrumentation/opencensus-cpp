@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("//opencensus:copts.bzl", "TEST_COPTS")
+
 licenses(["notice"])  # Apache 2.0
 
 package(
@@ -27,6 +29,7 @@ package(
 cc_test(
     name = "span_example",
     srcs = ["span_example.cc"],
+    copts = TEST_COPTS,
     deps = [
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",

@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
+
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//opencensus:__subpackages__"])
@@ -21,6 +23,7 @@ package(default_visibility = ["//opencensus:__subpackages__"])
 cc_library(
     name = "random_lib",
     srcs = ["random.cc"],
+    copts = DEFAULT_COPTS,
     hdrs = ["random.h"],
     deps = [
         "@com_google_absl//absl/synchronization",
@@ -31,6 +34,7 @@ cc_library(
 cc_library(
     name = "stats_object",
     hdrs = ["stats_object.h"],
+    copts = DEFAULT_COPTS,
     deps = [
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
@@ -43,6 +47,7 @@ cc_library(
 cc_library(
     name = "string_vector_hash",
     hdrs = ["string_vector_hash.h"],
+    copts = DEFAULT_COPTS,
 )
 
 # Tests
@@ -51,6 +56,7 @@ cc_library(
 cc_test(
     name = "random_test",
     srcs = ["random_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":random_lib",
         "@com_google_googletest//:gtest_main",
@@ -61,6 +67,7 @@ cc_binary(
     name = "random_benchmark",
     testonly = 1,
     srcs = ["random_benchmark.cc"],
+    copts = TEST_COPTS,
     linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
@@ -72,6 +79,7 @@ cc_binary(
 cc_test(
     name = "stats_object_test",
     srcs = ["stats_object_test.cc"],
+    copts = TEST_COPTS,
     deps = [
         ":stats_object",
         "@com_google_absl//absl/strings",

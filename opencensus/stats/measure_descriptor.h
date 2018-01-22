@@ -36,7 +36,7 @@ class MeasureDescriptor final {
   const std::string& name() const { return name_; }
   const std::string& units() const { return units_; }
   const std::string& description() const { return description_; }
-  const Type type() const { return type_; }
+  Type type() const { return type_; }
 
   std::string DebugString() const;
 
