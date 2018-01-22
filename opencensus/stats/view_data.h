@@ -30,7 +30,11 @@
 namespace opencensus {
 namespace stats {
 
+// Forward declarations of friends.
 class ViewDataImpl;
+namespace testing {
+class TestUtils;
+}
 
 // ViewData is an immutable snapshot of data for a particular View, aggregated
 // according to the View's Aggregation and AggregationWindow.
@@ -69,6 +73,7 @@ class ViewData {
 
  private:
   friend class View;  // Allowed to call the private constructor.
+  friend class testing::TestUtils;
   explicit ViewData(std::unique_ptr<ViewDataImpl> data);
 
   const std::unique_ptr<ViewDataImpl> impl_;

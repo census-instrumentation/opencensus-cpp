@@ -102,14 +102,13 @@ TEST_F(ExporterExample, Distribution) {
       opencensus::stats::ViewDescriptor()
           .set_name("example.com/Bar/FooUsage-sum-interval-foo_id")
           .set_measure(kFooUsageMeasureName)
-          .set_name("example.com/Bar/FooUsage-sum-delta-foo_id")
           .set_aggregation(opencensus::stats::Aggregation::Sum())
           .set_aggregation_window(
               opencensus::stats::AggregationWindow::Interval(absl::Hours(1)))
           .add_column("foo_id")
           .set_description(
-              "Cumulative sum of example.com/Foo/FooUsage broken down "
-              "by 'foo_id'.");
+              "Rolling sum of example.com/Foo/FooUsage over the previous hour "
+              "broken down by 'foo_id'.");
 
   // The order of view registration and exporter creation does not matter, as
   // long as both precede data recording.
