@@ -56,23 +56,21 @@ class RunningSpanStoreImplTestPeer {
 namespace {
 constexpr uint8_t trace_id[] = {1, 2,  3,  4,  5,  6,  7,  8,
                                 9, 10, 11, 12, 13, 14, 15, 16};
-ABSL_ATTRIBUTE_UNUSED constexpr uint8_t span_id1[] = {1, 0, 0, 0, 0, 0, 0, 11};
-constexpr uint8_t span_id2[] = {2, 0, 0, 0, 0, 0, 0, 22};
-ABSL_ATTRIBUTE_UNUSED constexpr uint8_t span_id3[] = {3, 0, 0, 0, 0, 0, 0, 33};
+constexpr uint8_t span_id[] = {2, 0, 0, 0, 0, 0, 0, 22};
 
 TEST(RunningSpanStoreTest, ForceSamplingViaStartSpanOptions) {
   // Parent isn't sampled, child is.
   // Child Span with forced sampling.
-  SpanContext parent_ctx2{TraceId(trace_id), SpanId(span_id2)};
+  SpanContext parent_ctx{TraceId(trace_id), SpanId(span_id)};
   AlwaysSampler sampler;
   RunningSpanStoreImplTestPeer::ClearForTesting();
-  auto span2 =
-      Span::StartSpanWithRemoteParent("Span2", parent_ctx2, {&sampler});
-  EXPECT_TRUE(span2.IsSampled());
+  auto span =
+      Span::StartSpanWithRemoteParent("Span", parent_ctx, {&sampler});
+  EXPECT_TRUE(span.IsSampled());
   EXPECT_EQ(1, RunningSpanStore::GetRunningSpans({"", 1}).size());
   EXPECT_EQ(0, RunningSpanStore::GetRunningSpans({"", 0}).size())
       << "Hit max_spans_to_return.";
-  span2.End();
+  span.End();
   EXPECT_EQ(0, RunningSpanStore::GetRunningSpans({"", 1}).size());
 }
 
