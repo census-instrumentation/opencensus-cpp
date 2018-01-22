@@ -64,8 +64,7 @@ TEST(RunningSpanStoreTest, ForceSamplingViaStartSpanOptions) {
   SpanContext parent_ctx{TraceId(trace_id), SpanId(span_id)};
   AlwaysSampler sampler;
   RunningSpanStoreImplTestPeer::ClearForTesting();
-  auto span =
-      Span::StartSpanWithRemoteParent("Span", parent_ctx, {&sampler});
+  auto span = Span::StartSpanWithRemoteParent("Span", parent_ctx, {&sampler});
   EXPECT_TRUE(span.IsSampled());
   EXPECT_EQ(1, RunningSpanStore::GetRunningSpans({"", 1}).size());
   EXPECT_EQ(0, RunningSpanStore::GetRunningSpans({"", 0}).size())

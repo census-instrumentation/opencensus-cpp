@@ -28,7 +28,8 @@
 namespace opencensus {
 namespace trace {
 
-struct SpanTestPeer {
+class SpanTestPeer {
+ public:
   static SpanId GetParentSpanId(Span* span) {
     return span->span_impl_for_test()->parent_span_id();
   }
