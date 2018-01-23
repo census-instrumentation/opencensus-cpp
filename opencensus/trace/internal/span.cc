@@ -61,7 +61,8 @@ TraceId GenerateRandomTraceId() {
 
 }  // namespace
 
-struct SpanGenerator {
+class SpanGenerator {
+ public:
   static Span Generate(absl::string_view name, const SpanContext* parent_ctx,
                        bool has_remote_parent,
                        const StartSpanOptions& options) {
