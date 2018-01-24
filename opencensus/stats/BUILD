@@ -205,3 +205,23 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+# Benchmarks
+# ========================================================================= #
+cc_binary(
+    name = "stats_manager_benchmark",
+    testonly = 1,
+    srcs = ["internal/stats_manager_benchmark.cc"],
+    copts = TEST_COPTS,
+    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
+    linkstatic = 1,
+    deps = [
+        ":core",
+        ":export",
+        ":recording",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
+        "@com_google_benchmark//:benchmark",
+    ],
+)
