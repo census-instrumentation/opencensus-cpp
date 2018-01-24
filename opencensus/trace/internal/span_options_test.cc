@@ -32,7 +32,8 @@ namespace opencensus {
 namespace trace {
 
 // Helper class to peer into SpanImpl implementation details.
-struct SpanTestPeer {
+class SpanTestPeer {
+ public:
   static exporter::Status GetStatus(Span* span) {
     // This is a hack so that we don't have to add a status() accessor to the
     // public API.

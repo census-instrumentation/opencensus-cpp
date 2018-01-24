@@ -19,7 +19,8 @@
 namespace opencensus {
 namespace trace {
 
-struct SpanTestPeer {
+class SpanTestPeer {
+ public:
   static void SetSampled(TraceOptions* opts, bool is_sampled) {
     opts->SetSampled(is_sampled);
   }

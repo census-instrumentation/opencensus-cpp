@@ -21,16 +21,6 @@
 #include "gtest/gtest.h"
 #include "opencensus/stats/stats.h"
 
-namespace opencensus {
-namespace stats {
-
-struct StatsExporterTest {
-  static constexpr auto& ExportForTesting = StatsExporter::ExportForTesting;
-};
-
-}  // namespace stats
-}  // namespace opencensus
-
 namespace opencensus_examples {
 namespace {
 

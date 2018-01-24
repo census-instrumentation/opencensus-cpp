@@ -20,3 +20,10 @@ bin
 
 # Other
 TAGS
+
+# Bazel
+bazel-bin
+bazel-genfiles
+bazel-opencensus-cpp
+bazel-out
+bazel-testlogs
