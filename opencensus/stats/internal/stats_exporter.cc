@@ -16,6 +16,7 @@
 
 #include <thread>  // NOLINT
 
+#include "absl/memory/memory.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
@@ -41,9 +42,15 @@ class StatsExporterImpl {
     views_.erase(std::string(name));
   }
 
+  // Adds a handler, which cannot be subsequently removed (except by
+  // ClearHandlersForTesting()). The background thread is started when the
+  // first handler is registered.
   void RegisterHandler(std::unique_ptr<StatsExporter::Handler> handler) {
     absl::MutexLock l(&mu_);
     handlers_.push_back(std::move(handler));
+    if (!thread_started_) {
+      StartExportThread();
+    }
   }
 
   void Export() {
@@ -59,7 +66,7 @@ class StatsExporterImpl {
   }
 
  private:
-  StatsExporterImpl() : t_(&StatsExporterImpl::RunWorkerLoop, this) {}
+  StatsExporterImpl() {}
 
   void SendToHandlers(const ViewDescriptor& descriptor, const ViewData& data)
       SHARED_LOCKS_REQUIRED(mu_) {
@@ -68,10 +75,20 @@ class StatsExporterImpl {
     }
   }
 
+  void StartExportThread() EXCLUSIVE_LOCKS_REQUIRED(mu_) {
+    t_ = std::thread(&StatsExporterImpl::RunWorkerLoop, this);
+    thread_started_ = true;
+  }
+
   // Loops forever, calling Export() every export_interval_.
   void RunWorkerLoop() {
+    absl::Time next_export_time = absl::Now() + export_interval_;
     while (true) {
-      absl::SleepFor(export_interval_);
+      // SleepFor() returns immediately when given a negative duration.
+      absl::SleepFor(next_export_time - absl::Now());
+      // In case the last export took longer than the export interval, we
+      // calculate the next time from now.
+      next_export_time = absl::Now() + export_interval_;
       Export();
     }
   }
@@ -83,7 +100,9 @@ class StatsExporterImpl {
   std::vector<std::unique_ptr<StatsExporter::Handler>> handlers_
       GUARDED_BY(mu_);
   std::unordered_map<std::string, std::unique_ptr<View>> views_ GUARDED_BY(mu_);
-  std::thread t_;
+
+  bool thread_started_ GUARDED_BY(mu_) = false;
+  std::thread t_ GUARDED_BY(mu_);
 };
 
 void StatsExporter::AddView(const ViewDescriptor& view) {
