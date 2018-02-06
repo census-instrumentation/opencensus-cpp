@@ -20,9 +20,9 @@ namespace opencensus {
 namespace stats {
 
 std::string MeasureDescriptor::DebugString() const {
-  return absl::StrCat("name: \"", name_, "\"; ", "units: \"", units_, "\"; ",
-                      "description: \"", description_, "\"",
-                      "type: ", type_ == Type::kDouble ? "double" : "int64");
+  return absl::StrCat(
+      "name: \"", name_, "\"; units: \"", units_, "\"; description: \"",
+      description_, "\"; type: ", type_ == Type::kDouble ? "double" : "int64");
 }
 
 }  // namespace stats
