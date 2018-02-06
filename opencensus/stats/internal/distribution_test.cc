@@ -163,5 +163,22 @@ TEST_F(DistributionTest, NegativeInfinity) {
   EXPECT_EQ(distribution.max(), 1);
 }
 
+TEST_F(DistributionTest, DebugString) {
+  BucketBoundaries buckets = BucketBoundaries::Explicit({0});
+  Distribution distribution = MakeDistribution(&buckets);
+  AddToDistribution(&distribution, -1);
+  AddToDistribution(&distribution, 7);
+
+  const std::string s = distribution.DebugString();
+
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "count: 2", s);
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "mean: 3", s);
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "sum of squared deviation: 32",
+                      s);
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "min: -1", s);
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "max: 7", s);
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "histogram counts: 1, 1", s);
+}
+
 }  // namespace stats
 }  // namespace opencensus
