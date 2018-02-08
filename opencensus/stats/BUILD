@@ -206,6 +206,18 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "view_data_test",
+    srcs = ["internal/view_data_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":core",
+        ":test_utils",
+        "@com_google_absl//absl/time",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 # Benchmarks
 # ========================================================================= #
 cc_binary(

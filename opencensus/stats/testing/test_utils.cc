@@ -31,7 +31,11 @@ ViewData TestUtils::MakeViewData(
   for (const auto& value : values) {
     impl->Add(value.second, value.first, absl::UnixEpoch());
   }
-  return ViewData(std::move(impl));
+  if (impl->type() == ViewDataImpl::Type::kStatsObject) {
+    return ViewData(absl::make_unique<ViewDataImpl>(*impl, absl::UnixEpoch()));
+  } else {
+    return ViewData(std::move(impl));
+  }
 }
 
 }  // namespace testing

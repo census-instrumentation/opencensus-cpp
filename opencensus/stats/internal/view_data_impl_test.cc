@@ -20,6 +20,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "opencensus/stats/aggregation.h"
+#include "opencensus/stats/aggregation_window.h"
 #include "opencensus/stats/bucket_boundaries.h"
 #include "opencensus/stats/distribution.h"
 #include "opencensus/stats/view_descriptor.h"
