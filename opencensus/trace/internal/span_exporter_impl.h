@@ -65,6 +65,7 @@ class SpanExporterImpl {
   SpanExporterImpl& operator=(SpanExporterImpl&&) = delete;
   friend class Span;
 
+  void StartExportThread() EXCLUSIVE_LOCKS_REQUIRED(handler_mu_);
   void RunWorkerLoop();
   // Calls all registered handlers and exports the spans contained in span_data.
   void Export(const std::vector<SpanData>& span_data);
@@ -83,6 +84,7 @@ class SpanExporterImpl {
       GUARDED_BY(span_mu_);
   std::vector<std::unique_ptr<SpanExporter::Handler>> handlers_
       GUARDED_BY(handler_mu_);
+  bool thread_started_ GUARDED_BY(handler_mu_) = false;
   std::thread t_;
 };
 

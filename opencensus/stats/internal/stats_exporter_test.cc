@@ -58,11 +58,19 @@ class MockExporter : public StatsExporter::Handler {
   std::vector<ViewDescriptor> actual_descriptors_;
 };
 
-constexpr char kMeasureId[] = "first_measure_id";
+constexpr char kMeasureId[] = "test_measure_id";
+
+MeasureDouble TestMeasure() {
+  static MeasureDouble measure =
+      MeasureRegistry::RegisterDouble(kMeasureId, "ops", "");
+  return measure;
+}
 
 class StatsExporterTest : public ::testing::Test {
  protected:
   void SetUp() {
+    // Access the measure to ensure it has been registered.
+    TestMeasure();
     descriptor1_.set_name("id1");
     descriptor1_.set_measure(kMeasureId);
     descriptor1_.set_aggregation(Aggregation::Count());
@@ -86,9 +94,6 @@ class StatsExporterTest : public ::testing::Test {
   }
 
   static void Export() { StatsExporter::ExportForTesting(); }
-
-  MeasureDouble first_measure_ = MeasureRegistry::RegisterDouble(
-      kMeasureId, "ops", "Usage of resource 1.");
 
   ViewDescriptor descriptor1_;
   ViewDescriptor descriptor1_edited_;
@@ -128,7 +133,7 @@ TEST_F(StatsExporterTest, MultipleExporters) {
 TEST_F(StatsExporterTest, TimedExport) {
   MockExporter::Register({descriptor1_});
   StatsExporter::AddView(descriptor1_);
-  absl::SleepFor(absl::Seconds(15));
+  absl::SleepFor(absl::Seconds(11));
 }
 
 }  // namespace stats
