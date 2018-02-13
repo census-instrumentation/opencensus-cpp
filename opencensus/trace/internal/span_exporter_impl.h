@@ -15,7 +15,6 @@
 #ifndef OPENCENSUS_TRACE_INTERNAL_SPAN_EXPORTER_IMPL_H_
 #define OPENCENSUS_TRACE_INTERNAL_SPAN_EXPORTER_IMPL_H_
 
-#include <atomic>
 #include <functional>
 #include <memory>
 #include <string>
@@ -74,10 +73,6 @@ class SpanExporterImpl {
   static SpanExporterImpl* span_exporter_;
   const uint32_t buffer_size_;
   const absl::Duration interval_;
-  // This is intentionally not guarded by span_mu_. You cannot lock the waiting
-  // mutex within an AwaitWithTimeout, so we need to store the size in another
-  // variable.
-  std::atomic<size_t> size_;
   mutable absl::Mutex span_mu_;
   mutable absl::Mutex handler_mu_;
   std::vector<std::shared_ptr<opencensus::trace::SpanImpl>> spans_
@@ -85,7 +80,7 @@ class SpanExporterImpl {
   std::vector<std::unique_ptr<SpanExporter::Handler>> handlers_
       GUARDED_BY(handler_mu_);
   bool thread_started_ GUARDED_BY(handler_mu_) = false;
-  std::thread t_;
+  std::thread t_ GUARDED_BY(handler_mu_);
 };
 
 }  // namespace exporter

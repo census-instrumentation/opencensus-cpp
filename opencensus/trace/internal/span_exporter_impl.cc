@@ -35,7 +35,7 @@ SpanExporterImpl* SpanExporterImpl::Get() {
 // Create detached worker thread
 SpanExporterImpl::SpanExporterImpl(uint32_t buffer_size,
                                    absl::Duration interval)
-    : buffer_size_(buffer_size), interval_(interval), size_(0) {}
+    : buffer_size_(buffer_size), interval_(interval) {}
 
 void SpanExporterImpl::RegisterHandler(
     std::unique_ptr<SpanExporter::Handler> handler) {
@@ -50,7 +50,6 @@ void SpanExporterImpl::AddSpan(
     const std::shared_ptr<opencensus::trace::SpanImpl>& span_impl) {
   absl::MutexLock l(&span_mu_);
   spans_.emplace_back(span_impl);
-  size_.fetch_add(1, std::memory_order_acq_rel);
 }
 
 void SpanExporterImpl::StartExportThread() {
@@ -68,20 +67,19 @@ void SpanExporterImpl::RunWorkerLoop() {
     {
       absl::MutexLock l(&span_mu_);
       // Wait until batch is full or interval time has been exceeded.
-      span_mu_.AwaitWithDeadline(
-          absl::Condition(
-              +[](SpanExporterImpl* ptr) {
-                return (ptr->size_.load(std::memory_order_acquire) >=
-                        ptr->buffer_size_);
-              },
-              this),
-          next_forced_export_time);
+      span_mu_.AwaitWithDeadline(absl::Condition(
+                                     +[](SpanExporterImpl* ptr) {
+                                       ptr->span_mu_.AssertHeld();
+                                       return ptr->spans_.size() >=
+                                              ptr->buffer_size_;
+                                     },
+                                     this),
+                                 next_forced_export_time);
       next_forced_export_time = absl::Now() + interval_;
       if (spans_.empty()) {
         continue;
       }
       std::swap(spans_copy_, spans_);
-      size_.store(0, std::memory_order_release);
     }
     for (const auto& span : spans_copy_) {
       span_data_.emplace_back(span->ToSpanData());
