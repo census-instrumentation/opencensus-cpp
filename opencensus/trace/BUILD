@@ -155,6 +155,7 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":trace",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/synchronization",
         "@com_google_googletest//:gtest_main",

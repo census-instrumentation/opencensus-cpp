@@ -35,6 +35,30 @@ http_archive(
     urls = ["https://github.com/google/googletest/archive/master.zip"],
 )
 
+# gRPC
+http_archive(
+    name = "com_github_grpc_grpc",
+    # TODO: Switch to master branch:
+    #urls = ["https://github.com/grpc/grpc/archive/master.zip"],
+    #strip_prefix = "grpc-master"
+    urls = ["https://github.com/grpc/grpc/archive/v1.9.1.zip"],
+    strip_prefix = "grpc-1.9.1",
+)
+
+load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
+grpc_deps()
+
+# These bind()s are needed for the cc_grpc_library() rule to work.
+bind(
+    name = "grpc++_codegen_proto",
+    actual = "@com_github_grpc_grpc//:grpc++_codegen_proto",
+)
+
+bind(
+    name = "grpc_cpp_plugin",
+    actual = "@com_github_grpc_grpc//:grpc_cpp_plugin",
+)
+
 # Google Benchmark library.
 # Adapted from cctz's WORKSPACE.
 # Upstream support for bazel is tracked in
