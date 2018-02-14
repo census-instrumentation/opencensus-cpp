@@ -9,6 +9,8 @@ before_install:
   - ./bazel-0.8.1-installer-linux-x86_64.sh --user
 
 script:
-  - bazel build --noshow_progress -k //...
-  - bazel test --noshow_progress -k //...
+  # We can't use --noshow_progress because Travis terminates the
+  # build after 10 mins without output.
+  - bazel build -k $(bazel query //... | grep -v :_)
+  - bazel test -k $(bazel query //... | grep -v :_)
   - ./format.sh

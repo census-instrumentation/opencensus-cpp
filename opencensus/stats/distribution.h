@@ -42,6 +42,8 @@ class Distribution final {
   double min() const { return min_; }
   double max() const { return max_; }
 
+  const BucketBoundaries& bucket_boundaries() const { return *buckets_; }
+
   // A string representation of the Distribution's data suitable for human
   // consumption.
   std::string DebugString() const;

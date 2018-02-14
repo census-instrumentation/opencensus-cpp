@@ -1,6 +1,6 @@
-# OpenCensus C++ internal libraries.
+# OpenCensus C++ exporter libraries.
 #
-# Copyright 2017, OpenCensus Authors
+# Copyright 2018, OpenCensus Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,74 +16,64 @@
 
 load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
 
-licenses(["notice"])  # Apache 2.0
+licenses(["notice"])  # Apache License 2.0
 
-package(default_visibility = ["//opencensus:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
 
-cc_library(
-    name = "random_lib",
-    srcs = ["random.cc"],
-    hdrs = ["random.h"],
-    copts = DEFAULT_COPTS,
-    deps = [
-        "@com_google_absl//absl/synchronization",
-        "@com_google_absl//absl/time",
-    ],
-)
+# Libraries
+# ========================================================================= #
 
 cc_library(
-    name = "stats_object",
-    hdrs = ["stats_object.h"],
+    name = "stdout_exporter",
+    srcs = ["stdout_exporter.cc"],
+    hdrs = ["stdout_exporter.h"],
     copts = DEFAULT_COPTS,
     deps = [
+        "//opencensus/trace",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/time",
-        "@com_google_absl//absl/types:span",
     ],
 )
 
 cc_library(
-    name = "string_vector_hash",
-    hdrs = ["string_vector_hash.h"],
+    name = "stackdriver_exporter",
+    srcs = ["stackdriver_exporter.cc"],
+    hdrs = ["stackdriver_exporter.h"],
     copts = DEFAULT_COPTS,
+    deps = [
+        "//google/devtools/cloudtrace/v2:tracing_proto",
+        "//opencensus/trace",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+    ],
 )
 
 # Tests
 # ========================================================================= #
 
 cc_test(
-    name = "random_test",
-    srcs = ["random_test.cc"],
+    name = "stdout_exporter_test",
+    srcs = ["stdout_exporter_test.cc"],
     copts = TEST_COPTS,
     deps = [
-        ":random_lib",
+        ":stdout_exporter",
+        "//opencensus/trace",
+        "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",
     ],
 )
 
-cc_binary(
-    name = "random_benchmark",
-    testonly = 1,
-    srcs = ["random_benchmark.cc"],
-    copts = TEST_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
-    linkstatic = 1,
-    deps = [
-        ":random_lib",
-        "@com_google_benchmark//:benchmark",
-    ],
-)
-
 cc_test(
-    name = "stats_object_test",
-    srcs = ["stats_object_test.cc"],
+    name = "stackdriver_exporter_test",
+    srcs = ["stackdriver_exporter_test.cc"],
     copts = TEST_COPTS,
     deps = [
-        ":stats_object",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/types:span",
+        ":stackdriver_exporter",
+        "//opencensus/trace",
+        "@com_github_grpc_grpc//test/core/util:gpr_test_util",
         "@com_google_googletest//:gtest_main",
     ],
 )
