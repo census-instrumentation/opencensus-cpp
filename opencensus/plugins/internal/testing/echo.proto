@@ -18,6 +18,7 @@ package opencensus.testing;
 
 message EchoRequest {
   string message = 1;
+  int32 status_code = 2;
 }
 
 message EchoResponse {
@@ -25,7 +26,9 @@ message EchoResponse {
 }
 
 service EchoService {
-  // Copies the request message to the response.
+  // Copies the request message to the response. If status_code is set in the
+  // request, returns the corresponding error code (for testing error
+  // reporting).
   rpc Echo(EchoRequest) returns (EchoResponse) {
   }
 }

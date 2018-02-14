@@ -16,6 +16,7 @@
 #define OPENCENSUS_PLUGINS_INTERNAL_FILTER_H_
 
 #include "absl/strings/string_view.h"
+#include "include/grpc/impl/codegen/status.h"
 #include "opencensus/plugins/internal/rpc_encoding.h"
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/span_context.h"
@@ -92,6 +93,9 @@ uint64_t GetOutgoingDataSize(const grpc_call_final_info *final_info);
 // the census_context* stored by grpc. The user will need to call this for
 // manual propagation of tracing data.
 trace::SpanContext SpanContextFromCensusContext(const census_context *ctxt);
+
+// Returns a string representation of the StatusCode enum.
+absl::string_view StatusCodeToString(grpc_status_code code);
 
 }  // namespace opencensus
 

@@ -56,6 +56,7 @@ void RegisterGrpcPlugin() {
 // implementations--see
 // https://github.com/census-instrumentation/opencensus-java/blob/master/contrib/grpc_metrics/src/main/java/io/opencensus/contrib/grpc/metrics/RpcMeasureConstants.java.
 ABSL_CONST_INIT const absl::string_view kMethodTagKey = "method";
+ABSL_CONST_INIT const absl::string_view kStatusTagKey = "status";
 
 // Client
 ABSL_CONST_INIT const absl::string_view kRpcClientErrorCountMeasureName =

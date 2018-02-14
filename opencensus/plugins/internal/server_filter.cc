@@ -194,9 +194,10 @@ void CensusServerCallData::Destroy(grpc_call_element *elem,
   double elapsed_time_ms = absl::ToDoubleMilliseconds(elapsed_time_);
   grpc_auth_context_release(auth_context_);
   grpc_slice_unref_internal(method_);
-  // TODO: Add error count and tag.
   stats::Record(
-      {{RpcServerRequestBytes(), static_cast<double>(request_size)},
+      {{RpcServerErrorCount(),
+        final_info->final_status == GRPC_STATUS_OK ? 0 : 1},
+       {RpcServerRequestBytes(), static_cast<double>(request_size)},
        {RpcServerResponseBytes(), static_cast<double>(response_size)},
        {RpcServerServerElapsedTime(), elapsed_time_ms},
        {RpcServerRequestCount(), sent_message_count_},
@@ -204,7 +205,8 @@ void CensusServerCallData::Destroy(grpc_call_element *elem,
        {RpcServerResponseCount(), recv_message_count_}},
       {{kMethodTagKey, absl::string_view(reinterpret_cast<char *>(
                                              GRPC_SLICE_START_PTR(method_)),
-                                         method_size_)}});
+                                         method_size_)},
+       {kStatusTagKey, StatusCodeToString(final_info->final_status)}});
 }
 
 }  // namespace opencensus

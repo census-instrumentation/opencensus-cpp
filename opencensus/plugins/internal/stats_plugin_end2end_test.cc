@@ -34,8 +34,13 @@ class EchoServer final : public EchoService::Service {
   ::grpc::Status Echo(::grpc::ServerContext* context,
                       const EchoRequest* request,
                       EchoResponse* response) override {
-    response->set_message(request->message());
-    return ::grpc::Status::OK;
+    if (request->status_code() == 0) {
+      response->set_message(request->message());
+      return ::grpc::Status::OK;
+    } else {
+      return ::grpc::Status(
+          static_cast<::grpc::StatusCode>(request->status_code()), "");
+    }
   }
 };
 
@@ -74,6 +79,84 @@ class StatsPluginEnd2EndTest : public ::testing::Test {
 
   std::unique_ptr<EchoService::Stub> stub_;
 };
+
+TEST_F(StatsPluginEnd2EndTest, ErrorCount) {
+  const auto client_method_descriptor =
+      stats::ViewDescriptor()
+          .set_measure(kRpcClientErrorCountMeasureName)
+          .set_name("client_method")
+          .set_aggregation(stats::Aggregation::Sum())
+          .set_aggregation_window(stats::AggregationWindow::Cumulative())
+          .add_column(kMethodTagKey);
+  stats::View client_method_view(client_method_descriptor);
+  const auto server_method_descriptor =
+      stats::ViewDescriptor()
+          .set_measure(kRpcServerErrorCountMeasureName)
+          .set_name("server_method")
+          .set_aggregation(stats::Aggregation::Sum())
+          .set_aggregation_window(stats::AggregationWindow::Cumulative())
+          .add_column(kMethodTagKey);
+  stats::View server_method_view(client_method_descriptor);
+
+  const auto client_status_descriptor =
+      stats::ViewDescriptor()
+          .set_measure(kRpcClientErrorCountMeasureName)
+          .set_name("client_status")
+          .set_aggregation(stats::Aggregation::Sum())
+          .set_aggregation_window(stats::AggregationWindow::Cumulative())
+          .add_column(kStatusTagKey);
+  stats::View client_status_view(client_status_descriptor);
+  const auto server_status_descriptor =
+      stats::ViewDescriptor()
+          .set_measure(kRpcServerErrorCountMeasureName)
+          .set_name("server_status")
+          .set_aggregation(stats::Aggregation::Sum())
+          .set_aggregation_window(stats::AggregationWindow::Cumulative())
+          .add_column(kStatusTagKey);
+  stats::View server_status_view(server_status_descriptor);
+
+  // Cover all valid statuses.
+  for (int i = 0; i <= 16; ++i) {
+    EchoRequest request;
+    request.set_message("foo");
+    request.set_status_code(i);
+    EchoResponse response;
+    ::grpc::ClientContext context;
+    ::grpc::Status status = stub_->Echo(&context, request, &response);
+  }
+
+  EXPECT_THAT(client_method_view.GetData().double_data(),
+              ::testing::UnorderedElementsAre(
+                  ::testing::Pair(::testing::ElementsAre(method_name_), 16.0)));
+  EXPECT_THAT(server_method_view.GetData().double_data(),
+              ::testing::UnorderedElementsAre(
+                  ::testing::Pair(::testing::ElementsAre(method_name_), 16.0)));
+
+  auto codes = {
+      ::testing::Pair(::testing::ElementsAre("OK"), 0.0),
+      ::testing::Pair(::testing::ElementsAre("CANCELLED"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("UNKNOWN"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("INVALID_ARGUMENT"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("DEADLINE_EXCEEDED"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("NOT_FOUND"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("ALREADY_EXISTS"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("PERMISSION_DENIED"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("UNAUTHENTICATED"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("RESOURCE_EXHAUSTED"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("FAILED_PRECONDITION"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("ABORTED"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("OUT_OF_RANGE"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("UNIMPLEMENTED"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("INTERNAL"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("UNAVAILABLE"), 1.0),
+      ::testing::Pair(::testing::ElementsAre("DATA_LOSS"), 1.0),
+  };
+
+  EXPECT_THAT(client_status_view.GetData().double_data(),
+              ::testing::UnorderedElementsAreArray(codes));
+  EXPECT_THAT(server_status_view.GetData().double_data(),
+              ::testing::UnorderedElementsAreArray(codes));
+}
 
 TEST_F(StatsPluginEnd2EndTest, RequestResponseBytes) {
   const auto client_request_bytes_descriptor =

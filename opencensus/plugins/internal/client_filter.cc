@@ -153,9 +153,10 @@ void CensusClientCallData::Destroy(grpc_call_element *elem,
   const uint64_t request_size = GetOutgoingDataSize(final_info);
   const uint64_t response_size = GetIncomingDataSize(final_info);
   double latency_ms = absl::ToDoubleMilliseconds(absl::Now() - start_time_);
-  // TODO: Add error count and tag.
   stats::Record(
-      {{RpcClientRequestBytes(), static_cast<double>(request_size)},
+      {{RpcClientErrorCount(),
+        final_info->final_status == GRPC_STATUS_OK ? 0 : 1},
+       {RpcClientRequestBytes(), static_cast<double>(request_size)},
        {RpcClientResponseBytes(), static_cast<double>(response_size)},
        {RpcClientRoundtripLatency(), latency_ms},
        {RpcClientServerElapsedTime(),
@@ -165,7 +166,8 @@ void CensusClientCallData::Destroy(grpc_call_element *elem,
        {RpcClientResponseCount(), recv_message_count_}},
       {{kMethodTagKey, absl::string_view(reinterpret_cast<char *>(
                                              GRPC_SLICE_START_PTR(method_)),
-                                         method_size_)}});
+                                         method_size_)},
+       {kStatusTagKey, StatusCodeToString(final_info->final_status)}});
   grpc_slice_unref_internal(method_);
 }
 
