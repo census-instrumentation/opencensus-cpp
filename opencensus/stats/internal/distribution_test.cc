@@ -22,51 +22,41 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "opencensus/stats/bucket_boundaries.h"
+#include "opencensus/stats/testing/test_utils.h"
 
 namespace opencensus {
 namespace stats {
 
-class DistributionTest : public ::testing::Test {
- protected:
-  Distribution MakeDistribution(const BucketBoundaries* buckets) {
-    return Distribution(buckets);
-  }
-
-  void AddToDistribution(Distribution* distribution, double value) {
-    distribution->Add(value);
-  }
-};
-
-TEST_F(DistributionTest, Bucketing) {
+TEST(DistributionTest, Bucketing) {
   BucketBoundaries buckets = BucketBoundaries::Explicit({0, 10});
-  Distribution distribution = MakeDistribution(&buckets);
+  Distribution distribution = testing::TestUtils::MakeDistribution(&buckets);
 
   EXPECT_EQ(distribution.bucket_counts(), std::vector<uint64_t>({0, 0, 0}));
 
-  AddToDistribution(&distribution, -1);
+  testing::TestUtils::AddToDistribution(&distribution, -1);
   EXPECT_EQ(distribution.bucket_counts(), std::vector<uint64_t>({1, 0, 0}));
 
-  AddToDistribution(&distribution, 2);
+  testing::TestUtils::AddToDistribution(&distribution, 2);
   EXPECT_EQ(distribution.bucket_counts(), std::vector<uint64_t>({1, 1, 0}));
 
-  AddToDistribution(&distribution, 12);
+  testing::TestUtils::AddToDistribution(&distribution, 12);
   EXPECT_EQ(distribution.bucket_counts(), std::vector<uint64_t>({1, 1, 1}));
 
   // Buckets on boundaries go to the higher bucket
-  AddToDistribution(&distribution, 0);
+  testing::TestUtils::AddToDistribution(&distribution, 0);
   EXPECT_EQ(distribution.bucket_counts(), std::vector<uint64_t>({1, 2, 1}));
 
-  AddToDistribution(&distribution, 10);
+  testing::TestUtils::AddToDistribution(&distribution, 10);
   EXPECT_EQ(distribution.bucket_counts(), std::vector<uint64_t>({1, 2, 2}));
 }
 
-TEST_F(DistributionTest, SmallSequence) {
+TEST(DistributionTest, SmallSequence) {
   BucketBoundaries buckets = BucketBoundaries::Explicit({});
-  Distribution distribution = MakeDistribution(&buckets);
+  Distribution distribution = testing::TestUtils::MakeDistribution(&buckets);
 
-  AddToDistribution(&distribution, 3);
-  AddToDistribution(&distribution, 0);
-  AddToDistribution(&distribution, 3);
+  testing::TestUtils::AddToDistribution(&distribution, 3);
+  testing::TestUtils::AddToDistribution(&distribution, 0);
+  testing::TestUtils::AddToDistribution(&distribution, 3);
 
   EXPECT_EQ(distribution.count(), 3);
   EXPECT_DOUBLE_EQ(distribution.mean(), 2);
@@ -75,15 +65,15 @@ TEST_F(DistributionTest, SmallSequence) {
   EXPECT_DOUBLE_EQ(distribution.max(), 3);
 }
 
-TEST_F(DistributionTest, LinearSequence) {
+TEST(DistributionTest, LinearSequence) {
   BucketBoundaries buckets = BucketBoundaries::Explicit({});
-  Distribution distribution = MakeDistribution(&buckets);
+  Distribution distribution = testing::TestUtils::MakeDistribution(&buckets);
 
   const int max = 100;
   const double expected_mean = max / 2.0;
   double expected_sum_of_squared_deviation = 0;
   for (int i = 0; i <= max; ++i) {
-    AddToDistribution(&distribution, i);
+    testing::TestUtils::AddToDistribution(&distribution, i);
     expected_sum_of_squared_deviation += pow(i - expected_mean, 2);
   }
 
@@ -95,9 +85,9 @@ TEST_F(DistributionTest, LinearSequence) {
   EXPECT_DOUBLE_EQ(distribution.max(), max);
 }
 
-TEST_F(DistributionTest, ArbitrarySequence) {
+TEST(DistributionTest, ArbitrarySequence) {
   BucketBoundaries buckets = BucketBoundaries::Explicit({});
-  Distribution distribution = MakeDistribution(&buckets);
+  Distribution distribution = testing::TestUtils::MakeDistribution(&buckets);
 
   const std::vector<int> samples{91, 18, 63, 98, 87, 77, 14, 97, 10, 35,
                                  12, 5,  75, 41, 49, 38, 40, 20, 55, 83};
@@ -106,7 +96,7 @@ TEST_F(DistributionTest, ArbitrarySequence) {
       samples.size();
   double expected_sum_of_squared_deviation = 0;
   for (const auto sample : samples) {
-    AddToDistribution(&distribution, sample);
+    testing::TestUtils::AddToDistribution(&distribution, sample);
     expected_sum_of_squared_deviation += pow(sample - expected_mean, 2);
   }
 
@@ -121,12 +111,13 @@ TEST_F(DistributionTest, ArbitrarySequence) {
 }
 
 // As with stackdriver, non-finite values corrupt statistics.
-TEST_F(DistributionTest, NaN) {
+TEST(DistributionTest, NaN) {
   BucketBoundaries buckets = BucketBoundaries::Explicit({});
-  Distribution distribution = MakeDistribution(&buckets);
+  Distribution distribution = testing::TestUtils::MakeDistribution(&buckets);
 
-  AddToDistribution(&distribution, 1);
-  AddToDistribution(&distribution, std::numeric_limits<double>::quiet_NaN());
+  testing::TestUtils::AddToDistribution(&distribution, 1);
+  testing::TestUtils::AddToDistribution(
+      &distribution, std::numeric_limits<double>::quiet_NaN());
 
   EXPECT_EQ(distribution.count(), 2);
   EXPECT_TRUE(std::isnan(distribution.mean()));
@@ -135,12 +126,13 @@ TEST_F(DistributionTest, NaN) {
   EXPECT_TRUE(std::isnan(distribution.max()));
 }
 
-TEST_F(DistributionTest, PositiveInfinity) {
+TEST(DistributionTest, PositiveInfinity) {
   BucketBoundaries buckets = BucketBoundaries::Explicit({});
-  Distribution distribution = MakeDistribution(&buckets);
+  Distribution distribution = testing::TestUtils::MakeDistribution(&buckets);
 
-  AddToDistribution(&distribution, 1);
-  AddToDistribution(&distribution, std::numeric_limits<double>::infinity());
+  testing::TestUtils::AddToDistribution(&distribution, 1);
+  testing::TestUtils::AddToDistribution(
+      &distribution, std::numeric_limits<double>::infinity());
 
   EXPECT_EQ(distribution.count(), 2);
   EXPECT_FALSE(std::isfinite(distribution.mean()));
@@ -149,12 +141,13 @@ TEST_F(DistributionTest, PositiveInfinity) {
   EXPECT_FALSE(std::isfinite(distribution.max()));
 }
 
-TEST_F(DistributionTest, NegativeInfinity) {
+TEST(DistributionTest, NegativeInfinity) {
   BucketBoundaries buckets = BucketBoundaries::Explicit({});
-  Distribution distribution = MakeDistribution(&buckets);
+  Distribution distribution = testing::TestUtils::MakeDistribution(&buckets);
 
-  AddToDistribution(&distribution, 1);
-  AddToDistribution(&distribution, -std::numeric_limits<double>::infinity());
+  testing::TestUtils::AddToDistribution(&distribution, 1);
+  testing::TestUtils::AddToDistribution(
+      &distribution, -std::numeric_limits<double>::infinity());
 
   EXPECT_EQ(distribution.count(), 2);
   EXPECT_FALSE(std::isfinite(distribution.mean()));
@@ -163,11 +156,11 @@ TEST_F(DistributionTest, NegativeInfinity) {
   EXPECT_EQ(distribution.max(), 1);
 }
 
-TEST_F(DistributionTest, DebugString) {
+TEST(DistributionTest, DebugString) {
   BucketBoundaries buckets = BucketBoundaries::Explicit({0});
-  Distribution distribution = MakeDistribution(&buckets);
-  AddToDistribution(&distribution, -1);
-  AddToDistribution(&distribution, 7);
+  Distribution distribution = testing::TestUtils::MakeDistribution(&buckets);
+  testing::TestUtils::AddToDistribution(&distribution, -1);
+  testing::TestUtils::AddToDistribution(&distribution, 7);
 
   const std::string s = distribution.DebugString();
 

@@ -18,7 +18,7 @@ load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
 
 licenses(["notice"])  # Apache License 2.0
 
-package(default_visibility = ["//visibility:private"])
+package(default_visibility = ["//opencensus/exporters/stats:__subpackages__"])
 
 # Public exporter libraries.
 
@@ -76,6 +76,21 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "test_utils",
+    testonly = 1,
+    srcs = ["internal/testing/time_series_matcher.cc"],
+    hdrs = ["internal/testing/time_series_matcher.h"],
+    deps = [
+        "//google/api:distribution",
+        "//google/api:metric",
+        "//google/monitoring/v3:common",
+        "//google/monitoring/v3:metric",
+        "//opencensus/stats",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
 # Tests.
 # ========================================================================= #
 
@@ -85,9 +100,11 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":stackdriver_utils",
+        ":test_utils",
         "//google/api:distribution",
         "//google/api:label",
         "//google/api:metric",
+        "//google/monitoring/v3:common",
         "//google/monitoring/v3:metric",
         "//opencensus/stats",
         "//opencensus/stats:test_utils",
