@@ -144,6 +144,7 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":core",
+        ":test_utils",
         "@com_google_googletest//:gtest_main",
     ],
 )

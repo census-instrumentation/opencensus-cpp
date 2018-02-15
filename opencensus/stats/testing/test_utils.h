@@ -20,6 +20,8 @@
 #include <utility>
 #include <vector>
 
+#include "opencensus/stats/bucket_boundaries.h"
+#include "opencensus/stats/distribution.h"
 #include "opencensus/stats/internal/view_data_impl.h"
 #include "opencensus/stats/view_data.h"
 
@@ -33,6 +35,12 @@ class TestUtils final {
       const ViewDescriptor& descriptor,
       std::initializer_list<std::pair<std::vector<std::string>, double>>
           values);
+
+  static Distribution MakeDistribution(const BucketBoundaries* buckets);
+
+  static void AddToDistribution(Distribution* distribution, double value);
+
+  TestUtils() = delete;
 };
 
 }  // namespace testing

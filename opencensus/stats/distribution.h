@@ -25,6 +25,11 @@
 namespace opencensus {
 namespace stats {
 
+// Forward declaration of friend.
+namespace testing {
+class TestUtils;
+}
+
 // A Distribution object holds a summary of a stream of double values (e.g. all
 // values for one measure and set of tags). It stores both a statistical summary
 // (mean, sum of squared deviation, and range) and a histogram recording the
@@ -50,7 +55,7 @@ class Distribution final {
 
  private:
   friend class ViewDataImpl;  // ViewDataImpl populates data directly.
-  friend class DistributionTest;
+  friend class testing::TestUtils;
 
   // buckets must outlive the Distribution.
   explicit Distribution(const BucketBoundaries* buckets);

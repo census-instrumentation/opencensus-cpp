@@ -58,21 +58,19 @@ cc_library(
 
 # TODO: grpc_plugin_end2end_test
 
-# TODO: Enable this test:
-# cc_test(
-#     name = "stats_plugin_end2end_test",
-#     srcs = ["internal/stats_plugin_end2end_test.cc"],
-#     copts = TEST_COPTS,
-#     linkopts = [
-#         "-pthread",
-#     ],
-#     deps = [
-#         ":grpc_plugin",
-#         "//opencensus/plugins/internal/testing:echo_proto",
-#         "//opencensus/stats",
-#         "@com_github_grpc_grpc//:grpc++",
-#         "@com_github_grpc_grpc//test/core/util:grpc_test_util_base",
-#         "@com_google_absl//absl/strings",
-#         "@com_google_googletest//:gtest_main",
-#     ],
-# )
+cc_test(
+    name = "stats_plugin_end2end_test",
+    srcs = ["internal/stats_plugin_end2end_test.cc"],
+    copts = TEST_COPTS,
+    linkopts = [
+        "-pthread",
+    ],
+    deps = [
+        ":grpc_plugin",
+        "//opencensus/plugins/internal/testing:echo_proto",
+        "//opencensus/stats",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
