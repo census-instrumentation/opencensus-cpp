@@ -26,8 +26,11 @@
 #include "google/monitoring/v3/common.pb.h"
 #include "google/protobuf/timestamp.pb.h"
 #include "gtest/gtest.h"
+#include "opencensus/exporters/stats/internal/testing/time_series_matcher.h"
 #include "opencensus/stats/stats.h"
 #include "opencensus/stats/testing/test_utils.h"
+
+using opencensus::stats::testing::TestUtils;
 
 namespace opencensus {
 namespace exporters {
@@ -142,7 +145,187 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorDescription) {
   EXPECT_EQ(description, metric_descriptor.description());
 }
 
-// TODO: MakeTimeSeriesSumDouble
+TEST(StackdriverUtilsTest, MakeTimeSeriesSumDouble) {
+  const auto measure = opencensus::stats::MeasureRegistry::RegisterDouble(
+      "measure_sum_double", "", "");
+  const std::string task = "test_task";
+  const std::string view_name = "test_view";
+  const std::string tag_key_1 = "foo";
+  const std::string tag_key_2 = "bar";
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor()
+          .set_name(view_name)
+          .set_measure(measure.GetDescriptor().name())
+          .set_aggregation(opencensus::stats::Aggregation::Sum())
+          .set_aggregation_window(
+              opencensus::stats::AggregationWindow::Cumulative())
+          .add_column(tag_key_1)
+          .add_column(tag_key_2);
+  const opencensus::stats::ViewData data = TestUtils::MakeViewData(
+      view_descriptor, {{{"v1", "v1"}, 1.0}, {{"v1", "v2"}, 2.0}});
+  const std::vector<google::monitoring::v3::TimeSeries> time_series =
+      MakeTimeSeries(view_descriptor, data, task);
+
+  for (const auto& ts : time_series) {
+    EXPECT_EQ("custom.googleapis.com/opencensus/test_view", ts.metric().type());
+    EXPECT_EQ("global", ts.resource().type());
+    ASSERT_EQ(1, ts.points_size());
+    EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
+              ts.points(0).interval().start_time().seconds());
+    EXPECT_EQ(absl::ToUnixSeconds(data.end_time()),
+              ts.points(0).interval().end_time().seconds());
+  }
+
+  EXPECT_THAT(
+      time_series,
+      ::testing::UnorderedElementsAre(
+          testing::TimeSeriesDouble(
+              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v1"}},
+              1.0),
+          testing::TimeSeriesDouble(
+              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v2"}},
+              2.0)));
+}
+
+TEST(StackdriverUtilsTest, MakeTimeSeriesSumInt) {
+  const auto measure = opencensus::stats::MeasureRegistry::RegisterInt(
+      "measure_sum_int", "", "");
+  const std::string task = "test_task";
+  const std::string view_name = "test_descriptor";
+  const std::string tag_key_1 = "foo";
+  const std::string tag_key_2 = "bar";
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor()
+          .set_name(view_name)
+          .set_measure(measure.GetDescriptor().name())
+          .set_aggregation(opencensus::stats::Aggregation::Sum())
+          .set_aggregation_window(
+              opencensus::stats::AggregationWindow::Cumulative())
+          .add_column(tag_key_1)
+          .add_column(tag_key_2);
+  const opencensus::stats::ViewData data = TestUtils::MakeViewData(
+      view_descriptor, {{{"v1", "v1"}, 1.0}, {{"v1", "v2"}, 2.0}});
+  const std::vector<google::monitoring::v3::TimeSeries> time_series =
+      MakeTimeSeries(view_descriptor, data, task);
+
+  for (const auto& ts : time_series) {
+    EXPECT_EQ(absl::StrCat("custom.googleapis.com/opencensus/", view_name),
+              ts.metric().type());
+    EXPECT_EQ("global", ts.resource().type());
+    ASSERT_EQ(1, ts.points_size());
+    EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
+              ts.points(0).interval().start_time().seconds());
+    EXPECT_EQ(absl::ToUnixSeconds(data.end_time()),
+              ts.points(0).interval().end_time().seconds());
+  }
+
+  EXPECT_THAT(
+      time_series,
+      ::testing::UnorderedElementsAre(
+          testing::TimeSeriesInt(
+              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v1"}},
+              1),
+          testing::TimeSeriesInt(
+              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v2"}},
+              2)));
+}
+
+TEST(StackdriverUtilsTest, MakeTimeSeriesCountDouble) {
+  const auto measure = opencensus::stats::MeasureRegistry::RegisterDouble(
+      "measure_count_double", "", "");
+  const std::string task = "test_task";
+  const std::string view_name = "test_descriptor";
+  const std::string tag_key_1 = "foo";
+  const std::string tag_key_2 = "bar";
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor()
+          .set_name(view_name)
+          .set_measure(measure.GetDescriptor().name())
+          .set_aggregation(opencensus::stats::Aggregation::Count())
+          .set_aggregation_window(
+              opencensus::stats::AggregationWindow::Cumulative())
+          .add_column(tag_key_1)
+          .add_column(tag_key_2);
+  const opencensus::stats::ViewData data = TestUtils::MakeViewData(
+      view_descriptor,
+      {{{"v1", "v1"}, 1.0}, {{"v1", "v1"}, 3.0}, {{"v1", "v2"}, 2.0}});
+  const std::vector<google::monitoring::v3::TimeSeries> time_series =
+      MakeTimeSeries(view_descriptor, data, task);
+
+  for (const auto& ts : time_series) {
+    EXPECT_EQ(absl::StrCat("custom.googleapis.com/opencensus/", view_name),
+              ts.metric().type());
+    EXPECT_EQ("global", ts.resource().type());
+    ASSERT_EQ(1, ts.points_size());
+    EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
+              ts.points(0).interval().start_time().seconds());
+    EXPECT_EQ(absl::ToUnixSeconds(data.end_time()),
+              ts.points(0).interval().end_time().seconds());
+  }
+
+  EXPECT_THAT(
+      time_series,
+      ::testing::UnorderedElementsAre(
+          testing::TimeSeriesInt(
+              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v1"}},
+              2),
+          testing::TimeSeriesInt(
+              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v2"}},
+              1)));
+}
+
+TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
+  const auto measure = opencensus::stats::MeasureRegistry::RegisterDouble(
+      "measure_distribution_double", "", "");
+  const std::string task = "test_task";
+  const std::string view_name = "test_view";
+  const std::string tag_key_1 = "foo";
+  const std::string tag_key_2 = "bar";
+  const auto bucket_boundaries =
+      opencensus::stats::BucketBoundaries::Explicit({0});
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor()
+          .set_name(view_name)
+          .set_measure(measure.GetDescriptor().name())
+          .set_aggregation(
+              opencensus::stats::Aggregation::Distribution(bucket_boundaries))
+          .set_aggregation_window(
+              opencensus::stats::AggregationWindow::Cumulative())
+          .add_column(tag_key_1)
+          .add_column(tag_key_2);
+  const opencensus::stats::ViewData data = TestUtils::MakeViewData(
+      view_descriptor,
+      {{{"v1", "v1"}, -1.0}, {{"v1", "v1"}, 7.0}, {{"v1", "v2"}, 1.0}});
+  const std::vector<google::monitoring::v3::TimeSeries> time_series =
+      MakeTimeSeries(view_descriptor, data, task);
+
+  for (const auto& ts : time_series) {
+    EXPECT_EQ("custom.googleapis.com/opencensus/test_view", ts.metric().type());
+    EXPECT_EQ("global", ts.resource().type());
+    ASSERT_EQ(1, ts.points_size());
+    EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
+              ts.points(0).interval().start_time().seconds());
+    EXPECT_EQ(absl::ToUnixSeconds(data.end_time()),
+              ts.points(0).interval().end_time().seconds());
+  }
+
+  auto distribution1 = TestUtils::MakeDistribution(&bucket_boundaries);
+  TestUtils::AddToDistribution(&distribution1, -1.0);
+  TestUtils::AddToDistribution(&distribution1, 7.0);
+
+  auto distribution2 = TestUtils::MakeDistribution(&bucket_boundaries);
+  TestUtils::AddToDistribution(&distribution2, 1.0);
+
+  EXPECT_THAT(
+      time_series,
+      ::testing::UnorderedElementsAre(
+          testing::TimeSeriesDistribution(
+              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v1"}},
+              distribution1),
+          testing::TimeSeriesDistribution(
+              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v2"}},
+              distribution2)));
+}
 
 }  // namespace
 }  // namespace stats

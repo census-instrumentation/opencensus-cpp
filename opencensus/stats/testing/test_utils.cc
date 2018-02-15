@@ -38,6 +38,16 @@ ViewData TestUtils::MakeViewData(
   }
 }
 
+// static
+Distribution TestUtils::MakeDistribution(const BucketBoundaries* buckets) {
+  return Distribution(buckets);
+}
+
+// static
+void TestUtils::AddToDistribution(Distribution* distribution, double value) {
+  distribution->Add(value);
+}
+
 }  // namespace testing
 }  // namespace stats
 }  // namespace opencensus
