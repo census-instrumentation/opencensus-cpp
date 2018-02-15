@@ -24,7 +24,6 @@
 #include "opencensus/plugins/grpc_plugin.h"
 #include "opencensus/plugins/internal/testing/echo.grpc.pb.h"
 #include "opencensus/stats/stats.h"
-#include "test/core/util/port.h"
 
 namespace opencensus {
 namespace testing {
@@ -51,12 +50,15 @@ class StatsPluginEnd2EndTest : public ::testing::Test {
   void SetUp() {
     // Set up a synchronous server on a different thread to avoid the asynch
     // interface.
-    server_address_ = absl::StrCat("[::]:", grpc_pick_unused_port_or_die());
     ::grpc::ServerBuilder builder;
-    builder.AddListeningPort(server_address_,
-                             ::grpc::InsecureServerCredentials());
+    int port;
+    builder.AddListeningPort("[::]:0", ::grpc::InsecureServerCredentials(),
+                             &port);
     builder.RegisterService(&service_);
     server_ = builder.BuildAndStart();
+    ASSERT_NE(nullptr, server_);
+    ASSERT_NE(0, port);
+    server_address_ = absl::StrCat("[::]:", port);
     server_thread_ = std::thread(&StatsPluginEnd2EndTest::RunServerLoop, this);
 
     stub_ = EchoService::NewStub(::grpc::CreateChannel(
