@@ -14,6 +14,7 @@
 
 #include "opencensus/stats/recording.h"
 
+#include "absl/time/clock.h"
 #include "opencensus/stats/internal/stats_manager.h"
 #include "opencensus/stats/measure.h"
 
@@ -24,7 +25,7 @@ void Record(
     std::initializer_list<Measurement> measurements,
     std::initializer_list<std::pair<absl::string_view, absl::string_view>>
         tags) {
-  StatsManager::Get()->Record(measurements, tags);
+  StatsManager::Get()->Record(measurements, tags, absl::Now());
 }
 
 }  // namespace stats
