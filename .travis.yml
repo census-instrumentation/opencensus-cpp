@@ -4,6 +4,7 @@ dist: trusty
 sudo: false
 
 before_install:
+  - ./format.sh
   - wget https://github.com/bazelbuild/bazel/releases/download/0.8.1/bazel-0.8.1-installer-linux-x86_64.sh
   - chmod +x bazel-0.8.1-installer-linux-x86_64.sh
   - ./bazel-0.8.1-installer-linux-x86_64.sh --user
@@ -11,6 +12,5 @@ before_install:
 script:
   # We can't use --noshow_progress because Travis terminates the
   # build after 10 mins without output.
-  - bazel build -k $(bazel query //... | grep -v :_)
-  - bazel test -k $(bazel query //... | grep -v :_)
-  - ./format.sh
+  - bazel build --experimental_ui_actions_shown=1 -k $(bazel query ... | grep -v :_)
+  - bazel test --experimental_ui_actions_shown=1 -k $(bazel query ... | grep -v :_)
