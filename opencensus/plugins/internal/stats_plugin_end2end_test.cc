@@ -18,6 +18,8 @@
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "absl/time/clock.h"
+#include "absl/time/time.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "include/grpc++/grpc++.h"
@@ -68,6 +70,14 @@ class StatsPluginEnd2EndTest : public ::testing::Test {
   void TearDown() {
     server_->Shutdown();
     server_thread_.join();
+  }
+
+  // Sets a one-second deadline on a client context.
+  static void SetDeadline(::grpc::ClientContext* context) {
+    gpr_timespec deadline;
+    deadline.clock_type = gpr_clock_type::GPR_TIMESPAN;
+    deadline.tv_sec = 1;
+    context->set_deadline(deadline);
   }
 
   void RunServerLoop() { server_->Wait(); }
@@ -125,6 +135,11 @@ TEST_F(StatsPluginEnd2EndTest, ErrorCount) {
     EchoResponse response;
     ::grpc::ClientContext context;
     ::grpc::Status status = stub_->Echo(&context, request, &response);
+  }
+
+  // Avoid a possible race condition with the server recording data.
+  while (server_status_view.GetData().double_data().size() < 17) {
+    absl::SleepFor(absl::Milliseconds(100));
   }
 
   EXPECT_THAT(client_method_view.GetData().double_data(),
@@ -226,6 +241,10 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseBytes) {
   EXPECT_EQ(1, client_response_bytes->second.count());
   EXPECT_GT(client_response_bytes->second.mean(), 0);
 
+  // Avoid a possible race condition with the server recording data.
+  while (server_request_bytes_view.GetData().distribution_data().empty()) {
+    absl::SleepFor(absl::Milliseconds(100));
+  }
   const auto server_request_bytes_data =
       server_request_bytes_view.GetData().distribution_data();
   ASSERT_EQ(1, server_request_bytes_data.size());
@@ -313,6 +332,11 @@ TEST_F(StatsPluginEnd2EndTest, Latency) {
   EXPECT_LT(client_server_elapsed_time->second.mean(),
             client_latency->second.mean());
 
+  // Avoid a possible race condition with the server recording data.
+  while (
+      server_server_elapsed_time_view.GetData().distribution_data().empty()) {
+    absl::SleepFor(absl::Milliseconds(100));
+  }
   const auto server_server_elapsed_time_data =
       server_server_elapsed_time_view.GetData().distribution_data();
   ASSERT_EQ(1, server_server_elapsed_time_data.size());
@@ -378,9 +402,19 @@ TEST_F(StatsPluginEnd2EndTest, StartFinishCount) {
     EXPECT_THAT(client_finished_count_view.GetData().double_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
                     ::testing::ElementsAre(method_name_), i + 1)));
+
     EXPECT_THAT(server_started_count_view.GetData().double_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
                     ::testing::ElementsAre(method_name_), i + 1)));
+    // Avoid a possible race condition with the server recording data. (server
+    // started count is updated before the server replies.)
+    while (server_finished_count_view.GetData().double_data().empty() ||
+           server_finished_count_view.GetData()
+                   .double_data()
+                   .find({method_name_})
+                   ->second != i + 1) {
+      absl::SleepFor(absl::Milliseconds(100));
+    }
     EXPECT_THAT(server_finished_count_view.GetData().double_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
                     ::testing::ElementsAre(method_name_), i + 1)));
@@ -440,6 +474,15 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseCount) {
     EXPECT_THAT(client_response_count_view.GetData().double_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
                     ::testing::ElementsAre(method_name_), i + 1)));
+
+    // Avoid a possible race condition with the server recording data.
+    while (server_request_count_view.GetData().double_data().empty() ||
+           server_request_count_view.GetData()
+                   .double_data()
+                   .find({method_name_})
+                   ->second != i + 1) {
+      absl::SleepFor(absl::Milliseconds(100));
+    }
     EXPECT_THAT(server_request_count_view.GetData().double_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
                     ::testing::ElementsAre(method_name_), i + 1)));

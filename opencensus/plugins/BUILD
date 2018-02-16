@@ -60,8 +60,10 @@ cc_library(
 
 cc_test(
     name = "stats_plugin_end2end_test",
+    timeout = "short",
     srcs = ["internal/stats_plugin_end2end_test.cc"],
     copts = TEST_COPTS,
+    flaky = True,  # RPCs are sometimes lost or retried, messing up stats.
     linkopts = [
         "-pthread",
     ],
@@ -71,6 +73,7 @@ cc_test(
         "//opencensus/stats",
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",
     ],
 )
