@@ -13,4 +13,4 @@ script:
   # We can't use --noshow_progress because Travis terminates the
   # build after 10 mins without output.
   - bazel build --experimental_ui_actions_shown=1 -k $(bazel query ... | grep -v :_)
-  - bazel test --experimental_ui_actions_shown=1 -k $(bazel query ... | grep -v :_)
+  - bazel test --experimental_ui_actions_shown=1 -k $(bazel query "kind(test, //...) except attr('tags', 'noci', //...)" | grep -v :_)

@@ -40,11 +40,12 @@ cc_test(
     name = "exporter_example",
     srcs = ["exporter_example.cc"],
     copts = TEST_COPTS,
+    tags = ["noci"],  # This runs slowly and is not very useful as a test.
     deps = [
+        "//opencensus/stats",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
-        "//opencensus/stats",
         "@com_google_googletest//:gtest_main",
     ],
 )
