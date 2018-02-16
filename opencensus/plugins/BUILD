@@ -63,6 +63,7 @@ cc_test(
     timeout = "short",
     srcs = ["internal/stats_plugin_end2end_test.cc"],
     copts = TEST_COPTS,
+    flaky = True,  # RPCs are sometimes lost or retried, messing up stats.
     linkopts = [
         "-pthread",
     ],

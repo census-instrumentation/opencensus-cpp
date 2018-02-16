@@ -72,6 +72,14 @@ class StatsPluginEnd2EndTest : public ::testing::Test {
     server_thread_.join();
   }
 
+  // Sets a one-second deadline on a client context.
+  static void SetDeadline(::grpc::ClientContext* context) {
+    gpr_timespec deadline;
+    deadline.clock_type = gpr_clock_type::GPR_TIMESPAN;
+    deadline.tv_sec = 1;
+    context->set_deadline(deadline);
+  }
+
   void RunServerLoop() { server_->Wait(); }
 
   const std::string method_name_ = "/opencensus.testing.EchoService/Echo";
