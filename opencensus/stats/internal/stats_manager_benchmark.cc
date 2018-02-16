@@ -110,6 +110,69 @@ BENCHMARK_TEMPLATE2(BM_Record, DistributionAggregation, CumulativeWindow)
 BENCHMARK_TEMPLATE2(BM_Record, DistributionAggregation, IntervalWindow)
     ->Range(1, 16);
 
+// Benchmarks batched recording against a set of measures with a small number of
+// views on each, matching RPC stats recording.
+void BM_RecordBatched(benchmark::State& state) {
+  const std::string tag_key_1 = "tag_key_1";
+  const std::string tag_key_2 = "tag_key_2";
+  const int num_measures = 6;
+  std::vector<MeasureDouble> measures;
+  std::vector<std::unique_ptr<View>> views;
+  for (int i = 0; i < num_measures; ++i) {
+    const std::string measure_name = MakeUniqueName();
+    measures.push_back(MeasureRegistry::RegisterDouble(measure_name, "", ""));
+
+    const ViewDescriptor count_descriptor =
+        ViewDescriptor()
+            .set_measure(measure_name)
+            .set_name(absl::StrCat("count_", measure_name))
+            .set_aggregation(Aggregation::Count())
+            .set_aggregation_window(AggregationWindow::Cumulative())
+            .add_column(tag_key_1)
+            .add_column(tag_key_2);
+    views.push_back(absl::make_unique<View>(count_descriptor));
+
+    const ViewDescriptor sum_descriptor =
+        ViewDescriptor()
+            .set_measure(measure_name)
+            .set_name(absl::StrCat("sum_", measure_name))
+            .set_aggregation(Aggregation::Sum())
+            .set_aggregation_window(AggregationWindow::Cumulative())
+            .add_column(tag_key_1)
+            .add_column(tag_key_2);
+    views.push_back(absl::make_unique<View>(sum_descriptor));
+
+    const ViewDescriptor distribution_descriptor =
+        ViewDescriptor()
+            .set_measure(measure_name)
+            .set_name(absl::StrCat("distribution_", measure_name))
+            .set_aggregation(Aggregation::Distribution(
+                BucketBoundaries::Exponential(10, 10, 2)))
+            .set_aggregation_window(AggregationWindow::Cumulative())
+            .add_column(tag_key_1)
+            .add_column(tag_key_2);
+    views.push_back(absl::make_unique<View>(distribution_descriptor));
+  }
+
+  std::vector<std::string> tag_values(10);
+  for (int i = 0; i < 10; ++i) {
+    tag_values[i] = absl::StrCat("value", i);
+  }
+  int iteration = 0;
+  for (auto _ : state) {
+    Record({{measures[0], static_cast<double>(iteration)},
+            {measures[1], static_cast<double>(iteration)},
+            {measures[2], static_cast<double>(iteration)},
+            {measures[3], static_cast<double>(iteration)},
+            {measures[4], static_cast<double>(iteration)},
+            {measures[5], static_cast<double>(iteration)}},
+           {{tag_key_1, tag_values[iteration % tag_values.size()]},
+            {tag_key_2, tag_values[iteration % (tag_values.size() - 1)]}});
+    ++iteration;
+  }
+}
+BENCHMARK(BM_RecordBatched);
+
 // TODO: Other useful benchmarks:
 //  - Multithreaded recording against one/different measures.
 //  - Recording with parameterized numbers of tag keys.
@@ -117,4 +180,5 @@ BENCHMARK_TEMPLATE2(BM_Record, DistributionAggregation, IntervalWindow)
 }  // namespace
 }  // namespace stats
 }  // namespace opencensus
+
 BENCHMARK_MAIN();
