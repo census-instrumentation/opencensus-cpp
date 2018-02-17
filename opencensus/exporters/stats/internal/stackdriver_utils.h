@@ -20,6 +20,7 @@
 #include "absl/strings/string_view.h"
 #include "google/api/metric.pb.h"
 #include "google/monitoring/v3/metric.pb.h"
+#include "google/protobuf/timestamp.pb.h"
 #include "opencensus/stats/stats.h"
 
 namespace opencensus {
@@ -37,6 +38,8 @@ void SetMetricDescriptor(
 std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
     const opencensus::stats::ViewDescriptor& view_descriptor,
     const opencensus::stats::ViewData& data, absl::string_view opencensus_task);
+
+void SetTimestamp(absl::Time time, google::protobuf::Timestamp* proto);
 
 }  // namespace stats
 }  // namespace exporters

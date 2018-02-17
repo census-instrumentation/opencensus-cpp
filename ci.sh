@@ -49,7 +49,9 @@ fi
 # Exclude tests tagged "noci". Tests marked "manual" are already excluded from
 # wildcard queries.
 tests=$(bazel query -k --noshow_progress \
-  "kind(test, rdeps(//..., set(${files[*]}))) except attr('tags', 'noci', //...)" \
+  "kind(test, rdeps(//..., set(${files[*]}))) \
+   except attr('tags', 'noci', //...) \
+   except attr('tags', 'manual', //...)" \
   | grep -v :_)
 if [[ ! -z $tests ]]; then
   echo "Running tests"
