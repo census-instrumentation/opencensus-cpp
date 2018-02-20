@@ -24,7 +24,7 @@ namespace opencensus {
 namespace exporters {
 namespace trace {
 
-class StdOutExporter
+class StdoutExporter
     : public ::opencensus::trace::exporter::SpanExporter::Handler {
  public:
   void Export(const std::vector<::opencensus::trace::exporter::SpanData>& spans)

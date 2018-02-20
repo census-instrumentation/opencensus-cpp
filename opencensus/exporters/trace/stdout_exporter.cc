@@ -23,16 +23,16 @@ namespace opencensus {
 namespace exporters {
 namespace trace {
 
-void StdOutExporter::Export(
+void StdoutExporter::Export(
     const std::vector<::opencensus::trace::exporter::SpanData>& spans) {
   for (const auto& span : spans) {
     std::cout << span.DebugString() << "\n";
   }
 }
 
-void StdOutExporter::Register() {
+void StdoutExporter::Register() {
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
-      absl::make_unique<StdOutExporter>());
+      absl::make_unique<StdoutExporter>());
 }
 
 }  // namespace trace

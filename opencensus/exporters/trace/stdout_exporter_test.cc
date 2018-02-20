@@ -29,7 +29,7 @@ class TraceExporterTest : public ::testing::Test {
   TraceExporterTest() {}
 
  protected:
-  StdOutExporter handler_;
+  StdoutExporter handler_;
 };
 
 TEST_F(TraceExporterTest, ExportTrace) {
