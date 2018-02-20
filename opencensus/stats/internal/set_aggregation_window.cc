@@ -1,4 +1,4 @@
-// Copyright 2017, OpenCensus Authors
+// Copyright 2018, OpenCensus Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/stats/internal/aggregation_window.h"
+#include "opencensus/stats/internal/set_aggregation_window.h"
 
-#include "absl/strings/str_cat.h"
+#include "opencensus/stats/internal/aggregation_window.h"
+#include "opencensus/stats/view_descriptor.h"
 
 namespace opencensus {
 namespace stats {
 
-std::string AggregationWindow::DebugString() const {
-  switch (type_) {
-    case Type::kCumulative:
-      return "Cumulative";
-    case Type::kInterval:
-      return absl::StrCat("Interval (", absl::ToDoubleSeconds(duration_),
-                          "s window)");
-  }
+void SetAggregationWindow(const AggregationWindow& window,
+                          ViewDescriptor* descriptor) {
+  descriptor->aggregation_window_ = window;
 }
 
 }  // namespace stats

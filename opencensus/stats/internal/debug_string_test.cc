@@ -16,8 +16,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "opencensus/stats/aggregation.h"
-#include "opencensus/stats/aggregation_window.h"
 #include "opencensus/stats/bucket_boundaries.h"
+#include "opencensus/stats/internal/aggregation_window.h"
 #include "opencensus/stats/measure_descriptor.h"
 #include "opencensus/stats/measure_registry.h"
 #include "opencensus/stats/view_descriptor.h"
@@ -64,9 +64,9 @@ TEST(DebugStringTest, ViewDescriptor) {
   ViewDescriptor descriptor = ViewDescriptor()
                                   .set_measure(measure_name)
                                   .set_aggregation(aggregation)
-                                  .set_aggregation_window(aggregation_window)
                                   .add_column(tag_key)
                                   .set_description(description);
+  SetAggregationWindow(aggregation_window, &descriptor);
 
   EXPECT_PRED_FORMAT2(::testing::IsSubstring,
                       measure.GetDescriptor().DebugString(),

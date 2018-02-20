@@ -74,17 +74,15 @@ class StatsExporterTest : public ::testing::Test {
     descriptor1_.set_name("id1");
     descriptor1_.set_measure(kMeasureId);
     descriptor1_.set_aggregation(Aggregation::Count());
-    descriptor1_.set_aggregation_window(AggregationWindow::Cumulative());
     descriptor1_edited_.set_name("id1");
     descriptor1_edited_.set_measure(kMeasureId);
     descriptor1_edited_.set_aggregation(Aggregation::Sum());
-    descriptor1_edited_.set_aggregation_window(AggregationWindow::Cumulative());
     descriptor2_.set_name("id2");
     descriptor2_.set_measure(kMeasureId);
     descriptor2_.set_aggregation(
         Aggregation::Distribution(BucketBoundaries::Explicit({0})));
-    descriptor2_.set_aggregation_window(
-        AggregationWindow::Interval(absl::Hours(1)));
+    SetAggregationWindow(AggregationWindow::Interval(absl::Hours(1)),
+                         &descriptor2_);
   }
 
   void TearDown() {

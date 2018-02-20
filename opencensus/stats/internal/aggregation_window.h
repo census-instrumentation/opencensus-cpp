@@ -1,4 +1,4 @@
-// Copyright 2017, OpenCensus Authors
+// Copyright 2018, OpenCensus Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef OPENCENSUS_STATS_AGGREGATION_WINDOW_H_
-#define OPENCENSUS_STATS_AGGREGATION_WINDOW_H_
+#ifndef OPENCENSUS_STATS_INTERNAL_AGGREGATION_WINDOW_H_
+#define OPENCENSUS_STATS_INTERNAL_AGGREGATION_WINDOW_H_
 
 #include <string>
 
@@ -68,4 +68,4 @@ class AggregationWindow final {
 }  // namespace stats
 }  // namespace opencensus
 
-#endif  // OPENCENSUS_STATS_AGGREGATION_WINDOW_H_
+#endif  // OPENCENSUS_STATS_INTERNAL_AGGREGATION_WINDOW_H_

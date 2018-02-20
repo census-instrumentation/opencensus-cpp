@@ -161,8 +161,6 @@ TEST_F(StackdriverE2eTest, OneView) {
               prefix_))
           .set_measure(kTestMeasureName)
           .set_aggregation(::opencensus::stats::Aggregation::Sum())
-          .set_aggregation_window(
-              ::opencensus::stats::AggregationWindow::Cumulative())
           .add_column("key1")
           .add_column("key2")
           .set_description(
@@ -199,8 +197,6 @@ TEST_F(StackdriverE2eTest, LargeTest) {
               prefix_))
           .set_measure(kTestMeasureName)
           .set_aggregation(::opencensus::stats::Aggregation::Count())
-          .set_aggregation_window(
-              ::opencensus::stats::AggregationWindow::Cumulative())
           .add_column("key1")
           .add_column("key2")
           .set_description(
@@ -215,8 +211,6 @@ TEST_F(StackdriverE2eTest, LargeTest) {
               prefix_))
           .set_measure(kTestMeasureName)
           .set_aggregation(::opencensus::stats::Aggregation::Sum())
-          .set_aggregation_window(
-              ::opencensus::stats::AggregationWindow::Cumulative())
           .add_column("key1")
           .add_column("key2")
           .set_description(
