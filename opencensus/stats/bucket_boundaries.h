@@ -16,11 +16,9 @@
 #define OPENCENSUS_STATS_BUCKET_BOUNDARIES_H_
 
 #include <cstddef>
-#include <initializer_list>
 #include <string>
+#include <utility>
 #include <vector>
-
-#include "absl/types/span.h"
 
 namespace opencensus {
 namespace stats {
@@ -53,7 +51,7 @@ class BucketBoundaries final {
   // [boundaries[i], boundaries[i+1]), as well as an underflow bucket covering
   // [-inf, boundaries[0]) and an overflow bucket covering
   // [boundaries[boundaries.size()-1], inf].
-  static BucketBoundaries Explicit(std::initializer_list<double> boundaries);
+  static BucketBoundaries Explicit(std::vector<double> boundaries);
 
   // The number of buckets in a Distribution using this bucketer.
   int num_buckets() const { return lower_boundaries_.size() + 1; }
@@ -74,8 +72,8 @@ class BucketBoundaries final {
   }
 
  private:
-  BucketBoundaries(absl::Span<const double> lower_boundaries)
-      : lower_boundaries_(lower_boundaries.begin(), lower_boundaries.end()) {}
+  BucketBoundaries(std::vector<double> lower_boundaries)
+      : lower_boundaries_(std::move(lower_boundaries)) {}
 
   // The lower bound of each bucket, excluding the underflow bucket but
   // including the overflow bucket.
