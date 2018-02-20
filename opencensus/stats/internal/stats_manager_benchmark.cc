@@ -18,10 +18,14 @@
 #include "absl/strings/str_cat.h"
 #include "absl/time/time.h"
 #include "benchmark/benchmark.h"
+#include "opencensus/stats/aggregation.h"
+#include "opencensus/stats/internal/aggregation_window.h"
+#include "opencensus/stats/internal/set_aggregation_window.h"
 #include "opencensus/stats/measure.h"
 #include "opencensus/stats/measure_registry.h"
 #include "opencensus/stats/recording.h"
 #include "opencensus/stats/view.h"
+#include "opencensus/stats/view_descriptor.h"
 
 namespace opencensus {
 namespace stats {
@@ -77,15 +81,16 @@ void BM_Record(benchmark::State& state) {
   for (int i = 0; i < state.range(0); ++i) {
     // The view_key_* tag key is necessary to prevent these from being merged by
     // the StatsManager.
-    const ViewDescriptor descriptor =
+    ViewDescriptor descriptor =
         ViewDescriptor()
             .set_measure(measure_name)
             .set_name("count")
             .set_aggregation(
                 AggregationFactory()(BucketBoundaries::Exponential(10, 10, 2)))
-            .set_aggregation_window(AggregationWindowFactory()(absl::Hours(1)))
             .add_column(tag_key_1)
             .add_column(absl::StrCat("view_key_", i));
+    SetAggregationWindow(AggregationWindowFactory()(absl::Hours(1)),
+                         &descriptor);
     views.push_back(absl::make_unique<View>(descriptor));
   }
   std::vector<std::string> tag_values(100);
@@ -127,7 +132,6 @@ void BM_RecordBatched(benchmark::State& state) {
             .set_measure(measure_name)
             .set_name(absl::StrCat("count_", measure_name))
             .set_aggregation(Aggregation::Count())
-            .set_aggregation_window(AggregationWindow::Cumulative())
             .add_column(tag_key_1)
             .add_column(tag_key_2);
     views.push_back(absl::make_unique<View>(count_descriptor));
@@ -137,7 +141,6 @@ void BM_RecordBatched(benchmark::State& state) {
             .set_measure(measure_name)
             .set_name(absl::StrCat("sum_", measure_name))
             .set_aggregation(Aggregation::Sum())
-            .set_aggregation_window(AggregationWindow::Cumulative())
             .add_column(tag_key_1)
             .add_column(tag_key_2);
     views.push_back(absl::make_unique<View>(sum_descriptor));
@@ -148,7 +151,6 @@ void BM_RecordBatched(benchmark::State& state) {
             .set_name(absl::StrCat("distribution_", measure_name))
             .set_aggregation(Aggregation::Distribution(
                 BucketBoundaries::Exponential(10, 10, 2)))
-            .set_aggregation_window(AggregationWindow::Cumulative())
             .add_column(tag_key_1)
             .add_column(tag_key_2);
     views.push_back(absl::make_unique<View>(distribution_descriptor));

@@ -18,7 +18,6 @@
 // Re-export the public headers for stats so that users do not need to maintain
 // a long include list.
 #include "opencensus/stats/aggregation.h"         // IWYU pragma: export
-#include "opencensus/stats/aggregation_window.h"  // IWYU pragma: export
 #include "opencensus/stats/bucket_boundaries.h"   // IWYU pragma: export
 #include "opencensus/stats/measure.h"             // IWYU pragma: export
 #include "opencensus/stats/measure_descriptor.h"  // IWYU pragma: export

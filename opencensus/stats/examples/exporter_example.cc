@@ -77,34 +77,30 @@ TEST_F(ExporterExample, Distribution) {
   SetupFoo();
 
   // The stats consumer creates a View on Foo Usage.
-  const auto cumulative_descriptor =
+  const auto sum_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name("example.com/Bar/FooUsage-sum-cumulative-foo_id")
           .set_measure(kFooUsageMeasureName)
           .set_aggregation(opencensus::stats::Aggregation::Sum())
-          .set_aggregation_window(
-              opencensus::stats::AggregationWindow::Cumulative())
           .add_column("foo_id")
           .set_description(
               "Cumulative sum of example.com/Foo/FooUsage broken down "
               "by 'foo_id'.");
-  const auto interval_descriptor =
+  const auto count_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name("example.com/Bar/FooUsage-sum-interval-foo_id")
           .set_measure(kFooUsageMeasureName)
-          .set_aggregation(opencensus::stats::Aggregation::Sum())
-          .set_aggregation_window(
-              opencensus::stats::AggregationWindow::Interval(absl::Hours(1)))
+          .set_aggregation(opencensus::stats::Aggregation::Count())
           .add_column("foo_id")
           .set_description(
-              "Rolling sum of example.com/Foo/FooUsage over the previous hour "
-              "broken down by 'foo_id'.");
+              "Cumulative count of example.com/Foo/FooUsage broken down by "
+              "'foo_id'.");
 
   // The order of view registration and exporter creation does not matter, as
   // long as both precede data recording.
-  opencensus::stats::StatsExporter::AddView(cumulative_descriptor);
+  opencensus::stats::StatsExporter::AddView(sum_descriptor);
   ExampleExporter::Register();
-  opencensus::stats::StatsExporter::AddView(interval_descriptor);
+  opencensus::stats::StatsExporter::AddView(count_descriptor);
 
   // Someone calls the Foo API, recording usage under example.com/Bar/FooUsage.
   UseFoo("foo1", 1);
