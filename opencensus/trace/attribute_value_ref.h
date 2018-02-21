@@ -52,8 +52,8 @@ class AttributeValueRef final {
   // have to handle const char[] separately.
   template <typename T, typename std::enable_if<std::is_constructible<
                             absl::string_view, T>::value>::type* = nullptr>
-  AttributeValueRef(T string_value)
-      : string_value_(absl::string_view(string_value)), type_(Type::kString) {}
+  AttributeValueRef(const T& string_value)
+      : string_value_(string_value), type_(Type::kString) {}
 
   // Construct from integer. We have to supply this form explicitly because
   // otherwise AttributeValueRef(int) is ambiguous between int and bool!
