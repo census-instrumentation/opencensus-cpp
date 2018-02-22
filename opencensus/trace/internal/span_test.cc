@@ -173,6 +173,9 @@ TEST(SpanTest, FullSpanTest) {
   span.AddAttribute("key1", av);
   span.AddAttribute("key2", "value2");
   span.AddAttributes({{"key3", "value3"}, {"key4", 123}, {"key5", false}});
+  std::string val = "value";
+  val += "6";
+  span.AddAttribute("key6", val);
 
   span.AddAnnotation("anno1");
   span.AddAnnotation(
