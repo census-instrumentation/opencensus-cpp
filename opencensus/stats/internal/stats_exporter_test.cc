@@ -15,6 +15,7 @@
 #include "opencensus/stats/stats_exporter.h"
 
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 #include "absl/memory/memory.h"
@@ -35,7 +36,7 @@ namespace stats {
 class MockExporter : public StatsExporter::Handler {
  public:
   static void Register(absl::Span<const ViewDescriptor> expected_descriptors) {
-    opencensus::stats::StatsExporter::RegisterHandler(
+    opencensus::stats::StatsExporter::RegisterPushHandler(
         absl::make_unique<MockExporter>(expected_descriptors));
   }
 
@@ -102,6 +103,9 @@ TEST_F(StatsExporterTest, AddView) {
   MockExporter::Register({descriptor1_, descriptor2_});
   StatsExporter::AddView(descriptor1_);
   StatsExporter::AddView(descriptor2_);
+  EXPECT_THAT(StatsExporter::GetViewData(),
+              ::testing::UnorderedElementsAre(::testing::Key(descriptor1_),
+                                              ::testing::Key(descriptor2_)));
   Export();
 }
 
@@ -110,6 +114,10 @@ TEST_F(StatsExporterTest, UpdateView) {
   StatsExporter::AddView(descriptor1_);
   StatsExporter::AddView(descriptor2_);
   StatsExporter::AddView(descriptor1_edited_);
+  EXPECT_THAT(
+      StatsExporter::GetViewData(),
+      ::testing::UnorderedElementsAre(::testing::Key(descriptor1_edited_),
+                                      ::testing::Key(descriptor2_)));
   Export();
 }
 
@@ -118,6 +126,8 @@ TEST_F(StatsExporterTest, RemoveView) {
   StatsExporter::AddView(descriptor1_);
   StatsExporter::AddView(descriptor2_);
   StatsExporter::RemoveView(descriptor1_.name());
+  EXPECT_THAT(StatsExporter::GetViewData(),
+              ::testing::UnorderedElementsAre(::testing::Key(descriptor2_)));
   Export();
 }
 

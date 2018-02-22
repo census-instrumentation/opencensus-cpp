@@ -15,6 +15,8 @@
 #include "opencensus/stats/stats_exporter.h"
 
 #include <thread>  // NOLINT
+#include <utility>
+#include <vector>
 
 #include "absl/memory/memory.h"
 #include "absl/synchronization/mutex.h"
@@ -45,7 +47,7 @@ class StatsExporterImpl {
   // Adds a handler, which cannot be subsequently removed (except by
   // ClearHandlersForTesting()). The background thread is started when the
   // first handler is registered.
-  void RegisterHandler(std::unique_ptr<StatsExporter::Handler> handler) {
+  void RegisterPushHandler(std::unique_ptr<StatsExporter::Handler> handler) {
     absl::MutexLock l(&mu_);
     handlers_.push_back(std::move(handler));
     if (!thread_started_) {
@@ -53,8 +55,18 @@ class StatsExporterImpl {
     }
   }
 
+  std::vector<std::pair<ViewDescriptor, ViewData>> GetViewData() {
+    absl::ReaderMutexLock l(&mu_);
+    std::vector<std::pair<ViewDescriptor, ViewData>> data;
+    data.reserve(views_.size());
+    for (const auto& view : views_) {
+      data.emplace_back(view.second->descriptor(), view.second->GetData());
+    }
+    return data;
+  }
+
   void Export() {
-    absl::MutexLock l(&mu_);
+    absl::ReaderMutexLock l(&mu_);
     for (const auto& view : views_) {
       SendToHandlers(view.second->descriptor(), view.second->GetData());
     }
@@ -113,8 +125,12 @@ void StatsExporter::RemoveView(absl::string_view name) {
   StatsExporterImpl::Get()->RemoveView(name);
 }
 
-void StatsExporter::RegisterHandler(std::unique_ptr<Handler> handler) {
-  StatsExporterImpl::Get()->RegisterHandler(std::move(handler));
+void StatsExporter::RegisterPushHandler(std::unique_ptr<Handler> handler) {
+  StatsExporterImpl::Get()->RegisterPushHandler(std::move(handler));
+}
+
+std::vector<std::pair<ViewDescriptor, ViewData>> StatsExporter::GetViewData() {
+  return StatsExporterImpl::Get()->GetViewData();
 }
 
 void StatsExporter::ExportForTesting() { StatsExporterImpl::Get()->Export(); }

@@ -134,7 +134,7 @@ bool StackdriverExporter::Handler::MaybeRegisterView(
 // static
 void StackdriverExporter::Register(absl::string_view project_id,
                                    absl::string_view opencensus_task) {
-  opencensus::stats::StatsExporter::RegisterHandler(absl::WrapUnique(
+  opencensus::stats::StatsExporter::RegisterPushHandler(absl::WrapUnique(
       new StackdriverExporter::Handler(project_id, opencensus_task)));
 }
 
