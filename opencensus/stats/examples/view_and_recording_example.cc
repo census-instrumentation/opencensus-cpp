@@ -63,8 +63,6 @@ TEST(ViewAndRecordingExample, Sum) {
           .set_name("example.com/Bar/FooUsage-sum-cumulative-foo_id")
           .set_measure(kFooUsageMeasureName)
           .set_aggregation(opencensus::stats::Aggregation::Sum())
-          .set_aggregation_window(
-              opencensus::stats::AggregationWindow::Cumulative())
           .add_column("foo_id")
           .set_description(
               "Cumulative sum of example.com/Foo/FooUsage broken down by "

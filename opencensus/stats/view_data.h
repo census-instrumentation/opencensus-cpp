@@ -24,8 +24,8 @@
 #include "opencensus/common/internal/stats_object.h"
 #include "opencensus/common/internal/string_vector_hash.h"
 #include "opencensus/stats/aggregation.h"
-#include "opencensus/stats/aggregation_window.h"
 #include "opencensus/stats/distribution.h"
+#include "opencensus/stats/internal/aggregation_window.h"
 
 namespace opencensus {
 namespace stats {

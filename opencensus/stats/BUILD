@@ -23,7 +23,10 @@ package(default_visibility = ["//visibility:private"])
 # The public stats API.
 cc_library(
     name = "stats",
-    hdrs = ["stats.h"],
+    hdrs = [
+        "internal/set_aggregation_window.h",
+        "stats.h",
+    ],
     copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
     deps = [
@@ -59,6 +62,7 @@ cc_library(
         "internal/measure_descriptor.cc",
         "internal/measure_registry.cc",
         "internal/measure_registry_impl.cc",
+        "internal/set_aggregation_window.cc",
         "internal/stats_manager.cc",
         "internal/view_data.cc",
         "internal/view_data_impl.cc",
@@ -66,10 +70,11 @@ cc_library(
     ],
     hdrs = [
         "aggregation.h",
-        "aggregation_window.h",
         "bucket_boundaries.h",
         "distribution.h",
+        "internal/aggregation_window.h",
         "internal/measure_registry_impl.h",
+        "internal/set_aggregation_window.h",
         "internal/stats_manager.h",
         "internal/view_data_impl.h",
         "measure.h",
@@ -80,6 +85,8 @@ cc_library(
     ],
     copts = DEFAULT_COPTS,
     deps = [
+        "//opencensus/common/internal:stats_object",
+        "//opencensus/common/internal:string_vector_hash",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
@@ -87,8 +94,6 @@ cc_library(
         "@com_google_absl//absl/time",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
-        "//opencensus/common/internal:stats_object",
-        "//opencensus/common/internal:string_vector_hash",
     ],
 )
 

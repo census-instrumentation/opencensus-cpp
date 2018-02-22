@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
 #include "absl/base/macros.h"
 #include "absl/strings/str_cat.h"
@@ -39,7 +40,7 @@ BucketBoundaries BucketBoundaries::Linear(int num_finite_buckets, double offset,
     boundaries[i] = boundary;
     boundary += width;
   }
-  return BucketBoundaries(boundaries);
+  return BucketBoundaries(std::move(boundaries));
 }
 
 // static
@@ -52,20 +53,18 @@ BucketBoundaries BucketBoundaries::Exponential(int num_finite_buckets,
     boundaries[i] = upper_bound;
     upper_bound *= growth_factor;
   }
-  return BucketBoundaries(boundaries);
+  return BucketBoundaries(std::move(boundaries));
 }
 
 // static
-BucketBoundaries BucketBoundaries::Explicit(
-    std::initializer_list<double> boundaries) {
+BucketBoundaries BucketBoundaries::Explicit(std::vector<double> boundaries) {
   if (!std::is_sorted(boundaries.begin(), boundaries.end())) {
     std::cerr << "BucketBoundaries::Explicit called with non-monotonic "
                  "boundary list.\n";
     ABSL_ASSERT(0);
     return BucketBoundaries({});
   }
-  return BucketBoundaries(
-      absl::Span<const double>(boundaries.begin(), boundaries.size()));
+  return BucketBoundaries(std::move(boundaries));
 }
 
 int BucketBoundaries::BucketForValue(double value) const {

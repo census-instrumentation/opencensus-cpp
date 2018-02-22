@@ -88,7 +88,7 @@ TEST_F(StatsPluginEnd2EndTest, ErrorCount) {
           .set_measure(kRpcClientErrorCountMeasureName)
           .set_name("client_method")
           .set_aggregation(stats::Aggregation::Sum())
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
+
           .add_column(kMethodTagKey);
   stats::View client_method_view(client_method_descriptor);
   const auto server_method_descriptor =
@@ -96,7 +96,6 @@ TEST_F(StatsPluginEnd2EndTest, ErrorCount) {
           .set_measure(kRpcServerErrorCountMeasureName)
           .set_name("server_method")
           .set_aggregation(stats::Aggregation::Sum())
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View server_method_view(client_method_descriptor);
 
@@ -105,7 +104,6 @@ TEST_F(StatsPluginEnd2EndTest, ErrorCount) {
           .set_measure(kRpcClientErrorCountMeasureName)
           .set_name("client_status")
           .set_aggregation(stats::Aggregation::Sum())
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kStatusTagKey);
   stats::View client_status_view(client_status_descriptor);
   const auto server_status_descriptor =
@@ -113,7 +111,6 @@ TEST_F(StatsPluginEnd2EndTest, ErrorCount) {
           .set_measure(kRpcServerErrorCountMeasureName)
           .set_name("server_status")
           .set_aggregation(stats::Aggregation::Sum())
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kStatusTagKey);
   stats::View server_status_view(server_status_descriptor);
 
@@ -167,7 +164,6 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseBytes) {
           .set_name("client_request_bytes")
           .set_aggregation(stats::Aggregation::Distribution(
               stats::BucketBoundaries::Explicit({})))
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View client_request_bytes_view(client_request_bytes_descriptor);
   const auto client_response_bytes_descriptor =
@@ -176,7 +172,6 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseBytes) {
           .set_name("client_response_bytes")
           .set_aggregation(stats::Aggregation::Distribution(
               stats::BucketBoundaries::Explicit({})))
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View client_response_bytes_view(client_response_bytes_descriptor);
   const auto server_request_bytes_descriptor =
@@ -185,7 +180,6 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseBytes) {
           .set_name("server_request_bytes")
           .set_aggregation(stats::Aggregation::Distribution(
               stats::BucketBoundaries::Explicit({})))
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View server_request_bytes_view(server_request_bytes_descriptor);
   const auto server_response_bytes_descriptor =
@@ -194,7 +188,6 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseBytes) {
           .set_name("server_response_bytes")
           .set_aggregation(stats::Aggregation::Distribution(
               stats::BucketBoundaries::Explicit({})))
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View server_response_bytes_view(server_response_bytes_descriptor);
 
@@ -254,7 +247,6 @@ TEST_F(StatsPluginEnd2EndTest, Latency) {
           .set_name("client_latency")
           .set_aggregation(stats::Aggregation::Distribution(
               stats::BucketBoundaries::Explicit({})))
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View client_latency_view(client_latency_descriptor);
   const auto client_server_elapsed_time_descriptor =
@@ -263,7 +255,6 @@ TEST_F(StatsPluginEnd2EndTest, Latency) {
           .set_name("client_server_elapsed_time")
           .set_aggregation(stats::Aggregation::Distribution(
               stats::BucketBoundaries::Explicit({})))
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View client_server_elapsed_time_view(
       client_server_elapsed_time_descriptor);
@@ -273,7 +264,6 @@ TEST_F(StatsPluginEnd2EndTest, Latency) {
           .set_name("server_server_elapsed_time")
           .set_aggregation(stats::Aggregation::Distribution(
               stats::BucketBoundaries::Explicit({})))
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View server_server_elapsed_time_view(
       server_server_elapsed_time_descriptor);
@@ -332,7 +322,6 @@ TEST_F(StatsPluginEnd2EndTest, StartFinishCount) {
           .set_measure(kRpcClientStartedCountMeasureName)
           .set_name("client_started_count")
           .set_aggregation(stats::Aggregation::Sum())
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View client_started_count_view(client_started_count_descriptor);
   const auto client_finished_count_descriptor =
@@ -340,7 +329,6 @@ TEST_F(StatsPluginEnd2EndTest, StartFinishCount) {
           .set_measure(kRpcClientFinishedCountMeasureName)
           .set_name("client_finished_count")
           .set_aggregation(stats::Aggregation::Sum())
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View client_finished_count_view(client_finished_count_descriptor);
   const auto server_started_count_descriptor =
@@ -348,7 +336,6 @@ TEST_F(StatsPluginEnd2EndTest, StartFinishCount) {
           .set_measure(kRpcServerStartedCountMeasureName)
           .set_name("server_started_count")
           .set_aggregation(stats::Aggregation::Sum())
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View server_started_count_view(server_started_count_descriptor);
   const auto server_finished_count_descriptor =
@@ -356,7 +343,6 @@ TEST_F(StatsPluginEnd2EndTest, StartFinishCount) {
           .set_measure(kRpcServerFinishedCountMeasureName)
           .set_name("server_finished_count")
           .set_aggregation(stats::Aggregation::Sum())
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View server_finished_count_view(server_finished_count_descriptor);
 
@@ -394,7 +380,6 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseCount) {
           .set_measure(kRpcClientRequestCountMeasureName)
           .set_name("client_request_count")
           .set_aggregation(stats::Aggregation::Sum())
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View client_request_count_view(client_request_count_descriptor);
   const auto client_response_count_descriptor =
@@ -402,7 +387,6 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseCount) {
           .set_measure(kRpcClientResponseCountMeasureName)
           .set_name("client_response_count")
           .set_aggregation(stats::Aggregation::Sum())
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View client_response_count_view(client_response_count_descriptor);
   const auto server_request_count_descriptor =
@@ -410,7 +394,6 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseCount) {
           .set_measure(kRpcServerRequestCountMeasureName)
           .set_name("server_request_count")
           .set_aggregation(stats::Aggregation::Sum())
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View server_request_count_view(server_request_count_descriptor);
   const auto server_response_count_descriptor =
@@ -418,7 +401,6 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseCount) {
           .set_measure(kRpcServerResponseCountMeasureName)
           .set_name("server_response_count")
           .set_aggregation(stats::Aggregation::Sum())
-          .set_aggregation_window(stats::AggregationWindow::Cumulative())
           .add_column(kMethodTagKey);
   stats::View server_response_count_view(server_response_count_descriptor);
 
