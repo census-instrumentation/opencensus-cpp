@@ -25,8 +25,7 @@ namespace opencensus {
 namespace trace {
 namespace exporter {
 
-AttributeValue::AttributeValue(AttributeValueRef ref)
-    : type_(ref.type()) {
+AttributeValue::AttributeValue(AttributeValueRef ref) : type_(ref.type()) {
   switch (type_) {
     case Type::kString:
       new (&string_value_) std::string(ref.string_value());
