@@ -38,7 +38,7 @@ class AttributeValue final {
   // The type of value held by this object.
   using Type = AttributeValueRef::Type;
 
-  explicit AttributeValue(const AttributeValueRef& ref);
+  explicit AttributeValue(AttributeValueRef ref);
   ~AttributeValue();
 
   // AttributeValue is copyable and movable.
