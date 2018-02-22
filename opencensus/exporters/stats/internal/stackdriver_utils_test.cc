@@ -77,8 +77,6 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorMetricKind) {
   auto view_descriptor = opencensus::stats::ViewDescriptor();
   google::api::MetricDescriptor metric_descriptor;
 
-  view_descriptor.set_aggregation_window(
-      opencensus::stats::AggregationWindow::Cumulative());
   SetMetricDescriptor("", view_descriptor, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::CUMULATIVE,
             metric_descriptor.metric_kind());
@@ -157,8 +155,6 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumDouble) {
           .set_name(view_name)
           .set_measure(measure.GetDescriptor().name())
           .set_aggregation(opencensus::stats::Aggregation::Sum())
-          .set_aggregation_window(
-              opencensus::stats::AggregationWindow::Cumulative())
           .add_column(tag_key_1)
           .add_column(tag_key_2);
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
@@ -199,8 +195,6 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumInt) {
           .set_name(view_name)
           .set_measure(measure.GetDescriptor().name())
           .set_aggregation(opencensus::stats::Aggregation::Sum())
-          .set_aggregation_window(
-              opencensus::stats::AggregationWindow::Cumulative())
           .add_column(tag_key_1)
           .add_column(tag_key_2);
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
@@ -242,8 +236,6 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesCountDouble) {
           .set_name(view_name)
           .set_measure(measure.GetDescriptor().name())
           .set_aggregation(opencensus::stats::Aggregation::Count())
-          .set_aggregation_window(
-              opencensus::stats::AggregationWindow::Cumulative())
           .add_column(tag_key_1)
           .add_column(tag_key_2);
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
@@ -289,8 +281,6 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
           .set_measure(measure.GetDescriptor().name())
           .set_aggregation(
               opencensus::stats::Aggregation::Distribution(bucket_boundaries))
-          .set_aggregation_window(
-              opencensus::stats::AggregationWindow::Cumulative())
           .add_column(tag_key_1)
           .add_column(tag_key_2);
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(

@@ -21,7 +21,7 @@
 
 #include "absl/strings/string_view.h"
 #include "opencensus/stats/aggregation.h"
-#include "opencensus/stats/aggregation_window.h"
+#include "opencensus/stats/internal/aggregation_window.h"
 #include "opencensus/stats/measure_descriptor.h"
 
 namespace opencensus {
@@ -47,7 +47,6 @@ class ViewDescriptor final {
   ViewDescriptor& set_aggregation(const Aggregation& aggregation);
   const Aggregation& aggregation() const { return aggregation_; }
 
-  ViewDescriptor& set_aggregation_window(const AggregationWindow& window);
   const AggregationWindow& aggregation_window() const {
     return aggregation_window_;
   }
@@ -68,6 +67,7 @@ class ViewDescriptor final {
 
  private:
   friend class StatsManager;
+  friend void SetAggregationWindow(const AggregationWindow&, ViewDescriptor*);
 
   std::string name_;
   std::string measure_name_;

@@ -20,9 +20,10 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "opencensus/stats/aggregation.h"
-#include "opencensus/stats/aggregation_window.h"
 #include "opencensus/stats/bucket_boundaries.h"
 #include "opencensus/stats/distribution.h"
+#include "opencensus/stats/internal/aggregation_window.h"
+#include "opencensus/stats/internal/set_aggregation_window.h"
 #include "opencensus/stats/view_descriptor.h"
 
 namespace opencensus {
@@ -32,10 +33,7 @@ namespace {
 TEST(ViewDataImplTest, Sum) {
   const absl::Time start_time = absl::UnixEpoch();
   const absl::Time end_time = absl::UnixEpoch() + absl::Seconds(1);
-  const auto descriptor =
-      ViewDescriptor()
-          .set_aggregation(Aggregation::Sum())
-          .set_aggregation_window(AggregationWindow::Cumulative());
+  const auto descriptor = ViewDescriptor().set_aggregation(Aggregation::Sum());
   ViewDataImpl data(start_time, descriptor);
   const std::vector<std::string> tags1({"value1", "value2a"});
   const std::vector<std::string> tags2({"value1", "value2b"});
@@ -57,9 +55,7 @@ TEST(ViewDataImplTest, Count) {
   const absl::Time start_time = absl::UnixEpoch();
   const absl::Time end_time = absl::UnixEpoch() + absl::Seconds(1);
   const auto descriptor =
-      ViewDescriptor()
-          .set_aggregation(Aggregation::Count())
-          .set_aggregation_window(AggregationWindow::Cumulative());
+      ViewDescriptor().set_aggregation(Aggregation::Count());
   ViewDataImpl data(start_time, descriptor);
   const std::vector<std::string> tags1({"value1", "value2a"});
   const std::vector<std::string> tags2({"value1", "value2b"});
@@ -82,9 +78,7 @@ TEST(ViewDataImplTest, Distribution) {
   const absl::Time end_time = absl::UnixEpoch() + absl::Seconds(1);
   const BucketBoundaries buckets = BucketBoundaries::Explicit({10});
   const auto descriptor =
-      ViewDescriptor()
-          .set_aggregation(Aggregation::Distribution(buckets))
-          .set_aggregation_window(AggregationWindow::Cumulative());
+      ViewDescriptor().set_aggregation(Aggregation::Distribution(buckets));
   ViewDataImpl data(start_time, descriptor);
   const std::vector<std::string> tags1({"value1", "value2a"});
   const std::vector<std::string> tags2({"value1", "value2b"});
@@ -108,10 +102,8 @@ TEST(ViewDataImplTest, StatsObjectToCount) {
   const absl::Duration interval = absl::Minutes(1);
   const absl::Time start_time = absl::UnixEpoch();
   absl::Time time = start_time;
-  const auto descriptor =
-      ViewDescriptor()
-          .set_aggregation(Aggregation::Count())
-          .set_aggregation_window(AggregationWindow::Interval(interval));
+  auto descriptor = ViewDescriptor().set_aggregation(Aggregation::Count());
+  SetAggregationWindow(AggregationWindow::Interval(interval), &descriptor);
   ViewDataImpl data(start_time, descriptor);
   const std::vector<std::string> tags1({"value1", "value2a"});
   const std::vector<std::string> tags2({"value1", "value2b"});
@@ -145,10 +137,8 @@ TEST(ViewDataImplTest, StatsObjectToSum) {
   const absl::Duration interval = absl::Minutes(1);
   const absl::Time start_time = absl::UnixEpoch();
   absl::Time time = start_time;
-  const auto descriptor =
-      ViewDescriptor()
-          .set_aggregation(Aggregation::Sum())
-          .set_aggregation_window(AggregationWindow::Interval(interval));
+  auto descriptor = ViewDescriptor().set_aggregation(Aggregation::Sum());
+  SetAggregationWindow(AggregationWindow::Interval(interval), &descriptor);
   ViewDataImpl data(start_time, descriptor);
   const std::vector<std::string> tags1({"value1", "value2a"});
   const std::vector<std::string> tags2({"value1", "value2b"});
@@ -183,10 +173,9 @@ TEST(ViewDataImplTest, StatsObjectToDistribution) {
   const absl::Time start_time = absl::UnixEpoch();
   absl::Time time = start_time;
   const BucketBoundaries buckets = BucketBoundaries::Explicit({10});
-  const auto descriptor =
-      ViewDescriptor()
-          .set_aggregation(Aggregation::Distribution(buckets))
-          .set_aggregation_window(AggregationWindow::Interval(interval));
+  auto descriptor =
+      ViewDescriptor().set_aggregation(Aggregation::Distribution(buckets));
+  SetAggregationWindow(AggregationWindow::Interval(interval), &descriptor);
   ViewDataImpl data(start_time, descriptor);
   const std::vector<std::string> tags1({"value1", "value2a"});
   const std::vector<std::string> tags2({"value1", "value2b"});

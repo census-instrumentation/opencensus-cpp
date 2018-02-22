@@ -18,9 +18,10 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "opencensus/stats/aggregation.h"
-#include "opencensus/stats/aggregation_window.h"
 #include "opencensus/stats/bucket_boundaries.h"
 #include "opencensus/stats/distribution.h"
+#include "opencensus/stats/internal/aggregation_window.h"
+#include "opencensus/stats/internal/set_aggregation_window.h"
 #include "opencensus/stats/internal/view_data_impl.h"
 #include "opencensus/stats/testing/test_utils.h"
 #include "opencensus/stats/view_descriptor.h"
@@ -30,10 +31,7 @@ namespace stats {
 namespace {
 
 TEST(ViewDataTest, CumulativeSum) {
-  const auto descriptor =
-      ViewDescriptor()
-          .set_aggregation(Aggregation::Sum())
-          .set_aggregation_window(AggregationWindow::Cumulative());
+  const auto descriptor = ViewDescriptor().set_aggregation(Aggregation::Sum());
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 2.0}});
   EXPECT_EQ(Aggregation::Sum(), data.aggregation());
   EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
@@ -44,11 +42,9 @@ TEST(ViewDataTest, CumulativeSum) {
 }
 
 TEST(ViewDataTest, IntervalSum) {
-  const auto descriptor =
-      ViewDescriptor()
-          .set_aggregation(Aggregation::Sum())
-          .set_aggregation_window(
-              AggregationWindow::Interval(absl::Minutes(1)));
+  auto descriptor = ViewDescriptor().set_aggregation(Aggregation::Sum());
+  SetAggregationWindow(AggregationWindow::Interval(absl::Minutes(1)),
+                       &descriptor);
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 2.0}});
   EXPECT_EQ(Aggregation::Sum(), data.aggregation());
   EXPECT_EQ(AggregationWindow::Type::kInterval,
@@ -62,9 +58,7 @@ TEST(ViewDataTest, IntervalSum) {
 
 TEST(ViewDataTest, CumulativeCount) {
   const auto descriptor =
-      ViewDescriptor()
-          .set_aggregation(Aggregation::Count())
-          .set_aggregation_window(AggregationWindow::Cumulative());
+      ViewDescriptor().set_aggregation(Aggregation::Count());
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 2.0}});
   EXPECT_EQ(Aggregation::Count(), data.aggregation());
   EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
@@ -74,13 +68,14 @@ TEST(ViewDataTest, CumulativeCount) {
 }
 
 TEST(ViewDataTest, IntervalCount) {
-  const auto window = AggregationWindow::Interval(absl::Minutes(1));
-  const auto descriptor = ViewDescriptor()
-                              .set_aggregation(Aggregation::Count())
-                              .set_aggregation_window(window);
+  auto descriptor = ViewDescriptor().set_aggregation(Aggregation::Count());
+  SetAggregationWindow(AggregationWindow::Interval(absl::Minutes(1)),
+                       &descriptor);
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 2.0}});
   EXPECT_EQ(Aggregation::Count(), data.aggregation());
-  EXPECT_EQ(window, data.aggregation_window());
+  EXPECT_EQ(AggregationWindow::Type::kInterval,
+            data.aggregation_window().type());
+  EXPECT_EQ(absl::Minutes(1), data.aggregation_window().duration());
   ASSERT_EQ(ViewData::Type::kDouble, data.type());
   EXPECT_THAT(data.double_data(),
               ::testing::UnorderedElementsAre(
@@ -90,10 +85,7 @@ TEST(ViewDataTest, IntervalCount) {
 TEST(ViewDataTest, CumulativeDistribution) {
   const auto aggregation =
       Aggregation::Distribution(BucketBoundaries::Explicit({0}));
-  const auto descriptor =
-      ViewDescriptor()
-          .set_aggregation(aggregation)
-          .set_aggregation_window(AggregationWindow::Cumulative());
+  const auto descriptor = ViewDescriptor().set_aggregation(aggregation);
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 2.0}});
   EXPECT_EQ(aggregation, data.aggregation());
   EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
@@ -104,22 +96,20 @@ TEST(ViewDataTest, CumulativeDistribution) {
 TEST(ViewDataTest, IntervalDistribution) {
   const auto aggregation =
       Aggregation::Distribution(BucketBoundaries::Explicit({0}));
-  const auto window = AggregationWindow::Interval(absl::Minutes(1));
-  const auto descriptor = ViewDescriptor()
-                              .set_aggregation(aggregation)
-                              .set_aggregation_window(window);
+  auto descriptor = ViewDescriptor().set_aggregation(aggregation);
+  SetAggregationWindow(AggregationWindow::Interval(absl::Minutes(1)),
+                       &descriptor);
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 2.0}});
   EXPECT_EQ(aggregation, data.aggregation());
-  EXPECT_EQ(window, data.aggregation_window());
+  EXPECT_EQ(AggregationWindow::Type::kInterval,
+            data.aggregation_window().type());
+  EXPECT_EQ(absl::Minutes(1), data.aggregation_window().duration());
   ASSERT_EQ(ViewData::Type::kDistribution, data.type());
   EXPECT_EQ(data.distribution_data().size(), 1);
 }
 
 TEST(ViewDataDeathTest, DoubleData) {
-  const auto descriptor =
-      ViewDescriptor()
-          .set_aggregation(Aggregation::Sum())
-          .set_aggregation_window(AggregationWindow::Cumulative());
+  const auto descriptor = ViewDescriptor().set_aggregation(Aggregation::Sum());
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 1.0}});
   EXPECT_DEBUG_DEATH({ EXPECT_TRUE(data.int_data().empty()); }, "");
   EXPECT_DEBUG_DEATH({ EXPECT_TRUE(data.distribution_data().empty()); }, "");
@@ -127,20 +117,15 @@ TEST(ViewDataDeathTest, DoubleData) {
 
 TEST(ViewDataDeathTest, IntData) {
   const auto descriptor =
-      ViewDescriptor()
-          .set_aggregation(Aggregation::Count())
-          .set_aggregation_window(AggregationWindow::Cumulative());
+      ViewDescriptor().set_aggregation(Aggregation::Count());
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 1.0}});
   EXPECT_DEBUG_DEATH({ EXPECT_TRUE(data.double_data().empty()); }, "");
   EXPECT_DEBUG_DEATH({ EXPECT_TRUE(data.distribution_data().empty()); }, "");
 }
 
 TEST(ViewDataDeathTest, DistributionData) {
-  const auto descriptor =
-      ViewDescriptor()
-          .set_aggregation(
-              Aggregation::Distribution(BucketBoundaries::Explicit({})))
-          .set_aggregation_window(AggregationWindow::Cumulative());
+  const auto descriptor = ViewDescriptor().set_aggregation(
+      Aggregation::Distribution(BucketBoundaries::Explicit({})));
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 1.0}});
   EXPECT_DEBUG_DEATH({ EXPECT_TRUE(data.double_data().empty()); }, "");
   EXPECT_DEBUG_DEATH({ EXPECT_TRUE(data.int_data().empty()); }, "");

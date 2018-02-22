@@ -55,14 +55,12 @@ class StatsManagerTest : public ::testing::Test {
 };
 
 TEST_F(StatsManagerTest, Count) {
-  ViewDescriptor view_descriptor =
-      ViewDescriptor()
-          .set_measure(kFirstMeasureId)
-          .set_name("count")
-          .set_aggregation(Aggregation::Count())
-          .set_aggregation_window(AggregationWindow::Cumulative())
-          .add_column(key1_)
-          .add_column(key2_);
+  ViewDescriptor view_descriptor = ViewDescriptor()
+                                       .set_measure(kFirstMeasureId)
+                                       .set_name("count")
+                                       .set_aggregation(Aggregation::Count())
+                                       .add_column(key1_)
+                                       .add_column(key2_);
   View view(view_descriptor);
   ASSERT_EQ(ViewData::Type::kInt64, view.GetData().type());
   EXPECT_TRUE(view.GetData().int_data().empty());
@@ -83,14 +81,12 @@ TEST_F(StatsManagerTest, Count) {
 }
 
 TEST_F(StatsManagerTest, Sum) {
-  ViewDescriptor view_descriptor =
-      ViewDescriptor()
-          .set_measure(kSecondMeasureId)
-          .set_name("sum")
-          .set_aggregation(Aggregation::Sum())
-          .set_aggregation_window(AggregationWindow::Cumulative())
-          .add_column(key1_)
-          .add_column(key2_);
+  ViewDescriptor view_descriptor = ViewDescriptor()
+                                       .set_measure(kSecondMeasureId)
+                                       .set_name("sum")
+                                       .set_aggregation(Aggregation::Sum())
+                                       .add_column(key1_)
+                                       .add_column(key2_);
   View view(view_descriptor);
   ASSERT_EQ(ViewData::Type::kDouble, view.GetData().type());
   EXPECT_TRUE(view.GetData().double_data().empty());
@@ -117,7 +113,6 @@ TEST_F(StatsManagerTest, Distribution) {
           .set_name("distribution")
           .set_aggregation(
               Aggregation::Distribution(BucketBoundaries::Explicit({10})))
-          .set_aggregation_window(AggregationWindow::Cumulative())
           .add_column(key1_)
           .add_column(key2_);
   View view(view_descriptor);
@@ -143,14 +138,14 @@ TEST_F(StatsManagerTest, Distribution) {
 
 // TODO: Test window expiration if we add a simulated clock.
 TEST_F(StatsManagerTest, IntervalCount) {
-  ViewDescriptor view_descriptor =
-      ViewDescriptor()
-          .set_measure(kFirstMeasureId)
-          .set_name("interval-count")
-          .set_aggregation(Aggregation::Count())
-          .set_aggregation_window(AggregationWindow::Interval(absl::Minutes(1)))
-          .add_column(key1_)
-          .add_column(key2_);
+  ViewDescriptor view_descriptor = ViewDescriptor()
+                                       .set_measure(kFirstMeasureId)
+                                       .set_name("interval-count")
+                                       .set_aggregation(Aggregation::Count())
+                                       .add_column(key1_)
+                                       .add_column(key2_);
+  SetAggregationWindow(AggregationWindow::Interval(absl::Minutes(1)),
+                       &view_descriptor);
   View view(view_descriptor);
   ASSERT_EQ(ViewData::Type::kDouble, view.GetData().type());
   EXPECT_TRUE(view.GetData().double_data().empty());
@@ -171,14 +166,14 @@ TEST_F(StatsManagerTest, IntervalCount) {
 }
 
 TEST_F(StatsManagerTest, IntervalSum) {
-  ViewDescriptor view_descriptor =
-      ViewDescriptor()
-          .set_measure(kSecondMeasureId)
-          .set_name("interval-sum")
-          .set_aggregation(Aggregation::Sum())
-          .set_aggregation_window(AggregationWindow::Interval(absl::Hours(1)))
-          .add_column(key1_)
-          .add_column(key2_);
+  ViewDescriptor view_descriptor = ViewDescriptor()
+                                       .set_measure(kSecondMeasureId)
+                                       .set_name("interval-sum")
+                                       .set_aggregation(Aggregation::Sum())
+                                       .add_column(key1_)
+                                       .add_column(key2_);
+  SetAggregationWindow(AggregationWindow::Interval(absl::Minutes(1)),
+                       &view_descriptor);
   View view(view_descriptor);
   ASSERT_EQ(ViewData::Type::kDouble, view.GetData().type());
   EXPECT_TRUE(view.GetData().double_data().empty());
@@ -205,9 +200,10 @@ TEST_F(StatsManagerTest, IntervalDistribution) {
           .set_name("distribution-interval")
           .set_aggregation(
               Aggregation::Distribution(BucketBoundaries::Explicit({10})))
-          .set_aggregation_window(AggregationWindow::Interval(absl::Hours(1)))
           .add_column(key1_)
           .add_column(key2_);
+  SetAggregationWindow(AggregationWindow::Interval(absl::Hours(1)),
+                       &view_descriptor);
   View view(view_descriptor);
   ASSERT_EQ(ViewData::Type::kDistribution, view.GetData().type());
   EXPECT_TRUE(view.GetData().distribution_data().empty());
@@ -229,13 +225,11 @@ TEST_F(StatsManagerTest, IntervalDistribution) {
 }
 
 TEST_F(StatsManagerTest, IdenticalViews) {
-  ViewDescriptor view_descriptor =
-      ViewDescriptor()
-          .set_measure(kFirstMeasureId)
-          .set_name("count")
-          .set_aggregation(Aggregation::Count())
-          .set_aggregation_window(AggregationWindow::Cumulative())
-          .add_column(key1_);
+  ViewDescriptor view_descriptor = ViewDescriptor()
+                                       .set_measure(kFirstMeasureId)
+                                       .set_name("count")
+                                       .set_aggregation(Aggregation::Count())
+                                       .add_column(key1_);
 
   Record({{FirstMeasure(), 1.0}});
   {
@@ -270,12 +264,10 @@ TEST_F(StatsManagerTest, IdenticalViews) {
 
 TEST(StatsManagerDeathTest, UnregisteredMeasure) {
   const std::string measure_name = "new_measure_name";
-  ViewDescriptor view_descriptor =
-      ViewDescriptor()
-          .set_measure(measure_name)
-          .set_name("count")
-          .set_aggregation(Aggregation::Count())
-          .set_aggregation_window(AggregationWindow::Cumulative());
+  ViewDescriptor view_descriptor = ViewDescriptor()
+                                       .set_measure(measure_name)
+                                       .set_name("count")
+                                       .set_aggregation(Aggregation::Count());
 
   View view(view_descriptor);
   EXPECT_FALSE(view.IsValid());

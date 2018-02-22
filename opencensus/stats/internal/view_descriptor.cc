@@ -53,12 +53,6 @@ ViewDescriptor& ViewDescriptor::set_aggregation(
   return *this;
 }
 
-ViewDescriptor& ViewDescriptor::set_aggregation_window(
-    const AggregationWindow& window) {
-  aggregation_window_ = window;
-  return *this;
-}
-
 ViewDescriptor& ViewDescriptor::add_column(absl::string_view tag_key) {
   columns_.emplace_back(tag_key);
   return *this;

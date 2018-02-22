@@ -94,13 +94,6 @@ google::api::MetricDescriptor::ValueType GetValueType(
   }
 }
 
-void SetTimestamp(absl::Time time, google::protobuf::Timestamp* proto) {
-  const int64_t seconds = absl::ToUnixSeconds(time);
-  proto->set_seconds(seconds);
-  proto->set_nanos(
-      absl::ToInt64Nanoseconds(time - absl::FromUnixSeconds(seconds)));
-}
-
 // Overloaded function for converting ViewData value types to Points. The
 // ValueType is needed because Sum aggregation with an int64 measure returns
 // doubles but we want to export int64s for future compatibility.
@@ -205,6 +198,13 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
       return DataToTimeSeries(view_descriptor, data.distribution_data(),
                               base_time_series);
   }
+}
+
+void SetTimestamp(absl::Time time, google::protobuf::Timestamp* proto) {
+  const int64_t seconds = absl::ToUnixSeconds(time);
+  proto->set_seconds(seconds);
+  proto->set_nanos(
+      absl::ToInt64Nanoseconds(time - absl::FromUnixSeconds(seconds)));
 }
 
 }  // namespace stats
