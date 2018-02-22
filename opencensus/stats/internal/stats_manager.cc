@@ -57,7 +57,8 @@ int StatsManager::ViewInformation::RemoveConsumer() {
 
 void StatsManager::ViewInformation::Record(
     double value,
-    absl::Span<const std::pair<absl::string_view, absl::string_view>> tags) {
+    absl::Span<const std::pair<absl::string_view, absl::string_view>> tags,
+    absl::Time now) {
   mu_->AssertHeld();
   std::vector<std::string> tag_values(descriptor_.columns().size());
   for (int i = 0; i < tag_values.size(); ++i) {
@@ -69,7 +70,7 @@ void StatsManager::ViewInformation::Record(
       }
     }
   }
-  data_.Add(value, tag_values, absl::Now());
+  data_.Add(value, tag_values, now);
 }
 
 ViewDataImpl StatsManager::ViewInformation::GetData() const {
@@ -86,10 +87,11 @@ ViewDataImpl StatsManager::ViewInformation::GetData() const {
 
 void StatsManager::MeasureInformation::Record(
     double value,
-    absl::Span<const std::pair<absl::string_view, absl::string_view>> tags) {
+    absl::Span<const std::pair<absl::string_view, absl::string_view>> tags,
+    absl::Time now) {
   mu_->AssertHeld();
   for (auto& view : views_) {
-    view->Record(value, tags);
+    view->Record(value, tags, now);
   }
 }
 
@@ -132,18 +134,18 @@ StatsManager* StatsManager::Get() {
 
 void StatsManager::Record(
     std::initializer_list<Measurement> measurements,
-    std::initializer_list<std::pair<absl::string_view, absl::string_view>>
-        tags) {
+    std::initializer_list<std::pair<absl::string_view, absl::string_view>> tags,
+    absl::Time now) {
   absl::MutexLock l(&mu_);
   for (const auto& measurement : measurements) {
     if (MeasureRegistryImpl::IdValid(measurement.id_)) {
       const uint64_t index = MeasureRegistryImpl::IdToIndex(measurement.id_);
       switch (MeasureRegistryImpl::IdToType(measurement.id_)) {
         case MeasureDescriptor::Type::kDouble:
-          measures_[index].Record(measurement.value_double_, tags);
+          measures_[index].Record(measurement.value_double_, tags, now);
           break;
         case MeasureDescriptor::Type::kInt64:
-          measures_[index].Record(measurement.value_int_, tags);
+          measures_[index].Record(measurement.value_int_, tags, now);
           break;
       }
     }

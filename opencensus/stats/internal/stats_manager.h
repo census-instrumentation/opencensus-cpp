@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "absl/synchronization/mutex.h"
+#include "absl/time/time.h"
 #include "absl/types/span.h"
 #include "opencensus/common/internal/stats_object.h"
 #include "opencensus/stats/distribution.h"
@@ -56,7 +57,8 @@ class StatsManager final {
     // Requires holding *mu_.
     void Record(
         double value,
-        absl::Span<const std::pair<absl::string_view, absl::string_view>> tags);
+        absl::Span<const std::pair<absl::string_view, absl::string_view>> tags,
+        absl::Time now);
 
     // Retrieves a copy of the data.
     ViewDataImpl GetData() const LOCKS_EXCLUDED(*mu_);
@@ -85,7 +87,8 @@ class StatsManager final {
   void Record(
       std::initializer_list<Measurement> measurements,
       std::initializer_list<std::pair<absl::string_view, absl::string_view>>
-          tags) LOCKS_EXCLUDED(mu_);
+          tags,
+      absl::Time now) LOCKS_EXCLUDED(mu_);
 
   // Adds a measure--this is necessary for views to be added under that measure.
   template <typename MeasureT>
@@ -106,11 +109,13 @@ class StatsManager final {
    public:
     explicit MeasureInformation(absl::Mutex* mu) : mu_(mu) {}
 
-    // records 'value' against all views tracking 'measure'. Presently only
-    // supports doubles; recorded ints are converted to doubles internally.
+    // records 'value' against all views tracking 'measure' at time 'now'.
+    // Presently only supports doubles; recorded ints are converted to doubles
+    // internally.
     void Record(
         double value,
-        absl::Span<const std::pair<absl::string_view, absl::string_view>> tags);
+        absl::Span<const std::pair<absl::string_view, absl::string_view>> tags,
+        absl::Time now);
 
     ViewInformation* AddConsumer(const ViewDescriptor& descriptor);
     void RemoveView(const ViewInformation* handle);
