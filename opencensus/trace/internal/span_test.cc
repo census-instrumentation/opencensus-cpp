@@ -225,6 +225,11 @@ TEST(SpanTest, FullSpanTest) {
   EXPECT_EQ("value3", attributes.at("key3").string_value());
   EXPECT_EQ(123, attributes.at("key4").int_value());
   EXPECT_EQ(false, attributes.at("key5").bool_value());
+  EXPECT_EQ("value6", attributes.at("key6").string_value());
+  EXPECT_EQ("value7", attributes.at("key7").string_value());
+  EXPECT_EQ("value10", attributes.at("key10").string_value());
+  EXPECT_EQ("value11", attributes.at("key11").string_value());
+  EXPECT_EQ("value12", attributes.at("key12").string_value());
   EXPECT_EQ(attributes.end(), attributes.find("key_invalid"));
 
   EXPECT_EQ(2, data.annotations().events().size());
