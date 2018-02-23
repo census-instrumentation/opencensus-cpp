@@ -12,29 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef OPENCENSUS_EXPORTERS_TRACE_STDOUT_EXPORTER_H_
-#define OPENCENSUS_EXPORTERS_TRACE_STDOUT_EXPORTER_H_
+#include "opencensus/exporters/trace/stdout/stdout_exporter.h"
 
-#include <vector>
+#include <iostream>
 
-#include "opencensus/trace/exporter/span_data.h"
-#include "opencensus/trace/exporter/span_exporter.h"
+#include "absl/base/macros.h"
+#include "absl/memory/memory.h"
 
 namespace opencensus {
 namespace exporters {
 namespace trace {
 
-class StdoutExporter
-    : public ::opencensus::trace::exporter::SpanExporter::Handler {
- public:
-  void Export(const std::vector<::opencensus::trace::exporter::SpanData>& spans)
-      override;
+void StdoutExporter::Export(
+    const std::vector<::opencensus::trace::exporter::SpanData>& spans) {
+  for (const auto& span : spans) {
+    std::cout << span.DebugString() << "\n";
+  }
+}
 
-  static void Register();
-};
+void StdoutExporter::Register() {
+  ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
+      absl::make_unique<StdoutExporter>());
+}
 
 }  // namespace trace
 }  // namespace exporters
 }  // namespace opencensus
-
-#endif  // OPENCENSUS_EXPORTERS_TRACE_STDOUT_EXPORTER_H_
