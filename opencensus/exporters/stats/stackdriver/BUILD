@@ -1,5 +1,3 @@
-# OpenCensus C++ exporter libraries.
-#
 # Copyright 2018, OpenCensus Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,9 +16,7 @@ load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
 
 licenses(["notice"])  # Apache License 2.0
 
-package(default_visibility = ["//opencensus/exporters/stats:__subpackages__"])
-
-# Public exporter libraries.
+package(default_visibility = ["//visibility:private"])
 
 cc_library(
     name = "stackdriver_exporter",
@@ -35,20 +31,6 @@ cc_library(
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
-        "@com_google_absl//absl/time",
-    ],
-)
-
-cc_library(
-    name = "stdout_exporter",
-    srcs = ["internal/stdout_exporter.cc"],
-    hdrs = ["stdout_exporter.h"],
-    copts = DEFAULT_COPTS,
-    visibility = ["//visibility:public"],
-    deps = [
-        "//opencensus/stats",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
     ],
 )
@@ -77,10 +59,10 @@ cc_library(
 )
 
 cc_library(
-    name = "test_utils",
+    name = "time_series_matcher",
     testonly = 1,
-    srcs = ["internal/testing/time_series_matcher.cc"],
-    hdrs = ["internal/testing/time_series_matcher.h"],
+    srcs = ["internal/time_series_matcher.cc"],
+    hdrs = ["internal/time_series_matcher.h"],
     deps = [
         "//google/api:distribution",
         "//google/api:metric",
@@ -100,7 +82,7 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":stackdriver_utils",
-        ":test_utils",
+        ":time_series_matcher",
         "//google/api:distribution",
         "//google/api:label",
         "//google/api:metric",
@@ -109,6 +91,25 @@ cc_test(
         "//opencensus/stats",
         "//opencensus/stats:test_utils",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "stackdriver_e2e_test",
+    srcs = ["internal/stackdriver_e2e_test.cc"],
+    tags = ["manual"],
+    deps = [
+        ":stackdriver_exporter",
+        ":stackdriver_utils",
+        ":time_series_matcher",
+        "//google/monitoring/v3:common",
+        "//google/monitoring/v3:metric",
+        "//google/monitoring/v3:metric_service",
+        "//opencensus/stats",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",
     ],
 )

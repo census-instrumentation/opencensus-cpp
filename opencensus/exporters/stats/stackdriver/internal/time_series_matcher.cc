@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/exporters/stats/internal/testing/time_series_matcher.h"
+#include "opencensus/exporters/stats/stackdriver/internal/time_series_matcher.h"
 
 #include <cstdint>
 #include <map>

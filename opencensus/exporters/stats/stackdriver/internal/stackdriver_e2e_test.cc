@@ -25,9 +25,9 @@
 #include "google/protobuf/empty.pb.h"
 #include "gtest/gtest.h"
 #include "include/grpc++/grpc++.h"
-#include "opencensus/exporters/stats/internal/stackdriver_utils.h"
-#include "opencensus/exporters/stats/internal/testing/time_series_matcher.h"
-#include "opencensus/exporters/stats/stackdriver_exporter.h"
+#include "opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
+#include "opencensus/exporters/stats/stackdriver/internal/time_series_matcher.h"
+#include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 #include "opencensus/stats/stats.h"
 
 namespace opencensus {

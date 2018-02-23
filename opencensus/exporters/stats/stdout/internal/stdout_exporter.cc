@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/exporters/stats/stdout_exporter.h"
+#include "opencensus/exporters/stats/stdout/stdout_exporter.h"
 
 #include <cstdint>
 #include <functional>

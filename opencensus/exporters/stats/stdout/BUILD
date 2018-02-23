@@ -1,5 +1,3 @@
-# End-to-end tests for stats exporter libraries.
-#
 # Copyright 2018, OpenCensus Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,27 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
+
 licenses(["notice"])  # Apache License 2.0
 
 package(default_visibility = ["//visibility:private"])
 
-cc_test(
-    name = "stackdriver_e2e_test",
-    srcs = ["stackdriver_e2e_test.cc"],
-    tags = [
-        "manual",
-    ],
+cc_library(
+    name = "stdout_exporter",
+    srcs = ["internal/stdout_exporter.cc"],
+    hdrs = ["stdout_exporter.h"],
+    copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
     deps = [
-        "//google/monitoring/v3:common",
-        "//google/monitoring/v3:metric",
-        "//google/monitoring/v3:metric_service",
-        "//opencensus/exporters/stats:stackdriver_exporter",
-        "//opencensus/exporters/stats:stackdriver_utils",
-        "//opencensus/exporters/stats:test_utils",
         "//opencensus/stats",
-        "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
-        "@com_google_googletest//:gtest_main",
     ],
 )

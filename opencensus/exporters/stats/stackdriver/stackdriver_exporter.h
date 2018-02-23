@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef OPENCENSUS_EXPORTERS_STATS_STACKDRIVER_EXPORTER_H_
-#define OPENCENSUS_EXPORTERS_STATS_STACKDRIVER_EXPORTER_H_
+#ifndef OPENCENSUS_EXPORTERS_STATS_STACKDRIVER_STACKDRIVER_EXPORTER_H_
+#define OPENCENSUS_EXPORTERS_STATS_STACKDRIVER_STACKDRIVER_EXPORTER_H_
 
 #include "absl/strings/string_view.h"
 #include "opencensus/stats/stats.h"
@@ -53,4 +53,4 @@ class StackdriverExporter : public ::opencensus::stats::StatsExporter::Handler {
 }  // namespace exporters
 }  // namespace opencensus
 
-#endif  // OPENCENSUS_EXPORTERS_STATS_STACKDRIVER_EXPORTER_H_
+#endif  // OPENCENSUS_EXPORTERS_STATS_STACKDRIVER_STACKDRIVER_EXPORTER_H_

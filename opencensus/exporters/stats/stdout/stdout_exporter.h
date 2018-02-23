@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef OPENCENSUS_EXPORTERS_STATS_STDOUT_EXPORTER_H_
-#define OPENCENSUS_EXPORTERS_STATS_STDOUT_EXPORTER_H_
+#ifndef OPENCENSUS_EXPORTERS_STATS_STDOUT_STDOUT_EXPORTER_H_
+#define OPENCENSUS_EXPORTERS_STATS_STDOUT_STDOUT_EXPORTER_H_
 
 namespace opencensus {
 namespace exporters {
@@ -33,4 +33,4 @@ class StdoutExporter {
 }  // namespace exporters
 }  // namespace opencensus
 
-#endif  // OPENCENSUS_EXPORTERS_STATS_STDOUT_EXPORTER_H_
+#endif  // OPENCENSUS_EXPORTERS_STATS_STDOUT_STDOUT_EXPORTER_H_
