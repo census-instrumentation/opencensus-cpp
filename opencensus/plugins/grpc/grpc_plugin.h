@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef OPENCENSUS_PLUGINS_GRPC_PLUGIN_H_
-#define OPENCENSUS_PLUGINS_GRPC_PLUGIN_H_
+#ifndef OPENCENSUS_PLUGINS_GRPC_GRPC_PLUGIN_H_
+#define OPENCENSUS_PLUGINS_GRPC_GRPC_PLUGIN_H_
 
 #include "absl/strings/string_view.h"
 
 namespace opencensus {
 
-// Registers the opencensus plugin with gRPC, so that it will be used for future
+// Registers the OpenCensus plugin with gRPC, so that it will be used for future
 // RPCs. This must be called before any views are created on the measures
 // defined below.
 void RegisterGrpcPlugin();
@@ -52,4 +52,4 @@ extern const absl::string_view kRpcServerResponseCountMeasureName;
 
 }  // namespace opencensus
 
-#endif  // OPENCENSUS_PLUGINS_GRPC_PLUGIN_H_
+#endif  // OPENCENSUS_PLUGINS_GRPC_GRPC_PLUGIN_H_

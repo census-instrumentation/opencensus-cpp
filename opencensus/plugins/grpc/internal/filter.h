@@ -17,7 +17,7 @@
 
 #include "absl/strings/string_view.h"
 #include "include/grpc/impl/codegen/status.h"
-#include "opencensus/plugins/internal/rpc_encoding.h"
+#include "opencensus/plugins/grpc/internal/rpc_encoding.h"
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/span_context.h"
 #include "opencensus/trace/trace_params.h"

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/plugins/internal/filter.h"
+#include "opencensus/plugins/grpc/internal/filter.h"
 #include "include/grpc/impl/codegen/status.h"
 
 namespace opencensus {

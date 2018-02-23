@@ -15,7 +15,7 @@
 #ifndef OPENCENSUS_PLUGINS_INTERNAL_CHANNEL_FILTER_H_
 #define OPENCENSUS_PLUGINS_INTERNAL_CHANNEL_FILTER_H_
 
-#include "opencensus/plugins/internal/filter.h"
+#include "opencensus/plugins/grpc/internal/filter.h"
 
 namespace opencensus {
 

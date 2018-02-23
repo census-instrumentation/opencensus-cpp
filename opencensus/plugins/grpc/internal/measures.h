@@ -15,7 +15,7 @@
 #ifndef OPENCENSUS_PLUGINS_INTERNAL_MEASURES_H_
 #define OPENCENSUS_PLUGINS_INTERNAL_MEASURES_H_
 
-#include "opencensus/plugins/grpc_plugin.h"
+#include "opencensus/plugins/grpc/grpc_plugin.h"
 #include "opencensus/stats/stats.h"
 
 namespace opencensus {

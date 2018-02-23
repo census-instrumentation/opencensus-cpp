@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/plugins/internal/channel_filter.h"
+#include "opencensus/plugins/grpc/internal/channel_filter.h"
 
 namespace opencensus {
 
