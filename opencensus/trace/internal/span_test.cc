@@ -182,10 +182,10 @@ TEST(SpanTest, FullSpanTest) {
 
   // Test that StrCat's output outlives the AddAttribute call.
   span.AddAttribute(absl::StrCat("ke", "y7"), absl::StrCat("val", "ue7"));
-  span.AddAttributes({
-    {absl::StrCat("key", "10"), "value10"},
-    {"key11", absl::StrCat("value", "11")},
-    {absl::StrCat("key", "12"), absl::StrCat("value", "12")}});
+  span.AddAttributes(
+      {{absl::StrCat("key", "10"), "value10"},
+       {"key11", absl::StrCat("value", "11")},
+       {absl::StrCat("key", "12"), absl::StrCat("value", "12")}});
 
   span.AddAnnotation("anno1");
   span.AddAnnotation(
