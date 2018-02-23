@@ -269,6 +269,20 @@ cc_test(
 # Benchmarks
 # ========================================================================= #
 #
+
+cc_binary(
+    name = "attribute_value_ref_benchmark",
+    testonly = 1,
+    srcs = ["internal/attribute_value_ref_benchmark.cc"],
+    copts = TEST_COPTS,
+    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
+    linkstatic = 1,
+    deps = [
+        ":trace",
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
 cc_binary(
     name = "span_benchmark",
     testonly = 1,

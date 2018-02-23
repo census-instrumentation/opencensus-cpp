@@ -16,6 +16,7 @@
 
 #include <cstdint>
 
+#include "absl/strings/str_cat.h"
 #include "gtest/gtest.h"
 #include "opencensus/trace/attribute_value_ref.h"
 #include "opencensus/trace/exporter/attribute_value.h"
@@ -174,6 +175,18 @@ TEST(SpanTest, FullSpanTest) {
   span.AddAttribute("key2", "value2");
   span.AddAttributes({{"key3", "value3"}, {"key4", 123}, {"key5", false}});
 
+  // String (as opposed to literal).
+  std::string val = "value";
+  val += "6";
+  span.AddAttribute("key6", val);
+
+  // Test that StrCat's output outlives the AddAttribute call.
+  span.AddAttribute(absl::StrCat("ke", "y7"), absl::StrCat("val", "ue7"));
+  span.AddAttributes(
+      {{absl::StrCat("key", "10"), "value10"},
+       {"key11", absl::StrCat("value", "11")},
+       {absl::StrCat("key", "12"), absl::StrCat("value", "12")}});
+
   span.AddAnnotation("anno1");
   span.AddAnnotation(
       "anno2", {{"str_attr", "hello"}, {"int_attr", 123}, {"bool_attr", true}});
@@ -212,6 +225,11 @@ TEST(SpanTest, FullSpanTest) {
   EXPECT_EQ("value3", attributes.at("key3").string_value());
   EXPECT_EQ(123, attributes.at("key4").int_value());
   EXPECT_EQ(false, attributes.at("key5").bool_value());
+  EXPECT_EQ("value6", attributes.at("key6").string_value());
+  EXPECT_EQ("value7", attributes.at("key7").string_value());
+  EXPECT_EQ("value10", attributes.at("key10").string_value());
+  EXPECT_EQ("value11", attributes.at("key11").string_value());
+  EXPECT_EQ("value12", attributes.at("key12").string_value());
   EXPECT_EQ(attributes.end(), attributes.find("key_invalid"));
 
   EXPECT_EQ(2, data.annotations().events().size());

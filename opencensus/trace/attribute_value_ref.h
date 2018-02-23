@@ -48,12 +48,19 @@ class AttributeValueRef final {
   // We provide implicit constructors for string, int, and bool. We work around
   // the compiler coercing things like pointers and ints to bool.
 
-  // Construct from anything that converts to absl::string_view. Otherwise we
-  // have to handle const char[] separately.
-  template <typename T, typename std::enable_if<std::is_constructible<
-                            absl::string_view, T>::value>::type* = nullptr>
-  AttributeValueRef(T string_value)
-      : string_value_(absl::string_view(string_value)), type_(Type::kString) {}
+  // Construct from absl::string_view.
+  AttributeValueRef(absl::string_view string_value)
+      : string_value_(string_value), type_(Type::kString) {}
+
+  // Construct from C-style string.
+  AttributeValueRef(const char* string_value)
+      : string_value_(string_value), type_(Type::kString) {}
+
+  // Construct from std::string.
+  template <typename Allocator>
+  AttributeValueRef(const std::basic_string<char, std::char_traits<char>,
+                                            Allocator>& string_value)
+      : string_value_(string_value), type_(Type::kString) {}
 
   // Construct from integer. We have to supply this form explicitly because
   // otherwise AttributeValueRef(int) is ambiguous between int and bool!
