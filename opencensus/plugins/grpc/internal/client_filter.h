@@ -17,8 +17,8 @@
 
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
-#include "opencensus/plugins/internal/channel_filter.h"
-#include "opencensus/plugins/internal/filter.h"
+#include "opencensus/plugins/grpc/internal/channel_filter.h"
+#include "opencensus/plugins/grpc/internal/filter.h"
 
 namespace opencensus {
 

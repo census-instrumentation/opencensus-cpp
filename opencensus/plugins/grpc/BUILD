@@ -1,5 +1,3 @@
-# OpenCensus C++ Plugin library.
-#
 # Copyright 2018, OpenCensus Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -69,7 +67,7 @@ cc_test(
     tags = ["noci"],  # TODO: determine why this times out on Travis and reenable.
     deps = [
         ":grpc_plugin",
-        "//opencensus/plugins/internal/testing:echo_proto",
+        "//opencensus/plugins/grpc/internal/testing:echo_proto",
         "//opencensus/stats",
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/strings",

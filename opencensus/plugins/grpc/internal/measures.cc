@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/plugins/internal/measures.h"
+#include "opencensus/plugins/grpc/internal/measures.h"
 
-#include "opencensus/plugins/grpc_plugin.h"
+#include "opencensus/plugins/grpc/grpc_plugin.h"
 #include "opencensus/stats/stats.h"
 
 namespace opencensus {
