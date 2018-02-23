@@ -73,11 +73,6 @@ void StackdriverExporter::Handler::ExportViewData(
     const opencensus::stats::ViewDescriptor& descriptor,
     const opencensus::stats::ViewData& data) {
   absl::MutexLock l(&mu_);
-  // Stackdriver does not support interval aggregation.
-  if (descriptor.aggregation_window().type() !=
-      opencensus::stats::AggregationWindow::Type::kCumulative) {
-    return;
-  }
   if (!MaybeRegisterView(descriptor)) {
     return;
   }

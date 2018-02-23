@@ -34,7 +34,8 @@ namespace stats {
 // StatsExporter is thread-safe.
 class StatsExporter final {
  public:
-  // Inserts a new view, replacing any existing view with the same name.
+  // Inserts a new view, replacing any existing view with the same name. Only
+  // Cumulative views are supported.
   static void AddView(const ViewDescriptor& view);
   // Removes the view with 'name' from the registry, if one is registered.
   static void RemoveView(absl::string_view name);

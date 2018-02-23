@@ -14,6 +14,7 @@
 
 #include "opencensus/stats/stats_exporter.h"
 
+#include <iostream>
 #include <thread>  // NOLINT
 #include <utility>
 #include <vector>
@@ -22,6 +23,7 @@
 #include "absl/synchronization/mutex.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
+#include "opencensus/stats/internal/aggregation_window.h"
 
 namespace opencensus {
 namespace stats {
@@ -118,7 +120,12 @@ class StatsExporterImpl {
 };
 
 void StatsExporter::AddView(const ViewDescriptor& view) {
-  StatsExporterImpl::Get()->AddView(view);
+  if (view.aggregation_window().type() ==
+      AggregationWindow::Type::kCumulative) {
+    StatsExporterImpl::Get()->AddView(view);
+  } else {
+    std::cerr << "Only cumulative views may be registered for export.\n";
+  }
 }
 
 void StatsExporter::RemoveView(absl::string_view name) {

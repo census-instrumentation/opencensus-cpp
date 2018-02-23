@@ -23,6 +23,7 @@
 #include "absl/time/time.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "opencensus/stats/internal/set_aggregation_window.h"
 #include "opencensus/stats/measure.h"
 #include "opencensus/stats/measure_descriptor.h"
 #include "opencensus/stats/measure_registry.h"
@@ -82,8 +83,6 @@ class StatsExporterTest : public ::testing::Test {
     descriptor2_.set_measure(kMeasureId);
     descriptor2_.set_aggregation(
         Aggregation::Distribution(BucketBoundaries::Explicit({0})));
-    SetAggregationWindow(AggregationWindow::Interval(absl::Hours(1)),
-                         &descriptor2_);
   }
 
   void TearDown() {
@@ -135,6 +134,16 @@ TEST_F(StatsExporterTest, MultipleExporters) {
   MockExporter::Register({descriptor1_});
   MockExporter::Register({descriptor1_});
   StatsExporter::AddView(descriptor1_);
+  Export();
+}
+
+TEST_F(StatsExporterTest, IntervalViewRejected) {
+  MockExporter::Register({});
+  ViewDescriptor interval_descriptor = ViewDescriptor().set_name("interval");
+  SetAggregationWindow(AggregationWindow::Interval(absl::Hours(1)),
+                       &interval_descriptor);
+  StatsExporter::AddView(interval_descriptor);
+  EXPECT_TRUE(StatsExporter::GetViewData().empty());
   Export();
 }
 
