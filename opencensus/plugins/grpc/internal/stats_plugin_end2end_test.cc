@@ -21,8 +21,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "include/grpc++/grpc++.h"
-#include "opencensus/plugins/grpc_plugin.h"
-#include "opencensus/plugins/internal/testing/echo.grpc.pb.h"
+#include "opencensus/plugins/grpc/grpc_plugin.h"
+#include "opencensus/plugins/grpc/internal/testing/echo.grpc.pb.h"
 #include "opencensus/stats/stats.h"
 
 namespace opencensus {

@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/plugins/internal/server_filter.h"
+#include "opencensus/plugins/grpc/internal/server_filter.h"
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
-#include "opencensus/plugins/grpc_plugin.h"
-#include "opencensus/plugins/internal/measures.h"
+#include "opencensus/plugins/grpc/grpc_plugin.h"
+#include "opencensus/plugins/grpc/internal/measures.h"
 #include "opencensus/stats/stats.h"
 #include "src/core/lib/surface/call.h"
 

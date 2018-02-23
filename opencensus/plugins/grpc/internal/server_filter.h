@@ -19,8 +19,8 @@
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
 #include "include/grpc/grpc_security.h"
-#include "opencensus/plugins/internal/channel_filter.h"
-#include "opencensus/plugins/internal/filter.h"
+#include "opencensus/plugins/grpc/internal/channel_filter.h"
+#include "opencensus/plugins/grpc/internal/filter.h"
 
 namespace opencensus {
 
