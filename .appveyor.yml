@@ -1,0 +1,20 @@
+# Without this "Update next build number or change version format."
+version: "{build}"
+
+environment:
+  global:
+    BAZEL_ROOT: c:\bazel_root\
+    INSTALL_CACHE: c:\install_cache\
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+install:
+  - set PATH=%PATH%;%INSTALL_CACHE%
+  - cmd: tools\appveyor\install.bat
+
+build_script:
+  - cmd: tools\appveyor\build.bat
+
+test_script:
+  - cmd: tools\appveyor\test.bat
