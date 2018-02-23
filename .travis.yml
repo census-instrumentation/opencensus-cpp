@@ -4,10 +4,10 @@ dist: trusty
 sudo: false
 
 before_install:
-  - ./format.sh
+  - tools/format.sh
   - wget https://github.com/bazelbuild/bazel/releases/download/0.8.1/bazel-0.8.1-installer-linux-x86_64.sh
   - chmod +x bazel-0.8.1-installer-linux-x86_64.sh
   - ./bazel-0.8.1-installer-linux-x86_64.sh --user
 
 script:
-  - ./ci.sh
+  - tools/ci.sh
