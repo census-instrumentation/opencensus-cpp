@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
+#include "absl/types/span.h"
 #include "opencensus/trace/attribute_value_ref.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span_context.h"
@@ -45,7 +46,7 @@ class SpanTestPeer;
 // Attributes to the tracing API. e.g.:
 //   AddAttributes({{"key1", "value1"}, {"key2", 123}});
 using AttributesRef =
-    std::initializer_list<std::pair<absl::string_view, AttributeValueRef>>;
+    absl::Span<const std::pair<absl::string_view, AttributeValueRef>>;
 
 // Options for Starting a Span.
 struct StartSpanOptions {
