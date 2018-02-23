@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/exporters/stats/internal/stackdriver_utils.h"
+#include "opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
 
 #include <string>
 #include <vector>
@@ -26,7 +26,7 @@
 #include "google/monitoring/v3/common.pb.h"
 #include "google/protobuf/timestamp.pb.h"
 #include "gtest/gtest.h"
-#include "opencensus/exporters/stats/internal/testing/time_series_matcher.h"
+#include "opencensus/exporters/stats/stackdriver/internal/time_series_matcher.h"
 #include "opencensus/stats/stats.h"
 #include "opencensus/stats/testing/test_utils.h"
 

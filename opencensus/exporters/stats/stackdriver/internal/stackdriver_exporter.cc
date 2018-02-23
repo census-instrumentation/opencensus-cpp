@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/exporters/stats/stackdriver_exporter.h"
+#include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
@@ -20,7 +20,7 @@
 #include "google/monitoring/v3/metric_service.grpc.pb.h"
 #include "google/protobuf/empty.pb.h"
 #include "include/grpc++/grpc++.h"
-#include "opencensus/exporters/stats/internal/stackdriver_utils.h"
+#include "opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
 #include "opencensus/stats/stats.h"
 
 namespace opencensus {
