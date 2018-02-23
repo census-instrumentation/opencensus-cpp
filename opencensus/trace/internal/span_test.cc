@@ -16,6 +16,7 @@
 
 #include <cstdint>
 
+#include "absl/strings/str_cat.h"
 #include "gtest/gtest.h"
 #include "opencensus/trace/attribute_value_ref.h"
 #include "opencensus/trace/exporter/attribute_value.h"
@@ -173,9 +174,18 @@ TEST(SpanTest, FullSpanTest) {
   span.AddAttribute("key1", av);
   span.AddAttribute("key2", "value2");
   span.AddAttributes({{"key3", "value3"}, {"key4", 123}, {"key5", false}});
+
+  // String (as opposed to literal).
   std::string val = "value";
   val += "6";
   span.AddAttribute("key6", val);
+
+  // Test that StrCat's output outlives the AddAttribute call.
+  span.AddAttribute(absl::StrCat("ke", "y7"), absl::StrCat("val", "ue7"));
+  span.AddAttributes({
+    {absl::StrCat("key", "10"), "value10"},
+    {"key11", absl::StrCat("value", "11")},
+    {absl::StrCat("key", "12"), absl::StrCat("value", "12")}});
 
   span.AddAnnotation("anno1");
   span.AddAnnotation(
