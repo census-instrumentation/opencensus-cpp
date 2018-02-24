@@ -26,9 +26,14 @@ void GenerateServerContext(absl::string_view tracing, absl::string_view stats,
   new (context) CensusContext(method, parent_ctx);
 }
 
-void GenerateClientContext(absl::string_view method, CensusContext *context) {
-  // TODO: Change this so that it can be set to root or non-root span.
-  new (context) CensusContext(method);
+void GenerateClientContext(absl::string_view method, CensusContext *ctxt,
+                           census_context *parent_ctx) {
+  if (parent_ctx == nullptr) {
+    new (ctxt) CensusContext(
+        method, reinterpret_cast<CensusContext *>(parent_ctx)->Context());
+  } else {
+    new (ctxt) CensusContext(method);
+  }
 }
 
 size_t ServerStatsSerialize(uint64_t server_elapsed_time, char *buf,
@@ -52,6 +57,10 @@ uint64_t GetOutgoingDataSize(const grpc_call_final_info *final_info) {
 
 trace::SpanContext SpanContextFromCensusContext(const census_context *ctxt) {
   return reinterpret_cast<const CensusContext *>(ctxt)->Context();
+}
+
+trace::Span SpanFromCensusContext(const census_context *ctxt) {
+  return reinterpret_cast<const CensusContext *>(ctxt)->Span();
 }
 
 absl::string_view StatusCodeToString(grpc_status_code code) {

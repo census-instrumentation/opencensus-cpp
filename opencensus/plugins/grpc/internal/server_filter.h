@@ -31,8 +31,7 @@ namespace opencensus {
 class CensusServerCallData : public grpc::CallData {
  public:
   CensusServerCallData()
-      : method_size_(0),
-        gc_(nullptr),
+      : gc_(nullptr),
         auth_context_(nullptr),
         recv_initial_metadata_(nullptr),
         initial_on_done_recv_initial_metadata_(nullptr),
@@ -41,7 +40,7 @@ class CensusServerCallData : public grpc::CallData {
         recv_message_count_(0),
         sent_message_count_(0) {
     memset(&census_bin_, 0, sizeof(grpc_linked_mdelem));
-    memset(&method_, 0, sizeof(grpc_slice));
+    memset(&path_, 0, sizeof(grpc_slice));
     memset(&on_done_recv_initial_metadata_, 0, sizeof(grpc_closure));
     memset(&on_done_recv_message_, 0, sizeof(grpc_closure));
   }
@@ -62,9 +61,8 @@ class CensusServerCallData : public grpc::CallData {
  private:
   CensusContext context_;
   // server method
-  grpc_slice method_;
-  // server method size
-  size_t method_size_;
+  absl::string_view method_;
+  grpc_slice path_;
   // Pointer to the grpc_call element
   grpc_call *gc_;
   // Authorization context for the call.

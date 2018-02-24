@@ -52,11 +52,12 @@ class CensusContext {
   // Serializes the outgoing stats context.  Field IDs are 1 byte followed by
   // field data. A 1 byte version ID is always encoded first.
   size_t StatsContextSerialize(char *stats_buf, size_t stats_buf_size) {
-    // TODO: Add implementation.
+    // TODO: Add implementation. Waiting on stats tagging to be added.
     return 0;
   }
 
   trace::SpanContext Context() const { return span_.context(); }
+  trace::Span Span() const { return span_; }
 
  private:
   trace::Span span_;
@@ -81,7 +82,8 @@ void GenerateServerContext(absl::string_view tracing, absl::string_view stats,
 // If the current context is the default context then the newly created
 // span automatically becomes a root span. This should only be called with a
 // blank CensusContext as it overwrites it.
-void GenerateClientContext(absl::string_view method, CensusContext *context);
+void GenerateClientContext(absl::string_view method, CensusContext *ctxt,
+                           census_context *parent_ctx);
 
 // Returns the incoming data size from the grpc call final info.
 uint64_t GetIncomingDataSize(const grpc_call_final_info *final_info);
@@ -89,10 +91,11 @@ uint64_t GetIncomingDataSize(const grpc_call_final_info *final_info);
 // Returns the outgoing data size from the grpc call final info.
 uint64_t GetOutgoingDataSize(const grpc_call_final_info *final_info);
 
-// This is a helper function which will return the SpanContext associated with
-// the census_context* stored by grpc. The user will need to call this for
-// manual propagation of tracing data.
+// These helper functions return the SpanContext and Span, respectively
+// associated with the census_context* stored by grpc. The user will need to
+// call this for manual propagation of tracing data.
 trace::SpanContext SpanContextFromCensusContext(const census_context *ctxt);
+trace::Span SpanFromCensusContext(const census_context *ctxt);
 
 // Returns a string representation of the StatusCode enum.
 absl::string_view StatusCodeToString(grpc_status_code code);
