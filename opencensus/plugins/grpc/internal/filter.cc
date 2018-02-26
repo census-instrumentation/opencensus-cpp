@@ -31,14 +31,12 @@ void GenerateClientContext(absl::string_view method, CensusContext *ctxt,
   if (parent_ctxt != nullptr) {
     trace::SpanContext span_ctxt = parent_ctxt->Context();
     trace::Span span = parent_ctxt->Span();
-    if (span_ctxt.span_id().IsValid() && span_ctxt.trace_id().IsValid()) {
+    if (span_ctxt.IsValid()) {
       new (ctxt) CensusContext(method, &span);
-    } else {
-      new (ctxt) CensusContext(method);
+      return;
     }
-  } else {
-    new (ctxt) CensusContext(method);
   }
+  new (ctxt) CensusContext(method);
 }
 
 size_t ServerStatsSerialize(uint64_t server_elapsed_time, char *buf,

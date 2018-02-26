@@ -117,8 +117,8 @@ void CensusServerCallData::OnDoneRecvInitialMetadataCb(void *user_data,
 
     GenerateServerContext(absl::string_view(tracing_str, tracing_str_len),
                           absl::string_view(census_str, census_str_len),
-                          absl::string_view("", 0), calld->method_,
-                          &calld->context_);
+                          absl::string_view("", 0) /*primary_role=""*/,
+                          calld->method_, &calld->context_);
     stats::Record({{RpcServerStartedCount(), 1}},
                   {{kMethodTagKey, calld->method_}});
 
