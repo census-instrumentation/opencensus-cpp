@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 #
 # Copyright 2018, OpenCensus Authors
 #
@@ -14,15 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This script runs a slow but complete check of the code to make sure:
+# presubmit:
+# Run a slow but complete check of the code to make sure:
 #   - Everything builds.
 #   - Tests pass.
 #   - Sanitizers pass.
+#
+# This is intended to be run manually and locally, not as part of
+# continuous integration.
 
 readonly R="======================================="
-readonly BOLD="\033[1m"
-readonly ERR="\033[31;1m"
-readonly NORMAL="\033[0m"
+readonly BOLD="\\033[1m"
+readonly ERR="\\033[31;1m"
+readonly NORMAL="\\033[0m"
 
 function run() {
   echo ""
