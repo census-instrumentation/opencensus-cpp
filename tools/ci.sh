@@ -19,21 +19,32 @@
 # https://github.com/bazelbuild/bazel/blob/master/scripts/ci/ci.sh
 
 files=()
-# If WORKSPACE or .travis.yml is touched, almost anything may be affected.
-# Otherwise, top-level files are irrelevant to the build and we exclude them to
-# suppress query errors.
+# If WORKSPACE or the Travis config is touched, almost anything may be affected.
 if [[ ! -z $(git diff --name-only ${TRAVIS_COMMIT_RANGE} \
-  | grep "WORKSPACE\|.travis.yml" ) ]];
+  | grep "WORKSPACE\|.travis.yml\|tools/ci.sh" ) ]];
 then
-  echo ".travis.yml or WORKSPACE affected; running all tests."
+  echo "Travis config or WORKSPACE affected; running all tests."
   files=("//...")
 else
   echo "Affected files:"
-  for file in $(git diff --name-only ${TRAVIS_COMMIT_RANGE} | grep / ); do
-    mapfile -O ${#files[@]} -t files <<< "$(bazel query $file)"
-    bazel query $file
+  for file in $(git diff --name-only ${TRAVIS_COMMIT_RANGE}); do
+    # We need to replace :BUILD with :all because bazel does not consider
+    # targets to be dependencies of their BUILD files. Query errors mean
+    # that the file is not tracked by bazel (e.g. documentation, tools)
+    # and can be ignored.
+    mapfile -O ${#files[@]} -t files <<< \
+      "$(bazel query $file 2>/dev/null| sed s/:BUILD/:all/)"
+    bazel query $file 2>/dev/null
   done
 fi
+
+if [[ -z "${files[*]}" ]]; then
+  echo "No buildable files affected."
+  exit 0
+fi
+
+exit_code=0
+trap "exit_code=1" ERR
 
 # We can't use --noshow_progress on build/test commands because Travis
 # terminates the build after 10 mins without output.
@@ -58,3 +69,5 @@ if [[ ! -z $tests ]]; then
   echo "$tests"
   bazel test --experimental_ui_actions_shown=1 -k $tests
 fi
+
+exit $exit_code
