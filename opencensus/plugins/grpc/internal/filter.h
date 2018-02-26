@@ -38,8 +38,11 @@ class CensusContext {
   explicit CensusContext(absl::string_view name)
       : span_(trace::Span::StartSpan(name)) {}
 
-  CensusContext(absl::string_view name, const trace::SpanContext &parent_ctx)
-      : span_(trace::Span::StartSpanWithRemoteParent(name, parent_ctx)) {}
+  CensusContext(absl::string_view name, const trace::Span *parent)
+      : span_(trace::Span::StartSpan(name, parent)) {}
+
+  CensusContext(absl::string_view name, const trace::SpanContext &parent_ctxt)
+      : span_(trace::Span::StartSpanWithRemoteParent(name, parent_ctxt)) {}
 
   // Serializes the outgoing trace context. Field IDs are 1 byte followed by
   // field data. A 1 byte version ID is always encoded first.
@@ -83,7 +86,7 @@ void GenerateServerContext(absl::string_view tracing, absl::string_view stats,
 // span automatically becomes a root span. This should only be called with a
 // blank CensusContext as it overwrites it.
 void GenerateClientContext(absl::string_view method, CensusContext *ctxt,
-                           census_context *parent_ctx);
+                           CensusContext *parent_ctx);
 
 // Returns the incoming data size from the grpc call final info.
 uint64_t GetIncomingDataSize(const grpc_call_final_info *final_info);

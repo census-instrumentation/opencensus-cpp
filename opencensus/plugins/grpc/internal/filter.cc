@@ -27,10 +27,15 @@ void GenerateServerContext(absl::string_view tracing, absl::string_view stats,
 }
 
 void GenerateClientContext(absl::string_view method, CensusContext *ctxt,
-                           census_context *parent_ctx) {
-  if (parent_ctx == nullptr) {
-    new (ctxt) CensusContext(
-        method, reinterpret_cast<CensusContext *>(parent_ctx)->Context());
+                           CensusContext *parent_ctxt) {
+  if (parent_ctxt != nullptr) {
+    trace::SpanContext span_ctxt = parent_ctxt->Context();
+    trace::Span span = parent_ctxt->Span();
+    if (span_ctxt.span_id().IsValid() && span_ctxt.trace_id().IsValid()) {
+      new (ctxt) CensusContext(method, &span);
+    } else {
+      new (ctxt) CensusContext(method);
+    }
   } else {
     new (ctxt) CensusContext(method);
   }

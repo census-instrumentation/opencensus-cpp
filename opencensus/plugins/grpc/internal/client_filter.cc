@@ -86,7 +86,9 @@ void CensusClientCallData::StartTransportStreamOpBatch(
     // TODO(jsking): Move GenerateClientContext to init callback after
     // grpc has been changed to populate census context at call initialization.
     census_context *ctxt = op->get_census_context();
-    GenerateClientContext(method_, &context_, ctxt);
+    GenerateClientContext(
+        method_, &context_,
+        (ctxt == nullptr) ? nullptr : reinterpret_cast<CensusContext *>(ctxt));
     char tracing_buf[kMaxTracingLen];
     size_t tracing_len =
         context_.TraceContextSerialize(tracing_buf, kMaxTracingLen);
