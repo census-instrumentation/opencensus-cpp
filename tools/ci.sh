@@ -33,13 +33,13 @@ else
     # that the file is not tracked by bazel (e.g. documentation, tools)
     # and can be ignored.
     mapfile -O ${#files[@]} -t files <<< \
-      "$(bazel query $file 2>/dev/null| sed s/:BUILD/:all/)"
+      "$(bazel query $file 2>/dev/null | sed s/:BUILD/:all/)"
     bazel query $file 2>/dev/null
   done
 fi
 
-if [[ -z "${files[*]}" ]]; then
-  echo "No buildable files affected."
+if [[ -z "${files}" ]]; then
+  echo "(no buildable files affected)"
   exit 0
 fi
 
@@ -49,10 +49,11 @@ trap "exit_code=1" ERR
 # We can't use --noshow_progress on build/test commands because Travis
 # terminates the build after 10 mins without output.
 buildables=$(bazel query -k --noshow_progress \
-  "kind(rule, rdeps(//..., set(${files[*]})))" \
+  "kind(rule, rdeps(//..., set(${files[*]})))" 2>/dev/null \
   | grep -v :_)
 if [[ ! -z $buildables ]]; then
-  echo "Building targets"
+  echo ""
+  echo "Building targets:"
   echo "$buildables"
   bazel build --experimental_ui_actions_shown=1 -k $buildables
 fi
@@ -62,10 +63,11 @@ fi
 tests=$(bazel query -k --noshow_progress \
   "kind(test, rdeps(//..., set(${files[*]}))) \
    except attr('tags', 'noci', //...) \
-   except attr('tags', 'manual', //...)" \
+   except attr('tags', 'manual', //...)" 2>/dev/null \
   | grep -v :_)
 if [[ ! -z $tests ]]; then
-  echo "Running tests"
+  echo ""
+  echo "Running tests:"
   echo "$tests"
   bazel test --experimental_ui_actions_shown=1 -k $tests
 fi
