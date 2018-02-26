@@ -99,6 +99,25 @@ TEST(SpanTest, AddAttributesLastValueWins) {
             data.attributes().at("another_key").string_value());
 }
 
+TEST(SpanTest, AddAttributesWithArrayAndVector) {
+  auto span =
+      Span::StartSpan("SpanName", /*parent=*/nullptr, {nullptr, kRecordEvents});
+  std::array<std::pair<absl::string_view, AttributeValueRef>, 3>
+      attributes_array = {
+          {{"str_key", "value1"}, {"int_key", 123}, {"bool_key", true}}};
+  std::vector<std::pair<absl::string_view, AttributeValueRef>>
+      attributes_vector = {{"another_key", "another_value"}};
+  span.AddAttributes(attributes_array);
+  span.AddAttributes(attributes_vector);
+  auto data = SpanTestPeer::ToSpanData(&span);
+  span.End();
+  EXPECT_EQ("value1", data.attributes().at("str_key").string_value());
+  EXPECT_EQ(123, data.attributes().at("int_key").int_value());
+  EXPECT_EQ(true, data.attributes().at("bool_key").bool_value());
+  EXPECT_EQ("another_value",
+            data.attributes().at("another_key").string_value());
+}
+
 TEST(SpanTest, AddAnnotationLastAttributeWins) {
   auto span =
       Span::StartSpan("SpanName", /*parent=*/nullptr, {nullptr, kRecordEvents});
