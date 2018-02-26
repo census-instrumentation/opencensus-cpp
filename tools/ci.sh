@@ -44,7 +44,6 @@ if [[ -z "${files}" ]]; then
 fi
 
 exit_code=0
-trap "exit_code=1" ERR
 
 # We can't use --noshow_progress on build/test commands because Travis
 # terminates the build after 10 mins without output.
@@ -55,11 +54,10 @@ if [[ ! -z $buildables ]]; then
   echo ""
   echo "Building targets:"
   echo "$buildables"
-  bazel build --experimental_ui_actions_shown=1 -k $buildables
+  bazel build --experimental_ui_actions_shown=1 -k $buildables || exit_code=1
 fi
 
-# Exclude tests tagged "noci". Tests marked "manual" are already excluded from
-# wildcard queries.
+# Exclude tests tagged "noci".
 tests=$(bazel query -k --noshow_progress \
   "kind(test, rdeps(//..., set(${files[*]}))) \
    except attr('tags', 'noci', //...) \
@@ -69,7 +67,7 @@ if [[ ! -z $tests ]]; then
   echo ""
   echo "Running tests:"
   echo "$tests"
-  bazel test --experimental_ui_actions_shown=1 -k $tests
+  bazel test --experimental_ui_actions_shown=1 -k $tests || exit_code=1
 fi
 
 exit $exit_code
