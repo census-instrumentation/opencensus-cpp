@@ -44,7 +44,6 @@ buildables="-- $(bazel query -k --noshow_progress "kind('^cc', //...)")"
 
 tests="-- $(bazel query -k --noshow_progress \
   "kind(test, //...) \
-   except attr('tags', 'noci', //...) \
    except attr('tags', 'manual', //...)")"
 
 run bazel build $buildables
