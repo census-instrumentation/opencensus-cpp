@@ -21,3 +21,11 @@ config_setting(
     },
     visibility = [":__subpackages__"],
 )
+
+config_setting(
+    name = "windows",
+    values = {
+        "cpu": "x64_windows",
+    },
+    visibility = [":__subpackages__"],
+)
