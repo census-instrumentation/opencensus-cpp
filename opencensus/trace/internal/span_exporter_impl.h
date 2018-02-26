@@ -66,9 +66,14 @@ class SpanExporterImpl {
 
   void StartExportThread() EXCLUSIVE_LOCKS_REQUIRED(handler_mu_);
   void RunWorkerLoop();
+
   // Calls all registered handlers and exports the spans contained in span_data.
   void Export(const std::vector<SpanData>& span_data);
+
   void ExportForTesting();
+
+  // Returns true if the spans_ buffer has filled up.
+  bool IsBufferFull() const;
 
   static SpanExporterImpl* span_exporter_;
   const uint32_t buffer_size_;
