@@ -61,6 +61,7 @@ class CensusContext {
 
   trace::SpanContext Context() const { return span_.context(); }
   trace::Span Span() const { return span_; }
+  void EndSpan() { span_.End(); }
 
  private:
   trace::Span span_;

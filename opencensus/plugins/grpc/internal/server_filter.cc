@@ -204,6 +204,7 @@ void CensusServerCallData::Destroy(grpc_call_element *elem,
       {{kMethodTagKey, method_},
        {kStatusTagKey, StatusCodeToString(final_info->final_status)}});
   grpc_slice_unref_internal(path_);
+  context_.EndSpan();
 }
 
 }  // namespace opencensus
