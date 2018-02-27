@@ -15,6 +15,7 @@
 #include "opencensus/stats/stats_exporter.h"
 
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 #include "absl/memory/memory.h"
@@ -22,6 +23,7 @@
 #include "absl/time/time.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "opencensus/stats/internal/set_aggregation_window.h"
 #include "opencensus/stats/measure.h"
 #include "opencensus/stats/measure_descriptor.h"
 #include "opencensus/stats/measure_registry.h"
@@ -35,7 +37,7 @@ namespace stats {
 class MockExporter : public StatsExporter::Handler {
  public:
   static void Register(absl::Span<const ViewDescriptor> expected_descriptors) {
-    opencensus::stats::StatsExporter::RegisterHandler(
+    opencensus::stats::StatsExporter::RegisterPushHandler(
         absl::make_unique<MockExporter>(expected_descriptors));
   }
 
@@ -81,8 +83,6 @@ class StatsExporterTest : public ::testing::Test {
     descriptor2_.set_measure(kMeasureId);
     descriptor2_.set_aggregation(
         Aggregation::Distribution(BucketBoundaries::Explicit({0})));
-    SetAggregationWindow(AggregationWindow::Interval(absl::Hours(1)),
-                         &descriptor2_);
   }
 
   void TearDown() {
@@ -102,6 +102,9 @@ TEST_F(StatsExporterTest, AddView) {
   MockExporter::Register({descriptor1_, descriptor2_});
   StatsExporter::AddView(descriptor1_);
   StatsExporter::AddView(descriptor2_);
+  EXPECT_THAT(StatsExporter::GetViewData(),
+              ::testing::UnorderedElementsAre(::testing::Key(descriptor1_),
+                                              ::testing::Key(descriptor2_)));
   Export();
 }
 
@@ -110,6 +113,10 @@ TEST_F(StatsExporterTest, UpdateView) {
   StatsExporter::AddView(descriptor1_);
   StatsExporter::AddView(descriptor2_);
   StatsExporter::AddView(descriptor1_edited_);
+  EXPECT_THAT(
+      StatsExporter::GetViewData(),
+      ::testing::UnorderedElementsAre(::testing::Key(descriptor1_edited_),
+                                      ::testing::Key(descriptor2_)));
   Export();
 }
 
@@ -118,6 +125,8 @@ TEST_F(StatsExporterTest, RemoveView) {
   StatsExporter::AddView(descriptor1_);
   StatsExporter::AddView(descriptor2_);
   StatsExporter::RemoveView(descriptor1_.name());
+  EXPECT_THAT(StatsExporter::GetViewData(),
+              ::testing::UnorderedElementsAre(::testing::Key(descriptor2_)));
   Export();
 }
 
@@ -125,6 +134,16 @@ TEST_F(StatsExporterTest, MultipleExporters) {
   MockExporter::Register({descriptor1_});
   MockExporter::Register({descriptor1_});
   StatsExporter::AddView(descriptor1_);
+  Export();
+}
+
+TEST_F(StatsExporterTest, IntervalViewRejected) {
+  MockExporter::Register({});
+  ViewDescriptor interval_descriptor = ViewDescriptor().set_name("interval");
+  SetAggregationWindow(AggregationWindow::Interval(absl::Hours(1)),
+                       &interval_descriptor);
+  StatsExporter::AddView(interval_descriptor);
+  EXPECT_TRUE(StatsExporter::GetViewData().empty());
   Export();
 }
 
