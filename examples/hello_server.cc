@@ -43,17 +43,12 @@ class HelloServiceImpl final : public HelloService::Service {
   grpc::Status SayHello(grpc::ServerContext* context,
                         const HelloRequest* request,
                         HelloReply* reply) override {
-    // TODO: Instead of creating a Span, use the Span that the gRPC plugin
-    // created for us.
-    static ::opencensus::trace::AlwaysSampler sampler;
-    auto s = opencensus::trace::Span::StartSpan("FixmeSayHello",
-                                                /*parent=*/nullptr, {&sampler});
-    s.AddAnnotation("Constructing greeting.", {{"name", request->name()}});
-    std::string prefix("Hello ");
-    reply->set_message(prefix + request->name());
-    std::cerr << "rpc happened\n";  // TODO: rm printf debugging
+    opencensus::trace::Span span =
+        opencensus::GetSpanFromServerContext(context);
+    span.AddAnnotation("Constructing greeting.", {{"name", request->name()}});
+    reply->set_message(absl::StrCat("Hello ", request->name(), "!"));
     // TODO: Record() custom stats.
-    s.End();
+    std::cerr << "SayHello RPC handled.\n";
     return grpc::Status::OK;
   }
 };
