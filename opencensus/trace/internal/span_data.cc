@@ -95,8 +95,8 @@ std::string SpanData::DebugString() const {
   StrAppend(&debug_str, "Attributes: (", num_attributes_dropped(),
             " dropped)\n");
   for (const auto& attribute : attributes()) {
-    StrAppend(&debug_str, "  \"", attribute.first, "\":",
-              attribute.second.DebugString(), "\n");
+    StrAppend(&debug_str, "  \"", attribute.first,
+              "\":", attribute.second.DebugString(), "\n");
   }
 
   StrAppend(&debug_str, "Annotations: (", annotations().dropped_events_count(),
