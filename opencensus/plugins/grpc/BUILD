@@ -74,3 +74,25 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+# Benchmarks
+# ========================================================================= #
+cc_binary(
+    name = "grpc_plugin_benchmark",
+    testonly = 1,
+    srcs = ["internal/grpc_plugin_benchmark.cc"],
+    copts = TEST_COPTS,
+    linkopts = [
+        "-pthread",
+    ],
+    linkstatic = 1,
+    deps = [
+        ":grpc_plugin",
+        "//opencensus/plugins/grpc/internal/testing:echo_proto",
+        "//opencensus/stats",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/strings",
+        "@com_google_benchmark//:benchmark",
+    ],
+)
