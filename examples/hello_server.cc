@@ -88,12 +88,15 @@ int main(int argc, char** argv) {
   opencensus::exporters::stats::StdoutExporter::Register();
   opencensus::exporters::trace::StdoutExporter::Register();
 
-  // Expose a Prometheus endpoint and register the OpenCensus exporter with it.
-  prometheus::Exposer exposer("127.0.0.1:8080");
-  exposer.RegisterCollectable(
-      std::make_shared<opencensus::exporters::stats::PrometheusExporter>());
+  // Keep a shared pointer to the Prometheus exporter.
+  auto exporter =
+      std::make_shared<opencensus::exporters::stats::PrometheusExporter>();
 
-  // Add views of OpenCensus stats.
+  // Expose a Prometheus endpoint.
+  prometheus::Exposer exposer("127.0.0.1:8080");
+  exposer.RegisterCollectable(exporter);
+
+  // Add views for RPC stats.
   const auto server_request_bytes_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_measure(opencensus::kRpcServerRequestBytesMeasureName)
