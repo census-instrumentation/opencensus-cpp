@@ -58,7 +58,9 @@ class HelloServiceImpl final : public HelloService::Service {
     opencensus::trace::Span span =
         opencensus::GetSpanFromServerContext(context);
     span.AddAttribute("my_attribute", "red");
-    span.AddAnnotation("Constructing greeting.", {{"name", request->name()}});
+    span.AddAnnotation(
+        "Constructing greeting.",
+        {{"name", request->name()}, {"name length", request->name().size()}});
     reply->set_message(absl::StrCat("Hello ", request->name(), "!"));
     absl::SleepFor(absl::Milliseconds(10));
     PerformWork(&span);
