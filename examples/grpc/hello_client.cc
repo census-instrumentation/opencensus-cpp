@@ -64,19 +64,22 @@ int main(int argc, char** argv) {
   std::unique_ptr<HelloService::Stub> stub = HelloService::NewStub(channel);
 
   // Send the RPC.
-  grpc::ClientContext ctx;
-  HelloRequest request;
-  HelloReply reply;
-  request.set_name("world");
-  std::cout << "Sending request: \"" << request.ShortDebugString() << "\"\n";
+  {
+    // The client Span ends when ctx falls out of scope.
+    grpc::ClientContext ctx;
+    HelloRequest request;
+    HelloReply reply;
+    request.set_name("world");
+    std::cout << "Sending request: \"" << request.ShortDebugString() << "\"\n";
 
-  grpc::Status status = stub->SayHello(&ctx, request, &reply);
+    grpc::Status status = stub->SayHello(&ctx, request, &reply);
 
-  std::cout << "Got status: " << status.error_code() << ": \""
-            << status.error_message() << "\"\n";
-  std::cout << "Got reply: \"" << reply.ShortDebugString() << "\"\n";
+    std::cout << "Got status: " << status.error_code() << ": \""
+              << status.error_message() << "\"\n";
+    std::cout << "Got reply: \"" << reply.ShortDebugString() << "\"\n";
+  }
 
-  // Disable tracing any further RPCs (which will be send by exporters).
+  // Disable tracing any further RPCs (which will be sent by exporters).
   opencensus::trace::TraceConfig::SetCurrentTraceParams(
       {128, 128, 128, 128, opencensus::trace::ProbabilitySampler(0.0)});
 
