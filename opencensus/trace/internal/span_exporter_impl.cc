@@ -57,6 +57,11 @@ void SpanExporterImpl::StartExportThread() {
   thread_started_ = true;
 }
 
+bool SpanExporterImpl::IsBufferFull() const {
+  span_mu_.AssertHeld();
+  return spans_.size() >= buffer_size_;
+}
+
 void SpanExporterImpl::RunWorkerLoop() {
   std::vector<opencensus::trace::exporter::SpanData> span_data_;
   std::vector<std::shared_ptr<opencensus::trace::SpanImpl>> spans_copy_;
@@ -67,14 +72,9 @@ void SpanExporterImpl::RunWorkerLoop() {
     {
       absl::MutexLock l(&span_mu_);
       // Wait until batch is full or interval time has been exceeded.
-      span_mu_.AwaitWithDeadline(absl::Condition(
-                                     +[](SpanExporterImpl* ptr) {
-                                       ptr->span_mu_.AssertHeld();
-                                       return ptr->spans_.size() >=
-                                              ptr->buffer_size_;
-                                     },
-                                     this),
-                                 next_forced_export_time);
+      span_mu_.AwaitWithDeadline(
+          absl::Condition(this, &SpanExporterImpl::IsBufferFull),
+          next_forced_export_time);
       next_forced_export_time = absl::Now() + interval_;
       if (spans_.empty()) {
         continue;
