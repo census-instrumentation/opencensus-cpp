@@ -67,3 +67,9 @@ env STACKDRIVER_PROJECT_ID=myproject ../../bazel-bin/examples/grpc/hello_client 
 
 Go to https://console.cloud.google.com/traces/traces to see traces, and
 https://console.cloud.google.com/monitoring to see stats.
+
+Example trace:
+
+[![Example trace][sayhello-image]]
+
+[sayhello-image]: img/sayhello.png
