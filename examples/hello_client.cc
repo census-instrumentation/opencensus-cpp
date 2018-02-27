@@ -19,10 +19,14 @@
 
 #include <grpc++/grpc++.h>
 
-// TODO: instrument this.
-
 #include "examples/hello.grpc.pb.h"
 #include "examples/hello.pb.h"
+#include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
+#include "opencensus/exporters/stats/stdout/stdout_exporter.h"
+#include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
+#include "opencensus/exporters/trace/stdout/stdout_exporter.h"
+#include "opencensus/plugins/grpc/grpc_plugin.h"
+#include "opencensus/trace/sampler.h"
 
 namespace {
 
@@ -39,16 +43,27 @@ int main(int argc, char** argv) {
   }
   const std::string hostport = argv[1];
 
+  // Register the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
+  opencensus::RegisterGrpcPlugin();
+
+  // Trace outgoing RPC.
+  opencensus::trace::TraceConfig::SetCurrentTraceParams(
+      {128, 128, 128, 128, opencensus::trace::ProbabilitySampler(1.0)});
+
+  // For debugging, register exporters that just write to stdout.
+  opencensus::exporters::stats::StdoutExporter::Register();
+  opencensus::exporters::trace::StdoutExporter::Register();
+
+  // Create a Channel to send RPCs over.
   std::shared_ptr<grpc::Channel> channel =
       grpc::CreateChannel(hostport, grpc::InsecureChannelCredentials());
   std::unique_ptr<HelloService::Stub> stub = HelloService::NewStub(channel);
 
-  HelloRequest request;
-  request.set_name("world");
-
-  HelloReply reply;
+  // Send the RPC.
   grpc::ClientContext ctx;
-
+  HelloRequest request;
+  HelloReply reply;
+  request.set_name("world");
   std::cout << "Sending request: \"" << request.ShortDebugString() << "\"\n";
 
   grpc::Status status = stub->SayHello(&ctx, request, &reply);
@@ -56,4 +71,14 @@ int main(int argc, char** argv) {
   std::cout << "Got status: " << status.error_code() << ": \""
             << status.error_message() << "\"\n";
   std::cout << "Got reply: \"" << reply.ShortDebugString() << "\"\n";
+
+  // Disable sampling.
+  opencensus::trace::TraceConfig::SetCurrentTraceParams(
+      {128, 128, 128, 128, opencensus::trace::ProbabilitySampler(0.0)});
+
+  // Sleep while exporters run in the background.
+  std::cout << "Client sleeping, ^C to exit.\n";
+  while (true) {
+    absl::SleepFor(absl::Seconds(10));
+  }
 }

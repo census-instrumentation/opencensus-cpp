@@ -25,8 +25,6 @@ env GRPC_VERBOSITY=DEBUG ../bazel-bin/examples/hello_server 9001
 env GRPC_VERBOSITY=DEBUG ../bazel-bin/examples/hello_client [::]:9001
 ```
 
-TODO: instrument the client also
-
 ## Running the example on GCE
 
 Start a GCE instance:

@@ -39,6 +39,7 @@ cc_binary(
         "//opencensus/exporters/stats/stdout:stdout_exporter",
         "//opencensus/exporters/trace/stackdriver:stackdriver_exporter",
         "//opencensus/exporters/trace/stdout:stdout_exporter",
+        "//opencensus/plugins/grpc:grpc_plugin",
         "//opencensus/trace",
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/strings",

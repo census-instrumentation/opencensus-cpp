@@ -33,6 +33,8 @@
 #include "opencensus/plugins/grpc/grpc_plugin.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"
+#include "opencensus/trace/trace_config.h"
+#include "opencensus/trace/sampler.h"
 #include "prometheus/exposer.h"
 
 namespace {
@@ -47,6 +49,8 @@ class HelloServiceImpl final : public HelloService::Service {
                         HelloReply* reply) override {
     opencensus::trace::Span span =
         opencensus::GetSpanFromServerContext(context);
+    span.AddAnnotation("Sleeping.");
+    absl::SleepFor(absl::Milliseconds(50));
     span.AddAnnotation("Constructing greeting.", {{"name", request->name()}});
     reply->set_message(absl::StrCat("Hello ", request->name(), "!"));
     // TODO: Record() custom stats.
@@ -58,13 +62,7 @@ class HelloServiceImpl final : public HelloService::Service {
 }  // namespace
 
 int main(int argc, char** argv) {
-  // Handle environment and args.
-  const char* project_id = getenv("STACKDRIVER_PROJECT_ID");
-  if (project_id == nullptr) {
-    std::cerr
-        << "The STACKDRIVER_PROJECT_ID environment variable must be set.\n";
-    return 1;
-  }
+  // Handle port argument.
   int port = 0;
   if (argc == 2) {
     if (!absl::SimpleAtoi(argv[1], &port)) {
@@ -76,11 +74,18 @@ int main(int argc, char** argv) {
   // Register the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
   opencensus::RegisterGrpcPlugin();
 
+  // Trace all RPCs.
+  // FIXME: this causes an endless stream of stackdriver write RPCs to be sampled :^)
+  opencensus::trace::TraceConfig::SetCurrentTraceParams({128, 128, 128, 128, opencensus::trace::ProbabilitySampler(1.0)});
+
   // Register exporters for Stackdriver.
-  if (0) {
-    // TODO: Enable this and get it working on GCE.
+  const char* project_id = getenv("STACKDRIVER_PROJECT_ID");
+  if (project_id == nullptr) {
+    std::cerr
+        << "The STACKDRIVER_PROJECT_ID environment variable is not set: not exporting to Stackdriver.\n";
+  } else {
     opencensus::exporters::stats::StackdriverExporter::Register(project_id,
-                                                                "test_task");
+      absl::StrCat("hello_server", 123));
     opencensus::exporters::trace::StackdriverExporter::Register(project_id);
   }
 
