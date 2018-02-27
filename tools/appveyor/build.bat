@@ -13,7 +13,9 @@ REM See the License for the specific language governing permissions and
 REM limitations under the License.
 
 REM TODO: Exclude broken proto targets that start with an underscore.
-bazel build ...
+REM bazel build ...
+
+bazel build //opencensus/trace
 
 IF %ERRORLEVEL% NEQ 0 EXIT /b %ERRORLEVEL%
 EXIT /b 0

@@ -12,7 +12,8 @@ REM WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 REM See the License for the specific language governing permissions and
 REM limitations under the License.
 
-bazel test ...
+REM bazel test ...
+bazel test //opencensus/trace:all
 
 IF %ERRORLEVEL% NEQ 0 EXIT /b %ERRORLEVEL%
 EXIT /b 0
