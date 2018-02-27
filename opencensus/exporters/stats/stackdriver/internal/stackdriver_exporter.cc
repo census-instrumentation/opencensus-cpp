@@ -73,11 +73,6 @@ void StackdriverExporter::Handler::ExportViewData(
     const opencensus::stats::ViewDescriptor& descriptor,
     const opencensus::stats::ViewData& data) {
   absl::MutexLock l(&mu_);
-  // Stackdriver does not support interval aggregation.
-  if (descriptor.aggregation_window().type() !=
-      opencensus::stats::AggregationWindow::Type::kCumulative) {
-    return;
-  }
   if (!MaybeRegisterView(descriptor)) {
     return;
   }
@@ -134,7 +129,7 @@ bool StackdriverExporter::Handler::MaybeRegisterView(
 // static
 void StackdriverExporter::Register(absl::string_view project_id,
                                    absl::string_view opencensus_task) {
-  opencensus::stats::StatsExporter::RegisterHandler(absl::WrapUnique(
+  opencensus::stats::StatsExporter::RegisterPushHandler(absl::WrapUnique(
       new StackdriverExporter::Handler(project_id, opencensus_task)));
 }
 

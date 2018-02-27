@@ -38,7 +38,7 @@ opencensus::stats::MeasureDouble FooUsage() {
 class ExampleExporter : public opencensus::stats::StatsExporter::Handler {
  public:
   static void Register() {
-    opencensus::stats::StatsExporter::RegisterHandler(
+    opencensus::stats::StatsExporter::RegisterPushHandler(
         absl::make_unique<ExampleExporter>());
   }
 
