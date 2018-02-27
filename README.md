@@ -16,8 +16,8 @@ This is not an officially supported Google product.
 
 ## Quickstart
 
-Please refer to [`examples/`](examples/README.md) for an example RPC server
-that integrates gRPC, Stackdriver, and Prometheus.
+Please refer to [`examples/grpc/`](examples/grpc/README.md) for an example RPC
+server that integrates gRPC, Stackdriver, and Prometheus.
 
 Please refer to
 [`trace/examples/span_example.cc`](opencensus/trace/examples/span_example.cc)
