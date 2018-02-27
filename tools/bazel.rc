@@ -1,0 +1,27 @@
+# bazel configurations for running tests under sanitizers.
+# Based on https://github.com/bazelment/trunk/blob/master/tools/bazel.rc
+
+# --config=asan : Address Sanitizer.
+common:asan --copt -fsanitize=address
+common:asan --copt -DADDRESS_SANITIZER
+common:asan --linkopt -fsanitize=address
+common:asan --cc_output_directory_tag=asan
+
+# --config=msan : Memory Sanitizer.
+# TODO: This doesn't work with gcc.
+#common:msan --copt -fsanitize=memory
+#common:msan --copt -DMEMORY_SANITIZER
+#common:msan --linkopt -fsanitize=memory
+
+# --config=tsan : Thread Sanitizer.
+# TODO: Enable this once it works. Currently breaks build in absl's mutex.cc.
+#common:tsan --copt -fsanitize=thread
+#common:tsan --copt -DTHREAD_SANITIZER
+#common:tsan --copt -DDYNAMIC_ANNOTATIONS_ENABLED=1
+#common:tsan --copt -DDYNAMIC_ANNOTATIONS_EXTERNAL_IMPL=1
+#common:tsan --linkopt -fsanitize=thread
+
+# --config=ubsan : Undefined Behavior Sanitizer.
+common:ubsan --copt -fsanitize=undefined
+common:ubsan --linkopt -fsanitize=undefined
+common:ubsan --cc_output_directory_tag=ubsan

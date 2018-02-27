@@ -27,14 +27,18 @@ load(
     "GCC_TEST_FLAGS",
     "LLVM_FLAGS",
     "LLVM_TEST_FLAGS",
+    "MSVC_FLAGS",
+    "MSVC_TEST_FLAGS",
 )
 
 DEFAULT_COPTS = select({
     "//opencensus:llvm_compiler": LLVM_FLAGS,
+    "//opencensus:windows": MSVC_FLAGS,
     "//conditions:default": GCC_FLAGS,
 })
 
 TEST_COPTS = DEFAULT_COPTS + select({
     "//opencensus:llvm_compiler": LLVM_TEST_FLAGS,
+    "//opencensus:windows": MSVC_TEST_FLAGS,
     "//conditions:default": GCC_TEST_FLAGS,
 })
