@@ -51,6 +51,7 @@ cc_binary(
     copts = DEFAULT_COPTS,
     deps = [
         ":hello_proto",
+        "//opencensus/exporters/stats/prometheus:prometheus_exporter",
         "//opencensus/exporters/stats/stackdriver:stackdriver_exporter",
         "//opencensus/exporters/stats/stdout:stdout_exporter",
         "//opencensus/exporters/trace/stackdriver:stackdriver_exporter",
@@ -59,5 +60,6 @@ cc_binary(
         "//opencensus/trace",
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/strings",
+        "@prometheus_cpp",
     ],
 )

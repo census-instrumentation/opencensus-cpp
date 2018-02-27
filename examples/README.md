@@ -10,6 +10,8 @@ env GRPC_VERBOSITY=DEBUG STACKDRIVER_PROJECT_ID=e2e-debugging ../bazel-bin/examp
 env GRPC_VERBOSITY=DEBUG ../bazel-bin/examples/hello_client [::]:9001
 ```
 
+You can see the Prometheus stats on [http://127.0.0.1:8080].
+
 TODO: more and better docs
 
 TODO: instrument the client also

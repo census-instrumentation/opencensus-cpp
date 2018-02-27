@@ -25,6 +25,7 @@
 #include "absl/strings/str_cat.h"
 #include "examples/hello.grpc.pb.h"
 #include "examples/hello.pb.h"
+#include "opencensus/exporters/stats/prometheus/prometheus_exporter.h"
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 #include "opencensus/exporters/stats/stdout/stdout_exporter.h"
 #include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
@@ -32,6 +33,7 @@
 #include "opencensus/plugins/grpc/grpc_plugin.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"
+#include "prometheus/exposer.h"
 
 namespace {
 
@@ -85,6 +87,11 @@ int main(int argc, char** argv) {
   // For debugging, register exporters that just write to stdout.
   opencensus::exporters::stats::StdoutExporter::Register();
   opencensus::exporters::trace::StdoutExporter::Register();
+
+  // Expose a Prometheus endpoint and register the OpenCensus exporter with it.
+  prometheus::Exposer exposer("127.0.0.1:8080");
+  exposer.RegisterCollectable(
+      std::make_shared<opencensus::exporters::stats::PrometheusExporter>());
 
   // Add views of OpenCensus stats.
   const auto server_request_bytes_descriptor =
