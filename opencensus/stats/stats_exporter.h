@@ -19,6 +19,8 @@
 #include <functional>
 #include <memory>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "absl/strings/string_view.h"
 #include "opencensus/stats/view.h"
@@ -32,15 +34,16 @@ namespace stats {
 // StatsExporter is thread-safe.
 class StatsExporter final {
  public:
-  // Inserts a new view, replacing any existing view with the same name.
+  // Inserts a new view, replacing any existing view with the same name. Only
+  // Cumulative views are supported.
   static void AddView(const ViewDescriptor& view);
   // Removes the view with 'name' from the registry, if one is registered.
   static void RemoveView(absl::string_view name);
 
-  // StatsExporter::Handler is the interface for exporters that export recorded
-  // data for registered views. The exporter should provide a static Register()
-  // method that takes any arguments needed by the exporter (e.g. a URL to
-  // export to) and calls StatsExporter::RegisterHandler itself.
+  // StatsExporter::Handler is the interface for push exporters that export
+  // recorded data for registered views. The exporter should provide a static
+  // Register() method that takes any arguments needed by the exporter (e.g. a
+  // URL to export to) and calls StatsExporter::RegisterHandler itself.
   class Handler {
    public:
     virtual ~Handler() = default;
@@ -48,8 +51,12 @@ class StatsExporter final {
                                 const ViewData& data) = 0;
   };
 
-  // This should only be called by Handler's Register() methods.
-  static void RegisterHandler(std::unique_ptr<Handler> handler);
+  // This should only be called by push exporters' Register() methods.
+  static void RegisterPushHandler(std::unique_ptr<Handler> handler);
+
+  // Retrieves current data for all registered views, for implementing pull
+  // exporters.
+  static std::vector<std::pair<ViewDescriptor, ViewData>> GetViewData();
 
  private:
   friend class StatsExporterTest;

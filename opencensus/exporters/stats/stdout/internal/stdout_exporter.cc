@@ -55,7 +55,7 @@ class StdoutExporter::Handler
 
 // static
 void StdoutExporter::Register() {
-  opencensus::stats::StatsExporter::RegisterHandler(
+  opencensus::stats::StatsExporter::RegisterPushHandler(
       absl::make_unique<StdoutExporter::Handler>());
 }
 
