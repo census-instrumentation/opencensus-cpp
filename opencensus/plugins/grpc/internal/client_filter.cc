@@ -83,6 +83,12 @@ void CensusClientCallData::OnDoneRecvMessageCb(void *user_data,
 void CensusClientCallData::StartTransportStreamOpBatch(
     grpc_call_element *elem, grpc::TransportStreamOpBatch *op) {
   if (op->send_initial_metadata() != nullptr) {
+    // TODO(jsking): Move GenerateClientContext to init callback after
+    // grpc has been changed to populate census context at call initialization.
+    census_context *ctxt = op->get_census_context();
+    GenerateClientContext(
+        method_, &context_,
+        (ctxt == nullptr) ? nullptr : reinterpret_cast<CensusContext *>(ctxt));
     char tracing_buf[kMaxTracingLen];
     size_t tracing_len =
         context_.TraceContextSerialize(tracing_buf, kMaxTracingLen);
@@ -129,21 +135,20 @@ void CensusClientCallData::StartTransportStreamOpBatch(
 
 grpc_error *CensusClientCallData::Init(grpc_call_element *elem,
                                        const grpc_call_element_args *args) {
-  method_ = grpc_slice_ref_internal(args->path);
+  path_ = grpc_slice_ref_internal(args->path);
   start_time_ = absl::Now();
   const char *method_str =
-      GPR_SLICE_IS_EMPTY(method_)
+      GPR_SLICE_IS_EMPTY(path_)
           ? ""
-          : reinterpret_cast<const char *>(GRPC_SLICE_START_PTR(method_));
-  method_size_ = GRPC_SLICE_IS_EMPTY(method_) ? 0 : GRPC_SLICE_LENGTH(method_);
-  absl::string_view method(method_str, method_size_);
-  GenerateClientContext(method, &context_);
+          : reinterpret_cast<const char *>(GRPC_SLICE_START_PTR(path_));
+  method_ = absl::string_view(
+      method_str, GRPC_SLICE_IS_EMPTY(path_) ? 0 : GRPC_SLICE_LENGTH(path_));
   GRPC_CLOSURE_INIT(&on_done_recv_message_, OnDoneRecvMessageCb, elem,
                     grpc_schedule_on_exec_ctx);
   GRPC_CLOSURE_INIT(&on_done_recv_trailing_metadata_,
                     OnDoneRecvTrailingMetadataCb, elem,
                     grpc_schedule_on_exec_ctx);
-  stats::Record({{RpcClientStartedCount(), 1}}, {{kMethodTagKey, method}});
+  stats::Record({{RpcClientStartedCount(), 1}}, {{kMethodTagKey, method_}});
   return GRPC_ERROR_NONE;
 }
 
@@ -164,11 +169,10 @@ void CensusClientCallData::Destroy(grpc_call_element *elem,
        {RpcClientFinishedCount(), 1},
        {RpcClientRequestCount(), sent_message_count_},
        {RpcClientResponseCount(), recv_message_count_}},
-      {{kMethodTagKey, absl::string_view(reinterpret_cast<char *>(
-                                             GRPC_SLICE_START_PTR(method_)),
-                                         method_size_)},
+      {{kMethodTagKey, method_},
        {kStatusTagKey, StatusCodeToString(final_info->final_status)}});
-  grpc_slice_unref_internal(method_);
+  grpc_slice_unref_internal(path_);
+  context_.EndSpan();
 }
 
 }  // namespace opencensus

@@ -29,8 +29,7 @@ namespace opencensus {
 class CensusClientCallData : public grpc::CallData {
  public:
   CensusClientCallData()
-      : method_size_(0),
-        recv_trailing_metadata_(nullptr),
+      : recv_trailing_metadata_(nullptr),
         initial_on_done_recv_trailing_metadata_(nullptr),
         initial_on_done_recv_message_(nullptr),
         elapsed_time_(0),
@@ -39,7 +38,7 @@ class CensusClientCallData : public grpc::CallData {
         sent_message_count_(0) {
     memset(&stats_bin_, 0, sizeof(grpc_linked_mdelem));
     memset(&tracing_bin_, 0, sizeof(grpc_linked_mdelem));
-    memset(&method_, 0, sizeof(grpc_slice));
+    memset(&path_, 0, sizeof(grpc_slice));
     memset(&on_done_recv_trailing_metadata_, 0, sizeof(grpc_closure));
     memset(&on_done_recv_message_, 0, sizeof(grpc_closure));
   }
@@ -65,9 +64,8 @@ class CensusClientCallData : public grpc::CallData {
   grpc_linked_mdelem stats_bin_;
   grpc_linked_mdelem tracing_bin_;
   // Client method.
-  grpc_slice method_;
-  // Client method size.
-  size_t method_size_;
+  absl::string_view method_;
+  grpc_slice path_;
   // The recv trailing metadata callbacks.
   grpc_metadata_batch *recv_trailing_metadata_;
   grpc_closure *initial_on_done_recv_trailing_metadata_;
