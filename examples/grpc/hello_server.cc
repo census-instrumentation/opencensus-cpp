@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Example RPC server using gRPC and OpenCensus and Stackdriver.
+// Example RPC server using gRPC.
 
 #include <cstdlib>
 #include <iostream>
@@ -34,7 +34,6 @@
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/trace_config.h"
-#include "opencensus/trace/sampler.h"
 #include "prometheus/exposer.h"
 
 namespace {
@@ -43,16 +42,25 @@ using examples::HelloReply;
 using examples::HelloRequest;
 using examples::HelloService;
 
+void PerformWork(Span parent) {
+  auto span = opencensus::trace::Span::StartSpan("internal_work", parent);
+  span.AddAnnotation("Performing work.");
+  absl::SleepFor(absl::Milliseconds(20));  // Working hard here.
+  span.End();
+}
+
 class HelloServiceImpl final : public HelloService::Service {
   grpc::Status SayHello(grpc::ServerContext* context,
                         const HelloRequest* request,
                         HelloReply* reply) override {
     opencensus::trace::Span span =
         opencensus::GetSpanFromServerContext(context);
-    span.AddAnnotation("Sleeping.");
-    absl::SleepFor(absl::Milliseconds(50));
     span.AddAnnotation("Constructing greeting.", {{"name", request->name()}});
     reply->set_message(absl::StrCat("Hello ", request->name(), "!"));
+    absl::SleepFor(absl::Milliseconds(10));
+    PerformWork(span);
+    span.AddAnnotation("Sleeping.");
+    absl::SleepFor(absl::Milliseconds(30));
     // TODO: Record() custom stats.
     std::cerr << "SayHello RPC handled.\n";
     return grpc::Status::OK;
@@ -75,17 +83,22 @@ int main(int argc, char** argv) {
   opencensus::RegisterGrpcPlugin();
 
   // Trace all RPCs.
-  // FIXME: this causes an endless stream of stackdriver write RPCs to be sampled :^)
-  opencensus::trace::TraceConfig::SetCurrentTraceParams({128, 128, 128, 128, opencensus::trace::ProbabilitySampler(1.0)});
+  // FIXME: this causes an endless stream of stackdriver write RPCs to be
+  // sampled :^) opencensus::trace::TraceConfig::SetCurrentTraceParams({128,
+  // 128, 128, 128, opencensus::trace::ProbabilitySampler(1.0)});
 
   // Register exporters for Stackdriver.
   const char* project_id = getenv("STACKDRIVER_PROJECT_ID");
   if (project_id == nullptr) {
-    std::cerr
-        << "The STACKDRIVER_PROJECT_ID environment variable is not set: not exporting to Stackdriver.\n";
+    std::cerr << "The STACKDRIVER_PROJECT_ID environment variable is not set: "
+                 "not exporting to Stackdriver.\n";
   } else {
-    opencensus::exporters::stats::StackdriverExporter::Register(project_id,
-      absl::StrCat("hello_server", 123));
+    const char* hostname = getenv("HOSTNAME");
+    if (hostname == nullptr) hostname = "hostname";
+    const std::string opencensus_task =
+        absl::StrCat("cpp-", getpid(), "@", hostname);
+    opencensus::exporters::stats::StackdriverExporter::Register(
+        project_id, opencensus_task);
     opencensus::exporters::trace::StackdriverExporter::Register(project_id);
   }
 
