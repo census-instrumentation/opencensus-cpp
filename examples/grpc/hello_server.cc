@@ -43,6 +43,7 @@ using examples::HelloReply;
 using examples::HelloRequest;
 using examples::HelloService;
 
+// A helper function that performs some work in its own Span.
 void PerformWork(opencensus::trace::Span* parent) {
   auto span = opencensus::trace::Span::StartSpan("internal_work", parent);
   span.AddAttribute("my_attribute", "blue");
@@ -86,11 +87,6 @@ int main(int argc, char** argv) {
 
   // Register the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
   opencensus::RegisterGrpcPlugin();
-
-  // Trace all RPCs.
-  // FIXME: this causes an endless stream of stackdriver write RPCs to be
-  // sampled :^) opencensus::trace::TraceConfig::SetCurrentTraceParams({128,
-  // 128, 128, 128, opencensus::trace::ProbabilitySampler(1.0)});
 
   // Register exporters for Stackdriver.
   RegisterStackdriverExporters();

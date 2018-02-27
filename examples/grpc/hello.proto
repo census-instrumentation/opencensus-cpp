@@ -4,7 +4,7 @@ package examples;
 
 // The hello service says hello.
 service HelloService {
-  // Sends a greeting
+  // Sends a greeting.
   rpc SayHello (HelloRequest) returns (HelloReply) {}
 }
 
@@ -13,7 +13,7 @@ message HelloRequest {
   string name = 1;
 }
 
-// The response message containing the greetings.
+// The response message containing the greeting.
 message HelloReply {
   string message = 1;
 }
