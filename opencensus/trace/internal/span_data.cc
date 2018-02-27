@@ -85,64 +85,42 @@ bool SpanData::has_remote_parent() const { return has_remote_parent_; }
 
 std::string SpanData::DebugString() const {
   std::string debug_str;
-  StrAppend(&debug_str, "Name: ", name(), "\n");
-  StrAppend(&debug_str, "TraceId-SpanId-Options:\n");
-  StrAppend(&debug_str, context().ToString(), "\n");
-  StrAppend(&debug_str, "Parent SpanId: ", parent_span_id().ToHex(), "\n");
+  StrAppend(&debug_str, "Name: ", name(),
+            "\nTraceId-SpanId-Options: ", context().ToString(),
+            "\nParent SpanId: ", parent_span_id().ToHex(),
+            " (remote: ", has_remote_parent() ? "true" : "false",
+            ")\nStart time: ", absl::FormatTime(start_time()),
+            "\nEnd time: ", absl::FormatTime(end_time()), "\n");
 
-  // The start time of the span.
-  StrAppend(&debug_str, "start time: ", absl::FormatTime(start_time()), "\n");
-
-  // The end time of the span. Set to 0 if the span hasn't ended.
-  StrAppend(&debug_str, "end time: ", absl::FormatTime(end_time()), "\n");
-
-  // Export Attributes
-  StrAppend(&debug_str, "Attributes:\n");
-  // The number of attributes that were dropped.
-  StrAppend(&debug_str, "\tnum dropped attributes: ", num_attributes_dropped(),
-            "\n");
+  StrAppend(&debug_str, "Attributes: (", num_attributes_dropped(),
+            " dropped)\n");
   for (const auto& attribute : attributes()) {
-    StrAppend(&debug_str, "\t", attribute.first, " : ",
-              attribute.second.DebugString(), "\n");
+    StrAppend(&debug_str, "  \"", attribute.first,
+              "\":", attribute.second.DebugString(), "\n");
   }
 
-  // Export Annotations
-  StrAppend(&debug_str, "Annotations:\n");
-  StrAppend(&debug_str,
-            "\tnum dropped annotations: ", annotations().dropped_events_count(),
-            "\n");
+  StrAppend(&debug_str, "Annotations: (", annotations().dropped_events_count(),
+            " dropped)\n");
   for (const auto& annotation : annotations().events()) {
-    StrAppend(&debug_str, "\t", annotation.event().DebugString(), "\n");
+    StrAppend(&debug_str, "  ", absl::FormatTime(annotation.timestamp()), ": ",
+              annotation.event().DebugString(), "\n");
   }
 
-  // Export Message Events
-  StrAppend(&debug_str, "Message Events:\n");
-  // The number of message events that were dropped.
-  StrAppend(&debug_str,
-            "\tnum dropped events: ", message_events().dropped_events_count(),
-            "\n");
+  StrAppend(&debug_str, "Message events: (",
+            message_events().dropped_events_count(), " dropped)\n");
   for (const auto& message : message_events().events()) {
-    StrAppend(&debug_str, "\t", message.event().DebugString(), "\n");
+    StrAppend(&debug_str, "  ", absl::FormatTime(message.timestamp()), ": ",
+              message.event().DebugString(), "\n");
   }
 
-  // Export Links
-  StrAppend(&debug_str, "Links:\n");
-  // The number of links that were dropped.
-  StrAppend(&debug_str, "\tnum dropped links: ", num_links_dropped(), "\n");
+  StrAppend(&debug_str, "Links: (", num_links_dropped(), " dropped)\n");
   for (const auto& link : links()) {
-    StrAppend(&debug_str, "\t", link.DebugString(), "\n");
+    StrAppend(&debug_str, "  ", link.DebugString(), "\n");
   }
 
-  // True if the span ended.
-  StrAppend(&debug_str, "span ended: ", (has_ended() ? "true" : "false"), "\n");
+  StrAppend(&debug_str, "Span ended: ", (has_ended() ? "true" : "false"), "\n");
 
-  // True if the parent is on a different process.
-  StrAppend(&debug_str,
-            "has remote parent: ", (has_remote_parent() ? "true" : "false"),
-            "\n");
-
-  // The status of the span. Unset if the span hasn't ended.
-  StrAppend(&debug_str, "status: ", status().ToString(), "\n");
+  StrAppend(&debug_str, "Status: ", status().ToString(), "\n");
   return debug_str;
 }
 
