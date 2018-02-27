@@ -35,6 +35,7 @@
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/trace_config.h"
 #include "prometheus/exposer.h"
+#include "examples/grpc/stackdriver.h"
 
 namespace {
 
@@ -88,19 +89,7 @@ int main(int argc, char** argv) {
   // 128, 128, 128, opencensus::trace::ProbabilitySampler(1.0)});
 
   // Register exporters for Stackdriver.
-  const char* project_id = getenv("STACKDRIVER_PROJECT_ID");
-  if (project_id == nullptr) {
-    std::cerr << "The STACKDRIVER_PROJECT_ID environment variable is not set: "
-                 "not exporting to Stackdriver.\n";
-  } else {
-    const char* hostname = getenv("HOSTNAME");
-    if (hostname == nullptr) hostname = "hostname";
-    const std::string opencensus_task =
-        absl::StrCat("cpp-", getpid(), "@", hostname);
-    opencensus::exporters::stats::StackdriverExporter::Register(
-        project_id, opencensus_task);
-    opencensus::exporters::trace::StackdriverExporter::Register(project_id);
-  }
+  RegisterStackdriverExporters();
 
   // For debugging, register exporters that just write to stdout.
   opencensus::exporters::stats::StdoutExporter::Register();

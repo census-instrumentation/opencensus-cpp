@@ -29,6 +29,18 @@ cc_grpc_library(
     deps = [],
 )
 
+cc_library(
+    name = "stackdriver",
+    srcs = ["stackdriver.cc"],
+    hdrs = ["stackdriver.h"],
+    copts = DEFAULT_COPTS,
+    deps = [
+        "//opencensus/exporters/stats/stackdriver:stackdriver_exporter",
+        "//opencensus/exporters/trace/stackdriver:stackdriver_exporter",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 cc_binary(
     name = "hello_client",
     srcs = ["hello_client.cc"],

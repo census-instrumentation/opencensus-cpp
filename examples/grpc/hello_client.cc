@@ -19,6 +19,7 @@
 
 #include <grpc++/grpc++.h>
 
+#include "examples/grpc/stackdriver.h"
 #include "examples/hello.grpc.pb.h"
 #include "examples/hello.pb.h"
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
@@ -46,7 +47,10 @@ int main(int argc, char** argv) {
   // Register the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
   opencensus::RegisterGrpcPlugin();
 
-  // Trace outgoing RPC.
+  // Register exporters for Stackdriver.
+  RegisterStackdriverExporters();
+
+  // Trace all outgoing RPCs.
   opencensus::trace::TraceConfig::SetCurrentTraceParams(
       {128, 128, 128, 128, opencensus::trace::ProbabilitySampler(1.0)});
 
@@ -72,7 +76,7 @@ int main(int argc, char** argv) {
             << status.error_message() << "\"\n";
   std::cout << "Got reply: \"" << reply.ShortDebugString() << "\"\n";
 
-  // Disable sampling.
+  // Disable tracing any further RPCs (which will be send by exporters).
   opencensus::trace::TraceConfig::SetCurrentTraceParams(
       {128, 128, 128, 128, opencensus::trace::ProbabilitySampler(0.0)});
 
