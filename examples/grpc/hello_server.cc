@@ -45,6 +45,7 @@ using examples::HelloService;
 
 void PerformWork(opencensus::trace::Span* parent) {
   auto span = opencensus::trace::Span::StartSpan("internal_work", parent);
+  span.AddAttribute("my_attribute", "blue");
   span.AddAnnotation("Performing work.");
   absl::SleepFor(absl::Milliseconds(20));  // Working hard here.
   span.End();
@@ -56,6 +57,7 @@ class HelloServiceImpl final : public HelloService::Service {
                         HelloReply* reply) override {
     opencensus::trace::Span span =
         opencensus::GetSpanFromServerContext(context);
+    span.AddAttribute("my_attribute", "red");
     span.AddAnnotation("Constructing greeting.", {{"name", request->name()}});
     reply->set_message(absl::StrCat("Hello ", request->name(), "!"));
     absl::SleepFor(absl::Milliseconds(10));
