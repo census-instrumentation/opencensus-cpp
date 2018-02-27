@@ -22,6 +22,11 @@
 namespace opencensus {
 namespace stats {
 
+// View is an RAII handle for on-task data collection--once a View is
+// instantiated Opencensus will collect data for it, which can be accessed with
+// View::GetData(). To register a view for export, rather than on-task
+// collection, use ViewDescriptor::RegisterForExport() instead.
+//
 // View objects are thread-safe.
 class View {
  public:

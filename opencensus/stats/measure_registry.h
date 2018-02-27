@@ -37,7 +37,7 @@ class MeasureRegistry final {
   // registered with GetMeasure*ByName before registering it.
   //
   // 'name' should be a globally unique identifier. It is recommended that this
-  //   be in the format "<domain>/<path>", e.g. "example.com/Foo/FooUsage".
+  //   be in the format "<domain>/<path>", e.g. "example.com/client/foo_usage".
   // 'units' are the units of recorded values. The recommended grammar is:
   //     - Expression = Component { "." Component } {"/" Component }
   //     - Component = [ PREFIX ] UNIT [ Annotation ] | Annotation | "1"

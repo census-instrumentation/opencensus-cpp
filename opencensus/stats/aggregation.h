@@ -29,7 +29,8 @@ namespace stats {
 class Aggregation final {
  public:
   // Count aggregation counts the number of records, ignoring their individual
-  // values.
+  // values. Note that 'count' measures (e.g. the count of RPCs received) should
+  // use Sum() aggregation to correctly handle non-unit recorded values.
   static Aggregation Count() {
     return Aggregation(Type::kCount, BucketBoundaries::Explicit({}));
   }
@@ -39,8 +40,9 @@ class Aggregation final {
     return Aggregation(Type::kSum, BucketBoundaries::Explicit({}));
   }
 
-  // Distribution aggregation records the number of records in each bucket
-  // defined by 'buckets', and calculates distribution stats from that.
+  // Distribution aggregation calculates distribution statistics (count, mean,
+  // range, and sum of squared deviation) and tracks a histogram of recorded
+  // values according to 'buckets'.
   static Aggregation Distribution(BucketBoundaries buckets) {
     return Aggregation(Type::kDistribution, std::move(buckets));
   }
