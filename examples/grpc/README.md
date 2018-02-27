@@ -70,6 +70,4 @@ https://console.cloud.google.com/monitoring to see stats.
 
 Example trace:
 
-[![Example trace][sayhello-image]]
-
-[sayhello-image]: img/sayhello.png
+![Example trace](img/sayhello.png)
