@@ -3,7 +3,7 @@
 This example uses:
 
 * gRPC to create an RPC server and client.
-* The OpenCensus gRPC plugin to instrument the RPC server
+* The OpenCensus gRPC plugin to instrument the RPC server.
 * The Stackdriver exporter to export stats and traces.
 * The Prometheus exporter to export stats.
 * Debugging exporters to print stats and traces to stdout.
@@ -27,10 +27,9 @@ env GRPC_VERBOSITY=DEBUG ../../bazel-bin/examples/grpc/hello_client [::]:9001
 
 ## Running the example on GCE
 
-Start a GCE instance:
+Log in to a GCE instance:
 
 ```shell
-gcloud create gce instance # TODO
 gcloud compute --project myproject ssh myinstance
 ```
 
@@ -47,11 +46,11 @@ Build the example:
 
 ```shell
 git clone https://github.com/census-instrumentation/opencensus-cpp.git
-cd opencensus-cpp/examples
+cd opencensus-cpp/examples/grpc
 bazel build :all
 ```
 
-Configure authentication on the VM:
+Install the gRPC certificates on the VM: (you only need to do this once)
 
 ```shell
 sudo mkdir -p /usr/share/grpc
