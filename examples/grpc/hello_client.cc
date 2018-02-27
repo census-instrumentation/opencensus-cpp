@@ -19,9 +19,9 @@
 
 #include <grpc++/grpc++.h>
 
+#include "examples/grpc/hello.grpc.pb.h"
+#include "examples/grpc/hello.pb.h"
 #include "examples/grpc/stackdriver.h"
-#include "examples/hello.grpc.pb.h"
-#include "examples/hello.pb.h"
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 #include "opencensus/exporters/stats/stdout/stdout_exporter.h"
 #include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"

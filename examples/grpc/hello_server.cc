@@ -23,8 +23,9 @@
 
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
-#include "examples/hello.grpc.pb.h"
-#include "examples/hello.pb.h"
+#include "examples/grpc/hello.grpc.pb.h"
+#include "examples/grpc/hello.pb.h"
+#include "examples/grpc/stackdriver.h"
 #include "opencensus/exporters/stats/prometheus/prometheus_exporter.h"
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 #include "opencensus/exporters/stats/stdout/stdout_exporter.h"
@@ -35,7 +36,6 @@
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/trace_config.h"
 #include "prometheus/exposer.h"
-#include "examples/grpc/stackdriver.h"
 
 namespace {
 
@@ -43,7 +43,7 @@ using examples::HelloReply;
 using examples::HelloRequest;
 using examples::HelloService;
 
-void PerformWork(Span parent) {
+void PerformWork(opencensus::trace::Span* parent) {
   auto span = opencensus::trace::Span::StartSpan("internal_work", parent);
   span.AddAnnotation("Performing work.");
   absl::SleepFor(absl::Milliseconds(20));  // Working hard here.
@@ -59,7 +59,7 @@ class HelloServiceImpl final : public HelloService::Service {
     span.AddAnnotation("Constructing greeting.", {{"name", request->name()}});
     reply->set_message(absl::StrCat("Hello ", request->name(), "!"));
     absl::SleepFor(absl::Milliseconds(10));
-    PerformWork(span);
+    PerformWork(&span);
     span.AddAnnotation("Sleeping.");
     absl::SleepFor(absl::Milliseconds(30));
     // TODO: Record() custom stats.
