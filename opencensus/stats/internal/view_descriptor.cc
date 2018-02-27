@@ -14,11 +14,21 @@
 
 #include "opencensus/stats/view_descriptor.h"
 
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
+#include "absl/strings/string_view.h"
 #include "absl/time/time.h"
+#include "opencensus/stats/aggregation.h"
+#include "opencensus/stats/internal/aggregation_window.h"
 #include "opencensus/stats/internal/measure_registry_impl.h"
+#include "opencensus/stats/internal/stats_exporter_impl.h"
+#include "opencensus/stats/measure_descriptor.h"
+#include "opencensus/stats/view.h"
 
 namespace opencensus {
 namespace stats {
@@ -61,6 +71,14 @@ ViewDescriptor& ViewDescriptor::add_column(absl::string_view tag_key) {
 ViewDescriptor& ViewDescriptor::set_description(absl::string_view description) {
   description_ = std::string(description);
   return *this;
+}
+
+void ViewDescriptor::RegisterForExport() const {
+  if (aggregation_window_.type() == AggregationWindow::Type::kCumulative) {
+    StatsExporterImpl::Get()->AddView(*this);
+  } else {
+    std::cerr << "Only cumulative views may be registered for export.\n";
+  }
 }
 
 std::string ViewDescriptor::DebugString() const {
