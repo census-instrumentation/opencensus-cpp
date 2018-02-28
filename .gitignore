@@ -27,3 +27,6 @@ bazel-genfiles
 bazel-opencensus-cpp
 bazel-out
 bazel-testlogs
+
+# html
+html
