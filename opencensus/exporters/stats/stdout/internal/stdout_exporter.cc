@@ -20,7 +20,6 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/str_split.h"
 #include "absl/time/time.h"
 #include "opencensus/stats/stats.h"
 
@@ -31,18 +30,10 @@ namespace stats {
 namespace {
 
 // Functions to print data for different aggregation types.
-std::string DataToString(double data) { return absl::StrCat(": ", data, "\n"); }
-std::string DataToString(int64_t data) {
-  return absl::StrCat(": ", data, "\n");
-}
+std::string DataToString(double data) { return absl::StrCat(": ", data); }
+std::string DataToString(int64_t data) { return absl::StrCat(": ", data); }
 std::string DataToString(const opencensus::stats::Distribution& data) {
-  std::string output = "\n";
-  std::vector<std::string> lines = absl::StrSplit(data.DebugString(), '\n');
-  // Add indent.
-  for (const auto& line : lines) {
-    absl::StrAppend(&output, "    ", line, "\n");
-  }
-  return output;
+  return absl::StrCat("\n", data.DebugString());
 }
 
 }  // namespace
@@ -92,23 +83,23 @@ void StdoutExporter::Handler::ExportViewDataImpl(
     const opencensus::stats::ViewDescriptor& descriptor, absl::Time start_time,
     absl::Time end_time,
     const opencensus::stats::ViewData::DataMap<DataValueT>& data) {
-  if (data.size() == 0) {
-    std::cout << absl::StrCat("No data for view \"", descriptor.name(),
-                              "\" from ", absl::FormatTime(start_time),
-                              ".\n\n");
-    return;
+  std::string output;
+  absl::StrAppend(&output, "\nData for view \"", descriptor.name(), "\" from ",
+                  absl::FormatTime(start_time), " to ",
+                  absl::FormatTime(end_time), ":\n");
+  for (const auto& tag_key : descriptor.columns()) {
+    absl::StrAppend(
+        &output, tag_key,
+        tag_key.size() > 10 ? "" : std::string(10 - tag_key.size(), ' '));
   }
-  // Build a string so we can write it to cout in one shot to minimize crosstalk
-  // if multiple threads write to cout simultaneously.
-  std::string output = absl::StrCat("Data for view \"", descriptor.name(),
-                                    "\" from ", absl::FormatTime(start_time),
-                                    " to ", absl::FormatTime(end_time), ":\n");
+  absl::StrAppend(&output, "\n");
   for (const auto& row : data) {
-    absl::StrAppend(&output, "  ");
-    for (int i = 0; i < descriptor.columns().size(); ++i) {
-      absl::StrAppend(&output, descriptor.columns()[i], "=", row.first[i], " ");
+    for (const auto& tag_value : row.first) {
+      absl::StrAppend(
+          &output, tag_value,
+          tag_value.size() > 10 ? "" : std::string(10 - tag_value.size(), ' '));
     }
-    absl::StrAppend(&output, DataToString(row.second));
+    absl::StrAppend(&output, DataToString(row.second), "\n");
   }
   absl::StrAppend(&output, "\n");
   std::cout << output;
