@@ -178,7 +178,7 @@ const stats::ViewDescriptor& ClientResponseCountCumulative() {
 // server cumulative
 const stats::ViewDescriptor& ServerErrorCountCumulative() {
   const static stats::ViewDescriptor descriptor =
-      MinuteDescriptor()
+      stats::ViewDescriptor()
           .set_name("grpc.io/server/error_count/cumulative")
           .set_measure(kRpcServerErrorCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
@@ -189,7 +189,7 @@ const stats::ViewDescriptor& ServerErrorCountCumulative() {
 
 const stats::ViewDescriptor& ServerRequestBytesCumulative() {
   const static stats::ViewDescriptor descriptor =
-      MinuteDescriptor()
+      stats::ViewDescriptor()
           .set_name("grpc.io/server/request_bytes/cumulative")
           .set_measure(kRpcServerRequestBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
@@ -199,7 +199,7 @@ const stats::ViewDescriptor& ServerRequestBytesCumulative() {
 
 const stats::ViewDescriptor& ServerResponseBytesCumulative() {
   const static stats::ViewDescriptor descriptor =
-      MinuteDescriptor()
+      stats::ViewDescriptor()
           .set_name("grpc.io/server/response_bytes/cumulative")
           .set_measure(kRpcServerResponseBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
@@ -209,7 +209,7 @@ const stats::ViewDescriptor& ServerResponseBytesCumulative() {
 
 const stats::ViewDescriptor& ServerServerElapsedTimeCumulative() {
   const static stats::ViewDescriptor descriptor =
-      MinuteDescriptor()
+      stats::ViewDescriptor()
           .set_name("grpc.io/server/elapsed_time/cumulative")
           .set_measure(kRpcServerServerElapsedTimeMeasureName)
           .set_aggregation(MillisDistributionAggregation())
@@ -219,7 +219,7 @@ const stats::ViewDescriptor& ServerServerElapsedTimeCumulative() {
 
 const stats::ViewDescriptor& ServerStartedCountCumulative() {
   const static stats::ViewDescriptor descriptor =
-      MinuteDescriptor()
+      stats::ViewDescriptor()
           .set_name("grpc.io/server/started_count/cumulative")
           .set_measure(kRpcServerStartedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
@@ -229,7 +229,7 @@ const stats::ViewDescriptor& ServerStartedCountCumulative() {
 
 const stats::ViewDescriptor& ServerFinishedCountCumulative() {
   const static stats::ViewDescriptor descriptor =
-      MinuteDescriptor()
+      stats::ViewDescriptor()
           .set_name("grpc.io/server/finished_count/cumulative")
           .set_measure(kRpcServerFinishedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
@@ -239,7 +239,7 @@ const stats::ViewDescriptor& ServerFinishedCountCumulative() {
 
 const stats::ViewDescriptor& ServerRequestCountCumulative() {
   const static stats::ViewDescriptor descriptor =
-      MinuteDescriptor()
+      stats::ViewDescriptor()
           .set_name("grpc.io/server/request_count/cumulative")
           .set_measure(kRpcServerRequestCountMeasureName)
           .set_aggregation(CountDistributionAggregation())
@@ -249,7 +249,7 @@ const stats::ViewDescriptor& ServerRequestCountCumulative() {
 
 const stats::ViewDescriptor& ServerResponseCountCumulative() {
   const static stats::ViewDescriptor descriptor =
-      MinuteDescriptor()
+      stats::ViewDescriptor()
           .set_name("grpc.io/server/response_count/cumulative")
           .set_measure(kRpcServerResponseCountMeasureName)
           .set_aggregation(CountDistributionAggregation())

@@ -42,6 +42,7 @@ cc_library(
         "internal/server_filter.h",
     ],
     copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
     deps = [
         "//opencensus/stats",
         "//opencensus/trace",
@@ -65,13 +66,13 @@ cc_test(
     linkopts = [
         "-pthread",
     ],
-    tags = ["noci"],  # TODO: determine why this times out on Travis and reenable.
     deps = [
         ":grpc_plugin",
         "//opencensus/plugins/grpc/internal/testing:echo_proto",
         "//opencensus/stats",
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",
     ],
 )
