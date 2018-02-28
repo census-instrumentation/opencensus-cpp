@@ -13,11 +13,14 @@
 // limitations under the License.
 
 #include "opencensus/plugins/grpc/grpc_plugin.h"
+
+#include <grpc++/server_context.h>
+
 #include "opencensus/plugins/grpc/internal/channel_filter.h"
 #include "opencensus/plugins/grpc/internal/client_filter.h"
 #include "opencensus/plugins/grpc/internal/measures.h"
 #include "opencensus/plugins/grpc/internal/server_filter.h"
-#include "src/core/lib/surface/channel_init.h"
+#include "opencensus/trace/span.h"
 
 namespace opencensus {
 
@@ -50,6 +53,11 @@ void RegisterGrpcPlugin() {
   RpcServerFinishedCount();
   RpcServerRequestCount();
   RpcServerResponseCount();
+}
+
+opencensus::trace::Span GetSpanFromServerContext(grpc::ServerContext* context) {
+  return reinterpret_cast<const CensusContext*>(context->census_context())
+      ->Span();
 }
 
 // These measure definitions should be kept in sync across opencensus

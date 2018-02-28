@@ -16,6 +16,11 @@
 #define OPENCENSUS_PLUGINS_GRPC_GRPC_PLUGIN_H_
 
 #include "absl/strings/string_view.h"
+#include "opencensus/trace/span.h"
+
+namespace grpc {
+class ServerContext;
+}
 
 namespace opencensus {
 
@@ -23,6 +28,9 @@ namespace opencensus {
 // RPCs. This must be called before any views are created on the measures
 // defined below.
 void RegisterGrpcPlugin();
+
+// Returns the tracing Span for the current RPC.
+opencensus::trace::Span GetSpanFromServerContext(grpc::ServerContext* context);
 
 // The tag key for the RPC method and status, set for all values recorded for
 // the following measures.
