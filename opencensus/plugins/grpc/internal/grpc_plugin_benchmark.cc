@@ -95,6 +95,9 @@ BENCHMARK(BM_E2eLatencyCensusDisabled);
 
 void BM_E2eLatencyCensusEnabled(benchmark::State& state) {
   RegisterOnce();
+  // This we can safely repeat, and doing so clears accumulated data to avoid
+  // initialization costs varying between runs.
+  ExperimentalRegisterGrpcViewsForExport();
 
   EchoServerThread server;
   std::unique_ptr<testing::EchoService::Stub> stub =
