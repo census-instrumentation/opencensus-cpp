@@ -88,6 +88,9 @@ int main(int argc, char** argv) {
   // Register the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
   opencensus::RegisterGrpcPlugin();
 
+  // Register the experimental gRPC views (latency, error count, etc).
+  opencensus::ExperimentalRegisterGrpcViewsForExport();
+
   // Register exporters for Stackdriver.
   RegisterStackdriverExporters();
 
@@ -102,27 +105,6 @@ int main(int argc, char** argv) {
   // Expose a Prometheus endpoint.
   prometheus::Exposer exposer("127.0.0.1:8080");
   exposer.RegisterCollectable(exporter);
-
-  // Add views for RPC stats.
-  const auto server_request_bytes_descriptor =
-      opencensus::stats::ViewDescriptor()
-          .set_measure(opencensus::kRpcServerRequestBytesMeasureName)
-          .set_name("server_request_bytes")
-          .set_aggregation(opencensus::stats::Aggregation::Distribution(
-              opencensus::stats::BucketBoundaries::Exponential(5, 1, 10)))
-          .add_column(opencensus::kMethodTagKey);
-  const auto server_response_bytes_descriptor =
-      opencensus::stats::ViewDescriptor()
-          .set_measure(opencensus::kRpcServerResponseBytesMeasureName)
-          .set_name("server_response_bytes")
-          .set_aggregation(opencensus::stats::Aggregation::Distribution(
-              opencensus::stats::BucketBoundaries::Explicit({})))
-          .add_column(opencensus::kMethodTagKey);
-
-  // TODO: Get default/example gRPC views from plugin.
-
-  opencensus::stats::StatsExporter::AddView(server_request_bytes_descriptor);
-  opencensus::stats::StatsExporter::AddView(server_response_bytes_descriptor);
 
   // Start the RPC server. You shouldn't see any output from gRPC before this.
   std::cerr << "gRPC starting.\n";
