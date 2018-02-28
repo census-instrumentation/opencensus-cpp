@@ -54,6 +54,7 @@ class StatsPluginEnd2EndTest : public ::testing::Test {
     // interface.
     ::grpc::ServerBuilder builder;
     int port;
+    // Use IPv4 here because it's less flaky than IPv6 ("[::]:0") on Travis.
     builder.AddListeningPort("0.0.0.0:0", ::grpc::InsecureServerCredentials(),
                              &port);
     builder.RegisterService(&service_);
