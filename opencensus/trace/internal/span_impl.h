@@ -87,6 +87,8 @@ class SpanImpl final {
 
   // Marks the end of the Span and sets its end_time_.
   void End() LOCKS_EXCLUDED(mu_);
+  // Returns true if the span has ended.
+  bool HasEnded() LOCKS_EXCLUDED(mu_);
 
   absl::string_view name() const { return name_; }
 
