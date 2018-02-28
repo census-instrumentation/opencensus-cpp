@@ -12,7 +12,7 @@ REM WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 REM See the License for the specific language governing permissions and
 REM limitations under the License.
 
-REM TODO: Get everything to build under Windows:
+REM TODO: Get everything to build on Windows:
 REM bazel build //...
 
 REM TODO: Remove --output_user_root after https://github.com/bazelbuild/bazel/issues/4149 is fixed.
