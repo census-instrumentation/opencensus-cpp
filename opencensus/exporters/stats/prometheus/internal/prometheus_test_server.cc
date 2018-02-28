@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
           .set_description(
               "Cumulative distribution of example.com/Foo/FooUsage broken down "
               "by 'key1' and 'key2'.");
-  opencensus::stats::StatsExporter::AddView(view_descriptor);
+  view_descriptor.RegisterForExport();
 
   std::cout << "Access metrics on http://127.0.0.1:8080/metrics\n";
   while (true) {
