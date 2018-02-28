@@ -27,8 +27,7 @@ env GRPC_VERBOSITY=DEBUG ../../bazel-bin/examples/grpc/hello_client [::]:9001
 
 ## Stackdriver
 
-In order to be able to push your stats to [Stackdriver
-Monitoring][https://cloud.google.com/monitoring/], you must:
+In order to be able to push your stats to [Stackdriver Monitoring][https://cloud.google.com/monitoring/], you must:
 
 1. [Create a Cloud project](https://support.google.com/cloud/answer/6251787?hl=en).
 1. [Enable billing](https://support.google.com/cloud/answer/6288653#new-billing).
@@ -36,10 +35,8 @@ Monitoring][https://cloud.google.com/monitoring/], you must:
 1. [Make sure you have a Premium Stackdiver account](https://cloud.google.com/monitoring/accounts/tiers).
 
 To use our Stackdriver Stats exporter, your Stackdriver account needs to have
-permission to [create custom
-metrics](https://cloud.google.com/monitoring/custom-metrics/creating-metrics),
-and that requires a [Premium tier Stackdriver
-account](https://cloud.google.com/monitoring/accounts/tiers#this_request_is_only_available_in_the_premium_tier).
+permission to [create custom metrics](https://cloud.google.com/monitoring/custom-metrics/creating-metrics),
+and that requires a [Premium tier Stackdriver account](https://cloud.google.com/monitoring/accounts/tiers#this_request_is_only_available_in_the_premium_tier).
 Please note that by default all new Stackdriver accounts are Basic tier. To
 upgrade to a Premium tier Stackdriver account, follow the instructions
 [here](https://cloud.google.com/monitoring/accounts/tiers#start-premium).
