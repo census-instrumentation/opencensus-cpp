@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 
-#include "absl/strings/string_view.h"
 #include "opencensus/stats/aggregation.h"
 #include "opencensus/stats/internal/aggregation_window.h"
 #include "opencensus/stats/measure_descriptor.h"
@@ -33,6 +32,9 @@ namespace stats {
 // TODO: DOCS: Document members.
 class ViewDescriptor final {
  public:
+  //////////////////////////////////////////////////////////////////////////////
+  // View definition
+
   ViewDescriptor();
 
   ViewDescriptor& set_name(absl::string_view name);
@@ -57,6 +59,18 @@ class ViewDescriptor final {
 
   ViewDescriptor& set_description(absl::string_view description);
   const std::string& description() const { return description_; }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // View registration
+
+  // Registers this ViewDescriptor for export, replacing any already registered
+  // view with the same name.; requires that aggregation_window() ==
+  // AggregationWindow::kCumulative() (the default). Future changes to this
+  // ViewDescriptor will not update the registered view.
+  void RegisterForExport() const;
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Utilities
 
   std::string DebugString() const;
 

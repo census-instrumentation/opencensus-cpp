@@ -100,8 +100,8 @@ class StatsExporterTest : public ::testing::Test {
 
 TEST_F(StatsExporterTest, AddView) {
   MockExporter::Register({descriptor1_, descriptor2_});
-  StatsExporter::AddView(descriptor1_);
-  StatsExporter::AddView(descriptor2_);
+  descriptor1_.RegisterForExport();
+  descriptor2_.RegisterForExport();
   EXPECT_THAT(StatsExporter::GetViewData(),
               ::testing::UnorderedElementsAre(::testing::Key(descriptor1_),
                                               ::testing::Key(descriptor2_)));
@@ -110,9 +110,9 @@ TEST_F(StatsExporterTest, AddView) {
 
 TEST_F(StatsExporterTest, UpdateView) {
   MockExporter::Register({descriptor1_edited_, descriptor2_});
-  StatsExporter::AddView(descriptor1_);
-  StatsExporter::AddView(descriptor2_);
-  StatsExporter::AddView(descriptor1_edited_);
+  descriptor1_.RegisterForExport();
+  descriptor2_.RegisterForExport();
+  descriptor1_edited_.RegisterForExport();
   EXPECT_THAT(
       StatsExporter::GetViewData(),
       ::testing::UnorderedElementsAre(::testing::Key(descriptor1_edited_),
@@ -122,8 +122,8 @@ TEST_F(StatsExporterTest, UpdateView) {
 
 TEST_F(StatsExporterTest, RemoveView) {
   MockExporter::Register({descriptor2_});
-  StatsExporter::AddView(descriptor1_);
-  StatsExporter::AddView(descriptor2_);
+  descriptor1_.RegisterForExport();
+  descriptor2_.RegisterForExport();
   StatsExporter::RemoveView(descriptor1_.name());
   EXPECT_THAT(StatsExporter::GetViewData(),
               ::testing::UnorderedElementsAre(::testing::Key(descriptor2_)));
@@ -133,7 +133,7 @@ TEST_F(StatsExporterTest, RemoveView) {
 TEST_F(StatsExporterTest, MultipleExporters) {
   MockExporter::Register({descriptor1_});
   MockExporter::Register({descriptor1_});
-  StatsExporter::AddView(descriptor1_);
+  descriptor1_.RegisterForExport();
   Export();
 }
 
@@ -142,14 +142,14 @@ TEST_F(StatsExporterTest, IntervalViewRejected) {
   ViewDescriptor interval_descriptor = ViewDescriptor().set_name("interval");
   SetAggregationWindow(AggregationWindow::Interval(absl::Hours(1)),
                        &interval_descriptor);
-  StatsExporter::AddView(interval_descriptor);
+  interval_descriptor.RegisterForExport();
   EXPECT_TRUE(StatsExporter::GetViewData().empty());
   Export();
 }
 
 TEST_F(StatsExporterTest, TimedExport) {
   MockExporter::Register({descriptor1_});
-  StatsExporter::AddView(descriptor1_);
+  descriptor1_.RegisterForExport();
   absl::SleepFor(absl::Seconds(11));
 }
 
