@@ -92,6 +92,6 @@ Go to https://console.cloud.google.com/monitoring to see stats:
 
 ### Tracing
 
-Go to https://console.cloud.google.com/traces/traces to see traces.
+Go to https://console.cloud.google.com/traces/traces to see traces. Example:
 
 ![Example trace](https://i.imgur.com/heo9SU8.png)
