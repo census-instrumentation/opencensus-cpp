@@ -2,6 +2,7 @@ language: cpp
 os: linux
 dist: trusty
 sudo: false
+env: BAZEL_OPTIONS=--local_resources=4096,2,1.0
 
 before_install:
   - tools/format.sh
@@ -10,4 +11,8 @@ before_install:
   - ./bazel-0.8.1-installer-linux-x86_64.sh --user
 
 script:
-  - tools/ci.sh
+  # We can't use --noshow_progress because Travis terminates the
+  # build after 10 mins without output.  
+  - bazel build $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(rule, //...)" | grep -v :_)
+  - bazel test $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)" | grep -v :_)
+  
