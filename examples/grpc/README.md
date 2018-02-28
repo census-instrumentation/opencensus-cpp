@@ -97,4 +97,4 @@ Go to https://console.cloud.google.com/monitoring to see stats:
 
 Go to https://console.cloud.google.com/traces/traces to see traces.
 
-![Example trace](img/sample_trace.png)
+![Example trace](https://i.imgur.com/heo9SU8.png)
