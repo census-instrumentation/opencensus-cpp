@@ -24,6 +24,7 @@ package(default_visibility = ["//visibility:private"])
 cc_library(
     name = "stats",
     hdrs = [
+        "internal/aggregation_window.h",
         "internal/set_aggregation_window.h",
         "stats.h",
     ],
