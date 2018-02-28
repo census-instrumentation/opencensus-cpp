@@ -15,11 +15,12 @@ REM limitations under the License.
 REM This script is based on:
 REM https://github.com/google/xrtl/blob/master/tools/ci/appveyor/install.bat
 
-IF NOT EXIST %INSTALL_CACHE% (
-  MKDIR %INSTALL_CACHE%
-)
+IF NOT EXIST %INSTALL_CACHE% (MKDIR %INSTALL_CACHE%)
 
 REM Download bazel into install cache, which is on the path.
 IF NOT EXIST %INSTALL_CACHE%\bazel.exe (
   appveyor DownloadFile https://github.com/bazelbuild/bazel/releases/download/0.10.1/bazel-0.10.1-without-jdk-windows-x86_64.exe -FileName %INSTALL_CACHE%\bazel.exe
 )
+
+REM Temporary directory for bazel.
+IF NOT EXIST C:\T (MKDIR C:\T)
