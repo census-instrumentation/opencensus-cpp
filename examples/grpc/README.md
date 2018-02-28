@@ -66,7 +66,10 @@ env STACKDRIVER_PROJECT_ID=myproject ../../bazel-bin/examples/grpc/hello_client 
 
 ### Stats
 
-Go to https://console.cloud.google.com/monitoring to see stats.
+Go to https://console.cloud.google.com/monitoring to see stats:
+
+* Click on Resources &rarr; Metrics Explorer.
+* Choose the "global" Resource Type.
 
 ### Tracing
 
