@@ -25,10 +25,11 @@ namespace trace {
 class SpanTestPeer {
  public:
   static void End(absl::Duration latency, Span* span) {
-    // Call Span::End to get into stores.
-    span->End();
     // Set latency.
     span->span_impl_for_test()->EndWithLatencyForTesting(latency);
+    // Call Span::End to get into stores.
+    span->span_impl_for_test()->ExportSpanForTesting(
+        span->span_impl_for_test());
   }
 };
 
