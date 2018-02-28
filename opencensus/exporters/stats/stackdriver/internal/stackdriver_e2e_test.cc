@@ -166,7 +166,7 @@ TEST_F(StackdriverE2eTest, OneView) {
           .set_description(
               "Cumulative sum of opencensus.io/TestMeasure broken down "
               "by 'key1' and 'key2'.");
-  opencensus::stats::StatsExporter::AddView(view_descriptor);
+  view_descriptor.RegisterForExport();
 
   opencensus::stats::Record({{TestMeasure(), 1.0}},
                             {{"key1", "v11"}, {"key2", "v21"}});
@@ -202,7 +202,7 @@ TEST_F(StackdriverE2eTest, LargeTest) {
           .set_description(
               "Cumulative count of opencensus.io/TestMeasure broken down "
               "by 'key1' and 'key2'.");
-  opencensus::stats::StatsExporter::AddView(count_descriptor);
+  count_descriptor.RegisterForExport();
 
   const auto sum_descriptor =
       opencensus::stats::ViewDescriptor()
@@ -216,7 +216,7 @@ TEST_F(StackdriverE2eTest, LargeTest) {
           .set_description(
               "Cumulative sum of opencensus.io/TestMeasure broken down "
               "by 'key1' and 'key2'.");
-  opencensus::stats::StatsExporter::AddView(sum_descriptor);
+  sum_descriptor.RegisterForExport();
 
   std::vector<::testing::Matcher<google::monitoring::v3::TimeSeries>>
       sum_matchers;

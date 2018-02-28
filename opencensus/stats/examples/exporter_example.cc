@@ -98,9 +98,9 @@ TEST_F(ExporterExample, Distribution) {
 
   // The order of view registration and exporter creation does not matter, as
   // long as both precede data recording.
-  opencensus::stats::StatsExporter::AddView(sum_descriptor);
+  sum_descriptor.RegisterForExport();
   ExampleExporter::Register();
-  opencensus::stats::StatsExporter::AddView(count_descriptor);
+  count_descriptor.RegisterForExport();
 
   // Someone calls the Foo API, recording usage under example.com/Bar/FooUsage.
   UseFoo("foo1", 1);

@@ -31,7 +31,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":core",
-        ":export",
         ":recording",
     ],
 )
@@ -63,7 +62,9 @@ cc_library(
         "internal/measure_registry.cc",
         "internal/measure_registry_impl.cc",
         "internal/set_aggregation_window.cc",
+        "internal/stats_exporter.cc",
         "internal/stats_manager.cc",
+        "internal/view.cc",
         "internal/view_data.cc",
         "internal/view_data_impl.cc",
         "internal/view_descriptor.cc",
@@ -75,11 +76,14 @@ cc_library(
         "internal/aggregation_window.h",
         "internal/measure_registry_impl.h",
         "internal/set_aggregation_window.h",
+        "internal/stats_exporter_impl.h",
         "internal/stats_manager.h",
         "internal/view_data_impl.h",
         "measure.h",
         "measure_descriptor.h",
         "measure_registry.h",
+        "stats_exporter.h",
+        "view.h",
         "view_data.h",
         "view_descriptor.h",
     ],
@@ -105,27 +109,6 @@ cc_library(
     deps = [
         ":core",
         "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/time",
-    ],
-)
-
-cc_library(
-    name = "export",
-    srcs = [
-        "internal/stats_exporter.cc",
-        "internal/view.cc",
-    ],
-    hdrs = [
-        "stats_exporter.h",
-        "view.h",
-    ],
-    copts = DEFAULT_COPTS,
-    deps = [
-        ":core",
-        "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/time",
     ],
 )
@@ -182,7 +165,6 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":core",
-        ":export",
         ":recording",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/time",
@@ -196,7 +178,6 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":core",
-        ":export",
         ":recording",
         "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
@@ -237,7 +218,6 @@ cc_binary(
     linkstatic = 1,
     deps = [
         ":core",
-        ":export",
         ":recording",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",

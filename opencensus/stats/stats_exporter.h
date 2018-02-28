@@ -30,13 +30,11 @@
 namespace opencensus {
 namespace stats {
 
-// StatsExporter manages views for export, and export handlers.
+// StatsExporter manages views for export, and export handlers. New views can be
+// registered with ViewDescriptor::RegisterForExport().
 // StatsExporter is thread-safe.
 class StatsExporter final {
  public:
-  // Inserts a new view, replacing any existing view with the same name. Only
-  // Cumulative views are supported.
-  static void AddView(const ViewDescriptor& view);
   // Removes the view with 'name' from the registry, if one is registered.
   static void RemoveView(absl::string_view name);
 
