@@ -42,6 +42,7 @@ cc_library(
         "internal/server_filter.h",
     ],
     copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
     deps = [
         "//opencensus/stats",
         "//opencensus/trace",

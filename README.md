@@ -16,6 +16,9 @@ This is not an officially supported Google product.
 
 ## Quickstart
 
+Please refer to [`examples/grpc/`](examples/grpc/README.md) for an example RPC
+server that integrates gRPC, Stackdriver, and Prometheus.
+
 Please refer to
 [`trace/examples/span_example.cc`](opencensus/trace/examples/span_example.cc)
 for tracing and
@@ -32,7 +35,7 @@ for stats.
 
 ## Language support
 
-* STL is required. (e.g. `libstdc++', 'libc++', etc)
+* STL is required. (e.g. `libstdc++`, `libc++`, etc)
 * C++11 is required.
 * [`absl`](https://github.com/abseil/abseil-cpp/) is used for its building blocks.
 * [`googletest`](https://github.com/google/googletest/) is used for tests.
