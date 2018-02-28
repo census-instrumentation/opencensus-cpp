@@ -136,7 +136,7 @@ void SpanImpl::SetStatus(exporter::Status&& status) {
 
 void SpanImpl::End() { EndWithTime(absl::Now()); }
 
-bool SpanImpl::HasEnded() {
+bool SpanImpl::HasEnded() const {
   absl::MutexLock l(&mu_);
   return has_ended_;
 }
