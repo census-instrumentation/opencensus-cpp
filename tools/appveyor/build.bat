@@ -12,9 +12,10 @@ REM WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 REM See the License for the specific language governing permissions and
 REM limitations under the License.
 
-REM TODO: Exclude broken proto targets that start with an underscore.
-REM bazel build ...
+REM TODO: Get everything to build under Windows:
+REM bazel build //...
 
+REM TODO: Remove --output_user_root after https://github.com/bazelbuild/bazel/issues/4149 is fixed.
 bazel --output_user_root=c:/t/ build //opencensus/trace
 
 IF %ERRORLEVEL% NEQ 0 EXIT /b %ERRORLEVEL%

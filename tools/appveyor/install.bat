@@ -23,4 +23,5 @@ IF NOT EXIST %INSTALL_CACHE%\bazel.exe (
 )
 
 REM Temporary directory for bazel.
+REM TODO: Remove this after https://github.com/bazelbuild/bazel/issues/4149 is fixed.
 IF NOT EXIST C:\T (MKDIR C:\T)
