@@ -18,6 +18,8 @@
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "absl/time/clock.h"
+#include "absl/time/time.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "include/grpc++/grpc++.h"
@@ -52,13 +54,13 @@ class StatsPluginEnd2EndTest : public ::testing::Test {
     // interface.
     ::grpc::ServerBuilder builder;
     int port;
-    builder.AddListeningPort("[::]:0", ::grpc::InsecureServerCredentials(),
+    builder.AddListeningPort("0.0.0.0:0", ::grpc::InsecureServerCredentials(),
                              &port);
     builder.RegisterService(&service_);
     server_ = builder.BuildAndStart();
     ASSERT_NE(nullptr, server_);
     ASSERT_NE(0, port);
-    server_address_ = absl::StrCat("[::]:", port);
+    server_address_ = absl::StrCat("0.0.0.0:", port);
     server_thread_ = std::thread(&StatsPluginEnd2EndTest::RunServerLoop, this);
 
     stub_ = EchoService::NewStub(::grpc::CreateChannel(
@@ -123,6 +125,7 @@ TEST_F(StatsPluginEnd2EndTest, ErrorCount) {
     ::grpc::ClientContext context;
     ::grpc::Status status = stub_->Echo(&context, request, &response);
   }
+  absl::SleepFor(absl::Milliseconds(500));
 
   EXPECT_THAT(client_method_view.GetData().double_data(),
               ::testing::UnorderedElementsAre(
@@ -172,6 +175,7 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseBytes) {
     ASSERT_TRUE(status.ok());
     EXPECT_EQ("foo", response.message());
   }
+  absl::SleepFor(absl::Milliseconds(500));
 
   EXPECT_THAT(
       client_request_bytes_view.GetData().distribution_data(),
@@ -223,6 +227,8 @@ TEST_F(StatsPluginEnd2EndTest, Latency) {
   // We do not know exact latency/elapsed time, but we know it is less than the
   // entire time spent making the RPC.
   const double max_time = absl::ToDoubleMilliseconds(absl::Now() - start_time);
+
+  absl::SleepFor(absl::Milliseconds(500));
 
   EXPECT_THAT(
       client_latency_view.GetData().distribution_data(),
@@ -282,6 +288,7 @@ TEST_F(StatsPluginEnd2EndTest, StartFinishCount) {
       ASSERT_TRUE(status.ok());
       EXPECT_EQ("foo", response.message());
     }
+    absl::SleepFor(absl::Milliseconds(500));
 
     EXPECT_THAT(client_started_count_view.GetData().double_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
@@ -316,6 +323,7 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseCount) {
       ASSERT_TRUE(status.ok());
       EXPECT_EQ("foo", response.message());
     }
+    absl::SleepFor(absl::Milliseconds(500));
 
     EXPECT_THAT(client_request_count_view.GetData().distribution_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
