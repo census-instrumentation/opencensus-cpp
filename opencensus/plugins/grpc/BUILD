@@ -30,6 +30,7 @@ cc_library(
         "internal/grpc_plugin.cc",
         "internal/measures.cc",
         "internal/server_filter.cc",
+        "internal/views.cc",
     ],
     hdrs = [
         "grpc_plugin.h",
