@@ -83,6 +83,9 @@ env STACKDRIVER_PROJECT_ID=myproject ../../bazel-bin/examples/grpc/hello_server 
 env STACKDRIVER_PROJECT_ID=myproject ../../bazel-bin/examples/grpc/hello_client [::]:9001
 ```
 
+When running on GCE, the credentials used to authenticate to Stackdriver are
+determined automatically from the VM.
+
 ### Stats
 
 Go to https://console.cloud.google.com/monitoring to see stats:
@@ -92,9 +95,6 @@ Go to https://console.cloud.google.com/monitoring to see stats:
 
 ### Tracing
 
-Go to https://console.cloud.google.com/traces/traces to see traces. Example:
+Go to https://console.cloud.google.com/traces/traces to see traces.
 
 ![Example trace](img/sample_trace.png)
-
-When running on GCE, `grpc::GoogleDefaultCredentials()` works without having to
-generate a key with the `gcloud` CLI.
