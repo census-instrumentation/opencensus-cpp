@@ -13,7 +13,7 @@ REM See the License for the specific language governing permissions and
 REM limitations under the License.
 
 REM bazel test ...
-bazel test --output_user_root=c:/t/ //opencensus/trace:all
+bazel --output_user_root=c:/t/ test //opencensus/trace:all
 
 IF %ERRORLEVEL% NEQ 0 EXIT /b %ERRORLEVEL%
 EXIT /b 0
