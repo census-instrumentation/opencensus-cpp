@@ -27,7 +27,7 @@ env GRPC_VERBOSITY=DEBUG ../../bazel-bin/examples/grpc/hello_client [::]:9001
 
 ## Stackdriver
 
-In order to be able to push your stats to [Stackdriver Monitoring][https://cloud.google.com/monitoring/], you must:
+In order to be able to push your stats to [Stackdriver Monitoring](https://cloud.google.com/monitoring/), you must:
 
 1. [Create a Cloud project](https://support.google.com/cloud/answer/6251787?hl=en).
 1. [Enable billing](https://support.google.com/cloud/answer/6288653#new-billing).
