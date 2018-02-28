@@ -75,7 +75,7 @@ struct StartSpanOptions {
   const std::vector<Span*> parent_links;
 };
 
-  // Span represents a trace span. It has a SpanContext. Span is thread-safe.
+// Span represents a trace span. It has a SpanContext. Span is thread-safe.
 class Span final {
  public:
   // Constructs a no-op Span with an invalid context. Attempts to add
