@@ -201,7 +201,7 @@ void Span::SetStatus(StatusCode canonical_code, absl::string_view message) {
 }
 
 void Span::End() {
-  if (IsRecording()) {
+  if (IsRecording() && !span_impl_->HasEnded()) {
     span_impl_->End();
     exporter::RunningSpanStoreImpl::Get()->RemoveSpan(span_impl_);
     exporter::LocalSpanStoreImpl::Get()->AddSpan(span_impl_);

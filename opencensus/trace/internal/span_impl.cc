@@ -136,6 +136,11 @@ void SpanImpl::SetStatus(exporter::Status&& status) {
 
 void SpanImpl::End() { EndWithTime(absl::Now()); }
 
+bool SpanImpl::HasEnded() const {
+  absl::MutexLock l(&mu_);
+  return has_ended_;
+}
+
 void SpanImpl::EndWithLatencyForTesting(absl::Duration latency) {
   EndWithTime(start_time_ + latency);
 }
