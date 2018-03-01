@@ -27,8 +27,8 @@ cc_library(
     deps = [
         ":prometheus_utils",
         "//opencensus/stats",
+        "@com_github_jupp0r_prometheus_cpp//:prometheus_cpp",
         "@prometheus_client_model",
-        "@prometheus_cpp",
     ],
 )
 
@@ -72,7 +72,7 @@ cc_binary(
     deps = [
         ":prometheus_exporter",
         "//opencensus/stats",
+        "@com_github_jupp0r_prometheus_cpp//:prometheus_cpp",
         "@com_google_absl//absl/time",
-        "@prometheus_cpp",
     ],
 )
