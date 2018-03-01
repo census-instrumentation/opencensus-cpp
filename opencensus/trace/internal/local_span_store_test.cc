@@ -27,8 +27,9 @@ class SpanTestPeer {
   static void End(absl::Duration latency, Span* span) {
     // Set latency.
     span->span_impl_for_test()->EndWithLatencyForTesting(latency);
-    // Then call Span::End to get into stores.
-    span->End();
+    // Call Span::ExportSpanForTesting to get span into stores.
+    span->span_impl_for_test()->ExportSpanForTesting(
+        span->span_impl_for_test());
   }
 };
 

@@ -23,6 +23,9 @@
 #include "opencensus/trace/attribute_value_ref.h"
 #include "opencensus/trace/exporter/attribute_value.h"
 #include "opencensus/trace/exporter/message_event.h"
+#include "opencensus/trace/internal/local_span_store_impl.h"
+#include "opencensus/trace/internal/running_span_store_impl.h"
+#include "opencensus/trace/internal/span_exporter_impl.h"
 #include "opencensus/trace/span.h"
 
 namespace opencensus {
@@ -134,6 +137,12 @@ void SpanImpl::SetStatus(exporter::Status&& status) {
   }
 }
 
+void SpanImpl::ExportSpanForTesting(const std::shared_ptr<SpanImpl>& span) {
+  exporter::RunningSpanStoreImpl::Get()->RemoveSpan(span);
+  exporter::LocalSpanStoreImpl::Get()->AddSpan(span);
+  exporter::SpanExporterImpl::Get()->AddSpan(span);
+}
+
 void SpanImpl::End() { EndWithTime(absl::Now()); }
 
 bool SpanImpl::HasEnded() const {
@@ -142,7 +151,9 @@ bool SpanImpl::HasEnded() const {
 }
 
 void SpanImpl::EndWithLatencyForTesting(absl::Duration latency) {
-  EndWithTime(start_time_ + latency);
+  absl::MutexLock l(&mu_);
+  has_ended_ = true;
+  end_time_ = start_time_ + latency;
 }
 
 void SpanImpl::EndWithTime(absl::Time end_time) {
