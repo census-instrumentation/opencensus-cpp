@@ -82,13 +82,14 @@ cc_library(
 )
 
 http_archive(
-    name = "prometheus_cpp",
+    name = "com_github_jupp0r_prometheus_cpp",
     strip_prefix = "prometheus-cpp-master",
     urls = ["https://github.com/jupp0r/prometheus-cpp/archive/master.zip"],
 )
 
-load("@prometheus_cpp//:repositories.bzl", "load_prometheus_client_model",
-					   "load_civetweb")
+load("@com_github_jupp0r_prometheus_cpp//:repositories.bzl",
+     "load_prometheus_client_model",
+     "load_civetweb")
 
 # Load dependencies individually since we load some of them above.
 load_prometheus_client_model()

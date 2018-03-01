@@ -74,7 +74,7 @@ cc_binary(
         "//opencensus/plugins/grpc:grpc_plugin",
         "//opencensus/trace",
         "@com_github_grpc_grpc//:grpc++",
+        "@com_github_jupp0r_prometheus_cpp//:prometheus_cpp",
         "@com_google_absl//absl/strings",
-        "@prometheus_cpp",
     ],
 )
