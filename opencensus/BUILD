@@ -19,7 +19,10 @@ config_setting(
     values = {
         "compiler": "llvm",
     },
-    visibility = [":__subpackages__"],
+    visibility = [
+        ":__subpackages__",
+        "//examples:__subpackages__",
+    ],
 )
 
 config_setting(
@@ -27,5 +30,8 @@ config_setting(
     values = {
         "cpu": "x64_windows",
     },
-    visibility = [":__subpackages__"],
+    visibility = [
+        ":__subpackages__",
+        "//examples:__subpackages__",
+    ],
 )
