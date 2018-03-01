@@ -45,8 +45,8 @@ namespace {
 
 TEST(LocalSpanStoreTest, GetSummary) {
   exporter::LocalSpanStoreImplTestPeer::ClearForTesting();
-  auto span = Span::StartSpan("SpanName", /*parent=*/nullptr,
-                              {nullptr, /*record_events=*/true});
+  static AlwaysSampler sampler;
+  auto span = Span::StartSpan("SpanName", /*parent=*/nullptr, {&sampler});
   span.AddAnnotation("Annotation");
   SpanTestPeer::End(absl::Microseconds(15), &span);
 

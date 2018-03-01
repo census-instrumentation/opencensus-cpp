@@ -51,13 +51,6 @@ TEST(SpanExample, AlwaysSample) {
   span.End();
 }
 
-TEST(SpanExample, RecordEvents) {
-  auto span = ::opencensus::trace::Span::StartSpan(
-      "MyRootSpan", /*parent=*/nullptr,
-      {/*sampler=*/nullptr, /*record_events=*/true});
-  span.End();
-}
-
 void PretendCallback(::opencensus::trace::Span&& s) {
   s.AddAnnotation("Performing work.");
   s.End();

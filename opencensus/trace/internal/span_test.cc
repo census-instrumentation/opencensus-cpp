@@ -46,8 +46,6 @@ class SpanTestPeer {
 
 namespace {
 
-constexpr bool kRecordEvents = true;
-
 TEST(SpanTest, SampledSpan) {
   AlwaysSampler sampler;
   auto span = Span::StartSpan("MySpan", /*parent=*/nullptr, {&sampler});
@@ -55,15 +53,7 @@ TEST(SpanTest, SampledSpan) {
   EXPECT_TRUE(span.IsRecording()) << "Sampled spans must be recording.";
 }
 
-TEST(SpanTest, RecordingButNotSampledSpan) {
-  NeverSampler sampler;
-  auto span =
-      Span::StartSpan("MySpan", /*parent=*/nullptr, {&sampler, kRecordEvents});
-  EXPECT_FALSE(span.IsSampled());
-  EXPECT_TRUE(span.IsRecording());
-}
-
-TEST(SpanTest, NotRecordingAndNotSampledSpan) {
+TEST(SpanTest, NotSampledSpan) {
   NeverSampler sampler;
   auto span = Span::StartSpan("MySpan", /*parent=*/nullptr, {&sampler});
   EXPECT_FALSE(span.IsSampled());
@@ -84,8 +74,8 @@ TEST(SpanTest, ChildInheritsSamplingFromParent) {
 }
 
 TEST(SpanTest, AddAttributesLastValueWins) {
-  auto span =
-      Span::StartSpan("SpanName", /*parent=*/nullptr, {nullptr, kRecordEvents});
+  AlwaysSampler sampler;
+  auto span = Span::StartSpan("SpanName", /*parent=*/nullptr, {&sampler});
   span.AddAttributes({{"key", "value1"},
                       {"key", 123},
                       {"another_key", "another_value"},
@@ -100,8 +90,8 @@ TEST(SpanTest, AddAttributesLastValueWins) {
 }
 
 TEST(SpanTest, AddAttributesWithArrayAndVector) {
-  auto span =
-      Span::StartSpan("SpanName", /*parent=*/nullptr, {nullptr, kRecordEvents});
+  AlwaysSampler sampler;
+  auto span = Span::StartSpan("SpanName", /*parent=*/nullptr, {&sampler});
   std::array<std::pair<absl::string_view, AttributeValueRef>, 3>
       attributes_array = {
           {{"str_key", "value1"}, {"int_key", 123}, {"bool_key", true}}};
@@ -119,8 +109,8 @@ TEST(SpanTest, AddAttributesWithArrayAndVector) {
 }
 
 TEST(SpanTest, AddAnnotationLastAttributeWins) {
-  auto span =
-      Span::StartSpan("SpanName", /*parent=*/nullptr, {nullptr, kRecordEvents});
+  AlwaysSampler sampler;
+  auto span = Span::StartSpan("SpanName", /*parent=*/nullptr, {&sampler});
   span.AddAnnotation("Annotation text.", {{"key", "value1"},
                                           {"key", 123},
                                           {"another_key", "another_value"},
@@ -144,13 +134,12 @@ TEST(SpanTest, AddAnnotationLastAttributeWins) {
 }
 
 TEST(SpanTest, ParentLinksFromOptions) {
-  auto parent0 =
-      Span::StartSpan("Parent0", /*parent=*/nullptr, {nullptr, kRecordEvents});
-  auto parent1 =
-      Span::StartSpan("Parent1", /*parent=*/nullptr, {nullptr, kRecordEvents});
-  auto span = Span::StartSpan("MyRootSpan",
-                              /*parent=*/nullptr,
-                              {nullptr, kRecordEvents, {&parent0, &parent1}});
+  AlwaysSampler sampler;
+  auto parent0 = Span::StartSpan("Parent0", /*parent=*/nullptr, {&sampler});
+  auto parent1 = Span::StartSpan("Parent1", /*parent=*/nullptr, {&sampler});
+  auto span =
+      Span::StartSpan("MyRootSpan",
+                      /*parent=*/nullptr, {&sampler, {&parent0, &parent1}});
   // Check that StartSpan added parent links to span.
   {
     auto data = SpanTestPeer::ToSpanData(&span);
@@ -185,7 +174,7 @@ TEST(SpanTest, FullSpanTest) {
   auto parent = Span::StartSpan("parent");
   auto related_span =
       Span::StartSpan("RelatedSpan", /*parent=*/nullptr, {&sampler});
-  StartSpanOptions opts = {&sampler, kRecordEvents, {&related_span}};
+  StartSpanOptions opts = {&sampler, {&related_span}};
   auto span = ::opencensus::trace::Span::StartSpan("MyRootSpan", &parent, opts);
   auto child = Span::StartSpan("child", &span);
 
