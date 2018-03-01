@@ -69,22 +69,19 @@ StatsExporterImpl::GetViewData() {
 
 void StatsExporterImpl::Export() {
   absl::ReaderMutexLock l(&mu_);
+  std::vector<std::pair<ViewDescriptor, ViewData>> data;
+  data.reserve(views_.size());
   for (const auto& view : views_) {
-    SendToHandlers(view.second->descriptor(), view.second->GetData());
+    data.emplace_back(view.second->descriptor(), view.second->GetData());
+  }
+  for (auto& handler : handlers_) {
+    handler->ExportViewData(data);
   }
 }
 
 void StatsExporterImpl::ClearHandlersForTesting() {
   absl::MutexLock l(&mu_);
   handlers_.clear();
-}
-
-void StatsExporterImpl::SendToHandlers(const ViewDescriptor& descriptor,
-                                       const ViewData& data)
-    SHARED_LOCKS_REQUIRED(mu_) {
-  for (auto& handler : handlers_) {
-    handler->ExportViewData(descriptor, data);
-  }
 }
 
 void StatsExporterImpl::StartExportThread() EXCLUSIVE_LOCKS_REQUIRED(mu_) {

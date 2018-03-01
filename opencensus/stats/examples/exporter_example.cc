@@ -42,24 +42,30 @@ class ExampleExporter : public opencensus::stats::StatsExporter::Handler {
         absl::make_unique<ExampleExporter>());
   }
 
-  void ExportViewData(const opencensus::stats::ViewDescriptor& descriptor,
-                      const opencensus::stats::ViewData& data) override {
-    if (data.type() != opencensus::stats::ViewData::Type::kDouble) {
-      // This example only supports double data (i.e. Sum() aggregation).
-      return;
-    }
-    std::string output;
-    absl::StrAppend(&output, "\nData for view \"", descriptor.name(),
-                    "\" from ", absl::FormatTime(data.start_time()), " to ",
-                    absl::FormatTime(data.end_time()), ":\n");
-    for (const auto& row : data.double_data()) {
-      for (int i = 0; i < descriptor.columns().size(); ++i) {
-        absl::StrAppend(&output, descriptor.columns()[i], ":", row.first[i],
-                        ", ");
+  void ExportViewData(
+      const std::vector<std::pair<opencensus::stats::ViewDescriptor,
+                                  opencensus::stats::ViewData>>& data)
+      override {
+    for (const auto& datum : data) {
+      const auto& descriptor = datum.first;
+      const auto& view_data = datum.second;
+      if (view_data.type() != opencensus::stats::ViewData::Type::kDouble) {
+        // This example only supports double data (i.e. Sum() aggregation).
+        return;
       }
-      absl::StrAppend(&output, row.second, "\n");
+      std::string output;
+      absl::StrAppend(&output, "\nData for view \"", descriptor.name(),
+                      "\" from ", absl::FormatTime(view_data.start_time()),
+                      " to ", absl::FormatTime(view_data.end_time()), ":\n");
+      for (const auto& row : view_data.double_data()) {
+        for (int i = 0; i < descriptor.columns().size(); ++i) {
+          absl::StrAppend(&output, descriptor.columns()[i], ":", row.first[i],
+                          ", ");
+        }
+        absl::StrAppend(&output, row.second, "\n");
+      }
+      std::cout << output;
     }
-    std::cout << output;
   }
 };
 

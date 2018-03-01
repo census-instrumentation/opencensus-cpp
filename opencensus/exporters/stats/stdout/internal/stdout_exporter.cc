@@ -50,8 +50,9 @@ std::string DataToString(const opencensus::stats::Distribution& data) {
 class StdoutExporter::Handler
     : public opencensus::stats::StatsExporter::Handler {
  public:
-  void ExportViewData(const opencensus::stats::ViewDescriptor& descriptor,
-                      const opencensus::stats::ViewData& data) override;
+  void ExportViewData(
+      const std::vector<std::pair<opencensus::stats::ViewDescriptor,
+                                  opencensus::stats::ViewData>>& data) override;
 
  private:
   // Implements ExportViewData for supported data types.
@@ -69,21 +70,24 @@ void StdoutExporter::Register() {
 }
 
 void StdoutExporter::Handler::ExportViewData(
-    const opencensus::stats::ViewDescriptor& descriptor,
-    const opencensus::stats::ViewData& data) {
-  switch (data.type()) {
-    case opencensus::stats::ViewData::Type::kDouble:
-      ExportViewDataImpl(descriptor, data.start_time(), data.end_time(),
-                         data.double_data());
-      break;
-    case opencensus::stats::ViewData::Type::kInt64:
-      ExportViewDataImpl(descriptor, data.start_time(), data.end_time(),
-                         data.int_data());
-      break;
-    case opencensus::stats::ViewData::Type::kDistribution:
-      ExportViewDataImpl(descriptor, data.start_time(), data.end_time(),
-                         data.distribution_data());
-      break;
+    const std::vector<std::pair<opencensus::stats::ViewDescriptor,
+                                opencensus::stats::ViewData>>& data) {
+  for (const auto& datum : data) {
+    const auto& view_data = datum.second;
+    switch (view_data.type()) {
+      case opencensus::stats::ViewData::Type::kDouble:
+        ExportViewDataImpl(datum.first, view_data.start_time(),
+                           view_data.end_time(), view_data.double_data());
+        break;
+      case opencensus::stats::ViewData::Type::kInt64:
+        ExportViewDataImpl(datum.first, view_data.start_time(),
+                           view_data.end_time(), view_data.int_data());
+        break;
+      case opencensus::stats::ViewData::Type::kDistribution:
+        ExportViewDataImpl(datum.first, view_data.start_time(),
+                           view_data.end_time(), view_data.distribution_data());
+        break;
+    }
   }
 }
 
