@@ -137,23 +137,11 @@ void SpanImpl::SetStatus(exporter::Status&& status) {
   }
 }
 
-void SpanImpl::ExportSpanForTesting(const std::shared_ptr<SpanImpl>& span) {
-  exporter::RunningSpanStoreImpl::Get()->RemoveSpan(span);
-  exporter::LocalSpanStoreImpl::Get()->AddSpan(span);
-  exporter::SpanExporterImpl::Get()->AddSpan(span);
-}
-
 void SpanImpl::End() { EndWithTime(absl::Now()); }
 
 bool SpanImpl::HasEnded() const {
   absl::MutexLock l(&mu_);
   return has_ended_;
-}
-
-void SpanImpl::EndWithLatencyForTesting(absl::Duration latency) {
-  absl::MutexLock l(&mu_);
-  has_ended_ = true;
-  end_time_ = start_time_ + latency;
 }
 
 void SpanImpl::EndWithTime(absl::Time end_time) {
