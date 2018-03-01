@@ -12,12 +12,18 @@ REM WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 REM See the License for the specific language governing permissions and
 REM limitations under the License.
 
-REM TODO: Make all tests pass on Windows:
-REM bazel test //...
+REM We need this to append a variable within a loop.
+setlocal enabledelayedexpansion
+
+REM TODO: Is there an easier way to convert lines to a space-separated list?
+SET TESTS=
+FOR /F usebackq %%T IN (`bazel query "kind(test, //...)  except attr('tags', 'manual|noci', //...)" ^| FINDSTR /C:"\:_" /V`) DO (
+    SET TESTS=!TESTS! %%T
+)
 
 REM TODO: Remove --output_user_root after https://github.com/bazelbuild/bazel/issues/4149 is fixed.
-REM bazel --output_user_root=c:/t/ test //opencensus/trace:all
 echo TODO: Make all tests pass on Windows.
+REM bazel --output_user_root=c:/t/ test --test_output=errors %TESTS%
 
 IF %ERRORLEVEL% NEQ 0 EXIT /b %ERRORLEVEL%
 EXIT /b 0
