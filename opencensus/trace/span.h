@@ -50,13 +50,9 @@ using AttributesRef =
 
 // Options for Starting a Span.
 struct StartSpanOptions {
-  StartSpanOptions(
-      Sampler* sampler = nullptr,  // Default Sampler.
-      bool record_events = false,  // Only record events if the Span is sampled.
-      const std::vector<Span*>& parent_links = {})
-      : sampler(sampler),
-        record_events(record_events),
-        parent_links(parent_links) {}
+  StartSpanOptions(Sampler* sampler = nullptr,  // Default Sampler.
+                   const std::vector<Span*>& parent_links = {})
+      : sampler(sampler), parent_links(parent_links) {}
 
   // The Sampler to use. It must remain valid for the duration of the
   // StartSpan() call. If nullptr, use the default Sampler from TraceConfig.
@@ -64,11 +60,6 @@ struct StartSpanOptions {
   // A Span that's sampled will be exported (see exporter/span_exporter.h).
   // All sampled Spans record events.
   const Sampler* sampler;
-
-  // This option can be used to request recording of events for non-sampled
-  // Spans. Spans that record events show up in the RunningSpanStore and
-  // LocalSpanStore in the running process.
-  const bool record_events;
 
   // Pointers to Spans in *other Traces* that are parents of this Span. They
   // must remain valid for the duration of the StartSpan() call.

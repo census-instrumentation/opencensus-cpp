@@ -93,8 +93,8 @@ class SpanGenerator {
     }
     SpanContext context(trace_id, span_id, trace_options);
     SpanImpl* impl = nullptr;
-    if (trace_options.IsSampled() || options.record_events) {
-      // Only Spans that are recording are backed by a SpanImpl.
+    if (trace_options.IsSampled()) {
+      // Only Spans that are sampled are backed by a SpanImpl.
       impl =
           new SpanImpl(context, TraceConfigImpl::Get()->current_trace_params(),
                        name, parent_span_id, has_remote_parent);
