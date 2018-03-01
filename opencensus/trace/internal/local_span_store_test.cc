@@ -22,17 +22,6 @@
 namespace opencensus {
 namespace trace {
 
-class SpanTestPeer {
- public:
-  static void End(absl::Duration latency, Span* span) {
-    // Set latency.
-    span->span_impl_for_test()->EndWithLatencyForTesting(latency);
-    // Call Span::ExportSpanForTesting to get span into stores.
-    span->span_impl_for_test()->ExportSpanForTesting(
-        span->span_impl_for_test());
-  }
-};
-
 namespace exporter {
 class LocalSpanStoreImplTestPeer {
  public:
@@ -48,16 +37,14 @@ TEST(LocalSpanStoreTest, GetSummary) {
   auto span = Span::StartSpan("SpanName", /*parent=*/nullptr,
                               {nullptr, /*record_events=*/true});
   span.AddAnnotation("Annotation");
-  SpanTestPeer::End(absl::Microseconds(15), &span);
+  span.End();
 
   auto summary = LocalSpanStore::GetSummary();
   EXPECT_EQ(1, summary.per_span_name_summary.size());
   EXPECT_EQ(1, summary.per_span_name_summary["SpanName"]
                    .number_of_latency_sampled_spans.size());
-  EXPECT_EQ(
-      1,
-      summary.per_span_name_summary["SpanName"].number_of_latency_sampled_spans
-          [LocalSpanStore::LatencyBucketBoundary::k10us_to_100us]);
+  // TODO: EXPECT it ended up in the right bucket in
+  // number_of_latency_sampled_spans[].
 }
 
 }  // namespace
