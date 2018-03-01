@@ -106,8 +106,6 @@ class SpanImpl final {
   friend class ::opencensus::trace::exporter::SpanExporterImpl;
   friend class ::opencensus::trace::SpanTestPeer;
 
-  void ExportSpanForTesting(const std::shared_ptr<SpanImpl>& span);
-  void EndWithLatencyForTesting(absl::Duration latency) LOCKS_EXCLUDED(mu_);
   void EndWithTime(absl::Time end_time) LOCKS_EXCLUDED(mu_);
 
   // Makes a deep copy of span contents and returns copied data in SpanData.
