@@ -70,6 +70,7 @@ class ViewData {
   absl::Time end_time() const;
 
   ViewData(const ViewData& other);
+  // ViewData& operator=(const ViewData& other);
 
  private:
   friend class View;  // Allowed to call the private constructor.

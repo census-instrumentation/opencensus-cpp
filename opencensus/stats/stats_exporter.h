@@ -45,8 +45,8 @@ class StatsExporter final {
   class Handler {
    public:
     virtual ~Handler() = default;
-    virtual void ExportViewData(const ViewDescriptor& descriptor,
-                                const ViewData& data) = 0;
+    virtual void ExportViewData(
+        const std::vector<std::pair<ViewDescriptor, ViewData>>& data) = 0;
   };
 
   // This should only be called by push exporters' Register() methods.
