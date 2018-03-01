@@ -40,8 +40,9 @@ class StackdriverExporter::Handler
  public:
   Handler(absl::string_view project_id, absl::string_view opencensus_task);
 
-  void ExportViewData(const opencensus::stats::ViewDescriptor& descriptor,
-                      const opencensus::stats::ViewData& data)
+  void ExportViewData(
+      const std::vector<std::pair<opencensus::stats::ViewDescriptor,
+                                  opencensus::stats::ViewData>>& data)
       LOCKS_EXCLUDED(mu_) override;
 
  private:
@@ -70,20 +71,26 @@ StackdriverExporter::Handler::Handler(absl::string_view project_id,
                                 ::grpc::GoogleDefaultCredentials()))) {}
 
 void StackdriverExporter::Handler::ExportViewData(
-    const opencensus::stats::ViewDescriptor& descriptor,
-    const opencensus::stats::ViewData& data) {
+    const std::vector<std::pair<opencensus::stats::ViewDescriptor,
+                                opencensus::stats::ViewData>>& data) {
+  // TODO: refactor to avoid copying the timeseries.
   absl::MutexLock l(&mu_);
-  if (!MaybeRegisterView(descriptor)) {
-    return;
+  std::vector<google::monitoring::v3::TimeSeries> time_series;
+  for (const auto& datum : data) {
+    if (!MaybeRegisterView(datum.first)) {
+      continue;
+    }
+    const auto view_time_series =
+        MakeTimeSeries(datum.first, datum.second, opencensus_task_);
+    time_series.insert(time_series.end(), view_time_series.begin(),
+                       view_time_series.end());
   }
 
   // TODO: use asynchronous RPCs.
-  const auto time_series = MakeTimeSeries(descriptor, data, opencensus_task_);
   int i = 0;
   while (i < time_series.size()) {
     auto request = google::monitoring::v3::CreateTimeSeriesRequest();
     request.set_name(project_id_);
-    // TODO: refactor to avoid copying each timeseries.
     for (int batch_index = 0; batch_index < kTimeSeriesBatchSize;
          ++batch_index) {
       *request.add_time_series() = time_series[i];

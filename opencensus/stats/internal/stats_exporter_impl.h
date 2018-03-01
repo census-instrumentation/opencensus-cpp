@@ -49,9 +49,6 @@ class StatsExporterImpl {
  private:
   StatsExporterImpl() {}
 
-  void SendToHandlers(const ViewDescriptor& descriptor, const ViewData& data)
-      SHARED_LOCKS_REQUIRED(mu_);
-
   void StartExportThread() EXCLUSIVE_LOCKS_REQUIRED(mu_);
 
   // Loops forever, calling Export() every export_interval_.
