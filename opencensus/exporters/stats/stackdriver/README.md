@@ -52,7 +52,9 @@ simultaneously exporting to Stackdriver concurrently; the format
 ### Register views and record stats
 
 Once the exporter has been registered, any stats for views registered with
-`ViewDescriptor::RegisterForExport()` will be exported.
+`ViewDescriptor::RegisterForExport()` will be exported. Views may be registered 
+before or after the exporter, and will track stats since the registration of the
+view in either case.
 
 ## Data model
 
