@@ -58,24 +58,24 @@ Once the exporter has been registered, any stats for views registered with
 
 ### View metadata
 
-Opencensus exports views as custom metrics under the 
+OpenCensus exports views as custom metrics under the 
 [Global](https://cloud.google.com/monitoring/api/resources#tag_global)
-monitored resource. For each view Opencensus creates a Stackdriver metric. This
+monitored resource. For each view, OpenCensus creates a Stackdriver metric. This
 metric's name will be under the path `"custom.googleapis.com/opencensus/"`, so
 that, for example, a view named `"example.com/client/latency"` would translate
 to a Stackdriver metric named
-`"custom.googleapis.com/opencenus/example.com/client/latency"`.
+`"custom.googleapis.com/opencensus/example.com/client/latency"`.
 
-Only Cumulative views may be registered for export in Opencensus, and created
+Only Cumulative views may be registered for export in OpenCensus, and created
 Stackdriver metrics have the `CUMULATIVE` type.
 
-View columns translate to Stackdriver's labels. Opencensus adds a label 
+View columns translate to Stackdriver's labels. OpenCensus adds a label 
 `"opencensus_task"` to all exported views so that exports from different
 processes do not conflict.
 
 ### Data
 
-For each row of the view's data (a unique combination of tag values) Opencensus
+For each row of the view's data (a unique combination of tag values) OpenCensus
 exports a separate `TimeSeries` with label values corresponding to the row's tag
 values.
 
