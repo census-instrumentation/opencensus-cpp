@@ -49,7 +49,9 @@ class StatsExporter final {
         const std::vector<std::pair<ViewDescriptor, ViewData>>& data) = 0;
   };
 
-  // This should only be called by push exporters' Register() methods.
+  // Registers a new handler. Every few seconds, each registered handler will be
+  // called with the present data for each registered view. This should only be
+  // called by push exporters' Register() methods.
   static void RegisterPushHandler(std::unique_ptr<Handler> handler);
 
   // Retrieves current data for all registered views, for implementing pull
