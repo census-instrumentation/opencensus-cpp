@@ -52,7 +52,7 @@ class ViewDescriptor final {
   // Sets the measure. If no measure is registered under 'name' any View created
   // with the descriptor will be invalid.
   ViewDescriptor& set_measure(absl::string_view name);
-  // Accesses the descriptor of the descriptor's measure. If no measure has been
+  // Accesses the descriptor of the view's measure. If no measure has been
   // registered under the name set using set_measure(), this returns an invalid
   // descriptor with blank fields.
   const MeasureDescriptor& measure_descriptor() const;
