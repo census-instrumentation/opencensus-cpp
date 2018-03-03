@@ -33,6 +33,8 @@ class MeasureDescriptor final {
     kInt64,
   };
 
+  // See documentation on MeasureRegistry::Register*() for details of these
+  // fields.
   const std::string& name() const { return name_; }
   const std::string& units() const { return units_; }
   const std::string& description() const { return description_; }

@@ -33,6 +33,11 @@ constexpr char kGoogleStackdriverStatsAddress[] = "monitoring.googleapis.com";
 constexpr char kProjectIdPrefix[] = "projects/";
 constexpr int kTimeSeriesBatchSize = 3;
 
+std::string ToString(const grpc::Status& status) {
+  return absl::StrCat("status code ", status.error_code(), " details \"",
+                      status.error_message(), "\"");
+}
+
 }  // namespace
 
 class StackdriverExporter::Handler
@@ -103,7 +108,7 @@ void StackdriverExporter::Handler::ExportViewData(
     ::grpc::Status status =
         stub_->CreateTimeSeries(&context, request, &response);
     if (!status.ok()) {
-      std::cerr << "CreateTimeSeries request failed: " << status.error_details()
+      std::cerr << "CreateTimeSeries request failed: " << ToString(status)
                 << "\n";
     }
   }
@@ -125,8 +130,8 @@ bool StackdriverExporter::Handler::MaybeRegisterView(
   ::grpc::Status status =
       stub_->CreateMetricDescriptor(&context, request, &response);
   if (!status.ok()) {
-    std::cerr << "CreateMetricDescriptor request failed: "
-              << status.error_details() << "\n";
+    std::cerr << "CreateMetricDescriptor request failed: " << ToString(status)
+              << "\n";
     return false;
   }
   registered_descriptors_.emplace_hint(it, descriptor.name(), descriptor);

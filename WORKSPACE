@@ -67,6 +67,12 @@ new_http_archive(
     strip_prefix = "benchmark-master",
     build_file_content =
 """
+config_setting(
+    name = "windows",
+    values = {"cpu": "x64_windows"},
+    visibility = [ "//visibility:private" ],
+)
+
 cc_library(
     name = "benchmark",
     srcs = glob([
@@ -74,7 +80,11 @@ cc_library(
         "src/*.cc",
     ]),
     hdrs = glob(["include/benchmark/*.h"]),
-    copts = ["-DHAVE_POSIX_REGEX"],  # HAVE_STD_REGEX didn't work.
+    copts = select({
+        "//:windows": ["-DHAVE_STD_REGEX"],
+        # HAVE_STD_REGEX didn't work.
+        "//conditions:default": ["-DHAVE_POSIX_REGEX"],
+    }),
     includes = ["include"],
     visibility = ["//visibility:public"],
 )

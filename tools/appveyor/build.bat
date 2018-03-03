@@ -12,11 +12,19 @@ REM WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 REM See the License for the specific language governing permissions and
 REM limitations under the License.
 
-REM TODO: Get everything to build on Windows:
-REM bazel build //...
+REM We need this to append a variable within a loop.
+setlocal enabledelayedexpansion
+
+REM TODO: Is there an easier way to convert lines to a space-separated list?
+SET BUILDABLES=
+FOR /F usebackq %%T IN (`bazel query "kind(rule, //...)" ^| FINDSTR /C:"\:_" /V`) DO (
+    SET BUILDABLES=!BUILDABLES! %%T
+)
 
 REM TODO: Remove --output_user_root after https://github.com/bazelbuild/bazel/issues/4149 is fixed.
-bazel --output_user_root=c:/t/ build //opencensus/trace
+REM TODO: enable the full build when errors are resolved.
+bazel --output_user_root=c:/t/ build //opencensus/trace //opencensus/stats
+REM bazel --output_user_root=c:/t/ build %BUILDABLES%
 
 IF %ERRORLEVEL% NEQ 0 EXIT /b %ERRORLEVEL%
 EXIT /b 0

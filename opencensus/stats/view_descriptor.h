@@ -26,37 +26,59 @@
 namespace opencensus {
 namespace stats {
 
-// ViewDescriptor provides metadata for a view, including its identity and the
-// data to be collected.
+// ViewDescriptor provides metadata for a view: a unique name, the measure to
+// collect data for, how to aggregate that data, and what tag keys to break it
+// down by.
+// In order to collect data for a ViewDescriptor, it must either be registered
+// for export (by calling RegisterForExport() on the fully-defined descriptor)
+// or converted into a View to collect data on-task (see view.h).
+//
 // ViewDescriptor is a value type, and is thread-compatible.
-// TODO: DOCS: Document members.
 class ViewDescriptor final {
  public:
   //////////////////////////////////////////////////////////////////////////////
   // View definition
 
+  // Creates a ViewDescriptor with Cumulative aggregation.
   ViewDescriptor();
 
+  // Sets the name of the ViewDescriptor. Names must be unique within the
+  // library; it is recommended that it be in the format "<domain>/<path>",
+  // where "<path>" uniquely specifies the measure, aggregation, and columns
+  // (e.g. "example.com/Foo/FooUsage-sum-key1-key2").
   ViewDescriptor& set_name(absl::string_view name);
   const std::string& name() const { return name_; }
 
   // Sets the measure. If no measure is registered under 'name' any View created
   // with the descriptor will be invalid.
   ViewDescriptor& set_measure(absl::string_view name);
-
+  // Accesses the descriptor of the view's measure. If no measure has been
+  // registered under the name set using set_measure(), this returns an invalid
+  // descriptor with blank fields.
   const MeasureDescriptor& measure_descriptor() const;
 
+  // Sets and retrieves the ViewDescriptor's aggregation. See aggregation.h for
+  // details of the options.
   ViewDescriptor& set_aggregation(const Aggregation& aggregation);
   const Aggregation& aggregation() const { return aggregation_; }
 
+  // Retrieves the AggregationWindow--see internal/aggregation_window.h for
+  // details. For exported views this should be left at the default Cumulative;
+  // for on-task data needing other windows, internal/set_aggregation_window.h
+  // provides an interface for setting this field.
   const AggregationWindow& aggregation_window() const {
     return aggregation_window_;
   }
 
+  // Adds a dimension to the view's data. When data is recorded it can specify a
+  // number of tags, key-value pairs; the aggregated data for each view will be
+  // broken down by the distinct values of each tag key matching one of the
+  // view's columns.
   ViewDescriptor& add_column(absl::string_view tag_key);
   size_t num_columns() const { return columns_.size(); }
   const std::vector<std::string>& columns() const { return columns_; }
 
+  // Sets a human-readable description for the view.
   ViewDescriptor& set_description(absl::string_view description);
   const std::string& description() const { return description_; }
 
