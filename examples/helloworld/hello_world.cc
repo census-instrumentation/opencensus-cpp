@@ -27,13 +27,13 @@
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"
 
+namespace {
+
 ABSL_CONST_INIT const absl::string_view kFrontendKey = "my.org/keys/frontend";
 ABSL_CONST_INIT const absl::string_view kVideoSizeViewName =
     "my.org/views/video_size";
 ABSL_CONST_INIT const absl::string_view kVideoSizeMeasureName =
     "my.org/measure/video_size";
-
-opencensus::stats::MeasureInt VideoSizeMeasure();
 
 // The resource owner defines and registers a measure. A function exposing a
 // function-local static is the recommended style, ensuring that the measure is
@@ -44,6 +44,8 @@ opencensus::stats::MeasureInt VideoSizeMeasure() {
           kVideoSizeMeasureName, "MBy", "size of processed videos");
   return video_size;
 }
+
+}  // namespace
 
 // Simple program that collects data for video size.
 int main(int argc, char **argv) {
@@ -100,9 +102,5 @@ int main(int argc, char **argv) {
       for (auto &name : it.first) std::cout << name << " : ";
       std::cout << it.second.DebugString() << "\n";
     }
-  }
-  std::cout << "Client sleeping, ^C to exit.\n";
-  while (true) {
-    absl::SleepFor(absl::Seconds(10));
   }
 }
