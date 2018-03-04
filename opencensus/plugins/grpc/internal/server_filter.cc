@@ -72,7 +72,8 @@ void CensusServerCallData::OnDoneRecvMessageCb(void *user_data,
   GPR_ASSERT(channeld != nullptr);
   // Stream messages are no longer valid after receiving trailing metadata.
   if ((*calld->recv_message_) != nullptr) {
-    calld->context_.RecordMessageEvent(false, calld->recv_message_count_++, (*calld->recv_message_)->length);
+    calld->context_.RecordMessageEvent(false, calld->recv_message_count_++,
+                                       (*calld->recv_message_)->length);
   }
   GRPC_CLOSURE_RUN(calld->initial_on_done_recv_message_, GRPC_ERROR_REF(error));
 }
@@ -92,13 +93,9 @@ void CensusServerCallData::OnDoneRecvInitialMetadataCb(void *user_data,
     sml.census_proto = grpc_empty_slice();
     FilterInitialMetadata(initial_metadata, &sml);
     calld->path_ = grpc_slice_ref_internal(sml.path);
-    const char *method_str = GRPC_SLICE_IS_EMPTY(calld->path_)
-                                 ? ""
-                                 : reinterpret_cast<const char *>(
-                                       GRPC_SLICE_START_PTR(calld->path_));
     calld->method_ = absl::string_view(
-        method_str,
-        GRPC_SLICE_IS_EMPTY(sml.path) ? 0 : GRPC_SLICE_LENGTH(sml.path));
+        GetMethod(calld->path_),
+        GRPC_SLICE_IS_EMPTY(sml.path) ? 0 : GRPC_SLICE_LENGTH(sml.path) - 1);
     const char *tracing_str =
         GRPC_SLICE_IS_EMPTY(sml.tracing_slice)
             ? ""
@@ -141,7 +138,9 @@ void CensusServerCallData::StartTransportStreamOpBatch(
     op->set_recv_initial_metadata_ready(&on_done_recv_initial_metadata_);
   }
   if (op->send_message() != nullptr) {
-    context_.RecordMessageEvent(true, sent_message_count_++, op->op()->payload->send_message.send_message->length);
+    context_.RecordMessageEvent(
+        true, sent_message_count_++,
+        op->op()->payload->send_message.send_message->length);
   }
   if (op->recv_message() != nullptr) {
     recv_message_ = op->op()->payload->recv_message.recv_message;

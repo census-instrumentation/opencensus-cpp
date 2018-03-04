@@ -105,6 +105,13 @@ trace::Span SpanFromCensusContext(const census_context *ctxt);
 // Returns a string representation of the StatusCode enum.
 absl::string_view StatusCodeToString(grpc_status_code code);
 
+inline const char *GetMethod(grpc_slice *path) {
+  // Skip the first "/".
+  return GPR_SLICE_IS_EMPTY(*path)
+             ? ""
+             : reinterpret_cast<const char *>(GRPC_SLICE_START_PTR(*path)) + 1;
+}
+
 }  // namespace opencensus
 
 #endif  // OPENCENSUS_PLUGINS_INTERNAL_FILTER_H_

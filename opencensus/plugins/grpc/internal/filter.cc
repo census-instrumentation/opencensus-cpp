@@ -18,7 +18,7 @@
 namespace opencensus {
 
 void CensusContext::RecordMessageEvent(bool sent, uint32_t id, uint32_t size) {
-  if(sent) {
+  if (sent) {
     span_.AddSentMessageEvent(id, size, size);
   } else {
     span_.AddReceivedMessageEvent(id, size, size);

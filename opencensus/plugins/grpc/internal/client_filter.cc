@@ -72,7 +72,8 @@ void CensusClientCallData::OnDoneRecvMessageCb(void *user_data,
   GPR_ASSERT(channeld != nullptr);
   // Stream messages are no longer valid after receiving trailing metadata.
   if ((*calld->recv_message_) != nullptr) {
-    calld->context_.RecordMessageEvent(false, calld->recv_message_count_++, (*calld->recv_message_)->length);
+    calld->context_.RecordMessageEvent(false, calld->recv_message_count_++,
+                                       (*calld->recv_message_)->length);
   }
   GRPC_CLOSURE_RUN(calld->initial_on_done_recv_message_, GRPC_ERROR_REF(error));
 }
@@ -113,7 +114,9 @@ void CensusClientCallData::StartTransportStreamOpBatch(
   }
 
   if (op->send_message() != nullptr) {
-    context_.RecordMessageEvent(true, sent_message_count_++, op->op()->payload->send_message.send_message->length);
+    context_.RecordMessageEvent(
+        true, sent_message_count_++,
+        op->op()->payload->send_message.send_message->length);
   }
   if (op->recv_message() != nullptr) {
     recv_message_ = op->op()->payload->recv_message.recv_message;
@@ -134,12 +137,9 @@ grpc_error *CensusClientCallData::Init(grpc_call_element *elem,
                                        const grpc_call_element_args *args) {
   path_ = grpc_slice_ref_internal(args->path);
   start_time_ = absl::Now();
-  const char *method_str =
-      GPR_SLICE_IS_EMPTY(path_)
-          ? ""
-          : reinterpret_cast<const char *>(GRPC_SLICE_START_PTR(path_));
   method_ = absl::string_view(
-      method_str, GRPC_SLICE_IS_EMPTY(path_) ? 0 : GRPC_SLICE_LENGTH(path_));
+      GetMethod(path_),
+      GRPC_SLICE_IS_EMPTY(path_) ? 0 : GRPC_SLICE_LENGTH(path_) - 1);
   GRPC_CLOSURE_INIT(&on_done_recv_message_, OnDoneRecvMessageCb, elem,
                     grpc_schedule_on_exec_ctx);
   GRPC_CLOSURE_INIT(&on_done_recv_trailing_metadata_,
