@@ -59,6 +59,7 @@ class CensusContext {
     return 0;
   }
 
+  void RecordMessageEvent(bool sent, uint32_t id, uint32_t size);
   trace::SpanContext Context() const { return span_.context(); }
   trace::Span Span() const { return span_; }
   void EndSpan() { span_.End(); }

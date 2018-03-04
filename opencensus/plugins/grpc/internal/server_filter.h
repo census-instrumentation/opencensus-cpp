@@ -79,8 +79,8 @@ class CensusServerCallData : public grpc::CallData {
   absl::Time start_time_;  // For measuring elapsed time.
   absl::Duration elapsed_time_;
   grpc_byte_stream **recv_message_;
-  uint64_t recv_message_count_;
-  uint64_t sent_message_count_;
+  uint32_t recv_message_count_;
+  uint32_t sent_message_count_;
 };
 
 }  // namespace opencensus
