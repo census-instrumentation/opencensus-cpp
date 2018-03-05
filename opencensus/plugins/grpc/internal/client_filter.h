@@ -80,8 +80,8 @@ class CensusClientCallData : public grpc::CallData {
   // The received message--may be null.
   grpc_byte_stream **recv_message_;  // Not owned.
   // Number of messages in this RPC.
-  uint64_t recv_message_count_;
-  uint64_t sent_message_count_;
+  uint32_t recv_message_count_;
+  uint32_t sent_message_count_;
 };
 
 }  // namespace opencensus
