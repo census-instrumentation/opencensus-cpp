@@ -59,12 +59,6 @@ class CensusContext {
     return 0;
   }
 
-  void RecordSentMessageEvent(uint32_t id, uint32_t size) {
-    span_.AddSentMessageEvent(id, size, size);
-  }
-  void RecordReceivedMessageEvent(uint32_t id, uint32_t size) {
-    span_.AddReceivedMessageEvent(id, size, size);
-  }
   trace::SpanContext Context() const { return span_.context(); }
   trace::Span Span() const { return span_; }
   void EndSpan() { span_.End(); }
