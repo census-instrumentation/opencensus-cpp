@@ -104,6 +104,22 @@ trace::Span SpanFromCensusContext(const census_context *ctxt);
 // Returns a string representation of the StatusCode enum.
 absl::string_view StatusCodeToString(grpc_status_code code);
 
+inline absl::string_view GetMethod(const grpc_slice *path) {
+  if (GRPC_SLICE_IS_EMPTY(*path)) {
+    return "";
+  } else {
+    const char *str =
+        reinterpret_cast<const char *>(GRPC_SLICE_START_PTR(*path));
+    size_t size = GRPC_SLICE_LENGTH(*path);
+    // Check for leading '/' and trim it if present.
+    if (str[0] == '/') {
+      ++str;
+      --size;
+    }
+    return absl::string_view(str, size);
+  }
+}
+
 }  // namespace opencensus
 
 #endif  // OPENCENSUS_PLUGINS_INTERNAL_FILTER_H_

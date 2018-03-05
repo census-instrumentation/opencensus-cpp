@@ -86,7 +86,7 @@ void CensusClientCallData::StartTransportStreamOpBatch(
     // grpc has been changed to populate census context at call initialization.
     census_context *ctxt = op->get_census_context();
     GenerateClientContext(
-        method_, &context_,
+        qualified_method_, &context_,
         (ctxt == nullptr) ? nullptr : reinterpret_cast<CensusContext *>(ctxt));
     char tracing_buf[kMaxTracingLen];
     size_t tracing_len =
@@ -139,12 +139,8 @@ grpc_error *CensusClientCallData::Init(grpc_call_element *elem,
                                        const grpc_call_element_args *args) {
   path_ = grpc_slice_ref_internal(args->path);
   start_time_ = absl::Now();
-  const char *method_str =
-      GPR_SLICE_IS_EMPTY(path_)
-          ? ""
-          : reinterpret_cast<const char *>(GRPC_SLICE_START_PTR(path_));
-  method_ = absl::string_view(
-      method_str, GRPC_SLICE_IS_EMPTY(path_) ? 0 : GRPC_SLICE_LENGTH(path_));
+  method_ = GetMethod(&path_);
+  qualified_method_ = StrCat("Sent.", method_);
   GRPC_CLOSURE_INIT(&on_done_recv_message_, OnDoneRecvMessageCb, elem,
                     grpc_schedule_on_exec_ctx);
   GRPC_CLOSURE_INIT(&on_done_recv_trailing_metadata_,

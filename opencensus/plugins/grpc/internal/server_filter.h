@@ -15,6 +15,8 @@
 #ifndef OPENCENSUS_PLUGINS_INTERNAL_SERVER_FILTER_H_
 #define OPENCENSUS_PLUGINS_INTERNAL_SERVER_FILTER_H_
 
+#include <string>
+
 #include "absl/strings/string_view.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
@@ -62,6 +64,7 @@ class CensusServerCallData : public grpc::CallData {
   CensusContext context_;
   // server method
   absl::string_view method_;
+  std::string qualified_method_;
   grpc_slice path_;
   // Pointer to the grpc_call element
   grpc_call *gc_;
