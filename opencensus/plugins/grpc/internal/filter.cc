@@ -17,14 +17,6 @@
 
 namespace opencensus {
 
-void CensusContext::RecordSentMessageEvent(uint32_t id, uint32_t size) {
-  span_.AddSentMessageEvent(id, size, size);
-}
-
-void CensusContext::RecordReceivedMessageEvent(uint32_t id, uint32_t size) {
-  span_.AddReceivedMessageEvent(id, size, size);
-}
-
 void GenerateServerContext(absl::string_view tracing, absl::string_view stats,
                            absl::string_view primary_role,
                            absl::string_view method, CensusContext *context) {
