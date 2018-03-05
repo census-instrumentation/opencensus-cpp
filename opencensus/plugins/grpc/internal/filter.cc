@@ -17,12 +17,12 @@
 
 namespace opencensus {
 
-void CensusContext::RecordMessageEvent(bool sent, uint32_t id, uint32_t size) {
-  if (sent) {
-    span_.AddSentMessageEvent(id, size, size);
-  } else {
-    span_.AddReceivedMessageEvent(id, size, size);
-  }
+void CensusContext::RecordSentMessageEvent(uint32_t id, uint32_t size) {
+  span_.AddSentMessageEvent(id, size, size);
+}
+
+void CensusContext::RecordReceivedMessageEvent(uint32_t id, uint32_t size) {
+  span_.AddReceivedMessageEvent(id, size, size);
 }
 
 void GenerateServerContext(absl::string_view tracing, absl::string_view stats,
