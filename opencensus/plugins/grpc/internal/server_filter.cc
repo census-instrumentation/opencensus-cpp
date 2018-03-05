@@ -117,7 +117,7 @@ void CensusServerCallData::OnDoneRecvInitialMetadataCb(void *user_data,
                           /*primary_role*/ "", calld->qualified_method_,
                           &calld->context_);
     stats::Record({{RpcServerStartedCount(), 1}},
-                  {{kMethodTagKey, calld->method_}});
+                  {{kMethodTagKey, calld->qualified_method_}});
 
     grpc_slice_unref_internal(sml.tracing_slice);
     grpc_slice_unref_internal(sml.census_proto);
@@ -201,7 +201,7 @@ void CensusServerCallData::Destroy(grpc_call_element *elem,
        {RpcServerRequestCount(), sent_message_count_},
        {RpcServerFinishedCount(), 1},
        {RpcServerResponseCount(), recv_message_count_}},
-      {{kMethodTagKey, method_},
+      {{kMethodTagKey, qualified_method_},
        {kStatusTagKey, StatusCodeToString(final_info->final_status)}});
   grpc_slice_unref_internal(path_);
   context_.EndSpan();
