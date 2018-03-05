@@ -93,9 +93,13 @@ void CensusServerCallData::OnDoneRecvInitialMetadataCb(void *user_data,
     sml.census_proto = grpc_empty_slice();
     FilterInitialMetadata(initial_metadata, &sml);
     calld->path_ = grpc_slice_ref_internal(sml.path);
+    const char *method_str = GRPC_SLICE_IS_EMPTY(calld->path_)
+                                 ? ""
+                                 : reinterpret_cast<const char *>(
+                                       GRPC_SLICE_START_PTR(calld->path_));
     calld->method_ = absl::string_view(
-        GetMethod(calld->path_),
-        GRPC_SLICE_IS_EMPTY(sml.path) ? 0 : GRPC_SLICE_LENGTH(sml.path) - 1);
+        method_str,
+        GRPC_SLICE_IS_EMPTY(sml.path) ? 0 : GRPC_SLICE_LENGTH(sml.path));
     const char *tracing_str =
         GRPC_SLICE_IS_EMPTY(sml.tracing_slice)
             ? ""

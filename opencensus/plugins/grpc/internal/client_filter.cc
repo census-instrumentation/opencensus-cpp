@@ -137,9 +137,12 @@ grpc_error *CensusClientCallData::Init(grpc_call_element *elem,
                                        const grpc_call_element_args *args) {
   path_ = grpc_slice_ref_internal(args->path);
   start_time_ = absl::Now();
+  const char *method_str =
+      GPR_SLICE_IS_EMPTY(path_)
+          ? ""
+          : reinterpret_cast<const char *>(GRPC_SLICE_START_PTR(path_));
   method_ = absl::string_view(
-      GetMethod(path_),
-      GRPC_SLICE_IS_EMPTY(path_) ? 0 : GRPC_SLICE_LENGTH(path_) - 1);
+      method_str, GRPC_SLICE_IS_EMPTY(path_) ? 0 : GRPC_SLICE_LENGTH(path_));
   GRPC_CLOSURE_INIT(&on_done_recv_message_, OnDoneRecvMessageCb, elem,
                     grpc_schedule_on_exec_ctx);
   GRPC_CLOSURE_INIT(&on_done_recv_trailing_metadata_,
