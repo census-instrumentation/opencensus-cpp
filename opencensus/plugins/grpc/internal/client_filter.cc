@@ -139,8 +139,7 @@ grpc_error *CensusClientCallData::Init(grpc_call_element *elem,
                                        const grpc_call_element_args *args) {
   path_ = grpc_slice_ref_internal(args->path);
   start_time_ = absl::Now();
-  absl::string_view method = GetMethod(&path_);
-  qualified_method_ = StrCat("Sent.", method);
+  qualified_method_ = StrCat("Sent.", GetMethod(&path_));
   GRPC_CLOSURE_INIT(&on_done_recv_message_, OnDoneRecvMessageCb, elem,
                     grpc_schedule_on_exec_ctx);
   GRPC_CLOSURE_INIT(&on_done_recv_trailing_metadata_,
