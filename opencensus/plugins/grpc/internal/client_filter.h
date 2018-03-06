@@ -15,6 +15,8 @@
 #ifndef OPENCENSUS_PLUGINS_INTERNAL_CLIENT_FILTER_H_
 #define OPENCENSUS_PLUGINS_INTERNAL_CLIENT_FILTER_H_
 
+#include <string>
+
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
 #include "opencensus/plugins/grpc/internal/channel_filter.h"
@@ -64,7 +66,7 @@ class CensusClientCallData : public grpc::CallData {
   grpc_linked_mdelem stats_bin_;
   grpc_linked_mdelem tracing_bin_;
   // Client method.
-  absl::string_view method_;
+  std::string qualified_method_;
   grpc_slice path_;
   // The recv trailing metadata callbacks.
   grpc_metadata_batch *recv_trailing_metadata_;
