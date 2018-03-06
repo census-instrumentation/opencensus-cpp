@@ -1,6 +1,6 @@
 # OpenCensus Prometheus Stats Exporter
 
-The Opencensus Prometheus Stats Exporter is a stats exporter that exposes stats
+The OpenCensus Prometheus Stats Exporter is a stats exporter that exposes stats
 to the
 [Prometheus cpp client library](https://github.com/jupp0r/prometheus-cpp).
 
@@ -16,7 +16,7 @@ the instructions [here](https://prometheus.io/docs/introduction/first_steps/).
 
 #### Using the Prometheus client library's exposer
 
-Register the Exposer on a selected port, and then register the Opencensus
+Register the Exposer on a selected port, and then register the OpenCensus
 Prometheus exporter with that exposer:
 
 ```c++
