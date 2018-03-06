@@ -9,7 +9,7 @@ to the
 ### Prerequisites
 
 The Prometheus exporter exposes stats on an HTTP endpoint that is scraped by
-a Prometheus server scrapes. To install and run the Prometheus server, follow
+a Prometheus server. To install and run the Prometheus server, follow
 the instructions [here](https://prometheus.io/docs/introduction/first_steps/).
 
 ### Register the exporter
