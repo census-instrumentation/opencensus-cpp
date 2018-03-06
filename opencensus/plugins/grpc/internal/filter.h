@@ -16,6 +16,7 @@
 #define OPENCENSUS_PLUGINS_INTERNAL_FILTER_H_
 
 #include "absl/strings/string_view.h"
+#include "absl/strings/strip.h"
 #include "include/grpc/impl/codegen/status.h"
 #include "opencensus/plugins/grpc/internal/rpc_encoding.h"
 #include "opencensus/trace/span.h"
@@ -107,17 +108,12 @@ absl::string_view StatusCodeToString(grpc_status_code code);
 inline absl::string_view GetMethod(const grpc_slice *path) {
   if (GRPC_SLICE_IS_EMPTY(*path)) {
     return "";
-  } else {
-    const char *str =
-        reinterpret_cast<const char *>(GRPC_SLICE_START_PTR(*path));
-    size_t size = GRPC_SLICE_LENGTH(*path);
-    // Check for leading '/' and trim it if present.
-    if (str[0] == '/') {
-      ++str;
-      --size;
-    }
-    return absl::string_view(str, size);
   }
+  // Check for leading '/' and trim it if present.
+  return absl::StripPrefix(absl::string_view(reinterpret_cast<const char *>(
+                                                 GRPC_SLICE_START_PTR(*path)),
+                                             GRPC_SLICE_LENGTH(*path)),
+                           "/");
 }
 
 }  // namespace opencensus

@@ -63,7 +63,6 @@ class CensusServerCallData : public grpc::CallData {
  private:
   CensusContext context_;
   // server method
-  absl::string_view method_;
   std::string qualified_method_;
   grpc_slice path_;
   // Pointer to the grpc_call element
