@@ -76,6 +76,8 @@ int main(int argc, char **argv) {
   opencensus::stats::View view(video_size_view);
   video_size_view.RegisterForExport();
 
+  // Samplers are potentially expensive to construct. Use one long-lived sampler
+  // instead of constructing one per Span.
   static opencensus::trace::AlwaysSampler sampler;
 
   // Done initializing. Video processing starts here:
@@ -91,8 +93,8 @@ int main(int argc, char **argv) {
   span.End();
 
   // Report view data.
-  std::cout << "video_size_view definitions:" << video_size_view.DebugString() << "\n";
-  std::cout << "View data:\n";
+  std::cout << "video_size_view definitions:" << video_size_view.DebugString()
+            << "\nView data:\n";
   const auto data = view.GetData();
   assert(data.type() == opencensus::stats::ViewData::Type::kDistribution);
   for (auto &it : data.distribution_data()) {
