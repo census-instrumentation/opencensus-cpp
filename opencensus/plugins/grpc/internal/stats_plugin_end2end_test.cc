@@ -75,7 +75,10 @@ class StatsPluginEnd2EndTest : public ::testing::Test {
 
   void RunServerLoop() { server_->Wait(); }
 
-  const std::string method_name_ = "/opencensus.testing.EchoService/Echo";
+  const std::string client_method_name_ =
+      "Sent.opencensus.testing.EchoService/Echo";
+  const std::string server_method_name_ =
+      "Recv.opencensus.testing.EchoService/Echo";
 
   std::string server_address_;
   EchoServer service_;
@@ -91,7 +94,6 @@ TEST_F(StatsPluginEnd2EndTest, ErrorCount) {
           .set_measure(kRpcClientErrorCountMeasureName)
           .set_name("client_method")
           .set_aggregation(stats::Aggregation::Sum())
-
           .add_column(kMethodTagKey);
   stats::View client_method_view(client_method_descriptor);
   const auto server_method_descriptor =
@@ -100,7 +102,7 @@ TEST_F(StatsPluginEnd2EndTest, ErrorCount) {
           .set_name("server_method")
           .set_aggregation(stats::Aggregation::Sum())
           .add_column(kMethodTagKey);
-  stats::View server_method_view(client_method_descriptor);
+  stats::View server_method_view(server_method_descriptor);
 
   const auto client_status_descriptor =
       stats::ViewDescriptor()
@@ -129,11 +131,11 @@ TEST_F(StatsPluginEnd2EndTest, ErrorCount) {
   absl::SleepFor(absl::Milliseconds(500));
 
   EXPECT_THAT(client_method_view.GetData().double_data(),
-              ::testing::UnorderedElementsAre(
-                  ::testing::Pair(::testing::ElementsAre(method_name_), 16.0)));
+              ::testing::UnorderedElementsAre(::testing::Pair(
+                  ::testing::ElementsAre(client_method_name_), 16.0)));
   EXPECT_THAT(server_method_view.GetData().double_data(),
-              ::testing::UnorderedElementsAre(
-                  ::testing::Pair(::testing::ElementsAre(method_name_), 16.0)));
+              ::testing::UnorderedElementsAre(::testing::Pair(
+                  ::testing::ElementsAre(server_method_name_), 16.0)));
 
   auto codes = {
       ::testing::Pair(::testing::ElementsAre("OK"), 0.0),
@@ -181,28 +183,28 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseBytes) {
   EXPECT_THAT(
       client_request_bytes_view.GetData().distribution_data(),
       ::testing::UnorderedElementsAre(::testing::Pair(
-          ::testing::ElementsAre(method_name_),
+          ::testing::ElementsAre(client_method_name_),
           ::testing::AllOf(::testing::Property(&stats::Distribution::count, 1),
                            ::testing::Property(&stats::Distribution::mean,
                                                ::testing::Gt(0.0))))));
   EXPECT_THAT(
       client_response_bytes_view.GetData().distribution_data(),
       ::testing::UnorderedElementsAre(::testing::Pair(
-          ::testing::ElementsAre(method_name_),
+          ::testing::ElementsAre(client_method_name_),
           ::testing::AllOf(::testing::Property(&stats::Distribution::count, 1),
                            ::testing::Property(&stats::Distribution::mean,
                                                ::testing::Gt(0.0))))));
   EXPECT_THAT(
       server_request_bytes_view.GetData().distribution_data(),
       ::testing::UnorderedElementsAre(::testing::Pair(
-          ::testing::ElementsAre(method_name_),
+          ::testing::ElementsAre(server_method_name_),
           ::testing::AllOf(::testing::Property(&stats::Distribution::count, 1),
                            ::testing::Property(&stats::Distribution::mean,
                                                ::testing::Gt(0.0))))));
   EXPECT_THAT(
       server_response_bytes_view.GetData().distribution_data(),
       ::testing::UnorderedElementsAre(::testing::Pair(
-          ::testing::ElementsAre(method_name_),
+          ::testing::ElementsAre(server_method_name_),
           ::testing::AllOf(::testing::Property(&stats::Distribution::count, 1),
                            ::testing::Property(&stats::Distribution::mean,
                                                ::testing::Gt(0.0))))));
@@ -234,7 +236,7 @@ TEST_F(StatsPluginEnd2EndTest, Latency) {
   EXPECT_THAT(
       client_latency_view.GetData().distribution_data(),
       ::testing::UnorderedElementsAre(::testing::Pair(
-          ::testing::ElementsAre(method_name_),
+          ::testing::ElementsAre(client_method_name_),
           ::testing::AllOf(::testing::Property(&stats::Distribution::count, 1),
                            ::testing::Property(&stats::Distribution::mean,
                                                ::testing::Gt(0.0)),
@@ -244,11 +246,11 @@ TEST_F(StatsPluginEnd2EndTest, Latency) {
   // Elapsed time is a subinterval of total latency.
   const auto client_latency = client_latency_view.GetData()
                                   .distribution_data()
-                                  .find({method_name_})
+                                  .find({client_method_name_})
                                   ->second.mean();
   EXPECT_THAT(client_server_elapsed_time_view.GetData().distribution_data(),
               ::testing::UnorderedElementsAre(::testing::Pair(
-                  ::testing::ElementsAre(method_name_),
+                  ::testing::ElementsAre(client_method_name_),
                   ::testing::AllOf(
                       ::testing::Property(&stats::Distribution::count, 1),
                       ::testing::Property(&stats::Distribution::mean,
@@ -260,12 +262,12 @@ TEST_F(StatsPluginEnd2EndTest, Latency) {
   // client.
   const auto client_elapsed_time = client_server_elapsed_time_view.GetData()
                                        .distribution_data()
-                                       .find({method_name_})
+                                       .find({client_method_name_})
                                        ->second.mean();
   EXPECT_THAT(
       server_server_elapsed_time_view.GetData().distribution_data(),
       ::testing::UnorderedElementsAre(::testing::Pair(
-          ::testing::ElementsAre(method_name_),
+          ::testing::ElementsAre(server_method_name_),
           ::testing::AllOf(
               ::testing::Property(&stats::Distribution::count, 1),
               ::testing::Property(&stats::Distribution::mean,
@@ -293,16 +295,16 @@ TEST_F(StatsPluginEnd2EndTest, StartFinishCount) {
 
     EXPECT_THAT(client_started_count_view.GetData().double_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
-                    ::testing::ElementsAre(method_name_), i + 1)));
+                    ::testing::ElementsAre(client_method_name_), i + 1)));
     EXPECT_THAT(client_finished_count_view.GetData().double_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
-                    ::testing::ElementsAre(method_name_), i + 1)));
+                    ::testing::ElementsAre(client_method_name_), i + 1)));
     EXPECT_THAT(server_started_count_view.GetData().double_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
-                    ::testing::ElementsAre(method_name_), i + 1)));
+                    ::testing::ElementsAre(server_method_name_), i + 1)));
     EXPECT_THAT(server_finished_count_view.GetData().double_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
-                    ::testing::ElementsAre(method_name_), i + 1)));
+                    ::testing::ElementsAre(server_method_name_), i + 1)));
   }
 }
 
@@ -328,28 +330,28 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseCount) {
 
     EXPECT_THAT(client_request_count_view.GetData().distribution_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
-                    ::testing::ElementsAre(method_name_),
+                    ::testing::ElementsAre(client_method_name_),
                     ::testing::AllOf(
                         ::testing::Property(&stats::Distribution::count, i + 1),
                         ::testing::Property(&stats::Distribution::mean,
                                             ::testing::DoubleEq(1.0))))));
     EXPECT_THAT(client_response_count_view.GetData().distribution_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
-                    ::testing::ElementsAre(method_name_),
+                    ::testing::ElementsAre(client_method_name_),
                     ::testing::AllOf(
                         ::testing::Property(&stats::Distribution::count, i + 1),
                         ::testing::Property(&stats::Distribution::mean,
                                             ::testing::DoubleEq(1.0))))));
     EXPECT_THAT(server_request_count_view.GetData().distribution_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
-                    ::testing::ElementsAre(method_name_),
+                    ::testing::ElementsAre(server_method_name_),
                     ::testing::AllOf(
                         ::testing::Property(&stats::Distribution::count, i + 1),
                         ::testing::Property(&stats::Distribution::mean,
                                             ::testing::DoubleEq(1.0))))));
     EXPECT_THAT(server_response_count_view.GetData().distribution_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
-                    ::testing::ElementsAre(method_name_),
+                    ::testing::ElementsAre(server_method_name_),
                     ::testing::AllOf(
                         ::testing::Property(&stats::Distribution::count, i + 1),
                         ::testing::Property(&stats::Distribution::mean,
