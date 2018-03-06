@@ -17,7 +17,9 @@ the instructions [here](https://prometheus.io/docs/introduction/first_steps/).
 #### Using the Prometheus client library's exposer
 
 Register the Exposer on a selected port, and then register the OpenCensus
-Prometheus exporter with that exposer:
+Prometheus exporter with that exposer. This may be done either before or after
+views are registered for export and data is recorded, but stats will not be
+available to Prometheus until the exporter is registered.
 
 ```c++
   auto exporter =
