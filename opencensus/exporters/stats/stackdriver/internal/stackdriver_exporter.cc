@@ -118,7 +118,13 @@ bool StackdriverExporter::Handler::MaybeRegisterView(
     const opencensus::stats::ViewDescriptor& descriptor) {
   const auto& it = registered_descriptors_.find(descriptor.name());
   if (it != registered_descriptors_.end()) {
-    return it->second == descriptor;
+    if (it->second != descriptor) {
+      std::cerr << "Not exporting altered view: " << descriptor.DebugString()
+                << "\nAlready registered as: " << it->second.DebugString()
+                << "\n";
+      return false;
+    }
+    return true;
   }
 
   auto request = google::monitoring::v3::CreateMetricDescriptorRequest();

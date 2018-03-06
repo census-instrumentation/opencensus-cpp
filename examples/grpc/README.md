@@ -22,7 +22,7 @@ To increase gRPC verbosity, try:
 
 ```shell
 env GRPC_VERBOSITY=DEBUG ../../bazel-bin/examples/grpc/hello_server 9001
-env GRPC_VERBOSITY=DEBUG ../../bazel-bin/examples/grpc/hello_client [::]:9001
+env GRPC_VERBOSITY=DEBUG ../../bazel-bin/examples/grpc/hello_client "[::]:9001"
 ```
 
 ## Stackdriver
