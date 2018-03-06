@@ -18,7 +18,7 @@ set -e
 # For easier debugging: print the version because it affects the formatting.
 CMD=clang-format
 $CMD -version
-$CMD -i -style=Google $(find opencensus -name '*.cc' -or -name '*.h')
+$CMD -i -style=Google $(find . -name '*.cc' -or -name '*.h')
 CHANGED="$(git ls-files --modified)"
 if [[ ! -z "$CHANGED" ]]; then
   echo "The following files have changes:"
