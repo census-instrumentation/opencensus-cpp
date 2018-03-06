@@ -76,31 +76,31 @@ int main(int argc, char **argv) {
   opencensus::stats::View view(video_size_view);
   video_size_view.RegisterForExport();
 
-  opencensus::trace::AlwaysSampler sampler;
+  static opencensus::trace::AlwaysSampler sampler;
+
+  // Done initializing. Video processing starts here:
   auto span = opencensus::trace::Span::StartSpan("my.org/ProcessVideo", nullptr,
                                                  {&sampler});
-
-  // Process video.
-  // Record the processed video size.
   span.AddAnnotation("Start processing video.");
   // Sleep for [1,10] milliseconds to fake work.
   absl::SleepFor(absl::Milliseconds(rand() % 10 + 1));
+  // Record the processed video size.
   opencensus::stats::Record({{VideoSizeMeasure(), 25648}},
                             {{kFrontendKey, "video size"}});
   span.AddAnnotation("Finished processing video.");
   span.End();
 
-  // Sleep for ~5 seconds to ensure that exporters will process the span.
-  std::cout << "Wait longer than the reporting duration...\n";
-  absl::SleepFor(absl::Milliseconds(5100));
-
-  // Sleep while exporters run in the background.
-  std::cout << "Views:\n" << video_size_view.DebugString() << "\n";
+  // Report view data.
+  std::cout << "video_size_view definitions:" << video_size_view.DebugString() << "\n";
+  std::cout << "View data:\n";
   const auto data = view.GetData();
-  if (data.type() == opencensus::stats::ViewData::Type::kDistribution) {
-    for (auto &it : data.distribution_data()) {
-      for (auto &name : it.first) std::cout << name << " : ";
-      std::cout << it.second.DebugString() << "\n";
-    }
+  assert(data.type() == opencensus::stats::ViewData::Type::kDistribution);
+  for (auto &it : data.distribution_data()) {
+    std::cout << "  ";
+    for (auto &name : it.first) std::cout << name << " : ";
+    std::cout << it.second.DebugString() << "\n";
   }
+
+  std::cout << "\nWaiting for exporters to run...\n";
+  absl::SleepFor(absl::Milliseconds(5100));
 }
