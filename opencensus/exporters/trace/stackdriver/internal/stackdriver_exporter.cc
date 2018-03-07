@@ -37,6 +37,9 @@ static constexpr char kGoogleStackDriverTraceAddress[] =
 
 namespace {
 
+constexpr char kAgentKey[] = "g.co/agent";
+constexpr char kAgentValue[] = "opencensus-cpp";
+
 gpr_timespec ConvertToTimespec(absl::Time time) {
   gpr_timespec g_time;
   int64_t secs = absl::ToUnixSeconds(time);
@@ -231,6 +234,12 @@ void ConvertSpans(
     to_span->mutable_status()->set_code(
         static_cast<int32_t>(from_span.status().CanonicalCode()));
     to_span->mutable_status()->set_message(from_span.status().error_message());
+
+    // Add agent attribute.
+    SetTruncatableString(
+        kAgentValue, kAttributeStringLen,
+        (*to_span->mutable_attributes()->mutable_attribute_map())[kAgentKey]
+            .mutable_string_value());
   }
 }
 
