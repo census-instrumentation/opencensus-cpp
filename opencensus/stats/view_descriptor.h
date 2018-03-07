@@ -62,14 +62,6 @@ class ViewDescriptor final {
   ViewDescriptor& set_aggregation(const Aggregation& aggregation);
   const Aggregation& aggregation() const { return aggregation_; }
 
-  // Retrieves the AggregationWindow--see internal/aggregation_window.h for
-  // details. For exported views this should be left at the default Cumulative;
-  // for on-task data needing other windows, internal/set_aggregation_window.h
-  // provides an interface for setting this field.
-  const AggregationWindow& aggregation_window() const {
-    return aggregation_window_;
-  }
-
   // Adds a dimension to the view's data. When data is recorded it can specify a
   // number of tags, key-value pairs; the aggregated data for each view will be
   // broken down by the distinct values of each tag key matching one of the
@@ -103,6 +95,7 @@ class ViewDescriptor final {
 
  private:
   friend class StatsManager;
+  friend class ViewDataImpl;
   friend void SetAggregationWindow(const AggregationWindow&, ViewDescriptor*);
 
   std::string name_;

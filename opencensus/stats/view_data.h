@@ -25,7 +25,6 @@
 #include "opencensus/common/internal/string_vector_hash.h"
 #include "opencensus/stats/aggregation.h"
 #include "opencensus/stats/distribution.h"
-#include "opencensus/stats/internal/aggregation_window.h"
 
 namespace opencensus {
 namespace stats {
@@ -48,7 +47,6 @@ class ViewData {
                                      common::StringVectorHash>;
 
   const Aggregation& aggregation() const;
-  const AggregationWindow& aggregation_window() const;
 
   enum class Type {
     kDouble,

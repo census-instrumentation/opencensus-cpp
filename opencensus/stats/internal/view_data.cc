@@ -26,9 +26,6 @@ namespace stats {
 const Aggregation& ViewData::aggregation() const {
   return impl_->aggregation();
 }
-const AggregationWindow& ViewData::aggregation_window() const {
-  return impl_->aggregation_window();
-}
 
 ViewData::Type ViewData::type() const {
   switch (impl_->type()) {

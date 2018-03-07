@@ -67,16 +67,6 @@ void SetOpenCensusTaskLabelDescriptor(
   label_descriptor->set_description(kOpenCensusTaskDescription);
 }
 
-google::api::MetricDescriptor::MetricKind GetMetricKind(
-    const opencensus::stats::ViewDescriptor& descriptor) {
-  switch (descriptor.aggregation_window().type()) {
-    case opencensus::stats::AggregationWindow::Type::kCumulative:
-      return google::api::MetricDescriptor::CUMULATIVE;
-    case opencensus::stats::AggregationWindow::Type::kInterval:
-      return google::api::MetricDescriptor::METRIC_KIND_UNSPECIFIED;
-  }
-}
-
 google::api::MetricDescriptor::ValueType GetValueType(
     const opencensus::stats::ViewDescriptor& descriptor) {
   switch (descriptor.aggregation().type()) {
@@ -167,7 +157,7 @@ void SetMetricDescriptor(
   for (const auto& tag_key : view_descriptor.columns()) {
     SetLabelDescriptor(tag_key, metric_descriptor->add_labels());
   }
-  metric_descriptor->set_metric_kind(GetMetricKind(view_descriptor));
+  metric_descriptor->set_metric_kind(google::api::MetricDescriptor::CUMULATIVE);
   metric_descriptor->set_value_type(GetValueType(view_descriptor));
   metric_descriptor->set_unit(view_descriptor.measure_descriptor().units());
   metric_descriptor->set_description(view_descriptor.description());
