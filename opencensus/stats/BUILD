@@ -65,6 +65,7 @@ cc_library(
         "internal/set_aggregation_window.cc",
         "internal/stats_exporter.cc",
         "internal/stats_manager.cc",
+        "internal/tag_set.cc",
         "internal/view.cc",
         "internal/view_data.cc",
         "internal/view_data_impl.cc",
@@ -84,6 +85,7 @@ cc_library(
         "measure_descriptor.h",
         "measure_registry.h",
         "stats_exporter.h",
+        "tag_set.h",
         "view.h",
         "view_data.h",
         "view_descriptor.h",
@@ -181,6 +183,17 @@ cc_test(
         ":core",
         ":recording",
         "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "tag_set_test",
+    size = "small",
+    srcs = ["internal/tag_set_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":core",
         "@com_google_googletest//:gtest_main",
     ],
 )
