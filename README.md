@@ -16,7 +16,10 @@ This is not an officially supported Google product.
 
 ## Quickstart
 
-Please refer to [`examples/grpc/`](examples/grpc/README.md) for an example RPC
+Please refer to [`examples/helloworld/`](examples/helloworld) for an example of
+instrumentation with OpenCensus.
+
+Please refer to [`examples/grpc/`](examples/grpc) for an example RPC
 server that integrates gRPC, Stackdriver, and Prometheus.
 
 Please refer to
@@ -30,6 +33,10 @@ for stats.
 * [`opencensus/`](opencensus) prefix to get `#include` paths like `opencensus/trace/span.h`
   * [`common/`](opencensus/common) - Provides common libraries and components for OpenCensus.
   * [`doc/`](opencensus/doc) - Documentation for our APIs, coding style, etc.
+  * [`exporters/`](opencensus/exporters) - Exporters send stats and traces to
+    monitoring services.
+  * [`plugins/`](opencensus/plugins) - Plugins add OpenCensus instrumentation to
+    frameworks.
   * [`stats/`](opencensus/stats) - OpenCensus stats API.
   * [`trace/`](opencensus/trace) - OpenCensus tracing API.
 
