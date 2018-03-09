@@ -59,6 +59,7 @@ cc_library(
         "internal/bucket_boundaries.cc",
         "internal/distribution.cc",
         "internal/measure.cc",
+        "internal/measure_data.cc",
         "internal/measure_descriptor.cc",
         "internal/measure_registry.cc",
         "internal/measure_registry_impl.cc",
@@ -76,6 +77,7 @@ cc_library(
         "bucket_boundaries.h",
         "distribution.h",
         "internal/aggregation_window.h",
+        "internal/measure_data.h",
         "internal/measure_registry_impl.h",
         "internal/set_aggregation_window.h",
         "internal/stats_exporter_impl.h",
@@ -147,6 +149,19 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":core",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "measure_data_test",
+    size = "small",
+    srcs = ["internal/measure_data_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":core",
+        ":test_utils",
+        "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
     ],
 )
