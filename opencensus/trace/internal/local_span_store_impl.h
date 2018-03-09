@@ -15,7 +15,7 @@
 #ifndef OPENCENSUS_TRACE_INTERNAL_LOCAL_SPAN_STORE_IMPL_H_
 #define OPENCENSUS_TRACE_INTERNAL_LOCAL_SPAN_STORE_IMPL_H_
 
-#include "opencensus/trace/exporter/local_span_store.h"
+#include "opencensus/trace/internal/local_span_store.h"
 
 #include <cstdint>
 #include <deque>
