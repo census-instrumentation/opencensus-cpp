@@ -12,22 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
+load("//opencensus:copts.bzl", "DEFAULT_COPTS")
 
 licenses(["notice"])  # Apache License 2.0
 
 package(default_visibility = ["//visibility:private"])
 
 cc_binary(
-    name = "hello_world",
-    srcs = ["hello_world.cc"],
+    name = "helloworld",
+    srcs = ["helloworld.cc"],
     copts = DEFAULT_COPTS,
-    linkopts = ["-pthread"],
+    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     deps = [
         "//opencensus/exporters/stats/stdout:stdout_exporter",
         "//opencensus/exporters/trace/stdout:stdout_exporter",
-        "//opencensus/trace",
         "//opencensus/stats",
+        "//opencensus/trace",
         "@com_google_absl//absl/strings",
     ],
 )
