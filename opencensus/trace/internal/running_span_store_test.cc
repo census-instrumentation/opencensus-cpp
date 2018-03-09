@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/trace/exporter/running_span_store.h"
+#include "opencensus/trace/internal/running_span_store.h"
 
 #include <cstdint>
 #include <string>

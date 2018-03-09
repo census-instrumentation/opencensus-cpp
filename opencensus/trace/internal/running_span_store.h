@@ -25,6 +25,10 @@ namespace opencensus {
 namespace trace {
 namespace exporter {
 
+// **WARNING** This code is subject to change. Do not rely on its API or
+// implementation functioning in the current manner.
+//
+//
 // RunningSpanStore allows users to access in-process information about all
 // running spans. This functionality allows users to debug stuck operations or
 // long-lived operations.
