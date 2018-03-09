@@ -54,14 +54,14 @@ cc_library(
         "exporter/annotation.h",
         "exporter/attribute_value.h",
         "exporter/link.h",
-        "exporter/local_span_store.h",
         "exporter/message_event.h",
-        "exporter/running_span_store.h",
         "exporter/span_data.h",
         "exporter/span_exporter.h",
         "exporter/status.h",
         "internal/attribute_list.h",
+        "internal/local_span_store.h",
         "internal/local_span_store_impl.h",
+        "internal/running_span_store.h",
         "internal/running_span_store_impl.h",
         "internal/span_exporter_impl.h",
         "internal/span_impl.h",
@@ -269,7 +269,6 @@ cc_test(
 
 # Benchmarks
 # ========================================================================= #
-#
 
 cc_binary(
     name = "attribute_value_ref_benchmark",
