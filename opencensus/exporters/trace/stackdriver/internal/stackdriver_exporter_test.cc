@@ -17,7 +17,7 @@
 #include "absl/time/clock.h"
 #include "gtest/gtest.h"
 #include "include/grpc++/grpc++.h"
-#include "opencensus/trace/exporter/local_span_store.h"
+#include "opencensus/trace/internal/local_span_store.h"
 #include "opencensus/trace/span.h"
 #include "test/core/util/test_config.h"
 
