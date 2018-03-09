@@ -1,7 +1,7 @@
 # OpenCensus C++ Trace library.
 # See ../../README.md for details.
 #
-# Copyright 2018, OpenCensus Authors
+# Copyright 2017, OpenCensus Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
