@@ -24,16 +24,9 @@ namespace exporters {
 namespace trace {
 namespace {
 
-class TraceExporterTest : public ::testing::Test {
- public:
-  TraceExporterTest() {}
-
- protected:
-  StdoutExporter handler_;
-};
-
-TEST_F(TraceExporterTest, ExportTrace) {
-  ::opencensus::trace::AlwaysSampler sampler;
+TEST(TraceExporterTest, ExportTrace) {
+  StdoutExporter::Register();
+  static ::opencensus::trace::AlwaysSampler sampler;
   ::opencensus::trace::StartSpanOptions opts = {&sampler};
 
   auto span1 = ::opencensus::trace::Span::StartSpan("Span1", nullptr, opts);
@@ -45,10 +38,9 @@ TEST_F(TraceExporterTest, ExportTrace) {
   span3.End();
   span2.End();
   span1.End();
-  std::vector<::opencensus::trace::exporter::SpanData> spans =
-      ::opencensus::trace::exporter::LocalSpanStore::GetSpans();
 
-  handler_.Export(spans);
+  // Wait for exporter.
+  absl::SleepFor(absl::Milliseconds(5200));
 }
 
 }  // namespace
