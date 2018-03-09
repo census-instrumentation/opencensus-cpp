@@ -1,4 +1,4 @@
-#OpenCensus C++ Trace library.
+# OpenCensus C++ Trace library.
 
 This directory tree contains the C++ API and implementation of OpenCensus
 tracing.
