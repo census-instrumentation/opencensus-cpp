@@ -36,7 +36,7 @@ StatsManager::ViewInformation::ViewInformation(const ViewDescriptor& descriptor,
 bool StatsManager::ViewInformation::Matches(
     const ViewDescriptor& descriptor) const {
   return descriptor.aggregation() == descriptor_.aggregation() &&
-         descriptor.aggregation_window() == descriptor_.aggregation_window() &&
+         descriptor.aggregation_window_ == descriptor_.aggregation_window_ &&
          descriptor.columns() == descriptor_.columns();
 }
 

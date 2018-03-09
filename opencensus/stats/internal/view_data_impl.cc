@@ -22,10 +22,9 @@
 namespace opencensus {
 namespace stats {
 
-namespace {
-
-ViewDataImpl::Type TypeForDescriptor(const ViewDescriptor& descriptor) {
-  switch (descriptor.aggregation_window().type()) {
+ViewDataImpl::Type ViewDataImpl::TypeForDescriptor(
+    const ViewDescriptor& descriptor) {
+  switch (descriptor.aggregation_window_.type()) {
     case AggregationWindow::Type::kCumulative:
       switch (descriptor.aggregation().type()) {
         case Aggregation::Type::kSum:
@@ -40,12 +39,10 @@ ViewDataImpl::Type TypeForDescriptor(const ViewDescriptor& descriptor) {
   }
 }
 
-}  // namespace
-
 ViewDataImpl::ViewDataImpl(absl::Time start_time,
                            const ViewDescriptor& descriptor)
     : aggregation_(descriptor.aggregation()),
-      aggregation_window_(descriptor.aggregation_window()),
+      aggregation_window_(descriptor.aggregation_window_),
       type_(TypeForDescriptor(descriptor)),
       start_time_(start_time) {
   switch (type_) {

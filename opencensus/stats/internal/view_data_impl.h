@@ -108,6 +108,8 @@ class ViewDataImpl {
            absl::Time now);
 
  private:
+  Type TypeForDescriptor(const ViewDescriptor& descriptor);
+
   const Aggregation aggregation_;
   const AggregationWindow aggregation_window_;
   const Type type_;

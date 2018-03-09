@@ -34,7 +34,6 @@ TEST(ViewDataTest, CumulativeSum) {
   const auto descriptor = ViewDescriptor().set_aggregation(Aggregation::Sum());
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 2.0}});
   EXPECT_EQ(Aggregation::Sum(), data.aggregation());
-  EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
   ASSERT_EQ(ViewData::Type::kDouble, data.type());
   EXPECT_THAT(data.double_data(),
               ::testing::UnorderedElementsAre(
@@ -47,9 +46,6 @@ TEST(ViewDataTest, IntervalSum) {
                        &descriptor);
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 2.0}});
   EXPECT_EQ(Aggregation::Sum(), data.aggregation());
-  EXPECT_EQ(AggregationWindow::Type::kInterval,
-            data.aggregation_window().type());
-  EXPECT_EQ(absl::Minutes(1), data.aggregation_window().duration());
   ASSERT_EQ(ViewData::Type::kDouble, data.type());
   EXPECT_THAT(data.double_data(),
               ::testing::UnorderedElementsAre(
@@ -61,7 +57,6 @@ TEST(ViewDataTest, CumulativeCount) {
       ViewDescriptor().set_aggregation(Aggregation::Count());
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 2.0}});
   EXPECT_EQ(Aggregation::Count(), data.aggregation());
-  EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
   ASSERT_EQ(ViewData::Type::kInt64, data.type());
   EXPECT_THAT(data.int_data(), ::testing::UnorderedElementsAre(::testing::Pair(
                                    ::testing::ElementsAre(), 1)));
@@ -73,9 +68,6 @@ TEST(ViewDataTest, IntervalCount) {
                        &descriptor);
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 2.0}});
   EXPECT_EQ(Aggregation::Count(), data.aggregation());
-  EXPECT_EQ(AggregationWindow::Type::kInterval,
-            data.aggregation_window().type());
-  EXPECT_EQ(absl::Minutes(1), data.aggregation_window().duration());
   ASSERT_EQ(ViewData::Type::kDouble, data.type());
   EXPECT_THAT(data.double_data(),
               ::testing::UnorderedElementsAre(
@@ -88,7 +80,6 @@ TEST(ViewDataTest, CumulativeDistribution) {
   const auto descriptor = ViewDescriptor().set_aggregation(aggregation);
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 2.0}});
   EXPECT_EQ(aggregation, data.aggregation());
-  EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
   ASSERT_EQ(ViewData::Type::kDistribution, data.type());
   EXPECT_EQ(data.distribution_data().size(), 1);
 }
@@ -101,9 +92,6 @@ TEST(ViewDataTest, IntervalDistribution) {
                        &descriptor);
   ViewData data = testing::TestUtils::MakeViewData(descriptor, {{{}, 2.0}});
   EXPECT_EQ(aggregation, data.aggregation());
-  EXPECT_EQ(AggregationWindow::Type::kInterval,
-            data.aggregation_window().type());
-  EXPECT_EQ(absl::Minutes(1), data.aggregation_window().duration());
   ASSERT_EQ(ViewData::Type::kDistribution, data.type());
   EXPECT_EQ(data.distribution_data().size(), 1);
 }
