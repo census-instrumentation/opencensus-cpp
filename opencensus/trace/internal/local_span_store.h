@@ -27,6 +27,10 @@ namespace opencensus {
 namespace trace {
 namespace exporter {
 
+// **WARNING** This code is subject to change. Do not rely on its API or
+// implementation functioning in the current manner.
+//
+//
 // LocalSpanStore allows users to access in-process information about Spans that
 // have completed (called End()) and were recording events.
 //
