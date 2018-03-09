@@ -22,7 +22,7 @@
 #include "prometheus/exposer.h"
 
 int main(int argc, char** argv) {
-  // Expose a Prometheus endpoint and register the Opencensus exporter with it.
+  // Expose a Prometheus endpoint and register the OpenCensus exporter with it.
   prometheus::Exposer exposer("127.0.0.1:8080");
   auto exporter =
       std::make_shared<opencensus::exporters::stats::PrometheusExporter>();
