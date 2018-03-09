@@ -1,19 +1,19 @@
-# OpenCensus C++ Trace library.
-# See ../../README.md for details.
+#OpenCensus C++ Trace library.
+#See../../ README.md for details.
 #
-# Copyright 2017, OpenCensus Authors
+#Copyright 2017, OpenCensus Authors
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#Licensed under the Apache License, Version 2.0(the "License");
+#you may not use this file except in compliance with the License.
+#You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#http:  // www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#Unless required by applicable law or agreed to in writing, software
+#distributed under the License is distributed on an "AS IS" BASIS,
+#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#See the License for the specific language governing permissions and
+#limitations under the License.
 
 load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
 
@@ -54,14 +54,14 @@ cc_library(
         "exporter/annotation.h",
         "exporter/attribute_value.h",
         "exporter/link.h",
-        "exporter/local_span_store.h",
         "exporter/message_event.h",
-        "exporter/running_span_store.h",
         "exporter/span_data.h",
         "exporter/span_exporter.h",
         "exporter/status.h",
         "internal/attribute_list.h",
+        "internal/local_span_store.h",
         "internal/local_span_store_impl.h",
+        "internal/running_span_store.h",
         "internal/running_span_store_impl.h",
         "internal/span_exporter_impl.h",
         "internal/span_impl.h",
@@ -269,7 +269,6 @@ cc_test(
 
 # Benchmarks
 # ========================================================================= #
-#
 
 cc_binary(
     name = "attribute_value_ref_benchmark",

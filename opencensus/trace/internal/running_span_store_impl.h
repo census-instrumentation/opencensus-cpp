@@ -22,7 +22,7 @@
 
 #include "absl/base/thread_annotations.h"
 #include "absl/synchronization/mutex.h"
-#include "opencensus/trace/exporter/running_span_store.h"
+#include "opencensus/trace/internal/running_span_store.h"
 #include "opencensus/trace/internal/span_impl.h"
 
 namespace opencensus {
