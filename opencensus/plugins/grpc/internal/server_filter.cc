@@ -73,8 +73,8 @@ void CensusServerCallData::OnDoneRecvMessageCb(void *user_data,
   // Stream messages are no longer valid after receiving trailing metadata.
   if ((*calld->recv_message_) != nullptr) {
     calld->context_.Span().AddReceivedMessageEvent(
-        calld->recv_message_count_++, (*calld->recv_message_)->length,
-        (*calld->recv_message_)->length);
+        calld->recv_message_count_++, (*calld->recv_message_)->length(),
+        (*calld->recv_message_)->length());
   }
   GRPC_CLOSURE_RUN(calld->initial_on_done_recv_message_, GRPC_ERROR_REF(error));
 }
@@ -139,8 +139,8 @@ void CensusServerCallData::StartTransportStreamOpBatch(
   if (op->send_message() != nullptr) {
     context_.Span().AddSentMessageEvent(
         sent_message_count_++,
-        op->op()->payload->send_message.send_message->length,
-        op->op()->payload->send_message.send_message->length);
+        op->op()->payload->send_message.send_message->length(),
+        op->op()->payload->send_message.send_message->length());
   }
   if (op->recv_message() != nullptr) {
     recv_message_ = op->op()->payload->recv_message.recv_message;

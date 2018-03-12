@@ -21,6 +21,7 @@
 #include "absl/time/time.h"
 #include "opencensus/plugins/grpc/internal/channel_filter.h"
 #include "opencensus/plugins/grpc/internal/filter.h"
+#include "src/core/lib/gprpp/orphanable.h"
 
 namespace opencensus {
 
@@ -80,7 +81,7 @@ class CensusClientCallData : public grpc::CallData {
   // Server elapsed time in nanoseconds.
   uint64_t elapsed_time_;
   // The received message--may be null.
-  grpc_byte_stream **recv_message_;  // Not owned.
+  grpc_core::OrphanablePtr<grpc_core::ByteStream> *recv_message_;  // Not owned.
   // Number of messages in this RPC.
   uint32_t recv_message_count_;
   uint32_t sent_message_count_;
