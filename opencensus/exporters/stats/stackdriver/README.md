@@ -1,6 +1,6 @@
 # OpenCensus Stackdriver Stats Exporter
 
-The *OpenCensus Stackdriver Stats Exporter* is a stats exporter that exports 
+The *OpenCensus Stackdriver Stats Exporter* is a stats exporter that exports
 data to [Stackdriver Monitoring](stackdriver-monitoring).
 
 ## Quickstart
@@ -19,13 +19,13 @@ In order to be able to push your stats to [Stackdriver Monitoring](stackdriver-m
 These steps enable the API but don't require that your app is hosted on Google Cloud Platform.
 
 ### Setup authentication
-The Stackdriver exporter uses gRPC, which requires a certificate 
+The Stackdriver exporter uses gRPC, which requires a certificate
 (`etc/roots.pem` in the gRPC repository) copied to
 to `/usr/share/grpc/roots.pem`.
 
-If your application runs on Google Cloud Platform, it can automatically 
+If your application runs on Google Cloud Platform, it can automatically
 determine credentials to authenticate to Stackdriver from the VM environment.
-Otherwise, create a 
+Otherwise, create a
 [Google Cloud service account](https://cloud.google.com/iam/docs/creating-managing-service-accounts)
 with the "Monitoring Editor" role, create and download a service account key,
 and set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` to the path to
@@ -34,7 +34,7 @@ that key.
 ### Register the exporter
 
 `#include opencensus/exporters/stats/stackdriver/stackdriver_exporter.h` (if
-using Bazel, this requires a dependency on 
+using Bazel, this requires a dependency on
 `"@io_opencensus_cpp//exporters/stats/stackdriver:stackdriver_exporter"`).
 In your application's initialization code, register the exporter:
 ```c++
@@ -46,13 +46,13 @@ opencensus::exporters::stats::StackdriverExporter::Register(
     "my-stackdriver-project-id", opencensus_task);
 ```
 The `opencensus_task` may be anything, but must be unique among all exporters
-simultaneously exporting to Stackdriver concurrently; the format 
+simultaneously exporting to Stackdriver concurrently; the format
 `"cpp-${PROCESS_ID}@${HOSTNAME}"` is recommended.
 
 ### Register views and record stats
 
 Once the exporter has been registered, any stats for views registered with
-`ViewDescriptor::RegisterForExport()` will be exported. Views may be registered 
+`ViewDescriptor::RegisterForExport()` will be exported. Views may be registered
 before or after the exporter, and will track stats since the registration of the
 view in either case.
 
@@ -60,7 +60,7 @@ view in either case.
 
 ### View metadata
 
-OpenCensus exports views as custom metrics under the 
+OpenCensus exports views as custom metrics under the
 [Global](https://cloud.google.com/monitoring/api/resources#tag_global)
 monitored resource. For each view, OpenCensus creates a Stackdriver metric. This
 metric's name will be under the path `"custom.googleapis.com/opencensus/"`, so
@@ -71,7 +71,7 @@ to a Stackdriver metric named
 Only Cumulative views may be registered for export in OpenCensus, and created
 Stackdriver metrics have the `CUMULATIVE` type.
 
-View columns translate to Stackdriver's labels. OpenCensus adds a label 
+View columns translate to Stackdriver's labels. OpenCensus adds a label
 `"opencensus_task"` to all exported views so that exports from different
 processes do not conflict.
 
@@ -81,9 +81,8 @@ For each row of the view's data (a unique combination of tag values) OpenCensus
 exports a separate `TimeSeries` with label values corresponding to the row's tag
 values.
 
-The Stackdriver data type depends on the 
-view's measure type and aggregation--count aggregation to `INT64`, sum 
+The Stackdriver data type depends on the
+view's measure type and aggregation--count aggregation to `INT64`, sum
 aggregation to `INT64` for `MeasureInt` and `DOUBLE` for `MeasureDouble`, and
 distribution aggregation to `DISTRIBUTION`. Exported distributions omit the
 range as it is not supported by Stackdriver.
-
