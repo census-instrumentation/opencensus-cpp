@@ -1,2 +1,3 @@
 Please refer to the
-[Stackdriver instructions](../../stats/stackdriver/README.md) for stats.
+[Stackdriver Stats Exporter instructions](../../stats/stackdriver/README.md) for
+setup.

@@ -23,10 +23,7 @@ namespace trace {
 
 class StackdriverExporter {
  public:
-  // Registers the exporter and sets the project ID. The following are required
-  // to communicate with Stackdriver: a valid project ID, a valid authentication
-  // key which has been generated for that project (with the "Monitoring Editor"
-  // role), and the server security credentials.
+  // Registers the exporter and sets the project ID.
   static void Register(absl::string_view project_id);
 
  private:
