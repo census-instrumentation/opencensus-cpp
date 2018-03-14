@@ -19,17 +19,23 @@ In order to be able to push your stats to [Stackdriver Monitoring](stackdriver-m
 These steps enable the API but don't require that your app is hosted on Google Cloud Platform.
 
 ### Setup authentication
+
 The Stackdriver exporter uses gRPC, which requires a certificate
 (`etc/roots.pem` in the gRPC repository) copied to
 to `/usr/share/grpc/roots.pem`.
 
 If your application runs on Google Cloud Platform, it can automatically
 determine credentials to authenticate to Stackdriver from the VM environment.
+
 Otherwise, create a
-[Google Cloud service account](https://cloud.google.com/iam/docs/creating-managing-service-accounts)
-with the "Monitoring Editor" role, create and download a service account key,
+[Google Cloud service account](https://cloud.google.com/iam/docs/creating-managing-service-accounts),
+create and download a service account key,
 and set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` to the path to
 that key.
+
+Please refer to the [Stats access controls](https://cloud.google.com/monitoring/access-control)
+and [Trace access controls](https://cloud.google.com/trace/docs/iam)
+documentation for configuring roles.
 
 ### Register the exporter
 
