@@ -104,3 +104,79 @@ load("@com_github_jupp0r_prometheus_cpp//:repositories.bzl",
 # Load dependencies individually since we load some of them above.
 load_prometheus_client_model()
 load_civetweb()
+
+# Thrift library - used by zipkin exporter.
+new_http_archive(
+    name = "com_github_thrift",
+    urls = ["https://github.com/apache/thrift/archive/master.zip"],
+    strip_prefix = "thrift-master",
+    build_file_content =
+"""
+config_setting(
+    name = "windows",
+    values = {"cpu": "x64_windows"},
+    visibility = [ "//visibility:private" ],
+)
+
+cc_library(
+    name = "thrift",
+    srcs = glob([
+        "lib/cpp/src/*.cpp",
+    ]),
+    hdrs = glob([
+        "lib/cpp/src/*.h",
+    ]),
+    copts = select({
+        "//:windows": ["-DHAVE_STD_REGEX"],
+        # HAVE_STD_REGEX didn't work.
+        "//conditions:default": ["-DHAVE_POSIX_REGEX"],
+    }),
+    includes = ["lib/cpp/src/",],
+    visibility = ["//visibility:public"],
+)
+"""
+)
+
+# Thrift library - used by zipkin exporter.
+new_http_archive(
+    name = "com_github_rapidjson",
+    urls = ["https://github.com/Tencent/rapidjson/archive/master.zip"],
+    strip_prefix = "rapidjson-master",
+    build_file_content =
+"""
+cc_library(
+    name = "rapidjson",
+    srcs = [],
+    hdrs = glob([
+        "include/rapidjson/*.h",
+        "include/rapidjson/internal/*.h",
+        "include/rapidjson/error/*.h",
+    ]),
+    includes = ["include/",],
+    defines = ["RAPIDJSON_HAS_STDSTRING=1",],
+    visibility = ["//visibility:public"],
+)
+"""
+)
+
+# Thrift library - used by zipkin exporter.
+new_http_archive(
+    name = "com_github_folly",
+    urls = ["https://github.com/facebook/folly/archive/master.zip"],
+    strip_prefix = "folly-master",
+    build_file_content =
+"""
+cc_library(
+    name = "folly",
+    srcs = glob([
+        "folly/uri.cpp",
+    ]),
+    hdrs = glob([
+        "folly/uri.h",
+    ]),
+    includes = ["folly/"],
+    defines = ["FOLLY_NO_CONFIG=1", "FOLLY_HAVE_MEMRCHR=1",],
+    visibility = ["//visibility:public"],
+)
+"""
+)
