@@ -112,25 +112,17 @@ new_http_archive(
     strip_prefix = "thrift-master",
     build_file_content =
 """
-config_setting(
-    name = "windows",
-    values = {"cpu": "x64_windows"},
-    visibility = [ "//visibility:private" ],
-)
-
 cc_library(
     name = "thrift",
-    srcs = glob([
-        "lib/cpp/src/*.cpp",
-    ]),
+    srcs = [],
     hdrs = glob([
-        "lib/cpp/src/*.h",
+        "lib/cpp/src/thrift/*.h",
+        #"lib/cpp/src/thrift/async/*.h",
+        "lib/cpp/src/thrift/protocol/*.h",
+        "lib/cpp/src/thrift/transport/TBufferTransports.h",
+        "lib/cpp/src/thrift/transport/TTransportException.h",
+        "lib/cpp/src/thrift/transport/THeaderTransport.h",
     ]),
-    copts = select({
-        "//:windows": ["-DHAVE_STD_REGEX"],
-        # HAVE_STD_REGEX didn't work.
-        "//conditions:default": ["-DHAVE_POSIX_REGEX"],
-    }),
     includes = ["lib/cpp/src/",],
     visibility = ["//visibility:public"],
 )

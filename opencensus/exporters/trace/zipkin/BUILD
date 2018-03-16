@@ -22,6 +22,15 @@ package(default_visibility = ["//visibility:public"])
 # ========================================================================= #
 
 cc_library(
+    name = "thrift",
+    srcs = ["libthrift.so"],
+    hdrs = [],
+    deps = [
+        "@com_github_thrift//:thrift",
+    ]
+)
+
+cc_library(
     name = "zipkin_exporter",
     srcs = [
         "scribe.cc",
@@ -40,11 +49,11 @@ cc_library(
     ],
     copts = DEFAULT_COPTS,
     deps = [
+        ":thrift",
         "//opencensus/trace",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
-        "@com_github_thrift//:thrift",
         "@com_github_rapidjson//:rapidjson",
         "@com_github_folly//:folly",
     ],
@@ -53,14 +62,14 @@ cc_library(
 # Tests
 # ========================================================================= #
 
-# cc_test(
-#     name = "zipkin_exporter_test",
-#     srcs = ["internal/zipkin_exporter_test.cc"],
-#     copts = TEST_COPTS,
-#     deps = [
-#         ":zipkin_exporter",
-#         "//opencensus/trace",
-#         "@com_google_absl//absl/time",
-#         "@com_google_googletest//:gtest_main",
-#     ],
-# )
+cc_test(
+    name = "zipkin_exporter_test",
+    srcs = ["zipkin_exporter_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":zipkin_exporter",
+        "//opencensus/trace",
+        "@com_google_absl//absl/time",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

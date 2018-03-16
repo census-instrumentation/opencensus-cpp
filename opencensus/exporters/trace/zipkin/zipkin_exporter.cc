@@ -8,6 +8,8 @@
 #include "base64.h"
 
 namespace opencensus {
+namespace exporters {
+namespace trace {
 
 namespace {
 
@@ -203,7 +205,7 @@ struct ScribeOptions {
   size_t max_retry_times = 3;
 };
 
-class Scribe : public ::opencensus::TraceClient {
+class Scribe : public ::opencensus::exporters::trace::TraceClient {
  public:
   Scribe(const ScribeOptions &options)
       : options_(options.host, options.port),
@@ -302,4 +304,26 @@ void ZipkinExporter::Export(
   }
 }
 
+void ZipkinExporter::ExportForTesting(
+    const ZipkinExporterOptions &options,
+    const std::vector<::opencensus::trace::exporter::SpanData> &spans) {
+  if (!spans.empty()) {
+    // Create new exporter.
+    ZipkinExporter *exporter = new ZipkinExporter(options);
+
+    std::shared_ptr<apache::thrift::transport::TMemoryBuffer> buf(
+        new apache::thrift::transport::TMemoryBuffer());
+
+    exporter->message_codec_->Encode(buf, spans);
+    uint8_t *msg = nullptr;
+    uint32_t size = 0;
+    buf->getBuffer(&msg, &size);
+
+    std::string str(reinterpret_cast<char *>(msg), size);
+    fprintf(stderr, "%s\n", str.c_str());
+  }
+}
+
+}  // namespace trace
+}  // namespace exporters
 }  // namespace opencensus

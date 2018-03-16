@@ -19,6 +19,8 @@
 #include "zipkin_core_types.h"
 
 namespace opencensus {
+namespace exporters {
+namespace trace {
 
 class BinaryCodec;
 class JsonCodec;
@@ -92,8 +94,7 @@ struct ZipkinExporterOptions {
   ZipkinExporterOptions()
       : host("::1"),
         port(3000),
-        codec_type(ZipkinExporterOptions::CodecType::kJson),
-        exporter_type(ZipkinExporterOptions::ExporterType::kScribeExporter) {}
+        codec_type(ZipkinExporterOptions::CodecType::kJson) {}
 
   // Uniform Resource Identifier for server that spans will be sent to.
   absl::string_view uri;
@@ -106,11 +107,8 @@ struct ZipkinExporterOptions {
   enum class CodecType : uint8_t { kBinary, kJson, kPrettyJson };
   CodecType codec_type;
 
-  enum class ExporterType : uint8_t { kScribeExporter, kHttpExporter };
-  ExporterType exporter_type;
-
-  static std::unique_ptr<MessageCodec> GetCodec(CodecType type) {
-    switch (type) {
+  std::unique_ptr<MessageCodec> GetCodec() const {
+    switch (codec_type) {
       case ZipkinExporterOptions::CodecType::kBinary:
         return std::unique_ptr<MessageCodec>(
             dynamic_cast<MessageCodec *>(new BinaryCodec));
@@ -133,21 +131,27 @@ class ZipkinExporter
   static void Register(const ZipkinExporterOptions &options);
 
  private:
+  friend class ZipkinExporterTestPeer;
+
+  static void ExportForTesting(
+      const ZipkinExporterOptions &options,
+      const std::vector<::opencensus::trace::exporter::SpanData> &spans);
+
   ZipkinExporter(const ZipkinExporterOptions &options)
       : uri_(options.uri),
         uri_str_(options.uri),
         codec_type_(options.codec_type),
-        message_codec_(ZipkinExporterOptions::GetCodec(options.codec_type)),
-        exporter_type_(options.exporter_type) {}
+        message_codec_(options.GetCodec()) {}
 
   folly::Uri uri_;
   const std::string uri_str_;
   ZipkinExporterOptions::CodecType codec_type_;
   std::unique_ptr<MessageCodec> message_codec_;
-  ZipkinExporterOptions::ExporterType exporter_type_;
   std::unique_ptr<TraceClient> trace_client_;
 };
 
-}  // namespace opencensus
+} // namespace trace
+} // namespace exporters
+} // namespace opencensus
 
 #endif  // OPENCENSUS_EXPORTERS_TRACE_ZIPKIN_ZIPKIN_EXPORTER_H_
