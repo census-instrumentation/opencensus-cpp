@@ -105,6 +105,50 @@ load("@com_github_jupp0r_prometheus_cpp//:repositories.bzl",
 load_prometheus_client_model()
 load_civetweb()
 
+# Curl library - used by zipkin exporter.
+new_http_archive(
+    name = "com_github_curl",
+    urls = ["https://github.com/curl/curl/archive/master.zip"],
+    strip_prefix = "curl-master",
+    build_file_content =
+"""
+cc_library(
+    name = "curl",
+    srcs = glob([
+      "src/*.c",
+    ]),
+    hdrs = glob([
+      "include/curl/*.h",
+      "src/*.h",
+      "lib/*.h",
+    ]),
+    includes = ["include/", "lib/",],
+    defines = [
+      "HAVE_STRUCT_TIMEVAL=1",
+      "RECV_TYPE_ARG1 int",
+      "RECV_TYPE_ARG2 void *",
+      "RECV_TYPE_ARG3 size_t",
+      "RECV_TYPE_ARG4 int",
+      "RECV_TYPE_RETV ssize_t",
+      "RETSIGTYPE void",
+      "SELECT_QUAL_ARG5 ",
+      "SELECT_TYPE_ARG1 int",
+      "SELECT_TYPE_ARG234 fd_set *",
+      "SELECT_TYPE_ARG5 struct timeval *",
+      "SELECT_TYPE_RETV int",
+      "SEND_QUAL_ARG2 const",
+      "SEND_TYPE_ARG1 int",
+      "SEND_TYPE_ARG2 void *",
+      "SEND_TYPE_ARG3 size_t",
+      "SEND_TYPE_ARG4 int",
+      "SEND_TYPE_RETV ssize_t",
+    ],
+    visibility = ["//visibility:public"],
+)
+"""
+)
+
+
 # Thrift library - used by zipkin exporter.
 new_http_archive(
     name = "com_github_thrift",
