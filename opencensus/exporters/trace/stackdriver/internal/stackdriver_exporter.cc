@@ -37,7 +37,7 @@ namespace {
 constexpr size_t kAttributeStringLen = 256;
 constexpr size_t kAnnotationStringLen = 256;
 constexpr size_t kDisplayNameStringLen = 128;
-constexpr char kGoogleStackDriverTraceAddress[] = "cloudtrace.googleapis.com";
+constexpr char kGoogleStackdriverTraceAddress[] = "cloudtrace.googleapis.com";
 
 constexpr char kAgentKey[] = "g.co/agent";
 constexpr char kAgentValue[] = "opencensus-cpp";
@@ -285,7 +285,7 @@ void Handler::Export(
 
 void StackdriverExporter::Register(absl::string_view project_id) {
   auto creds = grpc::GoogleDefaultCredentials();
-  auto channel = ::grpc::CreateChannel(kGoogleStackDriverTraceAddress, creds);
+  auto channel = ::grpc::CreateChannel(kGoogleStackdriverTraceAddress, creds);
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
       absl::make_unique<Handler>(project_id, channel));
 }

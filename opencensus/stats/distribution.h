@@ -34,7 +34,7 @@ class TestUtils;
 // values for one measure and set of tags). It stores both a statistical summary
 // (mean, sum of squared deviation, and range) and a histogram recording the
 // number of values in each bucket (as defined by a BucketBoundaries).
-// This corresponds to a StackDriver Distribution metric
+// This corresponds to a Stackdriver Distribution metric
 // (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TypedValue#Distribution).
 // Distribution is thread-compatible.
 class Distribution final {

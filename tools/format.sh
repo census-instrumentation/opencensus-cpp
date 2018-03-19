@@ -19,8 +19,9 @@ if [[ ! -e tools/format.sh ]]; then
   exit 1
 fi
 set -e
-# Correct a common miscapitalization.
+# Correct common miscapitalizations.
 sed -i 's/Open[c]ensus/OpenCensus/g' $(find * -type f)
+sed -i 's/Stack[D]river/Stackdriver/g' $(find * -type f)
 # For easier debugging: print the version because it affects the formatting.
 CMD=clang-format
 $CMD -version
