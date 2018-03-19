@@ -22,9 +22,12 @@
 #include "absl/types/span.h"
 #include "opencensus/common/internal/stats_object.h"
 #include "opencensus/stats/distribution.h"
+#include "opencensus/stats/internal/delta_producer.h"
+#include "opencensus/stats/internal/measure_data.h"
 #include "opencensus/stats/internal/measure_registry_impl.h"
 #include "opencensus/stats/internal/view_data_impl.h"
 #include "opencensus/stats/measure.h"
+#include "opencensus/stats/tag_set.h"
 #include "opencensus/stats/view_descriptor.h"
 
 namespace opencensus {
@@ -60,6 +63,10 @@ class StatsManager final {
         absl::Span<const std::pair<absl::string_view, absl::string_view>> tags,
         absl::Time now);
 
+    // Adds 'data' under 'tags' as of 'now'. Requires holding *mu_;
+    void MergeMeasureData(const TagSet& tags, const MeasureData& data,
+                          absl::Time now);
+
     // Retrieves a copy of the data.
     std::unique_ptr<ViewDataImpl> GetData() LOCKS_EXCLUDED(*mu_);
 
@@ -90,6 +97,9 @@ class StatsManager final {
           tags,
       absl::Time now) LOCKS_EXCLUDED(mu_);
 
+  // Merges all data from 'delta' at the present time.
+  void MergeDelta(const Delta& delta) LOCKS_EXCLUDED(mu_);
+
   // Adds a measure--this is necessary for views to be added under that measure.
   template <typename MeasureT>
   void AddMeasure(Measure<MeasureT> measure) LOCKS_EXCLUDED(mu_);
@@ -116,6 +126,11 @@ class StatsManager final {
         double value,
         absl::Span<const std::pair<absl::string_view, absl::string_view>> tags,
         absl::Time now);
+
+    // Merges measure_data into all views under this measure. Requires holding
+    // *mu_;
+    void MergeMeasureData(const TagSet& tags, const MeasureData& data,
+                          absl::Time now);
 
     ViewInformation* AddConsumer(const ViewDescriptor& descriptor);
     void RemoveView(const ViewInformation* handle);

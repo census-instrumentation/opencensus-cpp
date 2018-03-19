@@ -54,36 +54,51 @@ void MeasureData::Add(double value) {
 }
 
 void MeasureData::AddToDistribution(Distribution* distribution) const {
+  AddToDistribution(distribution->bucket_boundaries(), &distribution->count_,
+                    &distribution->mean_,
+                    &distribution->sum_of_squared_deviation_,
+                    &distribution->min_, &distribution->max_,
+                    absl::Span<uint64_t>(distribution->bucket_counts_));
+}
+
+template <typename T>
+void MeasureData::AddToDistribution(const BucketBoundaries& boundaries,
+                                    T* count, double* mean,
+                                    double* sum_of_squared_deviation,
+                                    double* min, double* max,
+                                    absl::Span<T> histogram_buckets) const {
   // This uses the method of provisional means generalized for multiple values
   // in both datasets.
-  const double new_count = distribution->count_ + count_;
-  const double new_mean =
-      distribution->mean_ + (mean_ - distribution->mean_) * count_ / new_count;
-  distribution->sum_of_squared_deviation_ +=
-      sum_of_squared_deviation_ +
-      distribution->count_ * std::pow(distribution->mean_, 2) +
+  const double new_count = *count + count_;
+  const double new_mean = *mean + (mean_ - *mean) * count_ / new_count;
+  *sum_of_squared_deviation +=
+      sum_of_squared_deviation_ + *count * std::pow(*mean, 2) +
       count_ * std::pow(mean_, 2) - new_count * std::pow(new_mean, 2);
-  distribution->count_ = new_count;
-  distribution->mean_ = new_mean;
+  *count = new_count;
+  *mean = new_mean;
 
-  distribution->min_ = std::min(distribution->min_, min_);
-  distribution->max_ = std::max(distribution->max_, max_);
+  *min = std::min(*min, min_);
+  *max = std::max(*max, max_);
 
-  int histogram_index = std::find(boundaries_.begin(), boundaries_.end(),
-                                  distribution->bucket_boundaries()) -
-                        boundaries_.begin();
+  int histogram_index =
+      std::find(boundaries_.begin(), boundaries_.end(), boundaries) -
+      boundaries_.begin();
   if (histogram_index >= histograms_.size()) {
     std::cerr << "No matching BucketBoundaries in AddToDistribution\n";
     ABSL_ASSERT(false);
     // Add to the underflow bucket, to avoid downstream errors from the sum of
     // bucket counts not matching the total count.
-    distribution->bucket_counts_[0] += count_;
+    histogram_buckets[0] += count_;
   } else {
     for (int i = 0; i < histograms_[histogram_index].size(); ++i) {
-      distribution->bucket_counts_[i] += histograms_[histogram_index][i];
+      histogram_buckets[i] += histograms_[histogram_index][i];
     }
   }
 }
+
+template void MeasureData::AddToDistribution(const BucketBoundaries&, double*,
+                                             double*, double*, double*, double*,
+                                             absl::Span<double>) const;
 
 }  // namespace stats
 }  // namespace opencensus
