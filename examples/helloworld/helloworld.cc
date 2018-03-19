@@ -65,8 +65,8 @@ int main(int argc, char **argv) {
   constexpr int64_t kMiB = 1 << 20;
 
   // Create view to see the processed video size distribution broken down by
-  // frontend. The view has bucket boundaries (0, 256, 65536) that will group
-  // measure values into histogram buckets.
+  // frontend. The view has bucket boundaries (0, 16 * kMiB, 65536 * kMiB) that
+  // will group measure values into histogram buckets.
   const opencensus::stats::ViewDescriptor video_size_view =
       opencensus::stats::ViewDescriptor()
           .set_name(kVideoSizeViewName)
