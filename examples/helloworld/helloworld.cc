@@ -41,7 +41,7 @@ ABSL_CONST_INIT const absl::string_view kVideoSizeMeasureName =
 opencensus::stats::MeasureInt VideoSizeMeasure() {
   static const opencensus::stats::MeasureInt video_size =
       opencensus::stats::MeasureRegistry::RegisterInt(
-          kVideoSizeMeasureName, "MBy", "size of processed videos");
+          kVideoSizeMeasureName, "By", "size of processed videos");
   return video_size;
 }
 
@@ -62,6 +62,8 @@ int main(int argc, char **argv) {
   // Call measure so that it is initialized.
   VideoSizeMeasure();
 
+  constexpr int64_t kMiB = 1 << 20;
+
   // Create view to see the processed video size distribution broken down by
   // frontend. The view has bucket boundaries (0, 256, 65536) that will group
   // measure values into histogram buckets.
@@ -71,7 +73,8 @@ int main(int argc, char **argv) {
           .set_description("processed video size over time")
           .set_measure(kVideoSizeMeasureName)
           .set_aggregation(opencensus::stats::Aggregation::Distribution(
-              opencensus::stats::BucketBoundaries::Exponential(8, 1 << 8, 2)))
+              opencensus::stats::BucketBoundaries::Explicit(
+                  {0, 16 * kMiB, 256 * kMiB})))
           .add_column(kFrontendKey);
   opencensus::stats::View view(video_size_view);
   video_size_view.RegisterForExport();
@@ -87,7 +90,7 @@ int main(int argc, char **argv) {
   // Sleep for [1,10] milliseconds to fake work.
   absl::SleepFor(absl::Milliseconds(rand() % 10 + 1));
   // Record the processed video size.
-  opencensus::stats::Record({{VideoSizeMeasure(), 25648}},
+  opencensus::stats::Record({{VideoSizeMeasure(), 25 * kMiB}},
                             {{kFrontendKey, "video size"}});
   span.AddAnnotation("Finished processing video.");
   span.End();
