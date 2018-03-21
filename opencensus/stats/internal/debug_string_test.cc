@@ -37,6 +37,7 @@ TEST(DebugStringTest, Aggregation) {
 
 TEST(DebugStringTest, AggregationWindow) {
   EXPECT_NE("", AggregationWindow::Cumulative().DebugString());
+  EXPECT_NE("", AggregationWindow::Delta().DebugString());
   EXPECT_NE("", AggregationWindow::Interval(absl::Minutes(1)).DebugString());
 }
 

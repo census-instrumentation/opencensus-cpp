@@ -15,6 +15,7 @@
 #include "opencensus/stats/view.h"
 
 #include <iostream>
+#include <utility>
 
 #include "absl/base/macros.h"
 #include "absl/memory/memory.h"
@@ -43,7 +44,7 @@ const ViewData View::GetData() {
     ABSL_ASSERT(0);
     return ViewData(absl::make_unique<ViewDataImpl>(absl::Now(), descriptor_));
   }
-  return ViewData((absl::make_unique<ViewDataImpl>(handle_->GetData())));
+  return ViewData(handle_->GetData());
 }
 
 }  // namespace stats
