@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <string>
+
 #include "absl/time/time.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -60,7 +62,7 @@ TEST(DebugStringTest, ViewDescriptor) {
   const std::string measure_name = "bar";
   static const MeasureDouble measure =
       MeasureRegistry::RegisterDouble(measure_name, "", "");
-  const std::string tag_key = "tag_key_1";
+  static const TagKey tag_key = TagKey::Register("tag_key_1");
   const std::string description = "description string";
   ViewDescriptor descriptor = ViewDescriptor()
                                   .set_measure(measure_name)
@@ -76,7 +78,7 @@ TEST(DebugStringTest, ViewDescriptor) {
                       descriptor.DebugString());
   EXPECT_PRED_FORMAT2(::testing::IsSubstring, aggregation_window.DebugString(),
                       descriptor.DebugString());
-  EXPECT_PRED_FORMAT2(::testing::IsSubstring, tag_key,
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, tag_key.name(),
                       descriptor.DebugString());
   EXPECT_PRED_FORMAT2(::testing::IsSubstring, description,
                       descriptor.DebugString());

@@ -28,6 +28,9 @@ int main(int argc, char** argv) {
       std::make_shared<opencensus::exporters::stats::PrometheusExporter>();
   exposer.RegisterCollectable(exporter);
 
+  const auto key1 = opencensus::stats::TagKey::Register("key1");
+  const auto key2 = opencensus::stats::TagKey::Register("key2");
+
   // Create a view and register it with the exporter.
   const std::string foo_usage_measure_name = "example.com/Foo/FooUsage";
   const opencensus::stats::MeasureDouble foo_usage =
@@ -39,8 +42,8 @@ int main(int argc, char** argv) {
           .set_measure(foo_usage_measure_name)
           .set_aggregation(opencensus::stats::Aggregation::Distribution(
               opencensus::stats::BucketBoundaries::Explicit({0, 10})))
-          .add_column("key1")
-          .add_column("key2")
+          .add_column(key1)
+          .add_column(key2)
           .set_description(
               "Cumulative distribution of example.com/Foo/FooUsage broken down "
               "by 'key1' and 'key2'.");
@@ -48,11 +51,10 @@ int main(int argc, char** argv) {
 
   std::cout << "Access metrics on http://127.0.0.1:8080/metrics\n";
   while (true) {
-    opencensus::stats::Record({{foo_usage, 1.0}}, {{"key1", "v1"}});
-    opencensus::stats::Record({{foo_usage, 7.0}}, {{"key1", "v1"}});
-    opencensus::stats::Record({{foo_usage, 12.0}}, {{"key1", "v1"}});
-    opencensus::stats::Record({{foo_usage, 5.0}},
-                              {{"key1", "v1"}, {"key2", "v2"}});
+    opencensus::stats::Record({{foo_usage, 1.0}}, {{key1, "v1"}});
+    opencensus::stats::Record({{foo_usage, 7.0}}, {{key1, "v1"}});
+    opencensus::stats::Record({{foo_usage, 12.0}}, {{key1, "v1"}});
+    opencensus::stats::Record({{foo_usage, 5.0}}, {{key1, "v1"}, {key2, "v2"}});
     absl::SleepFor(absl::Seconds(10));
   }
 }

@@ -86,6 +86,11 @@ class StackdriverE2eTest : public ::testing::Test {
   const std::unique_ptr<google::monitoring::v3::MetricService::Stub> stub_ =
       google::monitoring::v3::MetricService::NewStub(::grpc::CreateChannel(
           kGoogleStackdriverStatsAddress, ::grpc::GoogleDefaultCredentials()));
+
+  const opencensus::stats::TagKey key1_ =
+      opencensus::stats::TagKey::Register("key1");
+  const opencensus::stats::TagKey key2_ =
+      opencensus::stats::TagKey::Register("key2");
 };
 
 const absl::string_view StackdriverE2eTest::project_id_ =
@@ -161,17 +166,17 @@ TEST_F(StackdriverE2eTest, OneView) {
               prefix_))
           .set_measure(kTestMeasureName)
           .set_aggregation(::opencensus::stats::Aggregation::Sum())
-          .add_column("key1")
-          .add_column("key2")
+          .add_column(key1_)
+          .add_column(key2_)
           .set_description(
               "Cumulative sum of opencensus.io/TestMeasure broken down "
               "by 'key1' and 'key2'.");
   view_descriptor.RegisterForExport();
 
   opencensus::stats::Record({{TestMeasure(), 1.0}},
-                            {{"key1", "v11"}, {"key2", "v21"}});
+                            {{key1_, "v11"}, {key2_, "v21"}});
   opencensus::stats::Record({{TestMeasure(), 2.0}},
-                            {{"key1", "v11"}, {"key2", "v22"}});
+                            {{key1_, "v11"}, {key2_, "v22"}});
 
   std::cout << "Waiting for data to propagate.\n";
   absl::SleepFor(absl::Seconds(40));
@@ -197,8 +202,8 @@ TEST_F(StackdriverE2eTest, LargeTest) {
               prefix_))
           .set_measure(kTestMeasureName)
           .set_aggregation(::opencensus::stats::Aggregation::Count())
-          .add_column("key1")
-          .add_column("key2")
+          .add_column(key1_)
+          .add_column(key2_)
           .set_description(
               "Cumulative count of opencensus.io/TestMeasure broken down "
               "by 'key1' and 'key2'.");
@@ -211,8 +216,8 @@ TEST_F(StackdriverE2eTest, LargeTest) {
               prefix_))
           .set_measure(kTestMeasureName)
           .set_aggregation(::opencensus::stats::Aggregation::Sum())
-          .add_column("key1")
-          .add_column("key2")
+          .add_column(key1_)
+          .add_column(key2_)
           .set_description(
               "Cumulative sum of opencensus.io/TestMeasure broken down "
               "by 'key1' and 'key2'.");
@@ -233,7 +238,7 @@ TEST_F(StackdriverE2eTest, LargeTest) {
       const std::string tag2 = absl::StrCat("v1", j);
       const double value = i * j;
       opencensus::stats::Record({{TestMeasure(), value}},
-                                {{"key1", tag1}, {"key2", tag2}});
+                                {{key1_, tag1}, {key2_, tag2}});
       sum_matchers.push_back(testing::TimeSeriesDouble(
           {{"opencensus_task", "test_task"}, {"key1", tag1}, {"key2", tag2}},
           value));

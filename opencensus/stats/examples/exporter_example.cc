@@ -34,6 +34,12 @@ opencensus::stats::MeasureDouble FooUsage() {
   return foo_usage;
 }
 
+opencensus::stats::TagKey FooIdTagKey() {
+  static const auto foo_id_tag_key =
+      opencensus::stats::TagKey::Register("foo_id");
+  return foo_id_tag_key;
+}
+
 // An example exporter that exports to stdout.
 class ExampleExporter : public opencensus::stats::StatsExporter::Handler {
  public:
@@ -59,8 +65,8 @@ class ExampleExporter : public opencensus::stats::StatsExporter::Handler {
                       " to ", absl::FormatTime(view_data.end_time()), ":\n");
       for (const auto& row : view_data.double_data()) {
         for (int i = 0; i < descriptor.columns().size(); ++i) {
-          absl::StrAppend(&output, descriptor.columns()[i], ":", row.first[i],
-                          ", ");
+          absl::StrAppend(&output, descriptor.columns()[i].name(), ":",
+                          row.first[i], ", ");
         }
         absl::StrAppend(&output, row.second, "\n");
       }
@@ -74,7 +80,7 @@ class ExporterExample : public ::testing::Test {
   void SetupFoo() { FooUsage(); }
 
   void UseFoo(absl::string_view id, double quantity) {
-    opencensus::stats::Record({{FooUsage(), quantity}}, {{"foo_id", id}});
+    opencensus::stats::Record({{FooUsage(), quantity}}, {{FooIdTagKey(), id}});
   }
 };
 
@@ -88,7 +94,7 @@ TEST_F(ExporterExample, Distribution) {
           .set_name("example.com/Bar/FooUsage-sum-cumulative-foo_id")
           .set_measure(kFooUsageMeasureName)
           .set_aggregation(opencensus::stats::Aggregation::Sum())
-          .add_column("foo_id")
+          .add_column(FooIdTagKey())
           .set_description(
               "Cumulative sum of example.com/Foo/FooUsage broken down "
               "by 'foo_id'.");
@@ -97,7 +103,7 @@ TEST_F(ExporterExample, Distribution) {
           .set_name("example.com/Bar/FooUsage-sum-interval-foo_id")
           .set_measure(kFooUsageMeasureName)
           .set_aggregation(opencensus::stats::Aggregation::Count())
-          .add_column("foo_id")
+          .add_column(FooIdTagKey())
           .set_description(
               "Cumulative count of example.com/Foo/FooUsage broken down by "
               "'foo_id'.");

@@ -22,6 +22,7 @@
 #include "opencensus/stats/aggregation.h"
 #include "opencensus/stats/internal/aggregation_window.h"
 #include "opencensus/stats/measure_descriptor.h"
+#include "opencensus/stats/tag_key.h"
 
 namespace opencensus {
 namespace stats {
@@ -66,9 +67,9 @@ class ViewDescriptor final {
   // number of tags, key-value pairs; the aggregated data for each view will be
   // broken down by the distinct values of each tag key matching one of the
   // view's columns.
-  ViewDescriptor& add_column(absl::string_view tag_key);
+  ViewDescriptor& add_column(TagKey tag_key);
   size_t num_columns() const { return columns_.size(); }
-  const std::vector<std::string>& columns() const { return columns_; }
+  const std::vector<TagKey>& columns() const { return columns_; }
 
   // Sets a human-readable description for the view.
   ViewDescriptor& set_description(absl::string_view description);
@@ -103,7 +104,7 @@ class ViewDescriptor final {
   uint64_t measure_id_;
   Aggregation aggregation_;
   AggregationWindow aggregation_window_;
-  std::vector<std::string> columns_;
+  std::vector<TagKey> columns_;
   std::string description_;
 };
 

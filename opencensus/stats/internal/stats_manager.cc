@@ -25,6 +25,7 @@
 #include "opencensus/stats/bucket_boundaries.h"
 #include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/internal/measure_data.h"
+#include "opencensus/stats/tag_key.h"
 #include "opencensus/stats/tag_set.h"
 #include "opencensus/stats/view_descriptor.h"
 
@@ -65,13 +66,12 @@ int StatsManager::ViewInformation::RemoveConsumer() {
 }
 
 void StatsManager::ViewInformation::Record(
-    double value,
-    absl::Span<const std::pair<absl::string_view, absl::string_view>> tags,
+    double value, absl::Span<const std::pair<TagKey, absl::string_view>> tags,
     absl::Time now) {
   mu_->AssertHeld();
   std::vector<std::string> tag_values(descriptor_.columns().size());
   for (int i = 0; i < tag_values.size(); ++i) {
-    const std::string& column = descriptor_.columns()[i];
+    const TagKey column = descriptor_.columns()[i];
     for (const auto& tag : tags) {
       if (tag.first == column) {
         tag_values[i] = std::string(tag.second);
@@ -88,7 +88,7 @@ void StatsManager::ViewInformation::MergeMeasureData(const TagSet& tags,
   mu_->AssertHeld();
   std::vector<std::string> tag_values(descriptor_.columns().size());
   for (int i = 0; i < tag_values.size(); ++i) {
-    const std::string& column = descriptor_.columns()[i];
+    const TagKey column = descriptor_.columns()[i];
     for (const auto& tag : tags.tags()) {
       if (tag.first == column) {
         tag_values[i] = std::string(tag.second);
@@ -115,8 +115,7 @@ std::unique_ptr<ViewDataImpl> StatsManager::ViewInformation::GetData() {
 // // StatsManager::MeasureInformation
 
 void StatsManager::MeasureInformation::Record(
-    double value,
-    absl::Span<const std::pair<absl::string_view, absl::string_view>> tags,
+    double value, absl::Span<const std::pair<TagKey, absl::string_view>> tags,
     absl::Time now) {
   mu_->AssertHeld();
   for (auto& view : views_) {
@@ -172,7 +171,7 @@ StatsManager* StatsManager::Get() {
 
 void StatsManager::Record(
     std::initializer_list<Measurement> measurements,
-    std::initializer_list<std::pair<absl::string_view, absl::string_view>> tags,
+    std::initializer_list<std::pair<TagKey, absl::string_view>> tags,
     absl::Time now) {
   absl::MutexLock l(&mu_);
   for (const auto& measurement : measurements) {
