@@ -23,15 +23,13 @@
 
 namespace opencensus {
 
+namespace {
+
 // Maximum size of metadata for tracing and tagging that are sent on the wire.
 constexpr uint32_t kMaxStatsLen = 2046;
 constexpr uint32_t kMaxTracingLen = 128;
-// Maximum size of server stats that are sent on the wire.
-constexpr uint32_t kMaxServerStatsLen = 32;
 
 constexpr double kNumMillisPerNanosecond = 1e-6;
-
-namespace {
 
 void FilterTrailingMetadata(grpc_metadata_batch *b, uint64_t *elapsed_time) {
   if (b->idx.named.grpc_server_stats_bin != nullptr) {
