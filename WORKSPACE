@@ -159,12 +159,7 @@ cc_library(
         "include/rapidjson/internal/*.h",
         "include/rapidjson/error/*.h",
     ]),
-    includes = ["include/",],
-    #copts = select({
-    #    "//conditions:default": [
-    #        "-DRAPIDJSON_HAS_STDSTRING=1",
-    #    ],
-    #}),
+    includes = ["include/"],
     defines = ["RAPIDJSON_HAS_STDSTRING=1",],
     visibility = ["//visibility:public"],
 )
