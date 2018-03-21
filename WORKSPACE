@@ -112,68 +112,39 @@ new_http_archive(
     strip_prefix = "curl-master",
     build_file_content =
 """
+load("@io_opencensus_cpp//opencensus/exporters/trace/zipkin:zipkin.bzl", "CURL_COPTS")
+package(features = ['no_copts_tokenization'])
+
+config_setting(
+    name = "windows",
+    values = {"cpu": "x64_windows"},
+    visibility = [ "//visibility:private" ],
+)
+
 cc_library(
     name = "curl",
     srcs = glob([
-      "src/*.c",
+        "lib/*.c",
+        "lib/vauth/*.c",
+        "lib/vtls/*.c",
     ]),
     hdrs = glob([
-      "include/curl/*.h",
-      "src/*.h",
-      "lib/*.h",
+        "include/curl/*.h",
+        "lib/*.h",
+        "lib/vtls/*.h",
+        "lib/vauth/*.h",
     ]),
-    includes = ["include/", "lib/",],
-    defines = [
-      "HAVE_STRUCT_TIMEVAL=1",
-      "RECV_TYPE_ARG1 int",
-      "RECV_TYPE_ARG2 void *",
-      "RECV_TYPE_ARG3 size_t",
-      "RECV_TYPE_ARG4 int",
-      "RECV_TYPE_RETV ssize_t",
-      "RETSIGTYPE void",
-      "SELECT_QUAL_ARG5 ",
-      "SELECT_TYPE_ARG1 int",
-      "SELECT_TYPE_ARG234 fd_set *",
-      "SELECT_TYPE_ARG5 struct timeval *",
-      "SELECT_TYPE_RETV int",
-      "SEND_QUAL_ARG2 const",
-      "SEND_TYPE_ARG1 int",
-      "SEND_TYPE_ARG2 void *",
-      "SEND_TYPE_ARG3 size_t",
-      "SEND_TYPE_ARG4 int",
-      "SEND_TYPE_RETV ssize_t",
+    includes = ["include/", "lib/"],
+    copts = CURL_COPTS + [
+        "-DOS=\\"os\\"",
+        "-DCURL_EXTERN_SYMBOL=__attribute__((__visibility__(\\"default\\")))",
     ],
     visibility = ["//visibility:public"],
 )
 """
 )
 
-
-# Thrift library - used by zipkin exporter.
-new_http_archive(
-    name = "com_github_thrift",
-    urls = ["https://github.com/apache/thrift/archive/master.zip"],
-    strip_prefix = "thrift-master",
-    build_file_content =
-"""
-cc_library(
-    name = "thrift",
-    srcs = [],
-    hdrs = glob([
-        "lib/cpp/src/thrift/*.h",
-        #"lib/cpp/src/thrift/async/*.h",
-        "lib/cpp/src/thrift/protocol/*.h",
-        "lib/cpp/src/thrift/transport/TBufferTransports.h",
-        "lib/cpp/src/thrift/transport/TTransportException.h",
-        "lib/cpp/src/thrift/transport/THeaderTransport.h",
-    ]),
-    includes = ["lib/cpp/src/",],
-    visibility = ["//visibility:public"],
-)
-"""
-)
-
-# Thrift library - used by zipkin exporter.
+# Rapidjson library - used by zipkin exporter.
 new_http_archive(
     name = "com_github_rapidjson",
     urls = ["https://github.com/Tencent/rapidjson/archive/master.zip"],
@@ -189,29 +160,12 @@ cc_library(
         "include/rapidjson/error/*.h",
     ]),
     includes = ["include/",],
+    #copts = select({
+    #    "//conditions:default": [
+    #        "-DRAPIDJSON_HAS_STDSTRING=1",
+    #    ],
+    #}),
     defines = ["RAPIDJSON_HAS_STDSTRING=1",],
-    visibility = ["//visibility:public"],
-)
-"""
-)
-
-# Thrift library - used by zipkin exporter.
-new_http_archive(
-    name = "com_github_folly",
-    urls = ["https://github.com/facebook/folly/archive/master.zip"],
-    strip_prefix = "folly-master",
-    build_file_content =
-"""
-cc_library(
-    name = "folly",
-    srcs = glob([
-        "folly/uri.cpp",
-    ]),
-    hdrs = glob([
-        "folly/uri.h",
-    ]),
-    includes = ["folly/"],
-    defines = ["FOLLY_NO_CONFIG=1", "FOLLY_HAVE_MEMRCHR=1",],
     visibility = ["//visibility:public"],
 )
 """

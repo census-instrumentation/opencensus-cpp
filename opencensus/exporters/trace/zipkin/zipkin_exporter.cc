@@ -1,11 +1,23 @@
+// Copyright 2018, OpenCensus Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #include "zipkin_exporter.h"
 
-#include <thrift/protocol/TBinaryProtocol.h>
-
+#include <curl/curl.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
-
-#include "base64.h"
+#include "absl/strings/str_cat.h"
 
 namespace opencensus {
 namespace exporters {
@@ -13,66 +25,8 @@ namespace trace {
 
 namespace {
 
-size_t SerializeBinary(apache::thrift::protocol::TBinaryProtocol *protocol,
-                       const ::opencensus::trace::exporter::SpanData &span) {
-  ::opencensus::zipkin::Span zipkin_span;
-
-  // Populate zipkin span
-  zipkin_span.__set_name(std::string(span.name()));
-  zipkin_span.__set_trace_id_high(strtoull(
-      span.context().trace_id().ToHex().substr(0, 16).c_str(), NULL, 16));
-  zipkin_span.__set_trace_id(
-      strtoull(span.context().trace_id().ToHex().substr(16).c_str(), NULL, 16));
-  zipkin_span.__set_id(
-      strtoull(span.context().span_id().ToHex().c_str(), NULL, 16));
-  zipkin_span.__set_parent_id(
-      strtoull(span.parent_span_id().ToHex().c_str(), NULL, 16));
-
-  // Annotations
-  for (const auto &annotation : span.annotations().events()) {
-    ::opencensus::zipkin::Annotation zipkin_annotation;
-    zipkin_annotation.__set_timestamp(
-        absl::ToUnixMicros(annotation.timestamp()));
-    zipkin_annotation.__set_value(annotation.event().DebugString());
-    zipkin_span.annotations.push_back(zipkin_annotation);
-  }
-
-  // Attributes
-  for (const auto &attribute : span.attributes()) {
-    ::opencensus::zipkin::BinaryAnnotation zipkin_annotation;
-    zipkin_annotation.__set_key(attribute.first);
-    switch (attribute.second.type()) {
-      case ::opencensus::trace::AttributeValueRef::Type::kString:
-        zipkin_annotation.__set_value(attribute.second.string_value());
-        zipkin_annotation.__set_annotation_type(
-            ::opencensus::zipkin::AnnotationType::STRING);
-        break;
-      case ::opencensus::trace::AttributeValueRef::Type::kBool: {
-        bool bool_value = attribute.second.bool_value();
-        zipkin_annotation.__set_value(
-            std::string(reinterpret_cast<const char *>(&bool_value), 1));
-        zipkin_annotation.__set_annotation_type(
-            ::opencensus::zipkin::AnnotationType::BOOL);
-      } break;
-      case ::opencensus::trace::AttributeValueRef::Type::kInt: {
-        int64_t int_value = attribute.second.int_value();
-        zipkin_annotation.__set_value(
-            std::string(reinterpret_cast<const char *>(&int_value), 8));
-        zipkin_annotation.__set_annotation_type(
-            ::opencensus::zipkin::AnnotationType::I64);
-      } break;
-      default:
-        break;
-    }
-    zipkin_span.binary_annotations.push_back(zipkin_annotation);
-  }
-
-  zipkin_span.__set_timestamp(absl::ToUnixMicros(span.start_time()));
-  zipkin_span.__set_duration(
-      absl::ToInt64Microseconds(span.end_time() - span.start_time()));
-
-  return zipkin_span.write(protocol);
-}
+constexpr const char *kZipkinLibname = "zipkin";
+constexpr const char *kZkipkinVersion = "2.0";
 
 void SerializeJson(rapidjson::Writer<rapidjson::StringBuffer> *writer,
                    const ::opencensus::trace::exporter::SpanData &span) {
@@ -141,24 +95,15 @@ void SerializeJson(rapidjson::Writer<rapidjson::StringBuffer> *writer,
   writer->EndObject();
 }
 
+class CurlEnv {
+ public:
+  CurlEnv() { curl_global_init(CURL_GLOBAL_DEFAULT); }
+  ~CurlEnv() { curl_global_cleanup(); }
+};
+
 }  // namespace
 
-size_t BinaryCodec::Encode(
-    std::shared_ptr<apache::thrift::transport::TMemoryBuffer> buf,
-    const std::vector<::opencensus::trace::exporter::SpanData> &spans) {
-  apache::thrift::protocol::TBinaryProtocol protocol(buf);
-
-  size_t wrote =
-      protocol.writeListBegin(apache::thrift::protocol::T_STRUCT, spans.size());
-  for (auto &span : spans) {
-    wrote += SerializeBinary(&protocol, span);
-  }
-
-  return wrote + protocol.writeListEnd();
-}
-
-size_t JsonCodec::Encode(
-    std::shared_ptr<apache::thrift::transport::TMemoryBuffer> buf,
+std::string JsonCodec::Encode(
     const std::vector<::opencensus::trace::exporter::SpanData> &spans) {
   rapidjson::StringBuffer buffer;
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -168,13 +113,10 @@ size_t JsonCodec::Encode(
     SerializeJson(&writer, span);
   }
   writer.EndArray();
-  buf->write((const uint8_t *)buffer.GetString(), buffer.GetSize());
-
-  return buffer.GetSize();
+  return buffer.GetString();
 }
 
-size_t PrettyJsonCodec::Encode(
-    std::shared_ptr<apache::thrift::transport::TMemoryBuffer> buf,
+std::string PrettyJsonCodec::Encode(
     const std::vector<::opencensus::trace::exporter::SpanData> &spans) {
   rapidjson::StringBuffer buffer;
   rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
@@ -184,106 +126,192 @@ size_t PrettyJsonCodec::Encode(
     SerializeJson(&writer, span);
   }
   writer.EndArray();
-  buf->write((const uint8_t *)buffer.GetString(), buffer.GetSize());
-
-  return buffer.GetSize();
+  return buffer.GetString();
 }
 
-struct ScribeOptions {
-  ScribeOptions(const std::string &h, int16_t p) : host(h), port(p) {}
-  ScribeOptions(folly::Uri &uri);
+struct HttpClientOptions {
+  HttpClientOptions(absl::string_view u) : url(u) {}
 
-  // Server address
-  std::string host;
-  // Server port
-  int16_t port;
-  // The Scribe category used to transmit the spans.
-  // The default category is zipkin.
-  std::string category = "zipkin";
-  // The maximum retry times.
-  // The default maximum retry times is 3.
-  size_t max_retry_times = 3;
+  // The URL to use in the request.
+  std::string url;
+  // The proxy to use for the upcoming request.
+  std::string proxy;
+  // Tunnel through HTTP proxy
+  bool http_proxy_tunnel = false;
+  // The maximum number of redirects allowed. The default maximum redirect times
+  // is 3.
+  size_t max_redirect_times = 3;
+  // The maximum timeout for TCP connect. The default connect timeout is 5
+  // seconds.
+  absl::Duration connect_timeout = absl::Seconds(5);
+  // The maximum timeout for HTTP request. The default request timeout is 15
+  // seconds.
+  absl::Duration request_timeout = absl::Seconds(15);
 };
 
-class Scribe : public ::opencensus::exporters::trace::TraceClient {
+class HttpClient : public ExportClient {
  public:
-  Scribe(const ScribeOptions &options)
-      : options_(options.host, options.port),
-        socket_(
-            new apache::thrift::transport::TSocket(options.host, options.port)),
-        transport_(new apache::thrift::transport::TFramedTransport(socket_)),
-        protocol_(new apache::thrift::protocol::TBinaryProtocol(transport_)),
-        client_(new ::opencensus::scribe::ScribeClient(protocol_)) {}
+  HttpClient(const HttpClientOptions &options)
+      : url_(options.url),
+        proxy_(options.proxy),
+        http_proxy_tunnel_(options.http_proxy_tunnel),
+        max_redirect_times_(options.max_redirect_times),
+        connect_timeout_(options.connect_timeout),
+        request_timeout_(options.request_timeout) {}
 
-  const ScribeOptions Options() const { return options_; };
-
-  virtual void SendMessage(const uint8_t *msg, size_t size) override;
+  void SendMessage(const std::string &msg, size_t size) override;
 
  private:
-  ScribeOptions options_;
-  std::shared_ptr<apache::thrift::transport::TSocket> socket_;
-  std::shared_ptr<apache::thrift::transport::TFramedTransport> transport_;
-  std::shared_ptr<apache::thrift::protocol::TBinaryProtocol> protocol_;
-  std::shared_ptr<::opencensus::scribe::ScribeClient> client_;
-
-  bool Connected() const;
-  bool Reconnect();
+  std::string url_;
+  std::string proxy_;
+  bool http_proxy_tunnel_;
+  size_t max_redirect_times_;
+  absl::Duration connect_timeout_;
+  absl::Duration request_timeout_;
 };
 
-ScribeOptions::ScribeOptions(folly::Uri &uri) {
-  std::vector<folly::StringPiece> parts;
+void HttpClient::SendMessage(const std::string &msg, size_t size) {
+  CURLcode res;
+  struct curl_slist *headers = nullptr;
+  char content_type[128] = {0}, err_msg[CURL_ERROR_SIZE] = {0};
+  std::string error;
+  CURL *curl = curl_easy_init();
 
-  host = folly::toStdString(uri.host());
-  if (uri.port()) port = uri.port();
-  folly::split("/", uri.path(), parts);
-  if (parts.size() > 1) category = parts[1].str();
+  if (!curl) {
+    // Failed to create curl handle.
+    return;
+  }
 
-  for (auto &param : uri.getQueryParams()) {
-    if (param.first == "max_retry_times") {
-      max_retry_times = folly::to<size_t>(param.second);
+  const std::string mime_type = "application/json";
+  snprintf(content_type, sizeof(content_type), "Content-Type: %s",
+           mime_type.c_str());
+
+  headers = curl_slist_append(headers, content_type);
+  headers = curl_slist_append(headers, "Expect:");
+  const uint8_t *data = reinterpret_cast<const uint8_t *>(msg.data());
+
+  if (CURLE_OK !=
+      (res = curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, err_msg))) {
+    // Failed to set curl error buffer.
+    error = curl_easy_strerror(res);
+  } else if (CURLE_OK !=
+             (res = curl_easy_setopt(curl, CURLOPT_URL, url_.c_str()))) {
+    // Failed to set url.
+    error = curl_easy_strerror(res);
+  } else if (CURLE_OK !=
+             (res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers))) {
+    // Failed to set http header.
+    error = curl_easy_strerror(res);
+  } else if (CURLE_OK != (res = curl_easy_setopt(
+                              curl, CURLOPT_USERAGENT,
+                              absl::StrCat(kZipkinLibname, "/", kZkipkinVersion)
+                                  .c_str()))) {
+    // Failed to set http user agent.
+    error = curl_easy_strerror(res);
+  } else if (CURLE_OK !=
+             (res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, size))) {
+    // Failed to set http body size.
+    error = curl_easy_strerror(res);
+  } else if (CURLE_OK !=
+             (res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data))) {
+    // Failed to set http body data.
+    error = curl_easy_strerror(res);
+  } else if (CURLE_OK !=
+             curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT,
+                              absl::ToInt64Milliseconds(connect_timeout_))) {
+    // Failed to set connect timeout.
+    error = curl_easy_strerror(res);
+  } else if (CURLE_OK !=
+             curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS,
+                              absl::ToInt64Milliseconds(request_timeout_))) {
+    // Failed to set request timeout.
+    error = curl_easy_strerror(res);
+  } else if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1))) {
+    // Failed to disable signals.
+    error = curl_easy_strerror(res);
+  } else {
+    if (proxy_.empty()) {
+      if (CURLE_OK !=
+          (res = curl_easy_setopt(curl, CURLOPT_PROXY, proxy_.c_str()))) {
+        // Failed to set proxy.
+        error = curl_easy_strerror(res);
+      }
+
+      if (http_proxy_tunnel_) {
+        if (CURLE_OK !=
+            (res = curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP))) {
+          // Failed to set HTTP proxy type.
+          error = curl_easy_strerror(res);
+        } else if (CURLE_OK !=
+                   (res = curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1))) {
+          // Failed to set HTTP proxy tunnel.
+          error = curl_easy_strerror(res);
+        }
+      }
+    }
+
+    if (max_redirect_times_) {
+      if (CURLE_OK !=
+          (res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1))) {
+        // Failed to enable follow location.
+        error = curl_easy_strerror(res);
+      } else if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_MAXREDIRS,
+                                                     max_redirect_times_))) {
+        // Failed to set max redirect times.
+        error = curl_easy_strerror(res);
+      }
+    }
+
+    // Sending HTTP request to url.
+    if (CURLE_OK != (res = curl_easy_perform(curl))) {
+      // Failed to send http request.
+      error = curl_easy_strerror(res);
+    } else {
+      long status_code = 0;
+      double total_time = 0, uploaded_bytes = 0, upload_speed = 0;
+
+      if (CURLE_OK != (res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE,
+                                               &status_code))) {
+        // Failed to get status code.
+        error = curl_easy_strerror(res);
+      } else if (CURLE_OK != (res = curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME,
+                                                      &total_time))) {
+        // Failed to get total time.
+        error = curl_easy_strerror(res);
+      } else if (CURLE_OK !=
+                 (res = curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD,
+                                          &uploaded_bytes))) {
+        // Failed to get uploaded bytes.
+        error = curl_easy_strerror(res);
+      } else if (CURLE_OK !=
+                 (res = curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD,
+                                          &upload_speed))) {
+        // Failed to get upload speed.
+        error = curl_easy_strerror(res);
+      } else {
+        // LOG(INFO) << "HTTP request finished, status " << status_code
+        //           << ", uploaded " << uploaded_bytes << " bytes in "
+        //           << total_time << " seconds (" << (upload_speed / 1024)
+        //           << " KB/s)";
+      }
     }
   }
-}
 
-void Scribe::SendMessage(const uint8_t *msg, size_t size) {
-  ::opencensus::scribe::LogEntry entry;
-  entry.__set_category(Options().category);
-  entry.__set_message(base64::Encode(msg, size));
-
-  std::vector<::opencensus::scribe::LogEntry> entries;
-  entries.push_back(entry);
-
-  ::opencensus::scribe::ResultCode::type res =
-      ::opencensus::scribe::ResultCode::type::TRY_LATER;
-  size_t retry_times = 0;
-
-  do {
-    if (Connected() || Reconnect()) {
-      res = client_->Log(entries);
-    }
-  } while (res == ::opencensus::scribe::ResultCode::type::TRY_LATER &&
-           retry_times++ < Options().max_retry_times);
-}
-
-bool Scribe::Connected() const { return socket_->isOpen(); }
-
-bool Scribe::Reconnect() {
-  socket_->open();
-  return socket_->isOpen();
+  // TODO: Log error if one exists.
+  curl_slist_free_all(headers);
+  curl_easy_cleanup(curl);
 }
 
 void ZipkinExporter::Register(const ZipkinExporterOptions &options) {
   // Create new exporter.
+  static CurlEnv *curl_lib = new CurlEnv();
   ZipkinExporter *exporter = new ZipkinExporter(options);
 
-  if (exporter->uri_.scheme() == "scribe" ||
-      exporter->uri_.scheme() == "thrift") {
-    // Create trace client handler that will send encoded span information to
-    // collection server.
-    ScribeOptions scribe_options(exporter->uri_);
-    exporter->trace_client_ = std::unique_ptr<TraceClient>(
-        dynamic_cast<TraceClient *>(new Scribe(scribe_options)));
-  }
+  // Create client handler that will send encoded span information to
+  // collection server.
+  HttpClientOptions http_client_options(exporter->options_.url);
+  exporter->trace_client_ = std::unique_ptr<ExportClient>(
+      dynamic_cast<ExportClient *>(new HttpClient(http_client_options)));
 
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
       absl::WrapUnique<::opencensus::trace::exporter::SpanExporter::Handler>(
@@ -293,14 +321,8 @@ void ZipkinExporter::Register(const ZipkinExporterOptions &options) {
 void ZipkinExporter::Export(
     const std::vector<::opencensus::trace::exporter::SpanData> &spans) {
   if (!spans.empty()) {
-    std::shared_ptr<apache::thrift::transport::TMemoryBuffer> buf(
-        new apache::thrift::transport::TMemoryBuffer());
-
-    message_codec_->Encode(buf, spans);
-    uint8_t *msg = nullptr;
-    uint32_t size = 0;
-    buf->getBuffer(&msg, &size);
-    trace_client_->SendMessage(msg, size);
+    std::string msg = message_codec_->Encode(spans);
+    trace_client_->SendMessage(msg, msg.size());
   }
 }
 
@@ -310,17 +332,8 @@ void ZipkinExporter::ExportForTesting(
   if (!spans.empty()) {
     // Create new exporter.
     ZipkinExporter *exporter = new ZipkinExporter(options);
-
-    std::shared_ptr<apache::thrift::transport::TMemoryBuffer> buf(
-        new apache::thrift::transport::TMemoryBuffer());
-
-    exporter->message_codec_->Encode(buf, spans);
-    uint8_t *msg = nullptr;
-    uint32_t size = 0;
-    buf->getBuffer(&msg, &size);
-
-    std::string str(reinterpret_cast<char *>(msg), size);
-    fprintf(stderr, "%s\n", str.c_str());
+    std::string msg = exporter->message_codec_->Encode(spans);
+    fprintf(stderr, "%s\n", msg.c_str());
   }
 }
 

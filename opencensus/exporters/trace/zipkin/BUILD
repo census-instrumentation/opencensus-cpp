@@ -22,41 +22,21 @@ package(default_visibility = ["//visibility:public"])
 # ========================================================================= #
 
 cc_library(
-    name = "thrift",
-    srcs = ["libthrift.so"],
-    hdrs = [],
-    deps = [
-        "@com_github_thrift//:thrift",
-    ]
-)
-
-cc_library(
     name = "zipkin_exporter",
     srcs = [
-        "scribe.cc",
-        "scribe_types.cc",
         "zipkin_exporter.cc",
-        "zipkin_core_constants.cc",
-        "zipkin_core_types.cc",
     ],
     hdrs = [
-        "base64.h",
-        "scribe.h",
-        "scribe_types.h",
         "zipkin_exporter.h",
-        "zipkin_core_constants.h",
-        "zipkin_core_types.h",
     ],
     copts = DEFAULT_COPTS,
     deps = [
-        ":thrift",
         "//opencensus/trace",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_github_curl//:curl",
         "@com_github_rapidjson//:rapidjson",
-        "@com_github_folly//:folly",
     ],
 )
 

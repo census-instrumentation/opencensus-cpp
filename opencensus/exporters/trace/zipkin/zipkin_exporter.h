@@ -1,30 +1,31 @@
+// Copyright 2018, OpenCensus Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #ifndef OPENCENSUS_EXPORTERS_TRACE_ZIPKIN_ZIPKIN_EXPORTER_H_
 #define OPENCENSUS_EXPORTERS_TRACE_ZIPKIN_ZIPKIN_EXPORTER_H_
 
-#include <atomic>
-#include <chrono>
 #include <memory>
-#include <mutex>
-#include <thread>
-
-#include <folly/Uri.h>
-#include <thrift/protocol/TBinaryProtocol.h>
-#include <thrift/transport/TBufferTransports.h>
-#include <thrift/transport/TSocket.h>
+#include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/time/time.h"
 #include "opencensus/trace/exporter/span_exporter.h"
 #include "opencensus/trace/span.h"
-#include "scribe.h"
-#include "zipkin_core_types.h"
 
 namespace opencensus {
 namespace exporters {
 namespace trace {
-
-class BinaryCodec;
-class JsonCodec;
-class PrettyJsonCodec;
 
 // MessageCodec is used for encoding message sets.
 class MessageCodec {
@@ -33,85 +34,60 @@ class MessageCodec {
 
   virtual const std::string name() const = 0;
 
-  virtual const std::string mime_type() const = 0;
-
-  virtual size_t Encode(
-      std::shared_ptr<apache::thrift::transport::TMemoryBuffer> buf,
+  virtual std::string Encode(
       const std::vector<::opencensus::trace::exporter::SpanData> &spans) = 0;
-};
-
-// Thrift binary encoding
-class BinaryCodec : public MessageCodec {
- public:
-  virtual const std::string name() const override { return "binary"; }
-
-  virtual const std::string mime_type() const override {
-    return "application/x-thrift";
-  }
-
-  virtual size_t Encode(
-      std::shared_ptr<apache::thrift::transport::TMemoryBuffer> buf,
-      const std::vector<::opencensus::trace::exporter::SpanData> &spans)
-      override;
 };
 
 // JSON encoding
 class JsonCodec : public MessageCodec {
  public:
-  virtual const std::string name() const override { return "json"; }
+  const std::string name() const override { return "json"; }
 
-  virtual const std::string mime_type() const override {
-    return "application/json";
-  }
-
-  virtual size_t Encode(
-      std::shared_ptr<apache::thrift::transport::TMemoryBuffer> buf,
-      const std::vector<::opencensus::trace::exporter::SpanData> &spans)
-      override;
+  std::string Encode(const std::vector<::opencensus::trace::exporter::SpanData>
+                         &spans) override;
 };
 
 // Pretty print JSON encoding
 class PrettyJsonCodec : public MessageCodec {
  public:
-  virtual const std::string name() const override { return "pretty_json"; }
+  const std::string name() const override { return "pretty_json"; }
 
-  virtual const std::string mime_type() const override {
-    return "application/json";
-  }
-
-  virtual size_t Encode(
-      std::shared_ptr<apache::thrift::transport::TMemoryBuffer> buf,
-      const std::vector<::opencensus::trace::exporter::SpanData> &spans)
-      override;
+  std::string Encode(const std::vector<::opencensus::trace::exporter::SpanData>
+                         &spans) override;
 };
 
-class TraceClient {
+class ExportClient {
  public:
-  virtual void SendMessage(const uint8_t *msg, size_t size) = 0;
+  virtual void SendMessage(const std::string &msg, size_t size) = 0;
 };
 
 struct ZipkinExporterOptions {
-  ZipkinExporterOptions()
-      : host("::1"),
-        port(3000),
-        codec_type(ZipkinExporterOptions::CodecType::kJson) {}
+  ZipkinExporterOptions(absl::string_view url)
+      : url(url), codec_type(ZipkinExporterOptions::CodecType::kJson) {}
 
-  // Uniform Resource Identifier for server that spans will be sent to.
-  absl::string_view uri;
-  // Server address
-  std::string host;
-  // Server port
-  int16_t port;
+  // Uniform Resource Location for server that spans will be sent to.
+  absl::string_view url;
+  // The proxy to use for the upcoming request.
+  std::string proxy;
+  // Tunnel through HTTP proxy
+  bool http_proxy_tunnel = false;
+  // The maximum number of redirects allowed. The default maximum redirect times
+  // is 3.
+  size_t max_redirect_times = 3;
+  // The maximum timeout for TCP connect. The default connect timeout is 5
+  // seconds.
+  absl::Duration connect_timeout = absl::Seconds(5);
+  // The maximum timeout for HTTP request. The default request timeout is 15
+  // seconds.
+  absl::Duration request_timeout = absl::Seconds(15);
+
   // Message codec to use for encoding message sets.
   // Default = Json
-  enum class CodecType : uint8_t { kBinary, kJson, kPrettyJson };
+  enum class CodecType : uint8_t { kJson, kPrettyJson };
   CodecType codec_type;
 
   std::unique_ptr<MessageCodec> GetCodec() const {
     switch (codec_type) {
-      case ZipkinExporterOptions::CodecType::kBinary:
-        return std::unique_ptr<MessageCodec>(
-            dynamic_cast<MessageCodec *>(new BinaryCodec));
       case ZipkinExporterOptions::CodecType::kJson:
         return std::unique_ptr<MessageCodec>(
             dynamic_cast<MessageCodec *>(new JsonCodec));
@@ -138,20 +114,19 @@ class ZipkinExporter
       const std::vector<::opencensus::trace::exporter::SpanData> &spans);
 
   ZipkinExporter(const ZipkinExporterOptions &options)
-      : uri_(options.uri),
-        uri_str_(options.uri),
+      : options_(options),
         codec_type_(options.codec_type),
         message_codec_(options.GetCodec()) {}
+  ~ZipkinExporter() {}
 
-  folly::Uri uri_;
-  const std::string uri_str_;
+  ZipkinExporterOptions options_;
   ZipkinExporterOptions::CodecType codec_type_;
   std::unique_ptr<MessageCodec> message_codec_;
-  std::unique_ptr<TraceClient> trace_client_;
+  std::unique_ptr<ExportClient> trace_client_;
 };
 
-} // namespace trace
-} // namespace exporters
-} // namespace opencensus
+}  // namespace trace
+}  // namespace exporters
+}  // namespace opencensus
 
 #endif  // OPENCENSUS_EXPORTERS_TRACE_ZIPKIN_ZIPKIN_EXPORTER_H_

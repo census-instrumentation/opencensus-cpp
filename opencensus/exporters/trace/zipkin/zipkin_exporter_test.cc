@@ -50,7 +50,7 @@ TEST_F(ZipkinExporterTestPeer, ExportTrace) {
   std::vector<::opencensus::trace::exporter::SpanData> spans =
       ::opencensus::trace::exporter::LocalSpanStore::GetSpans();
 
-  ZipkinExporterOptions options;
+  ZipkinExporterOptions options("testurl:1234");
   Export(options, spans);
 }
 
