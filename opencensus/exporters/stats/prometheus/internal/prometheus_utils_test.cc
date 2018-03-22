@@ -50,8 +50,8 @@ void CompareMetricFamilies(const io::prometheus::client::MetricFamily& actual,
 }
 
 TEST(SetMetricFamilyTest, CountDouble) {
-  const auto measure = opencensus::stats::MeasureRegistry::RegisterDouble(
-      "measure_count_double", "units", "");
+  const auto measure = opencensus::stats::MeasureDouble::Register(
+      "measure_count_double", "", "units");
   const std::string task = "test_task";
   const std::string view_name = "test_descriptor";
   const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
@@ -86,8 +86,8 @@ TEST(SetMetricFamilyTest, CountDouble) {
 }
 
 TEST(SetMetricFamilyTest, SumDouble) {
-  const auto measure = opencensus::stats::MeasureRegistry::RegisterDouble(
-      "measure_sum_double", "units", "");
+  const auto measure = opencensus::stats::MeasureDouble::Register(
+      "measure_sum_double", "", "units");
   const std::string task = "test_task";
   const std::string view_name = "test_descriptor";
   const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
@@ -122,8 +122,8 @@ TEST(SetMetricFamilyTest, SumDouble) {
 }
 
 TEST(SetMetricFamilyTest, SumInt) {
-  const auto measure = opencensus::stats::MeasureRegistry::RegisterInt(
-      "measure_sum_int", "units", "");
+  const auto measure =
+      opencensus::stats::MeasureInt64::Register("measure_sum_int", "", "units");
   const std::string task = "test_task";
   const std::string view_name = "test_descriptor";
   const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
@@ -158,8 +158,8 @@ TEST(SetMetricFamilyTest, SumInt) {
 }
 
 TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
-  const auto measure = opencensus::stats::MeasureRegistry::RegisterDouble(
-      "measure_distribution_double", "units", "");
+  const auto measure = opencensus::stats::MeasureDouble::Register(
+      "measure_distribution_double", "", "units");
   const std::string view_name = "test_descriptor";
   const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
   const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");

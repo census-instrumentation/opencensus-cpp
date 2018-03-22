@@ -20,8 +20,8 @@
 #include "opencensus/stats/aggregation.h"
 #include "opencensus/stats/bucket_boundaries.h"
 #include "opencensus/stats/internal/aggregation_window.h"
+#include "opencensus/stats/measure.h"
 #include "opencensus/stats/measure_descriptor.h"
-#include "opencensus/stats/measure_registry.h"
 #include "opencensus/stats/view_descriptor.h"
 
 namespace opencensus {
@@ -45,10 +45,10 @@ TEST(DebugStringTest, AggregationWindow) {
 
 TEST(DebugStringTest, MeasureDescriptor) {
   const std::string name = "foo";
-  const std::string units = "ops";
   const std::string description = "Usage of foo";
+  const std::string units = "1";
   static const MeasureDescriptor descriptor =
-      MeasureRegistry::RegisterInt(name, units, description).GetDescriptor();
+      MeasureInt64::Register(name, description, units).GetDescriptor();
   EXPECT_PRED_FORMAT2(::testing::IsSubstring, name, descriptor.DebugString());
   EXPECT_PRED_FORMAT2(::testing::IsSubstring, units, descriptor.DebugString());
   EXPECT_PRED_FORMAT2(::testing::IsSubstring, description,
@@ -60,9 +60,9 @@ TEST(DebugStringTest, ViewDescriptor) {
   const AggregationWindow aggregation_window =
       AggregationWindow::Interval(absl::Minutes(1));
   const std::string measure_name = "bar";
-  static const MeasureDouble measure =
-      MeasureRegistry::RegisterDouble(measure_name, "", "");
+  static const auto measure = MeasureDouble::Register(measure_name, "", "");
   static const TagKey tag_key = TagKey::Register("tag_key_1");
+  MeasureDouble::Register(measure_name, "", "");
   const std::string description = "description string";
   ViewDescriptor descriptor = ViewDescriptor()
                                   .set_measure(measure_name)

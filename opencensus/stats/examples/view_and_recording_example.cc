@@ -26,8 +26,8 @@ constexpr char kFooUsageMeasureName[] = "example.com/Foo/FooUsage";
 // only registered once.
 opencensus::stats::MeasureDouble FooUsage() {
   static const opencensus::stats::MeasureDouble foo_usage =
-      opencensus::stats::MeasureRegistry::RegisterDouble(
-          kFooUsageMeasureName, "foos", "Usage of foos.");
+      opencensus::stats::MeasureDouble::Register(kFooUsageMeasureName,
+                                                 "Usage of foos.", "foos");
   return foo_usage;
 }
 

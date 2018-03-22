@@ -25,6 +25,7 @@
 #include "opencensus/stats/bucket_boundaries.h"
 #include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/internal/measure_data.h"
+#include "opencensus/stats/internal/measure_registry_impl.h"
 #include "opencensus/stats/tag_key.h"
 #include "opencensus/stats/tag_set.h"
 #include "opencensus/stats/view_descriptor.h"
@@ -215,7 +216,7 @@ void StatsManager::AddMeasure(Measure<MeasureT> measure) {
 }
 
 template void StatsManager::AddMeasure(MeasureDouble measure);
-template void StatsManager::AddMeasure(MeasureInt measure);
+template void StatsManager::AddMeasure(MeasureInt64 measure);
 
 StatsManager::ViewInformation* StatsManager::AddConsumer(
     const ViewDescriptor& descriptor) {

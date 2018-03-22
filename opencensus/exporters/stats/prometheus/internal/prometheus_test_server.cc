@@ -34,8 +34,8 @@ int main(int argc, char** argv) {
   // Create a view and register it with the exporter.
   const std::string foo_usage_measure_name = "example.com/Foo/FooUsage";
   const opencensus::stats::MeasureDouble foo_usage =
-      opencensus::stats::MeasureRegistry::RegisterDouble(
-          foo_usage_measure_name, "foos", "Usage of foos.");
+      opencensus::stats::MeasureDouble::Register(foo_usage_measure_name,
+                                                 "Usage of foos.", "foos");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name("example.com/Bar/FooUsage-sum-cumulative-key1-key2")

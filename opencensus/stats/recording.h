@@ -31,8 +31,8 @@ namespace stats {
 //   Record({{measure_double, 2.5}, {measure_int, 1ll}});
 //
 // Only floating point values may be recorded against MeasureDoubles and only
-// integral values against MeasureInts, to prevent silent loss of precision. If
-// a record call fails to compile, ensure that all types match (using
+// integral values against MeasureInt64s, to prevent silent loss of precision.
+// If a record call fails to compile, ensure that all types match (using
 // static_cast to double or int64_t if necessary).
 void Record(
     std::initializer_list<Measurement> measurements,

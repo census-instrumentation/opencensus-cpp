@@ -37,10 +37,10 @@ ABSL_CONST_INIT const absl::string_view kVideoSizeMeasureName =
 // The resource owner defines and registers a measure. A function exposing a
 // function-local static is the recommended style, ensuring that the measure is
 // only registered once.
-opencensus::stats::MeasureInt VideoSizeMeasure() {
-  static const opencensus::stats::MeasureInt video_size =
-      opencensus::stats::MeasureRegistry::RegisterInt(
-          kVideoSizeMeasureName, "By", "size of processed videos");
+opencensus::stats::MeasureInt64 VideoSizeMeasure() {
+  static const opencensus::stats::MeasureInt64 video_size =
+      opencensus::stats::MeasureInt64::Register(
+          kVideoSizeMeasureName, "size of processed videos", "By");
   return video_size;
 }
 

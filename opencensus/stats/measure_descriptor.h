@@ -36,15 +36,15 @@ class MeasureDescriptor final {
   // See documentation on MeasureRegistry::Register*() for details of these
   // fields.
   const std::string& name() const { return name_; }
-  const std::string& units() const { return units_; }
   const std::string& description() const { return description_; }
+  const std::string& units() const { return units_; }
   Type type() const { return type_; }
 
   std::string DebugString() const;
 
   bool operator==(const MeasureDescriptor& other) const {
-    return name_ == other.name_ && units_ == other.units_ &&
-           description_ == other.description_ && type_ == other.type_;
+    return name_ == other.name_ && description_ == other.description_ &&
+           units_ == other.units_ && type_ == other.type_;
   }
   bool operator!=(const MeasureDescriptor& other) const {
     return !(*this == other);
@@ -54,13 +54,13 @@ class MeasureDescriptor final {
   // Only MeasureRegistryImpl can construct this--users should call the
   // MeasureRegistry::Register*() functions.
   friend class MeasureRegistryImpl;
-  MeasureDescriptor(absl::string_view name, absl::string_view units,
-                    absl::string_view description, Type type)
-      : name_(name), units_(units), description_(description), type_(type) {}
+  MeasureDescriptor(absl::string_view name, absl::string_view description,
+                    absl::string_view units, Type type)
+      : name_(name), description_(description), units_(units), type_(type) {}
 
   const std::string name_;
-  const std::string units_;
   const std::string description_;
+  const std::string units_;
   const Type type_;
 };
 

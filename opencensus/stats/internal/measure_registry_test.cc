@@ -33,47 +33,46 @@ std::string MakeUniqueName() {
 
 TEST(MeasureRegistryTest, RegisterDouble) {
   const std::string name = MakeUniqueName();
-  const std::string units = "units";
   const std::string description = "description";
+  const std::string units = "units";
 
-  MeasureDouble measure =
-      MeasureRegistry::RegisterDouble(name, units, description);
+  MeasureDouble measure = MeasureDouble::Register(name, description, units);
   ASSERT_TRUE(measure.IsValid());
   const MeasureDescriptor& descriptor = measure.GetDescriptor();
   EXPECT_EQ(name, descriptor.name());
-  EXPECT_EQ(units, descriptor.units());
   EXPECT_EQ(description, descriptor.description());
+  EXPECT_EQ(units, descriptor.units());
   EXPECT_EQ(MeasureDescriptor::Type::kDouble, descriptor.type());
 }
 
 TEST(MeasureRegistryTest, RegisterInt) {
   const std::string name = MakeUniqueName();
-  const std::string units = "units";
   const std::string description = "description";
+  const std::string units = "units";
 
-  MeasureInt measure = MeasureRegistry::RegisterInt(name, units, description);
+  MeasureInt64 measure = MeasureInt64::Register(name, description, units);
   ASSERT_TRUE(measure.IsValid());
   const MeasureDescriptor& descriptor = measure.GetDescriptor();
   EXPECT_EQ(name, descriptor.name());
-  EXPECT_EQ(units, descriptor.units());
   EXPECT_EQ(description, descriptor.description());
+  EXPECT_EQ(units, descriptor.units());
   EXPECT_EQ(MeasureDescriptor::Type::kInt64, descriptor.type());
 }
 
 TEST(MeasureRegistryTest, RegisteringEmptyNameFails) {
-  EXPECT_FALSE(MeasureRegistry::RegisterDouble("", "", "").IsValid());
+  EXPECT_FALSE(MeasureDouble::Register("", "", "").IsValid());
 }
 
 TEST(MeasureRegistryTest, DuplicateRegistrationsFail) {
   const std::string name = MakeUniqueName();
   const std::string units = "units";
 
-  MeasureDouble measure = MeasureRegistry::RegisterDouble(name, units, "");
+  MeasureDouble measure = MeasureDouble::Register(name, "", units);
   ASSERT_TRUE(measure.IsValid());
 
   // Subsequent registrations should fail, regardless of type.
-  EXPECT_FALSE(MeasureRegistry::RegisterDouble(name, "", "").IsValid());
-  EXPECT_FALSE(MeasureRegistry::RegisterInt(name, "", "").IsValid());
+  EXPECT_FALSE(MeasureDouble::Register(name, "", "").IsValid());
+  EXPECT_FALSE(MeasureInt64::Register(name, "", "").IsValid());
 
   // The descriptor should not have been updated.
   EXPECT_EQ(units, measure.GetDescriptor().units());
@@ -81,11 +80,10 @@ TEST(MeasureRegistryTest, DuplicateRegistrationsFail) {
 
 TEST(MeasureRegistryTest, GetDescriptorByName) {
   const std::string name = MakeUniqueName();
-  const std::string units = "units";
   const std::string description = "description";
+  const std::string units = "units";
 
-  MeasureDouble measure =
-      MeasureRegistry::RegisterDouble(name, units, description);
+  MeasureDouble measure = MeasureDouble::Register(name, description, units);
   ASSERT_TRUE(measure.IsValid());
   EXPECT_EQ(measure.GetDescriptor(),
             MeasureRegistry::GetDescriptorByName(name));
@@ -101,7 +99,7 @@ TEST(MeasureRegistryTest, GetDescriptorByNameWithUnregisteredName) {
 
 TEST(MeasureRegistryTest, GetMeasureDoubleByName) {
   const std::string name = MakeUniqueName();
-  MeasureDouble measure1 = MeasureRegistry::RegisterDouble(name, "", "");
+  MeasureDouble measure1 = MeasureDouble::Register(name, "", "");
   ASSERT_TRUE(measure1.IsValid());
 
   MeasureDouble measure2 = MeasureRegistry::GetMeasureDoubleByName(name);
@@ -110,12 +108,12 @@ TEST(MeasureRegistryTest, GetMeasureDoubleByName) {
   EXPECT_EQ(measure1.GetDescriptor(), measure2.GetDescriptor());
 }
 
-TEST(MeasureRegistryTest, GetMeasureIntByName) {
+TEST(MeasureRegistryTest, GetMeasureInt64ByName) {
   const std::string name = MakeUniqueName();
-  MeasureInt measure1 = MeasureRegistry::RegisterInt(name, "", "");
+  MeasureInt64 measure1 = MeasureInt64::Register(name, "", "");
   ASSERT_TRUE(measure1.IsValid());
 
-  MeasureInt measure2 = MeasureRegistry::GetMeasureIntByName(name);
+  MeasureInt64 measure2 = MeasureRegistry::GetMeasureInt64ByName(name);
   ASSERT_TRUE(measure2.IsValid());
   EXPECT_EQ(measure1, measure2);
   EXPECT_EQ(measure1.GetDescriptor(), measure2.GetDescriptor());
@@ -126,20 +124,19 @@ TEST(MeasureRegistryTest, GetMeasureDoubleUnregisteredFails) {
       MeasureRegistry::GetMeasureDoubleByName(MakeUniqueName()).IsValid());
 }
 
-TEST(MeasureRegistryTest, GetMeasureIntUnregisteredFails) {
+TEST(MeasureRegistryTest, GetMeasureInt64UnregisteredFails) {
   EXPECT_FALSE(
-      MeasureRegistry::GetMeasureIntByName(MakeUniqueName()).IsValid());
+      MeasureRegistry::GetMeasureInt64ByName(MakeUniqueName()).IsValid());
 }
 
 TEST(MeasureRegistryTest, GetMeasureByNameWithWrongTypeFails) {
   const std::string double_name = MakeUniqueName();
   const std::string int_name = MakeUniqueName();
-  MeasureDouble measure_double =
-      MeasureRegistry::RegisterDouble(double_name, "", "");
-  MeasureInt measure_int = MeasureRegistry::RegisterInt(int_name, "", "");
+  MeasureDouble measure_double = MeasureDouble::Register(double_name, "", "");
+  MeasureInt64 measure_int = MeasureInt64::Register(int_name, "", "");
 
-  MeasureInt measure_double_mistyped =
-      MeasureRegistry::GetMeasureIntByName(double_name);
+  MeasureInt64 measure_double_mistyped =
+      MeasureRegistry::GetMeasureInt64ByName(double_name);
   EXPECT_FALSE(measure_double_mistyped.IsValid());
   EXPECT_NE(measure_double.GetDescriptor(),
             measure_double_mistyped.GetDescriptor());

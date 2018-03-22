@@ -20,24 +20,24 @@
 
 namespace opencensus {
 
-stats::MeasureInt RpcClientErrorCount();
+stats::MeasureInt64 RpcClientErrorCount();
 stats::MeasureDouble RpcClientRequestBytes();
 stats::MeasureDouble RpcClientResponseBytes();
 stats::MeasureDouble RpcClientRoundtripLatency();
 stats::MeasureDouble RpcClientServerElapsedTime();
-stats::MeasureInt RpcClientStartedCount();
-stats::MeasureInt RpcClientFinishedCount();
-stats::MeasureInt RpcClientRequestCount();
-stats::MeasureInt RpcClientResponseCount();
+stats::MeasureInt64 RpcClientStartedCount();
+stats::MeasureInt64 RpcClientFinishedCount();
+stats::MeasureInt64 RpcClientRequestCount();
+stats::MeasureInt64 RpcClientResponseCount();
 
-stats::MeasureInt RpcServerErrorCount();
+stats::MeasureInt64 RpcServerErrorCount();
 stats::MeasureDouble RpcServerRequestBytes();
 stats::MeasureDouble RpcServerResponseBytes();
 stats::MeasureDouble RpcServerServerElapsedTime();
-stats::MeasureInt RpcServerStartedCount();
-stats::MeasureInt RpcServerFinishedCount();
-stats::MeasureInt RpcServerRequestCount();
-stats::MeasureInt RpcServerResponseCount();
+stats::MeasureInt64 RpcServerStartedCount();
+stats::MeasureInt64 RpcServerFinishedCount();
+stats::MeasureInt64 RpcServerRequestCount();
+stats::MeasureInt64 RpcServerResponseCount();
 
 }  // namespace opencensus
 

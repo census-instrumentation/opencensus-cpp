@@ -31,6 +31,34 @@ namespace stats {
 template <typename MeasureT>
 class Measure final {
  public:
+  // Registers a MeasureDescriptor, returning a Measure that can be used to
+  // record values for or create views on that measure. Only one Measure may be
+  // registered under a certain name; subsequent registrations will fail,
+  // returning an invalid measure. Register* functions should only be called by
+  // the owner of a measure--other users should use GetMeasureByName. If there
+  // are multiple competing owners (e.g. for a generic resource such as "RPC
+  // latency" shared between RPC libraries) check whether the measure is
+  // registered with MeasureRegistry::GetMeasure*ByName before registering it.
+  //
+  // 'name' should be a globally unique identifier. It is recommended that this
+  //   be in the format "<domain>/<path>", e.g. "example.com/client/foo_usage".
+  // 'description' is a human-readable description of what the measure's
+  //   values represent.
+  // 'units' are the units of recorded values. The recommended grammar is:
+  //     - Expression = Component { "." Component } {"/" Component }
+  //     - Component = [ PREFIX ] UNIT [ Annotation ] | Annotation | "1"
+  //     - Annotation = "{" NAME "}"
+  //   For example, string “MBy{transmitted}/ms” stands for megabytes per
+  //   milliseconds, and the annotation transmitted inside {} is just a comment
+  //   of the unit.
+  //   By convention:
+  //     - Latencies are measures in milliseconds, denoted "ms".
+  //     - Sizes are measured in bytes, denoted "By".
+  //     - Dimensionless values have unit "1".
+  static Measure<MeasureT> Register(absl::string_view name,
+                                    absl::string_view description,
+                                    absl::string_view units);
+
   // Retrieves a copy of the Measure's descriptor. This is expensive, requiring
   // a lookup in the MeasureRegistry.
   const MeasureDescriptor& GetDescriptor() const;
@@ -51,7 +79,7 @@ class Measure final {
 };
 
 typedef Measure<double> MeasureDouble;
-typedef Measure<int64_t> MeasureInt;
+typedef Measure<int64_t> MeasureInt64;
 
 // Measurement is an immutable pair of a Measure and corresponding value to
 // record--refer to comments in recording.h for further information.
@@ -65,7 +93,7 @@ class Measurement final {
       : id_(measure.id_), value_double_(value) {}
   template <typename T, typename std::enable_if<
                             std::is_integral<T>::value>::type* = nullptr>
-  Measurement(MeasureInt measure, T value)
+  Measurement(MeasureInt64 measure, T value)
       : id_(measure.id_), value_int_(value) {}
 
  private:
@@ -82,7 +110,7 @@ class Measurement final {
 template <>
 bool MeasureDouble::IsValid() const;
 template <>
-bool MeasureInt::IsValid() const;
+bool MeasureInt64::IsValid() const;
 extern template class Measure<double>;
 extern template class Measure<int64_t>;
 

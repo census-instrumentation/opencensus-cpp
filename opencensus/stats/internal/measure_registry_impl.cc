@@ -18,6 +18,7 @@
 
 #include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/internal/stats_manager.h"
+#include "opencensus/stats/measure_descriptor.h"
 
 namespace opencensus {
 namespace stats {
@@ -41,11 +42,12 @@ MeasureRegistryImpl* MeasureRegistryImpl::Get() {
   return global_measure_registry_impl;
 }
 
-MeasureDouble MeasureRegistryImpl::RegisterDouble(
-    absl::string_view name, absl::string_view units,
-    absl::string_view description) {
+template <>
+MeasureDouble MeasureRegistryImpl::Register(absl::string_view name,
+                                            absl::string_view description,
+                                            absl::string_view units) {
   MeasureDouble measure(RegisterImpl(MeasureDescriptor(
-      name, units, description, MeasureDescriptor::Type::kDouble)));
+      name, description, units, MeasureDescriptor::Type::kDouble)));
   if (measure.IsValid()) {
     StatsManager::Get()->AddMeasure(measure);
     DeltaProducer::Get()->AddMeasure();
@@ -53,11 +55,12 @@ MeasureDouble MeasureRegistryImpl::RegisterDouble(
   return measure;
 }
 
-MeasureInt MeasureRegistryImpl::RegisterInt(absl::string_view name,
-                                            absl::string_view units,
-                                            absl::string_view description) {
-  MeasureInt measure(RegisterImpl(MeasureDescriptor(
-      name, units, description, MeasureDescriptor::Type::kInt64)));
+template <>
+MeasureInt64 MeasureRegistryImpl::Register(absl::string_view name,
+                                           absl::string_view description,
+                                           absl::string_view units) {
+  MeasureInt64 measure(RegisterImpl(MeasureDescriptor(
+      name, description, units, MeasureDescriptor::Type::kInt64)));
   if (measure.IsValid()) {
     StatsManager::Get()->AddMeasure(measure);
     DeltaProducer::Get()->AddMeasure();
@@ -109,15 +112,15 @@ MeasureDouble MeasureRegistryImpl::GetMeasureDoubleByName(
   }
 }
 
-MeasureInt MeasureRegistryImpl::GetMeasureIntByName(
+MeasureInt64 MeasureRegistryImpl::GetMeasureInt64ByName(
     absl::string_view name) const {
   absl::ReaderMutexLock l(&mu_);
   const auto it = id_map_.find(std::string(name));
   if (it == id_map_.end()) {
-    return MeasureInt(
+    return MeasureInt64(
         CreateMeasureId(0, false, MeasureDescriptor::Type::kDouble));
   } else {
-    return MeasureInt(it->second);
+    return MeasureInt64(it->second);
   }
 }
 

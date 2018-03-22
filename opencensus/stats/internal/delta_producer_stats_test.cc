@@ -16,7 +16,6 @@
 #include "gtest/gtest.h"
 #include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/measure.h"
-#include "opencensus/stats/measure_registry.h"
 #include "opencensus/stats/view.h"
 
 namespace opencensus {
@@ -27,14 +26,14 @@ constexpr char kFirstMeasureId[] = "first_measure_name";
 constexpr char kSecondMeasureId[] = "second_measure_name";
 
 MeasureDouble FirstMeasure() {
-  static MeasureDouble measure = MeasureRegistry::RegisterDouble(
-      kFirstMeasureId, "ops", "Usage of resource 1.");
+  static const auto measure =
+      MeasureDouble::Register(kFirstMeasureId, "Usage of resource 1.", "1");
   return measure;
 }
 
-MeasureInt SecondMeasure() {
-  static MeasureInt measure = MeasureRegistry::RegisterInt(
-      kSecondMeasureId, "ops", "Usage of resource 2.");
+MeasureInt64 SecondMeasure() {
+  static const auto measure =
+      MeasureInt64::Register(kSecondMeasureId, "Usage of resource 2.", "1");
   return measure;
 }
 
@@ -305,8 +304,7 @@ TEST(StatsManagerDeathTest, UnregisteredMeasure) {
   EXPECT_DEBUG_DEATH({ EXPECT_TRUE(view.GetData().int_data().empty()); }, "");
   // Even if we later register the measure and record data under it, the view
   // should still be invalid.
-  static MeasureDouble measure =
-      MeasureRegistry::RegisterDouble(measure_name, "", "");
+  static const auto measure = MeasureDouble::Register(measure_name, "", "");
   EXPECT_TRUE(measure.IsValid());
   ExperimentalDeltaProducerRecord({{measure, 1.0}});
   EXPECT_FALSE(view.IsValid());

@@ -24,7 +24,6 @@
 #include "opencensus/stats/distribution.h"
 #include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/internal/measure_data.h"
-#include "opencensus/stats/internal/measure_registry_impl.h"
 #include "opencensus/stats/internal/view_data_impl.h"
 #include "opencensus/stats/measure.h"
 #include "opencensus/stats/tag_key.h"
@@ -149,7 +148,7 @@ class StatsManager final {
 };
 
 extern template void StatsManager::AddMeasure(MeasureDouble measure);
-extern template void StatsManager::AddMeasure(MeasureInt measure);
+extern template void StatsManager::AddMeasure(MeasureInt64 measure);
 
 }  // namespace stats
 }  // namespace opencensus

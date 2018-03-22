@@ -89,6 +89,6 @@ values.
 
 The Stackdriver data type depends on the
 view's measure type and aggregation--count aggregation to `INT64`, sum
-aggregation to `INT64` for `MeasureInt` and `DOUBLE` for `MeasureDouble`, and
+aggregation to `INT64` for `MeasureInt64` and `DOUBLE` for `MeasureDouble`, and
 distribution aggregation to `DISTRIBUTION`. Exported distributions omit the
 range as it is not supported by Stackdriver.
