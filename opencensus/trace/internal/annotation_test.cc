@@ -15,14 +15,27 @@
 #include "opencensus/trace/exporter/annotation.h"
 
 #include <iostream>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "opencensus/trace/exporter/attribute_value.h"
+#include "absl/synchronization/mutex.h"
 
 namespace opencensus {
 namespace trace {
 namespace exporter {
 namespace {
+
+class ThreadUnsafe {
+ public:
+  void Add(int i) {
+    ints_.emplace_back(i);
+  }
+
+ private:
+  mutable absl::Mutex mu_;
+  std::vector<int> ints_ GUARDED_BY(mu_);
+};
 
 TEST(AnnotationTest, Description) {
   Annotation a("hello");
