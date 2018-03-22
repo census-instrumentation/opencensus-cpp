@@ -24,4 +24,5 @@ common:asan --cc_output_directory_tag=asan
 # --config=ubsan : Undefined Behavior Sanitizer.
 common:ubsan --copt -fsanitize=undefined
 common:ubsan --linkopt -fsanitize=undefined
+common:ubsan --linkopt -lubsan
 common:ubsan --cc_output_directory_tag=ubsan
