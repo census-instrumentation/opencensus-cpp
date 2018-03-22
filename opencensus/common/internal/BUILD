@@ -21,6 +21,12 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//opencensus:__subpackages__"])
 
 cc_library(
+    name = "hash_mix",
+    hdrs = ["hash_mix.h"],
+    copts = DEFAULT_COPTS,
+)
+
+cc_library(
     name = "random_lib",
     srcs = ["random.cc"],
     hdrs = ["random.h"],
