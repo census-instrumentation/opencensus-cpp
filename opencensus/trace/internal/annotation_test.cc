@@ -17,20 +17,18 @@
 #include <iostream>
 #include <vector>
 
+#include "absl/synchronization/mutex.h"
 #include "gtest/gtest.h"
 #include "opencensus/trace/exporter/attribute_value.h"
-#include "absl/synchronization/mutex.h"
 
 namespace opencensus {
 namespace trace {
 namespace exporter {
 namespace {
 
-class ThreadUnsafe {
+class ThreadUnsafe {  // xx
  public:
-  void Add(int i) {
-    ints_.emplace_back(i);
-  }
+  void Add(int i) { ints_.emplace_back(i); }
 
  private:
   mutable absl::Mutex mu_;
