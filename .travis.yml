@@ -3,7 +3,7 @@ os: linux
 dist: trusty
 sudo: false
 compiler: clang
-env: BAZEL_OPTIONS="--local_resources=4096,2,1.0 --copt=-Wthread-safety"
+env: BAZEL_OPTIONS="--local_resources=4096,2,1.0 --copt=-Werror=thread-safety"
 
 before_install:
   - tools/format.sh

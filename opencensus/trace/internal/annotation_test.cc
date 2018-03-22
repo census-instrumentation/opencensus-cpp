@@ -26,7 +26,7 @@ namespace trace {
 namespace exporter {
 namespace {
 
-class ThreadUnsafe {  // xx
+class ThreadUnsafe {  // xxxx
  public:
   void Add(int i) { ints_.emplace_back(i); }
 
