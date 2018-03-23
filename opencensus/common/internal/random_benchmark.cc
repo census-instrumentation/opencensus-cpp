@@ -12,24 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cstdint>
+#include <vector>
+
 #include "benchmark/benchmark.h"
 #include "opencensus/common/internal/random.h"
 
 namespace {
 
 void BM_GetRandom(benchmark::State& state) {
-  while (state.KeepRunning()) {
+  for (auto _ : state) {
     ::opencensus::common::Random::GetRandom();
   }
 }
 BENCHMARK(BM_GetRandom);
 
 void BM_Random64(benchmark::State& state) {
-  while (state.KeepRunning()) {
+  for (auto _ : state) {
     ::opencensus::common::Random::GetRandom()->GenerateRandom64();
   }
 }
 BENCHMARK(BM_Random64);
+
+void BM_RandomBuffer(benchmark::State& state) {
+  const size_t size = state.range(0);
+  std::vector<uint8_t> buffer(size);
+  for (auto _ : state) {
+    ::opencensus::common::Random::GetRandom()->GenerateRandomBuffer(
+        buffer.data(), size);
+  }
+}
+BENCHMARK(BM_RandomBuffer)->Range(1, 16);
 
 }  // namespace
 BENCHMARK_MAIN();
