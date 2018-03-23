@@ -224,8 +224,9 @@ TEST_F(StackdriverE2eTest, LargeTest) {
       count_matchers;
 
   // The number of values to record for each tag--total metric cardinality will
-  // be tag_values^2.
-  const int tag_values = 10;
+  // be tag_values^2. We want this high enough that uploads require multiple
+  // batches.
+  const int tag_values = 25;
   for (int i = 0; i < tag_values; ++i) {
     for (int j = 0; j < tag_values; ++j) {
       const std::string tag1 = absl::StrCat("v1", i);

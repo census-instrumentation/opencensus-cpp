@@ -31,7 +31,8 @@ namespace {
 
 constexpr char kGoogleStackdriverStatsAddress[] = "monitoring.googleapis.com";
 constexpr char kProjectIdPrefix[] = "projects/";
-constexpr int kTimeSeriesBatchSize = 3;
+// Stackdriver limits a single CreateTimeSeries request to 200 series.
+constexpr int kTimeSeriesBatchSize = 200;
 
 std::string ToString(const grpc::Status& status) {
   return absl::StrCat("status code ", status.error_code(), " details \"",
