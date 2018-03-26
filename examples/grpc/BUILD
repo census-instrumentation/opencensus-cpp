@@ -22,7 +22,6 @@ package(default_visibility = ["//visibility:private"])
 cc_grpc_library(
     name = "hello_proto",
     srcs = ["hello.proto"],
-    generate_mock = False,
     proto_only = False,
     use_external = True,
     well_known_protos = False,

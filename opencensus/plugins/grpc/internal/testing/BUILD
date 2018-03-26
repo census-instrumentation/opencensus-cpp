@@ -23,9 +23,8 @@ load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
 cc_grpc_library(
     name = "echo_proto",
     srcs = ["echo.proto"],
-    deps = [],
     proto_only = False,
-    well_known_protos = False,
-    generate_mock = False,
     use_external = True,
+    well_known_protos = False,
+    deps = [],
 )
