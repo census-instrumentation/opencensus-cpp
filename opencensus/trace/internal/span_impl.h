@@ -85,8 +85,10 @@ class SpanImpl final {
 
   void SetStatus(exporter::Status&& status) LOCKS_EXCLUDED(mu_);
 
-  // Marks the end of the Span and sets its end_time_.
-  void End() LOCKS_EXCLUDED(mu_);
+  // Returns true on success (if this is the first time the Span has ended) and
+  // also marks the end of the Span and sets its end_time_.
+  bool End() LOCKS_EXCLUDED(mu_);
+
   // Returns true if the span has ended.
   bool HasEnded() const LOCKS_EXCLUDED(mu_);
 
@@ -105,8 +107,6 @@ class SpanImpl final {
   friend class ::opencensus::trace::exporter::LocalSpanStoreImpl;
   friend class ::opencensus::trace::exporter::SpanExporterImpl;
   friend class ::opencensus::trace::SpanTestPeer;
-
-  void EndWithTime(absl::Time end_time) LOCKS_EXCLUDED(mu_);
 
   // Makes a deep copy of span contents and returns copied data in SpanData.
   exporter::SpanData ToSpanData() const LOCKS_EXCLUDED(mu_);

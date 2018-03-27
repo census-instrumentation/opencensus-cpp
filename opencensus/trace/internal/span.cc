@@ -202,12 +202,10 @@ void Span::SetStatus(StatusCode canonical_code, absl::string_view message) {
 
 void Span::End() {
   if (IsRecording()) {
-    if (span_impl_->HasEnded()) {
-      assert(false && "Invalid attempt to End() the same Span more than once.");
+    if (!span_impl_->End()) {
       // In non-debug builds, ignore the second End().
       return;
     }
-    span_impl_->End();
     exporter::RunningSpanStoreImpl::Get()->RemoveSpan(span_impl_);
     exporter::LocalSpanStoreImpl::Get()->AddSpan(span_impl_);
     exporter::SpanExporterImpl::Get()->AddSpan(span_impl_);
