@@ -7,9 +7,9 @@ env: BAZEL_OPTIONS="--local_resources=4096,2,1.0 --copt=-Werror=thread-safety"
 
 before_install:
   - tools/format.sh
-  - wget https://github.com/bazelbuild/bazel/releases/download/0.8.1/bazel-0.8.1-installer-linux-x86_64.sh
-  - chmod +x bazel-0.8.1-installer-linux-x86_64.sh
-  - ./bazel-0.8.1-installer-linux-x86_64.sh --user
+  - wget https://github.com/bazelbuild/bazel/releases/download/0.11.1/bazel-0.11.1-installer-linux-x86_64.sh
+  - chmod +x bazel-0.11.1-installer-linux-x86_64.sh
+  - ./bazel-0.11.1-installer-linux-x86_64.sh --user
 
 script:
   # We can't use --noshow_progress because Travis terminates the
