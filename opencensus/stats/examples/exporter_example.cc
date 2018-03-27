@@ -29,8 +29,8 @@ constexpr char kFooUsageMeasureName[] = "example.com/Foo/FooUsage";
 
 opencensus::stats::MeasureDouble FooUsage() {
   static const opencensus::stats::MeasureDouble foo_usage =
-      opencensus::stats::MeasureRegistry::RegisterDouble(
-          kFooUsageMeasureName, "foos", "Usage of foos.");
+      opencensus::stats::MeasureDouble::Register(kFooUsageMeasureName, "foos",
+                                                 "Usage of foos.");
   return foo_usage;
 }
 

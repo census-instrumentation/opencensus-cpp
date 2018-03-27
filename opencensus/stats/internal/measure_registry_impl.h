@@ -35,18 +35,17 @@ class MeasureRegistryImpl {
  public:
   static MeasureRegistryImpl* Get();
 
-  MeasureDouble RegisterDouble(absl::string_view name, absl::string_view units,
-                               absl::string_view description)
-      LOCKS_EXCLUDED(mu_);
-  MeasureInt RegisterInt(absl::string_view name, absl::string_view units,
-                         absl::string_view description) LOCKS_EXCLUDED(mu_);
+  template <typename MeasureT>
+  Measure<MeasureT> Register(absl::string_view name,
+                             absl::string_view description,
+                             absl::string_view units) LOCKS_EXCLUDED(mu_);
 
   const MeasureDescriptor& GetDescriptorByName(absl::string_view name) const
       LOCKS_EXCLUDED(mu_);
 
   MeasureDouble GetMeasureDoubleByName(absl::string_view name) const
       LOCKS_EXCLUDED(mu_);
-  MeasureInt GetMeasureIntByName(absl::string_view name) const
+  MeasureInt64 GetMeasureInt64ByName(absl::string_view name) const
       LOCKS_EXCLUDED(mu_);
 
   // The following methods are for internal use by the library, and not exposed
@@ -81,6 +80,16 @@ class MeasureRegistryImpl {
   // A map from measure names to IDs.
   std::unordered_map<std::string, uint64_t> id_map_ GUARDED_BY(mu_);
 };
+
+template <>
+MeasureDouble MeasureRegistryImpl::Register(absl::string_view name,
+                                            absl::string_view description,
+                                            absl::string_view units);
+
+template <>
+MeasureInt64 MeasureRegistryImpl::Register(absl::string_view name,
+                                           absl::string_view description,
+                                           absl::string_view units);
 
 template <typename MeasureT>
 const MeasureDescriptor& MeasureRegistryImpl::GetDescriptor(

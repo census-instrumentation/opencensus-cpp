@@ -22,7 +22,6 @@
 #include "opencensus/stats/internal/aggregation_window.h"
 #include "opencensus/stats/internal/set_aggregation_window.h"
 #include "opencensus/stats/measure.h"
-#include "opencensus/stats/measure_registry.h"
 #include "opencensus/stats/recording.h"
 #include "opencensus/stats/view.h"
 #include "opencensus/stats/view_descriptor.h"
@@ -76,7 +75,7 @@ void BM_Record(benchmark::State& state) {
   const TagKey tag_key_1 = TagKey::Register("tag_key_1");
   const TagKey tag_key_2 = TagKey::Register("tag_key_2");
   const std::string measure_name = MakeUniqueName();
-  MeasureDouble measure = MeasureRegistry::RegisterDouble(measure_name, "", "");
+  MeasureDouble measure = MeasureDouble::Register(measure_name, "", "");
   std::vector<std::unique_ptr<View>> views;
   for (int i = 0; i < state.range(0); ++i) {
     // This tag key is necessary to prevent these from being merged by
@@ -126,7 +125,7 @@ void BM_RecordBatched(benchmark::State& state) {
   std::vector<std::unique_ptr<View>> views;
   for (int i = 0; i < num_measures; ++i) {
     const std::string measure_name = MakeUniqueName();
-    measures.push_back(MeasureRegistry::RegisterDouble(measure_name, "", ""));
+    measures.push_back(MeasureDouble::Register(measure_name, "", ""));
 
     const ViewDescriptor count_descriptor =
         ViewDescriptor()

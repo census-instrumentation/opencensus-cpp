@@ -26,7 +26,6 @@
 #include "opencensus/stats/internal/set_aggregation_window.h"
 #include "opencensus/stats/measure.h"
 #include "opencensus/stats/measure_descriptor.h"
-#include "opencensus/stats/measure_registry.h"
 #include "opencensus/stats/view_descriptor.h"
 
 namespace opencensus {
@@ -60,8 +59,7 @@ class MockExporter : public StatsExporter::Handler {
 constexpr char kMeasureId[] = "test_measure_id";
 
 MeasureDouble TestMeasure() {
-  static MeasureDouble measure =
-      MeasureRegistry::RegisterDouble(kMeasureId, "ops", "");
+  static MeasureDouble measure = MeasureDouble::Register(kMeasureId, "", "1");
   return measure;
 }
 

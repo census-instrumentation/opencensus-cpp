@@ -51,8 +51,8 @@ constexpr char kGoogleStackdriverStatsAddress[] = "monitoring.googleapis.com";
 constexpr char kTestMeasureName[] = "opencensus.io/TestMeasure";
 opencensus::stats::MeasureDouble TestMeasure() {
   static const opencensus::stats::MeasureDouble foo_usage =
-      opencensus::stats::MeasureRegistry::RegisterDouble(
-          kTestMeasureName, "1{test units}", "Test measure.");
+      opencensus::stats::MeasureDouble::Register(
+          kTestMeasureName, "Test measure.", "1{test units}");
   return foo_usage;
 }
 

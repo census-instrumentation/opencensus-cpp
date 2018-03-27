@@ -20,20 +20,6 @@ namespace opencensus {
 namespace stats {
 
 // static
-MeasureDouble MeasureRegistry::RegisterDouble(absl::string_view name,
-                                              absl::string_view units,
-                                              absl::string_view description) {
-  return MeasureRegistryImpl::Get()->RegisterDouble(name, units, description);
-}
-
-// static
-MeasureInt MeasureRegistry::RegisterInt(absl::string_view name,
-                                        absl::string_view units,
-                                        absl::string_view description) {
-  return MeasureRegistryImpl::Get()->RegisterInt(name, units, description);
-}
-
-// static
 const MeasureDescriptor& MeasureRegistry::GetDescriptorByName(
     absl::string_view name) {
   return MeasureRegistryImpl::Get()->GetDescriptorByName(name);
@@ -45,8 +31,8 @@ MeasureDouble MeasureRegistry::GetMeasureDoubleByName(absl::string_view name) {
 }
 
 // static
-MeasureInt MeasureRegistry::GetMeasureIntByName(absl::string_view name) {
-  return MeasureRegistryImpl::Get()->GetMeasureIntByName(name);
+MeasureInt64 MeasureRegistry::GetMeasureInt64ByName(absl::string_view name) {
+  return MeasureRegistryImpl::Get()->GetMeasureInt64ByName(name);
 }
 
 }  // namespace stats
