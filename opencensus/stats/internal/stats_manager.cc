@@ -15,8 +15,10 @@
 #include "opencensus/stats/internal/stats_manager.h"
 
 #include <iostream>
+#include <memory>
 
 #include "absl/base/macros.h"
+#include "absl/memory/memory.h"
 #include "absl/time/time.h"
 
 namespace opencensus {
@@ -73,12 +75,15 @@ void StatsManager::ViewInformation::Record(
   data_.Add(value, tag_values, now);
 }
 
-ViewDataImpl StatsManager::ViewInformation::GetData() const {
+std::unique_ptr<ViewDataImpl> StatsManager::ViewInformation::GetData() {
   absl::ReaderMutexLock l(mu_);
   if (data_.type() == ViewDataImpl::Type::kStatsObject) {
-    return ViewDataImpl(data_, absl::Now());
+    return absl::make_unique<ViewDataImpl>(data_, absl::Now());
+  } else if (descriptor_.aggregation_window_.type() ==
+             AggregationWindow::Type::kDelta) {
+    return data_.GetDeltaAndReset(absl::Now());
   } else {
-    return data_;
+    return absl::make_unique<ViewDataImpl>(data_);
   }
 }
 

@@ -16,7 +16,9 @@
 
 #include <cstdint>
 #include <iostream>
+#include <memory>
 
+#include "absl/memory/memory.h"
 #include "opencensus/stats/distribution.h"
 
 namespace opencensus {
@@ -26,6 +28,7 @@ ViewDataImpl::Type ViewDataImpl::TypeForDescriptor(
     const ViewDescriptor& descriptor) {
   switch (descriptor.aggregation_window_.type()) {
     case AggregationWindow::Type::kCumulative:
+    case AggregationWindow::Type::kDelta:
       switch (descriptor.aggregation().type()) {
         case Aggregation::Type::kSum:
           return ViewDataImpl::Type::kDouble;
@@ -123,6 +126,11 @@ ViewDataImpl::~ViewDataImpl() {
   }
 }
 
+std::unique_ptr<ViewDataImpl> ViewDataImpl::GetDeltaAndReset(absl::Time now) {
+  // Need to use wrap_unique because this is a private constructor.
+  return absl::WrapUnique(new ViewDataImpl(this, now));
+}
+
 ViewDataImpl::ViewDataImpl(const ViewDataImpl& other)
     : aggregation_(other.aggregation_),
       aggregation_window_(other.aggregation_window_),
@@ -199,6 +207,39 @@ void ViewDataImpl::Add(double value, const std::vector<std::string>& tag_values,
       }
     }
   }
+}
+
+ViewDataImpl::ViewDataImpl(ViewDataImpl* source, absl::Time now)
+    : aggregation_(source->aggregation_),
+      aggregation_window_(source->aggregation_window_),
+      type_(source->type_),
+      start_time_(source->start_time_),
+      end_time_(now) {
+  switch (type_) {
+    case Type::kDouble: {
+      new (&double_data_) DataMap<double>();
+      double_data_.swap(source->double_data_);
+      break;
+    }
+    case Type::kInt64: {
+      new (&int_data_) DataMap<int64_t>();
+      int_data_.swap(source->int_data_);
+      break;
+    }
+    case Type::kDistribution: {
+      new (&distribution_data_) DataMap<Distribution>();
+      distribution_data_.swap(source->distribution_data_);
+      break;
+    }
+    case Type::kStatsObject: {
+      std::cerr << "GetDeltaAndReset should not be called on ViewDataImpl for "
+                   "interval stats.";
+      ABSL_ASSERT(0);
+      break;
+    }
+  }
+  source->start_time_ = now;
+  source->end_time_ = now;
 }
 
 }  // namespace stats

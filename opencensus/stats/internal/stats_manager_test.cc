@@ -136,6 +136,37 @@ TEST_F(StatsManagerTest, Distribution) {
               ::testing::ElementsAre(1, 0));
 }
 
+TEST_F(StatsManagerTest, Delta) {
+  ViewDescriptor view_descriptor = ViewDescriptor()
+                                       .set_measure(kFirstMeasureId)
+                                       .set_name("delta")
+                                       .set_aggregation(Aggregation::Count())
+                                       .add_column(key1_)
+                                       .add_column(key2_);
+  SetAggregationWindow(AggregationWindow::Delta(), &view_descriptor);
+  View view(view_descriptor);
+  ASSERT_EQ(ViewData::Type::kInt64, view.GetData().type());
+  EXPECT_TRUE(view.GetData().int_data().empty());
+  // Stats under a different measure should be ignored.
+  Record({{SecondMeasure(), 1}}, {});
+  EXPECT_TRUE(view.GetData().int_data().empty());
+
+  Record({{FirstMeasure(), 2.0}}, {});
+  Record({{FirstMeasure(), 3.0}}, {});
+  Record({{FirstMeasure(), 4.0}},
+         {{key1_, "value1"}, {key2_, "value2"}, {key3_, "value3"}});
+  EXPECT_THAT(
+      view.GetData().int_data(),
+      ::testing::UnorderedElementsAre(
+          ::testing::Pair(::testing::ElementsAre("", ""), 2),
+          ::testing::Pair(::testing::ElementsAre("value1", "value2"), 1)));
+
+  Record({{FirstMeasure(), 4.0}}, {{key1_, "new_value"}});
+  EXPECT_THAT(view.GetData().int_data(),
+              ::testing::UnorderedElementsAre(
+                  ::testing::Pair(::testing::ElementsAre("new_value", ""), 1)));
+}
+
 // TODO: Test window expiration if we add a simulated clock.
 TEST_F(StatsManagerTest, IntervalCount) {
   ViewDescriptor view_descriptor = ViewDescriptor()

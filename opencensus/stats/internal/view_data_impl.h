@@ -15,6 +15,7 @@
 #ifndef OPENCENSUS_STATS_INTERNAL_VIEW_DATA_IMPL_H_
 #define OPENCENSUS_STATS_INTERNAL_VIEW_DATA_IMPL_H_
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -62,6 +63,10 @@ class ViewDataImpl {
   ViewDataImpl(const ViewDataImpl& other);
   ~ViewDataImpl();
 
+  // Returns a copy of the present state of the object and resets data() and
+  // start_time().
+  std::unique_ptr<ViewDataImpl> GetDeltaAndReset(absl::Time now);
+
   const Aggregation& aggregation() const { return aggregation_; }
   const AggregationWindow& aggregation_window() const {
     return aggregation_window_;
@@ -108,6 +113,11 @@ class ViewDataImpl {
            absl::Time now);
 
  private:
+  // Implements GetDeltaAndReset(), copying aggregation_ and swapping data_ and
+  // start/end times. This is private so that it can be given a more descriptive
+  // name in the public API.
+  ViewDataImpl(ViewDataImpl* source, absl::Time now);
+
   Type TypeForDescriptor(const ViewDescriptor& descriptor);
 
   const Aggregation aggregation_;

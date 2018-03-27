@@ -61,7 +61,7 @@ class StatsManager final {
         absl::Time now);
 
     // Retrieves a copy of the data.
-    ViewDataImpl GetData() const LOCKS_EXCLUDED(*mu_);
+    std::unique_ptr<ViewDataImpl> GetData() LOCKS_EXCLUDED(*mu_);
 
     const ViewDescriptor& view_descriptor() const { return descriptor_; }
 

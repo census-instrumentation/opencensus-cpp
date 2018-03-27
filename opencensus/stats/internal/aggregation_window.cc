@@ -23,6 +23,8 @@ std::string AggregationWindow::DebugString() const {
   switch (type_) {
     case Type::kCumulative:
       return "Cumulative";
+    case Type::kDelta:
+      return "Delta";
     case Type::kInterval:
       return absl::StrCat("Interval (", absl::ToDoubleSeconds(duration_),
                           "s window)");
