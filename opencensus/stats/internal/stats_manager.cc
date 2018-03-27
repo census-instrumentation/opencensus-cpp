@@ -20,6 +20,10 @@
 #include "absl/base/macros.h"
 #include "absl/memory/memory.h"
 #include "absl/time/time.h"
+#include "opencensus/stats/aggregation.h"
+#include "opencensus/stats/bucket_boundaries.h"
+#include "opencensus/stats/internal/delta_producer.h"
+#include "opencensus/stats/view_descriptor.h"
 
 namespace opencensus {
 namespace stats {
@@ -178,6 +182,10 @@ StatsManager::ViewInformation* StatsManager::AddConsumer(
     return nullptr;
   }
   const uint64_t index = MeasureRegistryImpl::IdToIndex(descriptor.measure_id_);
+  if (descriptor.aggregation().type() == Aggregation::Type::kDistribution) {
+    DeltaProducer::Get()->AddBoundaries(
+        index, descriptor.aggregation().bucket_boundaries());
+  }
   return measures_[index].AddConsumer(descriptor);
 }
 

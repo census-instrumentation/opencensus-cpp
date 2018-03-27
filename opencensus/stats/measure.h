@@ -70,6 +70,7 @@ class Measurement final {
 
  private:
   friend class StatsManager;
+  friend class Delta;
 
   const uint64_t id_;
   union {

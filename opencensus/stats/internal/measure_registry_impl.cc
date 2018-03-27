@@ -16,6 +16,7 @@
 
 #include <iostream>
 
+#include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/internal/stats_manager.h"
 
 namespace opencensus {
@@ -47,6 +48,7 @@ MeasureDouble MeasureRegistryImpl::RegisterDouble(
       name, units, description, MeasureDescriptor::Type::kDouble)));
   if (measure.IsValid()) {
     StatsManager::Get()->AddMeasure(measure);
+    DeltaProducer::Get()->AddMeasure();
   }
   return measure;
 }
@@ -58,6 +60,7 @@ MeasureInt MeasureRegistryImpl::RegisterInt(absl::string_view name,
       name, units, description, MeasureDescriptor::Type::kInt64)));
   if (measure.IsValid()) {
     StatsManager::Get()->AddMeasure(measure);
+    DeltaProducer::Get()->AddMeasure();
   }
   return measure;
 }
