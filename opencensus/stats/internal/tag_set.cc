@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
+#include "opencensus/common/internal/hash_mix.h"
 
 namespace opencensus {
 namespace stats {
@@ -44,18 +45,12 @@ void TagSet::Initialize() {
   std::sort(tags_.begin(), tags_.end());
 
   std::hash<std::string> hasher;
-  hash_ = 1;
+  common::HashMix mixer;
   for (const auto& tag : tags_) {
-    static const size_t kMul = static_cast<size_t>(0xdc3eb94af8ab4c93ULL);
-    hash_ *= kMul;
-    hash_ = ((hash_ << 19) |
-             (hash_ >> (std::numeric_limits<size_t>::digits - 19))) +
-            hasher(tag.first);
-    hash_ *= kMul;
-    hash_ = ((hash_ << 19) |
-             (hash_ >> (std::numeric_limits<size_t>::digits - 19))) +
-            hasher(tag.second);
+    mixer.Mix(hasher(tag.first));
+    mixer.Mix(hasher(tag.second));
   }
+  hash_ = mixer.get();
 }
 
 std::size_t TagSet::Hash::operator()(const TagSet& tag_set) const {

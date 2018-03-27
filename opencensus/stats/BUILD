@@ -96,6 +96,7 @@ cc_library(
     ],
     copts = DEFAULT_COPTS,
     deps = [
+        "//opencensus/common/internal:hash_mix",
         "//opencensus/common/internal:stats_object",
         "//opencensus/common/internal:string_vector_hash",
         "@com_google_absl//absl/base:core_headers",

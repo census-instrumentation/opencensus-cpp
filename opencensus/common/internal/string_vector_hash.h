@@ -16,9 +16,10 @@
 #define OPENCENSUS_COMMON_INTERNAL_STRING_VECTOR_HASH_H_
 
 #include <functional>
-#include <limits>
 #include <string>
 #include <vector>
+
+#include "opencensus/common/internal/hash_mix.h"
 
 namespace opencensus {
 namespace common {
@@ -26,15 +27,11 @@ namespace common {
 struct StringVectorHash {
   std::size_t operator()(const std::vector<std::string>& container) const {
     std::hash<std::string> hasher;
-    size_t hash = 1;
+    HashMix mixer;
     for (const auto& elem : container) {
-      static const size_t kMul = static_cast<size_t>(0xdc3eb94af8ab4c93ULL);
-      hash *= kMul;
-      hash = ((hash << 19) |
-              (hash >> (std::numeric_limits<size_t>::digits - 19))) +
-             hasher(elem);
+      mixer.Mix(hasher(elem));
     }
-    return hash;
+    return mixer.get();
   }
 };
 
