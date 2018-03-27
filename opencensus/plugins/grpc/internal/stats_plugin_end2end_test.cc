@@ -26,6 +26,7 @@
 #include "opencensus/plugins/grpc/grpc_plugin.h"
 #include "opencensus/plugins/grpc/internal/testing/echo.grpc.pb.h"
 #include "opencensus/stats/stats.h"
+#include "opencensus/stats/testing/test_utils.h"
 
 namespace opencensus {
 namespace testing {
@@ -129,6 +130,7 @@ TEST_F(StatsPluginEnd2EndTest, ErrorCount) {
     ::grpc::Status status = stub_->Echo(&context, request, &response);
   }
   absl::SleepFor(absl::Milliseconds(500));
+  stats::testing::TestUtils::Flush();
 
   EXPECT_THAT(client_method_view.GetData().double_data(),
               ::testing::UnorderedElementsAre(::testing::Pair(
@@ -179,6 +181,7 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseBytes) {
     EXPECT_EQ("foo", response.message());
   }
   absl::SleepFor(absl::Milliseconds(500));
+  stats::testing::TestUtils::Flush();
 
   EXPECT_THAT(
       client_request_bytes_view.GetData().distribution_data(),
@@ -232,6 +235,7 @@ TEST_F(StatsPluginEnd2EndTest, Latency) {
   const double max_time = absl::ToDoubleMilliseconds(absl::Now() - start_time);
 
   absl::SleepFor(absl::Milliseconds(500));
+  stats::testing::TestUtils::Flush();
 
   EXPECT_THAT(
       client_latency_view.GetData().distribution_data(),
@@ -292,6 +296,7 @@ TEST_F(StatsPluginEnd2EndTest, StartFinishCount) {
       EXPECT_EQ("foo", response.message());
     }
     absl::SleepFor(absl::Milliseconds(500));
+    stats::testing::TestUtils::Flush();
 
     EXPECT_THAT(client_started_count_view.GetData().double_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(
@@ -327,6 +332,7 @@ TEST_F(StatsPluginEnd2EndTest, RequestResponseCount) {
       EXPECT_EQ("foo", response.message());
     }
     absl::SleepFor(absl::Milliseconds(500));
+    stats::testing::TestUtils::Flush();
 
     EXPECT_THAT(client_request_count_view.GetData().distribution_data(),
                 ::testing::UnorderedElementsAre(::testing::Pair(

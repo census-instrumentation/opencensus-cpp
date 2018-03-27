@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "absl/types/optional.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/measure.h"
 #include "opencensus/stats/recording.h"
 #include "opencensus/stats/tag_key.h"
+#include "opencensus/stats/testing/test_utils.h"
 #include "opencensus/stats/view.h"
 
 namespace opencensus {
@@ -28,13 +29,13 @@ constexpr char kFirstMeasureId[] = "first_measure_name";
 constexpr char kSecondMeasureId[] = "second_measure_name";
 
 MeasureDouble FirstMeasure() {
-  static MeasureDouble measure =
+  static const auto measure =
       MeasureDouble::Register(kFirstMeasureId, "Usage of resource 1.", "1");
   return measure;
 }
 
 MeasureInt64 SecondMeasure() {
-  static MeasureInt64 measure =
+  static const auto measure =
       MeasureInt64::Register(kSecondMeasureId, "Usage of resource 2.", "1");
   return measure;
 }
@@ -47,6 +48,7 @@ class StatsManagerTest : public ::testing::Test {
     // Access measures to be sure they are initialized.
     FirstMeasure();
     SecondMeasure();
+    testing::TestUtils::Flush();
   }
 
   const TagKey key1_ = TagKey::Register("key1");
@@ -67,11 +69,13 @@ TEST_F(StatsManagerTest, Count) {
 
   // Stats under a different measure should be ignored.
   Record({{SecondMeasure(), 1}});
+  testing::TestUtils::Flush();
   EXPECT_TRUE(view.GetData().int_data().empty());
 
   Record({{FirstMeasure(), 2.0}, {FirstMeasure(), 3.0}});
   Record({{FirstMeasure(), 4.0}},
          {{key1_, "value1"}, {key2_, "value2"}, {key3_, "value3"}});
+  testing::TestUtils::Flush();
   const opencensus::stats::ViewData data = view.GetData();
   EXPECT_THAT(
       data.int_data(),
@@ -93,11 +97,13 @@ TEST_F(StatsManagerTest, Sum) {
 
   // Stats under a different measure should be ignored.
   Record({{FirstMeasure(), 1.0}});
+  testing::TestUtils::Flush();
   EXPECT_TRUE(view.GetData().double_data().empty());
 
   Record({{SecondMeasure(), 2}, {SecondMeasure(), 3}});
   Record({{SecondMeasure(), 4}},
          {{key1_, "value1"}, {key2_, "value2"}, {key3_, "value3"}});
+  testing::TestUtils::Flush();
   const opencensus::stats::ViewData data = view.GetData();
   EXPECT_THAT(
       data.double_data(),
@@ -121,11 +127,13 @@ TEST_F(StatsManagerTest, Distribution) {
 
   // Stats under a different measure should be ignored.
   Record({{FirstMeasure(), 1.0}});
+  testing::TestUtils::Flush();
   EXPECT_TRUE(view.GetData().distribution_data().empty());
 
   Record({{SecondMeasure(), 5}, {SecondMeasure(), 15}});
   Record({{SecondMeasure(), 5}},
          {{key1_, "value1"}, {key2_, "value2"}, {key3_, "value3"}});
+  testing::TestUtils::Flush();
   const opencensus::stats::ViewData data = view.GetData();
   EXPECT_EQ(2, data.distribution_data().size());
   EXPECT_THAT(data.distribution_data().find({"", ""})->second.bucket_counts(),
@@ -149,12 +157,14 @@ TEST_F(StatsManagerTest, Delta) {
   EXPECT_TRUE(view.GetData().int_data().empty());
   // Stats under a different measure should be ignored.
   Record({{SecondMeasure(), 1}}, {});
+  testing::TestUtils::Flush();
   EXPECT_TRUE(view.GetData().int_data().empty());
 
   Record({{FirstMeasure(), 2.0}}, {});
   Record({{FirstMeasure(), 3.0}}, {});
   Record({{FirstMeasure(), 4.0}},
          {{key1_, "value1"}, {key2_, "value2"}, {key3_, "value3"}});
+  testing::TestUtils::Flush();
   EXPECT_THAT(
       view.GetData().int_data(),
       ::testing::UnorderedElementsAre(
@@ -162,6 +172,7 @@ TEST_F(StatsManagerTest, Delta) {
           ::testing::Pair(::testing::ElementsAre("value1", "value2"), 1)));
 
   Record({{FirstMeasure(), 4.0}}, {{key1_, "new_value"}});
+  testing::TestUtils::Flush();
   EXPECT_THAT(view.GetData().int_data(),
               ::testing::UnorderedElementsAre(
                   ::testing::Pair(::testing::ElementsAre("new_value", ""), 1)));
@@ -183,11 +194,13 @@ TEST_F(StatsManagerTest, IntervalCount) {
 
   // Stats under a different measure should be ignored.
   Record({{SecondMeasure(), 1}});
+  testing::TestUtils::Flush();
   EXPECT_TRUE(view.GetData().double_data().empty());
 
   Record({{FirstMeasure(), 2.0}, {FirstMeasure(), 3.0}});
   Record({{FirstMeasure(), 4.0}},
          {{key1_, "value1"}, {key2_, "value2"}, {key3_, "value3"}});
+  testing::TestUtils::Flush();
   const opencensus::stats::ViewData data = view.GetData();
   EXPECT_THAT(
       data.double_data(),
@@ -211,11 +224,13 @@ TEST_F(StatsManagerTest, IntervalSum) {
 
   // Stats under a different measure should be ignored.
   Record({{FirstMeasure(), 1.0}});
+  testing::TestUtils::Flush();
   EXPECT_TRUE(view.GetData().double_data().empty());
 
   Record({{SecondMeasure(), 2}, {SecondMeasure(), 3}});
   Record({{SecondMeasure(), 4}},
          {{key1_, "value1"}, {key2_, "value2"}, {key3_, "value3"}});
+  testing::TestUtils::Flush();
   const opencensus::stats::ViewData data = view.GetData();
   EXPECT_THAT(
       data.double_data(),
@@ -241,11 +256,13 @@ TEST_F(StatsManagerTest, IntervalDistribution) {
 
   // Stats under a different measure should be ignored.
   Record({{FirstMeasure(), 1.0}});
+  testing::TestUtils::Flush();
   EXPECT_TRUE(view.GetData().distribution_data().empty());
 
   Record({{SecondMeasure(), 5}, {SecondMeasure(), 15}});
   Record({{SecondMeasure(), 5}},
          {{key1_, "value1"}, {key2_, "value2"}, {key3_, "value3"}});
+  testing::TestUtils::Flush();
   const opencensus::stats::ViewData data = view.GetData();
   EXPECT_EQ(2, data.distribution_data().size());
   EXPECT_EQ(std::vector<uint64_t>({1, 1}),
@@ -263,11 +280,14 @@ TEST_F(StatsManagerTest, IdenticalViews) {
                                        .add_column(key1_);
 
   Record({{FirstMeasure(), 1.0}});
+  testing::TestUtils::Flush();
   {
     View view1(view_descriptor);
     // No data should be recorded from before the first view is created.
+    testing::TestUtils::Flush();
     EXPECT_TRUE(view1.GetData().int_data().empty());
     Record({{FirstMeasure(), 1.0}});
+    testing::TestUtils::Flush();
     EXPECT_THAT(view1.GetData().int_data(),
                 ::testing::UnorderedElementsAre(
                     ::testing::Pair(::testing::ElementsAre(""), 1)));
@@ -275,6 +295,7 @@ TEST_F(StatsManagerTest, IdenticalViews) {
       View view2(view_descriptor);
       Record({{FirstMeasure(), 1.0}});
       // Second views should mirror the data of the first.
+      testing::TestUtils::Flush();
       EXPECT_THAT(view1.GetData().int_data(),
                   ::testing::UnorderedElementsAre(
                       ::testing::Pair(::testing::ElementsAre(""), 2)));
@@ -283,6 +304,7 @@ TEST_F(StatsManagerTest, IdenticalViews) {
                       ::testing::Pair(::testing::ElementsAre(""), 2)));
     }
     // Removing the second view should not affect data from the first.
+    testing::TestUtils::Flush();
     EXPECT_THAT(view1.GetData().int_data(),
                 ::testing::UnorderedElementsAre(
                     ::testing::Pair(::testing::ElementsAre(""), 2)));
@@ -290,6 +312,7 @@ TEST_F(StatsManagerTest, IdenticalViews) {
   // A view created after deconstructing all previous views should have data
   // reset.
   View view(view_descriptor);
+  testing::TestUtils::Flush();
   EXPECT_TRUE(view.GetData().int_data().empty());
 }
 
@@ -302,15 +325,17 @@ TEST(StatsManagerDeathTest, UnregisteredMeasure) {
 
   View view(view_descriptor);
   EXPECT_FALSE(view.IsValid());
+  testing::TestUtils::Flush();
   // Getting data from an invalid view DCHECKs, and returns empty data in opt
   // mode.
   EXPECT_DEBUG_DEATH({ EXPECT_TRUE(view.GetData().int_data().empty()); }, "");
   // Even if we later register the measure and record data under it, the view
   // should still be invalid.
-  static MeasureDouble measure = MeasureDouble::Register(measure_name, "", "");
+  static const auto measure = MeasureDouble::Register(measure_name, "", "");
   EXPECT_TRUE(measure.IsValid());
   Record({{measure, 1.0}});
   EXPECT_FALSE(view.IsValid());
+  testing::TestUtils::Flush();
   EXPECT_DEBUG_DEATH({ EXPECT_TRUE(view.GetData().int_data().empty()); }, "");
 }
 

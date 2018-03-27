@@ -70,6 +70,7 @@ cc_test(
         ":grpc_plugin",
         "//opencensus/plugins/grpc/internal/testing:echo_proto",
         "//opencensus/stats",
+        "//opencensus/stats:test_utils",
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
