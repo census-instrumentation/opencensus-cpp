@@ -17,9 +17,7 @@
 #include "absl/time/clock.h"
 #include "gtest/gtest.h"
 #include "opencensus/trace/exporter/annotation.h"
-#include "opencensus/trace/exporter/local_span_store.h"
 #include "opencensus/trace/span.h"
-//#include "opencensus/trace/exporter/attribute_value.h"
 
 namespace opencensus {
 namespace exporters {
