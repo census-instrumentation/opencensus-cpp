@@ -24,7 +24,7 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "zipkin_exporter",
     srcs = [
-        "zipkin_exporter.cc",
+        "internal/zipkin_exporter.cc",
     ],
     hdrs = [
         "zipkin_exporter.h",
@@ -45,7 +45,7 @@ cc_library(
 
 cc_test(
     name = "zipkin_exporter_test",
-    srcs = ["zipkin_exporter_test.cc"],
+    srcs = ["internal/zipkin_exporter_test.cc"],
     copts = TEST_COPTS,
     deps = [
         ":zipkin_exporter",

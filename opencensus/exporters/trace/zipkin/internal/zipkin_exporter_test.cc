@@ -16,8 +16,10 @@
 
 #include "absl/time/clock.h"
 #include "gtest/gtest.h"
+#include "opencensus/trace/exporter/annotation.h"
 #include "opencensus/trace/exporter/local_span_store.h"
 #include "opencensus/trace/span.h"
+//#include "opencensus/trace/exporter/attribute_value.h"
 
 namespace opencensus {
 namespace exporters {
@@ -28,9 +30,8 @@ class ZipkinExporterTestPeer : public ::testing::Test {
   ZipkinExporterTestPeer() {}
 
   void Export(
-      const ZipkinExporterOptions &options,
       const std::vector<::opencensus::trace::exporter::SpanData> &spans) {
-    ZipkinExporter::ExportForTesting(options, spans);
+    ZipkinExporter::ExportForTesting(spans);
   }
 };
 
@@ -40,8 +41,11 @@ TEST_F(ZipkinExporterTestPeer, ExportTrace) {
 
   auto span1 = ::opencensus::trace::Span::StartSpan("Span1", nullptr, opts);
   absl::SleepFor(absl::Milliseconds(100));
+  span1.AddAnnotation("Annotation1", {{"TestBool", true}});
   auto span2 = ::opencensus::trace::Span::StartSpan("Span2", &span1, opts);
   absl::SleepFor(absl::Milliseconds(200));
+  span2.AddAnnotation("Annotation2",
+                      {{"TestString", "Test"}, {"TestInt", 123}});
   auto span3 = ::opencensus::trace::Span::StartSpan("Span3", &span2, opts);
   absl::SleepFor(absl::Milliseconds(300));
   span3.End();
@@ -50,8 +54,7 @@ TEST_F(ZipkinExporterTestPeer, ExportTrace) {
   std::vector<::opencensus::trace::exporter::SpanData> spans =
       ::opencensus::trace::exporter::LocalSpanStore::GetSpans();
 
-  ZipkinExporterOptions options("testurl:1234");
-  Export(options, spans);
+  Export(spans);
 }
 
 }  // namespace trace

@@ -27,46 +27,11 @@ namespace opencensus {
 namespace exporters {
 namespace trace {
 
-// MessageCodec is used for encoding message sets.
-class MessageCodec {
- public:
-  virtual ~MessageCodec() = default;
-
-  virtual const std::string name() const = 0;
-
-  virtual std::string Encode(
-      const std::vector<::opencensus::trace::exporter::SpanData> &spans) = 0;
-};
-
-// JSON encoding
-class JsonCodec : public MessageCodec {
- public:
-  const std::string name() const override { return "json"; }
-
-  std::string Encode(const std::vector<::opencensus::trace::exporter::SpanData>
-                         &spans) override;
-};
-
-// Pretty print JSON encoding
-class PrettyJsonCodec : public MessageCodec {
- public:
-  const std::string name() const override { return "pretty_json"; }
-
-  std::string Encode(const std::vector<::opencensus::trace::exporter::SpanData>
-                         &spans) override;
-};
-
-class ExportClient {
- public:
-  virtual void SendMessage(const std::string &msg, size_t size) = 0;
-};
-
 struct ZipkinExporterOptions {
-  ZipkinExporterOptions(absl::string_view url)
-      : url(url), codec_type(ZipkinExporterOptions::CodecType::kJson) {}
+  ZipkinExporterOptions(absl::string_view url) : url(url) {}
 
   // Uniform Resource Location for server that spans will be sent to.
-  absl::string_view url;
+  std::string url;
   // The proxy to use for the upcoming request.
   std::string proxy;
   // Tunnel through HTTP proxy
@@ -80,23 +45,23 @@ struct ZipkinExporterOptions {
   // The maximum timeout for HTTP request. The default request timeout is 15
   // seconds.
   absl::Duration request_timeout = absl::Seconds(15);
+  // Service name used by zipkin collector.
+  std::string service_name;
+  // Address family to be reported to zipkin collector.
+  enum class AddressFamily : uint8_t { kIpv4, kIpv6 };
+  AddressFamily af_type;
 
-  // Message codec to use for encoding message sets.
-  // Default = Json
-  enum class CodecType : uint8_t { kJson, kPrettyJson };
-  CodecType codec_type;
+  struct Service {
+    Service() : af_type(AddressFamily::kIpv4) {}
+    Service(const std::string &service_name, AddressFamily af_type)
+        : service_name(service_name), af_type(af_type) {}
 
-  std::unique_ptr<MessageCodec> GetCodec() const {
-    switch (codec_type) {
-      case ZipkinExporterOptions::CodecType::kJson:
-        return std::unique_ptr<MessageCodec>(
-            dynamic_cast<MessageCodec *>(new JsonCodec));
-      case ZipkinExporterOptions::CodecType::kPrettyJson:
-        return std::unique_ptr<MessageCodec>(
-            dynamic_cast<MessageCodec *>(new PrettyJsonCodec));
-    }
-    return nullptr;
-  }
+    std::string service_name;
+    AddressFamily af_type;
+    // IP address will be local address of machine. It will be populated
+    // automatically.
+    std::string ip_address;
+  };
 };
 
 class ZipkinExporter
@@ -110,19 +75,16 @@ class ZipkinExporter
   friend class ZipkinExporterTestPeer;
 
   static void ExportForTesting(
-      const ZipkinExporterOptions &options,
       const std::vector<::opencensus::trace::exporter::SpanData> &spans);
 
-  ZipkinExporter(const ZipkinExporterOptions &options)
-      : options_(options),
-        codec_type_(options.codec_type),
-        message_codec_(options.GetCodec()) {}
+  ZipkinExporter(const ZipkinExporterOptions &options) : options_(options) {}
   ~ZipkinExporter() {}
 
+  // Send HTTP message to zipkin endpoint using libcurl.
+  void SendMessage(const std::string &msg, size_t size) const;
+
   ZipkinExporterOptions options_;
-  ZipkinExporterOptions::CodecType codec_type_;
-  std::unique_ptr<MessageCodec> message_codec_;
-  std::unique_ptr<ExportClient> trace_client_;
+  ZipkinExporterOptions::Service service_;
 };
 
 }  // namespace trace
