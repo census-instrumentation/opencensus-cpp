@@ -35,25 +35,30 @@ constexpr char kZipkinLib[] = "zipkin/2.0";
 constexpr char ipv4_loopback[] = "127.0.0.1";
 constexpr char ipv6_loopback[] = "::1";
 
+std::string AttributeValueToString(
+    const ::opencensus::trace::exporter::AttributeValue &value) {
+  switch (value.type()) {
+    case ::opencensus::trace::AttributeValueRef::Type::kString:
+      return value.string_value();
+      break;
+    case ::opencensus::trace::AttributeValueRef::Type::kBool:
+      return value.bool_value() ? "true" : "false";
+      break;
+    case ::opencensus::trace::AttributeValueRef::Type::kInt:
+      return std::to_string(value.int_value());
+      break;
+  }
+  return "";
+}
+
 std::string SerializeAnnotation(
     const ::opencensus::trace::exporter::Annotation &annotation) {
   std::string annotation_str(annotation.description());
   absl::StrAppend(&annotation_str, " (");
   size_t count = 0;
   for (const auto &attribute : annotation.attributes()) {
-    std::string value;
-    switch (attribute.second.type()) {
-      case ::opencensus::trace::exporter::AttributeValue::Type::kString:
-        value = attribute.second.string_value();
-        break;
-      case ::opencensus::trace::exporter::AttributeValue::Type::kBool:
-        value = attribute.second.bool_value() ? "true" : "false";
-        break;
-      case ::opencensus::trace::exporter::AttributeValue::Type::kInt:
-        value = std::to_string(attribute.second.int_value());
-        break;
-    }
-    absl::StrAppend(&annotation_str, attribute.first, ":", value);
+    absl::StrAppend(&annotation_str, attribute.first, ":",
+                    AttributeValueToString(attribute.second));
 
     if (++count < annotation.attributes().size()) {
       absl::StrAppend(&annotation_str, ", ");
@@ -118,25 +123,7 @@ void SerializeJson(const ::opencensus::trace::exporter::SpanData &span,
       writer->Key("key");
       writer->String(attribute.first);
       writer->Key("value");
-      switch (attribute.second.type()) {
-        case ::opencensus::trace::AttributeValueRef::Type::kString:
-          writer->String(attribute.second.string_value());
-          writer->Key("type");
-          writer->String("STRING");
-          break;
-        case ::opencensus::trace::AttributeValueRef::Type::kBool:
-          writer->Bool(attribute.second.bool_value());
-          writer->Key("type");
-          writer->String("BOOL");
-          break;
-        case ::opencensus::trace::AttributeValueRef::Type::kInt:
-          writer->Int64(attribute.second.int_value());
-          writer->Key("type");
-          writer->String("I64");
-          break;
-        default:
-          break;
-      }
+      writer->String(AttributeValueToString(attribute.second));
       writer->EndObject();
     }
     writer->EndArray(span.attributes().size());
