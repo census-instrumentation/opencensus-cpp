@@ -63,8 +63,17 @@ opencensus::trace::Span GetSpanFromServerContext(grpc::ServerContext* context) {
 // These measure definitions should be kept in sync across opencensus
 // implementations--see
 // https://github.com/census-instrumentation/opencensus-java/blob/master/contrib/grpc_metrics/src/main/java/io/opencensus/contrib/grpc/metrics/RpcMeasureConstants.java.
-ABSL_CONST_INIT const absl::string_view kMethodTagKey = "method";
-ABSL_CONST_INIT const absl::string_view kStatusTagKey = "status";
+opencensus::stats::TagKey MethodTagKey() {
+  static const auto method_tag_key =
+      opencensus::stats::TagKey::Register("method");
+  return method_tag_key;
+}
+
+opencensus::stats::TagKey StatusTagKey() {
+  static const auto status_tag_key =
+      opencensus::stats::TagKey::Register("status");
+  return status_tag_key;
+}
 
 // Client
 ABSL_CONST_INIT const absl::string_view kRpcClientErrorCountMeasureName =

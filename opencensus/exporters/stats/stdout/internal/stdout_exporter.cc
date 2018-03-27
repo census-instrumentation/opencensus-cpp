@@ -110,7 +110,8 @@ void StdoutExporter::Handler::ExportViewDataImpl(
   for (const auto& row : data) {
     absl::StrAppend(&output, "  ");
     for (int i = 0; i < descriptor.columns().size(); ++i) {
-      absl::StrAppend(&output, descriptor.columns()[i], "=", row.first[i], " ");
+      absl::StrAppend(&output, descriptor.columns()[i].name(), "=",
+                      row.first[i], " ");
     }
     absl::StrAppend(&output, DataToString(row.second));
   }

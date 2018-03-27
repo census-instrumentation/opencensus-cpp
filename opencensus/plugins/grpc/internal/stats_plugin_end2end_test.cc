@@ -94,14 +94,14 @@ TEST_F(StatsPluginEnd2EndTest, ErrorCount) {
           .set_measure(kRpcClientErrorCountMeasureName)
           .set_name("client_method")
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   stats::View client_method_view(client_method_descriptor);
   const auto server_method_descriptor =
       stats::ViewDescriptor()
           .set_measure(kRpcServerErrorCountMeasureName)
           .set_name("server_method")
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   stats::View server_method_view(server_method_descriptor);
 
   const auto client_status_descriptor =
@@ -109,14 +109,14 @@ TEST_F(StatsPluginEnd2EndTest, ErrorCount) {
           .set_measure(kRpcClientErrorCountMeasureName)
           .set_name("client_status")
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kStatusTagKey);
+          .add_column(StatusTagKey());
   stats::View client_status_view(client_status_descriptor);
   const auto server_status_descriptor =
       stats::ViewDescriptor()
           .set_measure(kRpcServerErrorCountMeasureName)
           .set_name("server_status")
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kStatusTagKey);
+          .add_column(StatusTagKey());
   stats::View server_status_view(server_status_descriptor);
 
   // Cover all valid statuses.

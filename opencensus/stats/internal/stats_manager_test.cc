@@ -18,6 +18,7 @@
 #include "opencensus/stats/measure.h"
 #include "opencensus/stats/measure_registry.h"
 #include "opencensus/stats/recording.h"
+#include "opencensus/stats/tag_key.h"
 #include "opencensus/stats/view.h"
 
 namespace opencensus {
@@ -49,9 +50,9 @@ class StatsManagerTest : public ::testing::Test {
     SecondMeasure();
   }
 
-  const std::string key1_ = "key1";
-  const std::string key2_ = "key2";
-  const std::string key3_ = "key3";
+  const TagKey key1_ = TagKey::Register("key1");
+  const TagKey key2_ = TagKey::Register("key2");
+  const TagKey key3_ = TagKey::Register("key3");
 };
 
 TEST_F(StatsManagerTest, Count) {

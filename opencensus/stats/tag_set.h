@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
+#include "opencensus/stats/tag_key.h"
 
 namespace opencensus {
 namespace stats {
@@ -34,14 +35,14 @@ class TagSet final {
   // Both constructors are not explicit so that Record({}, {{"k", "v"}}) works.
   // This constructor is needed because even though we copy to a vector
   // internally because c++ cannot deduce the conversion needed.
-  TagSet(std::initializer_list<std::pair<absl::string_view, absl::string_view>>
-             tags);
+  TagSet(std::initializer_list<std::pair<TagKey, absl::string_view>> tags);
   // This constructor is needed so that callers can dynamically construct
   // tagsets. It takes the argument by value to allow it to be moved.
-  TagSet(std::vector<std::pair<std::string, std::string>> tags);
+  TagSet(std::vector<std::pair<TagKey, std::string>> tags);
 
-  // Accesses the tags sorted by key.
-  const std::vector<std::pair<std::string, std::string>>& tags() const {
+  // Accesses the tags sorted by key (in an implementation-defined, not
+  // lexicographic, order).
+  const std::vector<std::pair<TagKey, std::string>>& tags() const {
     return tags_;
   }
 
@@ -57,7 +58,7 @@ class TagSet final {
 
   std::size_t hash_;
   // TODO: add an option to store string_views to avoid copies.
-  std::vector<std::pair<std::string, std::string>> tags_;
+  std::vector<std::pair<TagKey, std::string>> tags_;
 };
 
 }  // namespace stats

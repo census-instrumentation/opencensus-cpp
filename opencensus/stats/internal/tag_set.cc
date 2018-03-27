@@ -22,21 +22,21 @@
 
 #include "absl/strings/string_view.h"
 #include "opencensus/common/internal/hash_mix.h"
+#include "opencensus/stats/tag_key.h"
 
 namespace opencensus {
 namespace stats {
 
 TagSet::TagSet(
-    std::initializer_list<std::pair<absl::string_view, absl::string_view>>
-        tags) {
+    std::initializer_list<std::pair<TagKey, absl::string_view>> tags) {
   tags_.reserve(tags.size());
   for (const auto& tag : tags) {
-    tags_.emplace_back(std::string(tag.first), std::string(tag.second));
+    tags_.emplace_back(tag.first, std::string(tag.second));
   }
   Initialize();
 }
 
-TagSet::TagSet(std::vector<std::pair<std::string, std::string>> tags)
+TagSet::TagSet(std::vector<std::pair<TagKey, std::string>> tags)
     : tags_(std::move(tags)) {
   Initialize();
 }
@@ -47,7 +47,7 @@ void TagSet::Initialize() {
   std::hash<std::string> hasher;
   common::HashMix mixer;
   for (const auto& tag : tags_) {
-    mixer.Mix(hasher(tag.first));
+    mixer.Mix(tag.first.hash());
     mixer.Mix(hasher(tag.second));
   }
   hash_ = mixer.get();

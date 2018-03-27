@@ -27,50 +27,63 @@ namespace stats {
 namespace {
 
 TEST(TagSetTest, ConstructorsEquivalent) {
-  const std::vector<std::pair<std::string, std::string>> tags({{"k", "v"}});
-  EXPECT_EQ(TagSet(tags), TagSet({{"k", "v"}}));
+  TagKey key = TagKey::Register("k");
+  const std::vector<std::pair<TagKey, std::string>> tags({{key, "v"}});
+  EXPECT_EQ(TagSet(tags), TagSet({{key, "v"}}));
 }
 
 TEST(TagSetTest, TagsSorted) {
-  const std::vector<std::pair<std::string, std::string>> expected = {
-      {"B", "v"}, {"a", "v"}, {"b", "v"}};
-  const std::vector<std::pair<std::string, std::string>> tags(
-      {{"b", "v"}, {"a", "v"}, {"B", "v"}});
+  TagKey k1 = TagKey::Register("b");
+  TagKey k2 = TagKey::Register("c");
+  TagKey k3 = TagKey::Register("a");
+  const std::vector<std::pair<TagKey, std::string>> expected = {
+      {k1, "v"}, {k2, "v"}, {k3, "v"}};
+  const std::vector<std::pair<TagKey, std::string>> tags(
+      {{k2, "v"}, {k3, "v"}, {k1, "v"}});
   EXPECT_THAT(TagSet(tags).tags(), ::testing::ElementsAreArray(expected));
-  EXPECT_THAT(TagSet({{"B", "v"}, {"b", "v"}, {"a", "v"}}).tags(),
+  EXPECT_THAT(TagSet({{k2, "v"}, {k1, "v"}, {k3, "v"}}).tags(),
               ::testing::ElementsAreArray(expected));
 }
 
 TEST(TagSetTest, EqualityDisregardsOrder) {
-  EXPECT_EQ(TagSet({{"k1", "v1"}, {"k2", "v2"}}),
-            TagSet({{"k2", "v2"}, {"k1", "v1"}}));
+  TagKey k1 = TagKey::Register("k1");
+  TagKey k2 = TagKey::Register("k2");
+  EXPECT_EQ(TagSet({{k1, "v1"}, {k2, "v2"}}), TagSet({{k2, "v2"}, {k1, "v1"}}));
 }
 
 TEST(TagSetTest, EqualityRespectsMissingKeys) {
-  EXPECT_NE(TagSet({{"k1", "v1"}, {"k2", "v2"}}), TagSet({{"k1", "v1"}}));
+  TagKey k1 = TagKey::Register("k1");
+  TagKey k2 = TagKey::Register("k2");
+  EXPECT_NE(TagSet({{k1, "v1"}, {k2, "v2"}}), TagSet({{k1, "v1"}}));
 }
 
 TEST(TagSetTest, EqualityRespectsKeyValuePairings) {
-  EXPECT_NE(TagSet({{"k1", "v1"}, {"k2", "v2"}}),
-            TagSet({{"k1", "v2"}, {"k2", "v1"}}));
+  TagKey k1 = TagKey::Register("k1");
+  TagKey k2 = TagKey::Register("k2");
+  EXPECT_NE(TagSet({{k1, "v1"}, {k2, "v2"}}), TagSet({{k1, "v2"}, {k2, "v1"}}));
 }
 
 TEST(TagSetTest, HashDisregardsOrder) {
-  TagSet ts1({{"k1", "v1"}, {"k2", "v2"}});
-  TagSet ts2({{"k2", "v2"}, {"k1", "v1"}});
+  TagKey k1 = TagKey::Register("k1");
+  TagKey k2 = TagKey::Register("k2");
+  TagSet ts1({{k1, "v1"}, {k2, "v2"}});
+  TagSet ts2({{k2, "v2"}, {k1, "v1"}});
   EXPECT_EQ(TagSet::Hash()(ts1), TagSet::Hash()(ts2));
 }
 
 TEST(TagSetTest, HashRespectsKeyValuePairings) {
-  TagSet ts1({{"k1", "v1"}, {"k2", "v2"}});
-  TagSet ts2({{"k1", "v2"}, {"k2", "v1"}});
+  TagKey k1 = TagKey::Register("k1");
+  TagKey k2 = TagKey::Register("k2");
+  TagSet ts1({{k1, "v1"}, {k2, "v2"}});
+  TagSet ts2({{k1, "v2"}, {k2, "v1"}});
   EXPECT_NE(TagSet::Hash()(ts1), TagSet::Hash()(ts2));
 }
 
 TEST(TagSetTest, UnorderedMap) {
   // Test that the operators and hash are compatible with std::unordered_map.
+  TagKey key = TagKey::Register("key");
   std::unordered_map<TagSet, int, TagSet::Hash> map;
-  TagSet ts = {{"key", "value"}};
+  TagSet ts = {{key, "value"}};
   map.emplace(ts, 1);
   EXPECT_NE(map.end(), map.find(ts));
   EXPECT_EQ(1, map.erase(ts));

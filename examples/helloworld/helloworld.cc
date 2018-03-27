@@ -29,7 +29,6 @@
 
 namespace {
 
-ABSL_CONST_INIT const absl::string_view kFrontendKey = "my.org/keys/frontend";
 ABSL_CONST_INIT const absl::string_view kVideoSizeViewName =
     "my.org/views/video_size";
 ABSL_CONST_INIT const absl::string_view kVideoSizeMeasureName =
@@ -43,6 +42,12 @@ opencensus::stats::MeasureInt VideoSizeMeasure() {
       opencensus::stats::MeasureRegistry::RegisterInt(
           kVideoSizeMeasureName, "By", "size of processed videos");
   return video_size;
+}
+
+opencensus::stats::TagKey FrontendKey() {
+  static const auto frontend_key =
+      opencensus::stats::TagKey::Register("my.org/keys/frontend");
+  return frontend_key;
 }
 
 }  // namespace
@@ -75,7 +80,7 @@ int main(int argc, char **argv) {
           .set_aggregation(opencensus::stats::Aggregation::Distribution(
               opencensus::stats::BucketBoundaries::Explicit(
                   {0, 16 * kMiB, 256 * kMiB})))
-          .add_column(kFrontendKey);
+          .add_column(FrontendKey());
   opencensus::stats::View view(video_size_view);
   video_size_view.RegisterForExport();
 
@@ -91,7 +96,7 @@ int main(int argc, char **argv) {
   absl::SleepFor(absl::Milliseconds(rand() % 10 + 1));
   // Record the processed video size.
   opencensus::stats::Record({{VideoSizeMeasure(), 25 * kMiB}},
-                            {{kFrontendKey, "video size"}});
+                            {{FrontendKey(), "video size"}});
   span.AddAnnotation("Finished processing video.");
   span.End();
 

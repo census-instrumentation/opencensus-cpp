@@ -49,9 +49,9 @@ class StatsManagerTest : public ::testing::Test {
     DeltaProducer::Get()->Flush();
   }
 
-  const std::string key1_ = "key1";
-  const std::string key2_ = "key2";
-  const std::string key3_ = "key3";
+  const TagKey key1_ = TagKey::Register("key1");
+  const TagKey key2_ = TagKey::Register("key2");
+  const TagKey key3_ = TagKey::Register("key3");
 };
 
 TEST_F(StatsManagerTest, Count) {

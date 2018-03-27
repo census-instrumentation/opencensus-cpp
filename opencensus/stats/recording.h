@@ -20,6 +20,7 @@
 
 #include "absl/strings/string_view.h"
 #include "opencensus/stats/measure.h"
+#include "opencensus/stats/tag_key.h"
 
 namespace opencensus {
 namespace stats {
@@ -35,8 +36,7 @@ namespace stats {
 // static_cast to double or int64_t if necessary).
 void Record(
     std::initializer_list<Measurement> measurements,
-    std::initializer_list<std::pair<absl::string_view, absl::string_view>>
-        tags = {});
+    std::initializer_list<std::pair<TagKey, absl::string_view>> tags = {});
 
 }  // namespace stats
 }  // namespace opencensus

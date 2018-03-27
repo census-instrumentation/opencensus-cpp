@@ -144,7 +144,7 @@ grpc_error *CensusClientCallData::Init(grpc_call_element *elem,
                     OnDoneRecvTrailingMetadataCb, elem,
                     grpc_schedule_on_exec_ctx);
   stats::Record({{RpcClientStartedCount(), 1}},
-                {{kMethodTagKey, qualified_method_}});
+                {{MethodTagKey(), qualified_method_}});
   return GRPC_ERROR_NONE;
 }
 
@@ -165,8 +165,8 @@ void CensusClientCallData::Destroy(grpc_call_element *elem,
        {RpcClientFinishedCount(), 1},
        {RpcClientRequestCount(), sent_message_count_},
        {RpcClientResponseCount(), recv_message_count_}},
-      {{kMethodTagKey, qualified_method_},
-       {kStatusTagKey, StatusCodeToString(final_info->final_status)}});
+      {{MethodTagKey(), qualified_method_},
+       {StatusTagKey(), StatusCodeToString(final_info->final_status)}});
   grpc_slice_unref_internal(path_);
   context_.EndSpan();
 }

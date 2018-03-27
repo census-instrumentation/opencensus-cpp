@@ -136,7 +136,8 @@ std::vector<google::monitoring::v3::TimeSeries> DataToTimeSeries(
     auto& time_series = vector.back();
     for (int i = 0; i < view_descriptor.columns().size(); ++i) {
       (*time_series.mutable_metric()
-            ->mutable_labels())[view_descriptor.columns()[i]] = row.first[i];
+            ->mutable_labels())[view_descriptor.columns()[i].name()] =
+          row.first[i];
     }
     // The point is already created in the base_time_series to set the times.
     SetTypedValue(row.second, type,
@@ -155,7 +156,7 @@ void SetMetricDescriptor(
   metric_descriptor->set_type(MakeType(view_descriptor.name()));
   SetOpenCensusTaskLabelDescriptor(metric_descriptor->add_labels());
   for (const auto& tag_key : view_descriptor.columns()) {
-    SetLabelDescriptor(tag_key, metric_descriptor->add_labels());
+    SetLabelDescriptor(tag_key.name(), metric_descriptor->add_labels());
   }
   metric_descriptor->set_metric_kind(google::api::MetricDescriptor::CUMULATIVE);
   metric_descriptor->set_value_type(GetValueType(view_descriptor));

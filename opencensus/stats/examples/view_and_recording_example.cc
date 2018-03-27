@@ -31,6 +31,14 @@ opencensus::stats::MeasureDouble FooUsage() {
   return foo_usage;
 }
 
+// The resource owner publicly registers the tag keys used in their recording
+// calls so that it is accessible to views.
+opencensus::stats::TagKey FooIdTagKey() {
+  static const auto foo_id_tag_key =
+      opencensus::stats::TagKey::Register("foo_id");
+  return foo_id_tag_key;
+}
+
 // Foo represents an arbitrary component that provides access to a resource and
 // records the usage.
 class Foo {
@@ -44,7 +52,7 @@ class Foo {
   // A Foo API call that records the amount of usage and the id of the object
   // used.
   void Use(double quantity) {
-    opencensus::stats::Record({{FooUsage(), quantity}}, {{"foo_id", id_}});
+    opencensus::stats::Record({{FooUsage(), quantity}}, {{FooIdTagKey(), id_}});
   }
 
  private:
@@ -63,7 +71,7 @@ TEST(ViewAndRecordingExample, Sum) {
           .set_name("example.com/Bar/FooUsage-sum-cumulative-foo_id")
           .set_measure(kFooUsageMeasureName)
           .set_aggregation(opencensus::stats::Aggregation::Sum())
-          .add_column("foo_id")
+          .add_column(FooIdTagKey())
           .set_description(
               "Cumulative sum of example.com/Foo/FooUsage broken down by "
               "'foo_id'.");

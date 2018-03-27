@@ -1,4 +1,4 @@
-// Copyright 2017, OpenCensus Authors
+// Copyright 2018, OpenCensus Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/stats/recording.h"
-
-#include "absl/time/clock.h"
-#include "opencensus/stats/internal/stats_manager.h"
-#include "opencensus/stats/measure.h"
 #include "opencensus/stats/tag_key.h"
+
+#include "gtest/gtest.h"
 
 namespace opencensus {
 namespace stats {
+namespace {
 
-void Record(std::initializer_list<Measurement> measurements,
-            std::initializer_list<std::pair<TagKey, absl::string_view>> tags) {
-  StatsManager::Get()->Record(measurements, tags, absl::Now());
+TEST(TagKeyTest, Name) {
+  TagKey key = TagKey::Register("TestKey");
+  EXPECT_EQ("TestKey", key.name());
 }
 
+TEST(TagKeyTest, DuplicateRegistrationsEqual) {
+  TagKey k1 = TagKey::Register("key");
+  TagKey k2 = TagKey::Register("key");
+  EXPECT_EQ(k1, k2);
+  EXPECT_EQ(k1.hash(), k2.hash());
+}
+
+TEST(TagKeyTest, Inequality) {
+  TagKey k1 = TagKey::Register("k1");
+  TagKey k2 = TagKey::Register("k2");
+  EXPECT_NE(k1, k2);
+  EXPECT_NE(k1.hash(), k2.hash());
+}
+
+}  // namespace
 }  // namespace stats
 }  // namespace opencensus

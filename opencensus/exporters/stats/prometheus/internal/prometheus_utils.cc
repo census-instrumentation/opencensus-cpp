@@ -88,7 +88,7 @@ void SetData(const opencensus::stats::ViewDescriptor& descriptor,
     metric->set_timestamp_ms(time);
     for (int i = 0; i < descriptor.num_columns(); ++i) {
       auto* label = metric->add_label();
-      label->set_name(SanitizeName(descriptor.columns()[i]));
+      label->set_name(SanitizeName(descriptor.columns()[i].name()));
       label->set_value(row.first[i]);
     }
     SetValue(row.second, metric);
