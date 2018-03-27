@@ -40,6 +40,8 @@ class TestUtils final {
 
   static void AddToDistribution(Distribution* distribution, double value);
 
+  static void Flush();
+
   TestUtils() = delete;
 };
 
