@@ -43,6 +43,13 @@ class MeasureData final {
   // this on construction.
   void AddToDistribution(Distribution* distribution) const;
 
+  // Adds this to a distribution by pointers to individual elements.
+  template <typename T>
+  void AddToDistribution(const BucketBoundaries& boundaries, T* count,
+                         double* mean, double* sum_of_squared_deviation,
+                         double* min, double* max,
+                         absl::Span<T> histogram_buckets) const;
+
  private:
   absl::Span<const BucketBoundaries> boundaries_;
 
@@ -53,6 +60,11 @@ class MeasureData final {
   double max_ = -std::numeric_limits<double>::infinity();
   std::vector<std::vector<int64_t>> histograms_;
 };
+
+extern template void MeasureData::AddToDistribution(const BucketBoundaries&,
+                                                    double*, double*, double*,
+                                                    double*, double*,
+                                                    absl::Span<double>) const;
 
 }  // namespace stats
 }  // namespace opencensus

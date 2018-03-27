@@ -28,6 +28,7 @@
 #include "opencensus/stats/aggregation.h"
 #include "opencensus/stats/distribution.h"
 #include "opencensus/stats/internal/aggregation_window.h"
+#include "opencensus/stats/internal/measure_data.h"
 #include "opencensus/stats/view_descriptor.h"
 
 namespace opencensus {
@@ -111,6 +112,13 @@ class ViewDataImpl {
   // supported.
   void Add(double value, const std::vector<std::string>& tag_values,
            absl::Time now);
+
+  // Merges bulk data for the given tag values at 'now'. tag_values must be
+  // ordered according to the order of keys in the ViewDescriptor.
+  // TODO: Change to take Span<string_view> when heterogenous lookup is
+  // supported.
+  void Merge(const std::vector<std::string>& tag_values,
+             const MeasureData& data, absl::Time now);
 
  private:
   // Implements GetDeltaAndReset(), copying aggregation_ and swapping data_ and

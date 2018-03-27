@@ -123,7 +123,7 @@ void DeltaProducer::SwapDeltas() {
 }
 
 void DeltaProducer::ConsumeLastDelta() {
-  // TODO: implement.
+  StatsManager::Get()->MergeDelta(last_delta_);
   last_delta_.clear();
 }
 
