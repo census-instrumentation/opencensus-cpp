@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <string>
+
 #include "absl/time/time.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "opencensus/stats/aggregation.h"
 #include "opencensus/stats/bucket_boundaries.h"
 #include "opencensus/stats/internal/aggregation_window.h"
+#include "opencensus/stats/measure.h"
 #include "opencensus/stats/measure_descriptor.h"
-#include "opencensus/stats/measure_registry.h"
 #include "opencensus/stats/view_descriptor.h"
 
 namespace opencensus {
@@ -37,15 +39,16 @@ TEST(DebugStringTest, Aggregation) {
 
 TEST(DebugStringTest, AggregationWindow) {
   EXPECT_NE("", AggregationWindow::Cumulative().DebugString());
+  EXPECT_NE("", AggregationWindow::Delta().DebugString());
   EXPECT_NE("", AggregationWindow::Interval(absl::Minutes(1)).DebugString());
 }
 
 TEST(DebugStringTest, MeasureDescriptor) {
   const std::string name = "foo";
-  const std::string units = "ops";
   const std::string description = "Usage of foo";
+  const std::string units = "1";
   static const MeasureDescriptor descriptor =
-      MeasureRegistry::RegisterInt(name, units, description).GetDescriptor();
+      MeasureInt64::Register(name, description, units).GetDescriptor();
   EXPECT_PRED_FORMAT2(::testing::IsSubstring, name, descriptor.DebugString());
   EXPECT_PRED_FORMAT2(::testing::IsSubstring, units, descriptor.DebugString());
   EXPECT_PRED_FORMAT2(::testing::IsSubstring, description,
@@ -57,9 +60,9 @@ TEST(DebugStringTest, ViewDescriptor) {
   const AggregationWindow aggregation_window =
       AggregationWindow::Interval(absl::Minutes(1));
   const std::string measure_name = "bar";
-  static const MeasureDouble measure =
-      MeasureRegistry::RegisterDouble(measure_name, "", "");
-  const std::string tag_key = "tag_key_1";
+  static const auto measure = MeasureDouble::Register(measure_name, "", "");
+  static const TagKey tag_key = TagKey::Register("tag_key_1");
+  MeasureDouble::Register(measure_name, "", "");
   const std::string description = "description string";
   ViewDescriptor descriptor = ViewDescriptor()
                                   .set_measure(measure_name)
@@ -75,7 +78,7 @@ TEST(DebugStringTest, ViewDescriptor) {
                       descriptor.DebugString());
   EXPECT_PRED_FORMAT2(::testing::IsSubstring, aggregation_window.DebugString(),
                       descriptor.DebugString());
-  EXPECT_PRED_FORMAT2(::testing::IsSubstring, tag_key,
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, tag_key.name(),
                       descriptor.DebugString());
   EXPECT_PRED_FORMAT2(::testing::IsSubstring, description,
                       descriptor.DebugString());

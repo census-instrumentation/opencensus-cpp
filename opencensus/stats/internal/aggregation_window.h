@@ -32,6 +32,12 @@ class AggregationWindow final {
     return AggregationWindow(Type::kCumulative, absl::InfiniteDuration());
   }
 
+  // Delta aggregation accumulates data until it is requested and then resets
+  // it, so that each recorded value appears in exactly one delta.
+  static AggregationWindow Delta() {
+    return AggregationWindow(Type::kDelta, absl::InfiniteDuration());
+  }
+
   // Interval aggregation keeps a rolling total of usage over the previous
   // 'interval' of time.
   static AggregationWindow Interval(absl::Duration interval) {
@@ -40,6 +46,7 @@ class AggregationWindow final {
 
   enum class Type {
     kCumulative,
+    kDelta,
     kInterval,
   };
 

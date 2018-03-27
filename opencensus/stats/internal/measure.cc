@@ -14,11 +14,21 @@
 
 #include "opencensus/stats/measure.h"
 
+#include "absl/strings/string_view.h"
 #include "opencensus/stats/internal/measure_registry_impl.h"
 #include "opencensus/stats/measure_registry.h"
 
 namespace opencensus {
 namespace stats {
+
+// static
+template <typename MeasureT>
+Measure<MeasureT> Measure<MeasureT>::Register(absl::string_view name,
+                                              absl::string_view description,
+                                              absl::string_view units) {
+  return MeasureRegistryImpl::Get()->Register<MeasureT>(name, description,
+                                                        units);
+}
 
 template <typename MeasureT>
 const MeasureDescriptor& Measure<MeasureT>::GetDescriptor() const {
@@ -35,7 +45,7 @@ bool MeasureDouble::IsValid() const {
 }
 
 template <>
-bool MeasureInt::IsValid() const {
+bool MeasureInt64::IsValid() const {
   return MeasureRegistryImpl::IdValid(id_) &&
          MeasureRegistryImpl::IdToType(id_) == MeasureDescriptor::Type::kInt64;
 }

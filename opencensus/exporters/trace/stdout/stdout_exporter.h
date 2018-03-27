@@ -15,22 +15,16 @@
 #ifndef OPENCENSUS_EXPORTERS_TRACE_STDOUT_STDOUT_EXPORTER_H_
 #define OPENCENSUS_EXPORTERS_TRACE_STDOUT_STDOUT_EXPORTER_H_
 
-#include <vector>
-
-#include "opencensus/trace/exporter/span_data.h"
-#include "opencensus/trace/exporter/span_exporter.h"
-
 namespace opencensus {
 namespace exporters {
 namespace trace {
 
-class StdoutExporter
-    : public ::opencensus::trace::exporter::SpanExporter::Handler {
+class StdoutExporter {
  public:
-  void Export(const std::vector<::opencensus::trace::exporter::SpanData>& spans)
-      override;
-
   static void Register();
+
+ private:
+  class Handler;
 };
 
 }  // namespace trace

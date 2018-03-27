@@ -16,8 +16,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "opencensus/stats/measure.h"
-#include "opencensus/stats/measure_registry.h"
 #include "opencensus/stats/recording.h"
+#include "opencensus/stats/tag_key.h"
 #include "opencensus/stats/view.h"
 
 namespace opencensus {
@@ -28,14 +28,14 @@ constexpr char kFirstMeasureId[] = "first_measure_name";
 constexpr char kSecondMeasureId[] = "second_measure_name";
 
 MeasureDouble FirstMeasure() {
-  static MeasureDouble measure = MeasureRegistry::RegisterDouble(
-      kFirstMeasureId, "ops", "Usage of resource 1.");
+  static MeasureDouble measure =
+      MeasureDouble::Register(kFirstMeasureId, "Usage of resource 1.", "1");
   return measure;
 }
 
-MeasureInt SecondMeasure() {
-  static MeasureInt measure = MeasureRegistry::RegisterInt(
-      kSecondMeasureId, "ops", "Usage of resource 2.");
+MeasureInt64 SecondMeasure() {
+  static MeasureInt64 measure =
+      MeasureInt64::Register(kSecondMeasureId, "Usage of resource 2.", "1");
   return measure;
 }
 
@@ -49,9 +49,9 @@ class StatsManagerTest : public ::testing::Test {
     SecondMeasure();
   }
 
-  const std::string key1_ = "key1";
-  const std::string key2_ = "key2";
-  const std::string key3_ = "key3";
+  const TagKey key1_ = TagKey::Register("key1");
+  const TagKey key2_ = TagKey::Register("key2");
+  const TagKey key3_ = TagKey::Register("key3");
 };
 
 TEST_F(StatsManagerTest, Count) {
@@ -134,6 +134,37 @@ TEST_F(StatsManagerTest, Distribution) {
                   .find({"value1", "value2"})
                   ->second.bucket_counts(),
               ::testing::ElementsAre(1, 0));
+}
+
+TEST_F(StatsManagerTest, Delta) {
+  ViewDescriptor view_descriptor = ViewDescriptor()
+                                       .set_measure(kFirstMeasureId)
+                                       .set_name("delta")
+                                       .set_aggregation(Aggregation::Count())
+                                       .add_column(key1_)
+                                       .add_column(key2_);
+  SetAggregationWindow(AggregationWindow::Delta(), &view_descriptor);
+  View view(view_descriptor);
+  ASSERT_EQ(ViewData::Type::kInt64, view.GetData().type());
+  EXPECT_TRUE(view.GetData().int_data().empty());
+  // Stats under a different measure should be ignored.
+  Record({{SecondMeasure(), 1}}, {});
+  EXPECT_TRUE(view.GetData().int_data().empty());
+
+  Record({{FirstMeasure(), 2.0}}, {});
+  Record({{FirstMeasure(), 3.0}}, {});
+  Record({{FirstMeasure(), 4.0}},
+         {{key1_, "value1"}, {key2_, "value2"}, {key3_, "value3"}});
+  EXPECT_THAT(
+      view.GetData().int_data(),
+      ::testing::UnorderedElementsAre(
+          ::testing::Pair(::testing::ElementsAre("", ""), 2),
+          ::testing::Pair(::testing::ElementsAre("value1", "value2"), 1)));
+
+  Record({{FirstMeasure(), 4.0}}, {{key1_, "new_value"}});
+  EXPECT_THAT(view.GetData().int_data(),
+              ::testing::UnorderedElementsAre(
+                  ::testing::Pair(::testing::ElementsAre("new_value", ""), 1)));
 }
 
 // TODO: Test window expiration if we add a simulated clock.
@@ -276,8 +307,7 @@ TEST(StatsManagerDeathTest, UnregisteredMeasure) {
   EXPECT_DEBUG_DEATH({ EXPECT_TRUE(view.GetData().int_data().empty()); }, "");
   // Even if we later register the measure and record data under it, the view
   // should still be invalid.
-  static MeasureDouble measure =
-      MeasureRegistry::RegisterDouble(measure_name, "", "");
+  static MeasureDouble measure = MeasureDouble::Register(measure_name, "", "");
   EXPECT_TRUE(measure.IsValid());
   Record({{measure, 1.0}});
   EXPECT_FALSE(view.IsValid());

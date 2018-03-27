@@ -15,9 +15,20 @@
 #include "opencensus/stats/internal/stats_manager.h"
 
 #include <iostream>
+#include <memory>
 
 #include "absl/base/macros.h"
+#include "absl/memory/memory.h"
+#include "absl/time/clock.h"
 #include "absl/time/time.h"
+#include "opencensus/stats/aggregation.h"
+#include "opencensus/stats/bucket_boundaries.h"
+#include "opencensus/stats/internal/delta_producer.h"
+#include "opencensus/stats/internal/measure_data.h"
+#include "opencensus/stats/internal/measure_registry_impl.h"
+#include "opencensus/stats/tag_key.h"
+#include "opencensus/stats/tag_set.h"
+#include "opencensus/stats/view_descriptor.h"
 
 namespace opencensus {
 namespace stats {
@@ -56,13 +67,12 @@ int StatsManager::ViewInformation::RemoveConsumer() {
 }
 
 void StatsManager::ViewInformation::Record(
-    double value,
-    absl::Span<const std::pair<absl::string_view, absl::string_view>> tags,
+    double value, absl::Span<const std::pair<TagKey, absl::string_view>> tags,
     absl::Time now) {
   mu_->AssertHeld();
   std::vector<std::string> tag_values(descriptor_.columns().size());
   for (int i = 0; i < tag_values.size(); ++i) {
-    const std::string& column = descriptor_.columns()[i];
+    const TagKey column = descriptor_.columns()[i];
     for (const auto& tag : tags) {
       if (tag.first == column) {
         tag_values[i] = std::string(tag.second);
@@ -73,12 +83,32 @@ void StatsManager::ViewInformation::Record(
   data_.Add(value, tag_values, now);
 }
 
-ViewDataImpl StatsManager::ViewInformation::GetData() const {
+void StatsManager::ViewInformation::MergeMeasureData(const TagSet& tags,
+                                                     const MeasureData& data,
+                                                     absl::Time now) {
+  mu_->AssertHeld();
+  std::vector<std::string> tag_values(descriptor_.columns().size());
+  for (int i = 0; i < tag_values.size(); ++i) {
+    const TagKey column = descriptor_.columns()[i];
+    for (const auto& tag : tags.tags()) {
+      if (tag.first == column) {
+        tag_values[i] = std::string(tag.second);
+        break;
+      }
+    }
+  }
+  data_.Merge(tag_values, data, now);
+}
+
+std::unique_ptr<ViewDataImpl> StatsManager::ViewInformation::GetData() {
   absl::ReaderMutexLock l(mu_);
   if (data_.type() == ViewDataImpl::Type::kStatsObject) {
-    return ViewDataImpl(data_, absl::Now());
+    return absl::make_unique<ViewDataImpl>(data_, absl::Now());
+  } else if (descriptor_.aggregation_window_.type() ==
+             AggregationWindow::Type::kDelta) {
+    return data_.GetDeltaAndReset(absl::Now());
   } else {
-    return data_;
+    return absl::make_unique<ViewDataImpl>(data_);
   }
 }
 
@@ -86,12 +116,20 @@ ViewDataImpl StatsManager::ViewInformation::GetData() const {
 // // StatsManager::MeasureInformation
 
 void StatsManager::MeasureInformation::Record(
-    double value,
-    absl::Span<const std::pair<absl::string_view, absl::string_view>> tags,
+    double value, absl::Span<const std::pair<TagKey, absl::string_view>> tags,
     absl::Time now) {
   mu_->AssertHeld();
   for (auto& view : views_) {
     view->Record(value, tags, now);
+  }
+}
+
+void StatsManager::MeasureInformation::MergeMeasureData(const TagSet& tags,
+                                                        const MeasureData& data,
+                                                        absl::Time now) {
+  mu_->AssertHeld();
+  for (auto& view : views_) {
+    view->MergeMeasureData(tags, data, now);
   }
 }
 
@@ -134,7 +172,7 @@ StatsManager* StatsManager::Get() {
 
 void StatsManager::Record(
     std::initializer_list<Measurement> measurements,
-    std::initializer_list<std::pair<absl::string_view, absl::string_view>> tags,
+    std::initializer_list<std::pair<TagKey, absl::string_view>> tags,
     absl::Time now) {
   absl::MutexLock l(&mu_);
   for (const auto& measurement : measurements) {
@@ -152,6 +190,23 @@ void StatsManager::Record(
   }
 }
 
+void StatsManager::MergeDelta(const Delta& delta) {
+  absl::MutexLock l(&mu_);
+  absl::Time now = absl::Now();
+  // Measures are added to the StatsManager before the DeltaProducer, so there
+  // should never be measures in the delta missing from measures_.
+  for (const auto& data_for_tagset : delta.delta()) {
+    for (int i = 0; i < data_for_tagset.second.size(); ++i) {
+      // Only add data if there is data for this tagset/measure combination, to
+      // avoid creating spurious empty rows.
+      if (data_for_tagset.second[i].count() != 0) {
+        measures_[i].MergeMeasureData(data_for_tagset.first,
+                                      data_for_tagset.second[i], now);
+      }
+    }
+  }
+}
+
 template <typename MeasureT>
 void StatsManager::AddMeasure(Measure<MeasureT> measure) {
   absl::MutexLock l(&mu_);
@@ -161,18 +216,25 @@ void StatsManager::AddMeasure(Measure<MeasureT> measure) {
 }
 
 template void StatsManager::AddMeasure(MeasureDouble measure);
-template void StatsManager::AddMeasure(MeasureInt measure);
+template void StatsManager::AddMeasure(MeasureInt64 measure);
 
 StatsManager::ViewInformation* StatsManager::AddConsumer(
     const ViewDescriptor& descriptor) {
-  absl::MutexLock l(&mu_);
   if (!MeasureRegistryImpl::IdValid(descriptor.measure_id_)) {
-    std::cerr
-        << "Attempting to register a ViewDescriptor with an invalid measure:\n"
-        << descriptor.DebugString() << "\n";
+    std::cerr << "Attempting to register a ViewDescriptor with an invalid "
+                 "measure:\n"
+              << descriptor.DebugString() << "\n";
     return nullptr;
   }
   const uint64_t index = MeasureRegistryImpl::IdToIndex(descriptor.measure_id_);
+  // We need to call this outside of the locked portion to avoid a deadlock when
+  // the DeltaProducer flushes the old delta. We call it before adding the view
+  // to avoid errors from the old delta not having a histogram for the new view.
+  if (descriptor.aggregation().type() == Aggregation::Type::kDistribution) {
+    DeltaProducer::Get()->AddBoundaries(
+        index, descriptor.aggregation().bucket_boundaries());
+  }
+  absl::MutexLock l(&mu_);
   return measures_[index].AddConsumer(descriptor);
 }
 

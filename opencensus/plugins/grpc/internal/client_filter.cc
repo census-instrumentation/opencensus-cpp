@@ -23,15 +23,13 @@
 
 namespace opencensus {
 
+namespace {
+
 // Maximum size of metadata for tracing and tagging that are sent on the wire.
 constexpr uint32_t kMaxStatsLen = 2046;
 constexpr uint32_t kMaxTracingLen = 128;
-// Maximum size of server stats that are sent on the wire.
-constexpr uint32_t kMaxServerStatsLen = 32;
 
 constexpr double kNumMillisPerNanosecond = 1e-6;
-
-namespace {
 
 void FilterTrailingMetadata(grpc_metadata_batch *b, uint64_t *elapsed_time) {
   if (b->idx.named.grpc_server_stats_bin != nullptr) {
@@ -73,8 +71,8 @@ void CensusClientCallData::OnDoneRecvMessageCb(void *user_data,
   // Stream messages are no longer valid after receiving trailing metadata.
   if ((*calld->recv_message_) != nullptr) {
     calld->context_.Span().AddReceivedMessageEvent(
-        calld->recv_message_count_++, (*calld->recv_message_)->length,
-        (*calld->recv_message_)->length);
+        calld->recv_message_count_++, (*calld->recv_message_)->length(),
+        (*calld->recv_message_)->length());
   }
   GRPC_CLOSURE_RUN(calld->initial_on_done_recv_message_, GRPC_ERROR_REF(error));
 }
@@ -117,8 +115,8 @@ void CensusClientCallData::StartTransportStreamOpBatch(
   if (op->send_message() != nullptr) {
     context_.Span().AddSentMessageEvent(
         sent_message_count_++,
-        op->op()->payload->send_message.send_message->length,
-        op->op()->payload->send_message.send_message->length);
+        op->op()->payload->send_message.send_message->length(),
+        op->op()->payload->send_message.send_message->length());
   }
   if (op->recv_message() != nullptr) {
     recv_message_ = op->op()->payload->recv_message.recv_message;
@@ -146,7 +144,7 @@ grpc_error *CensusClientCallData::Init(grpc_call_element *elem,
                     OnDoneRecvTrailingMetadataCb, elem,
                     grpc_schedule_on_exec_ctx);
   stats::Record({{RpcClientStartedCount(), 1}},
-                {{kMethodTagKey, qualified_method_}});
+                {{MethodTagKey(), qualified_method_}});
   return GRPC_ERROR_NONE;
 }
 
@@ -167,8 +165,8 @@ void CensusClientCallData::Destroy(grpc_call_element *elem,
        {RpcClientFinishedCount(), 1},
        {RpcClientRequestCount(), sent_message_count_},
        {RpcClientResponseCount(), recv_message_count_}},
-      {{kMethodTagKey, qualified_method_},
-       {kStatusTagKey, StatusCodeToString(final_info->final_status)}});
+      {{MethodTagKey(), qualified_method_},
+       {StatusTagKey(), StatusCodeToString(final_info->final_status)}});
   grpc_slice_unref_internal(path_);
   context_.EndSpan();
 }

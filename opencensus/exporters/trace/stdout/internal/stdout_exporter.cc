@@ -15,15 +15,24 @@
 #include "opencensus/exporters/trace/stdout/stdout_exporter.h"
 
 #include <iostream>
+#include <vector>
 
 #include "absl/base/macros.h"
 #include "absl/memory/memory.h"
+#include "opencensus/trace/exporter/span_data.h"
+#include "opencensus/trace/exporter/span_exporter.h"
 
 namespace opencensus {
 namespace exporters {
 namespace trace {
 
-void StdoutExporter::Export(
+class StdoutExporter::Handler
+    : public ::opencensus::trace::exporter::SpanExporter::Handler {
+  void Export(const std::vector<::opencensus::trace::exporter::SpanData>& spans)
+      override;
+};
+
+void StdoutExporter::Handler::Export(
     const std::vector<::opencensus::trace::exporter::SpanData>& spans) {
   for (const auto& span : spans) {
     std::cout << span.DebugString() << "\n";
@@ -32,7 +41,7 @@ void StdoutExporter::Export(
 
 void StdoutExporter::Register() {
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
-      absl::make_unique<StdoutExporter>());
+      absl::make_unique<Handler>());
 }
 
 }  // namespace trace

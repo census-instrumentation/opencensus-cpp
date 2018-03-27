@@ -21,6 +21,10 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/time/clock.h"
+#include "google/devtools/cloudtrace/v2/tracing.grpc.pb.h"
+#include "include/grpc++/grpc++.h"
+#include "opencensus/trace/exporter/span_data.h"
+#include "opencensus/trace/exporter/span_exporter.h"
 
 using grpc::ClientContext;
 using grpc::Status;
@@ -28,17 +32,20 @@ using grpc::Status;
 namespace opencensus {
 namespace exporters {
 namespace trace {
-
-static constexpr size_t kAttributeStringLen = 256;
-static constexpr size_t kAnnotationStringLen = 256;
-static constexpr size_t kDisplayNameStringLen = 128;
-static constexpr char kGoogleStackDriverTraceAddress[] =
-    "cloudtrace.googleapis.com";
-
 namespace {
+
+constexpr size_t kAttributeStringLen = 256;
+constexpr size_t kAnnotationStringLen = 256;
+constexpr size_t kDisplayNameStringLen = 128;
+constexpr char kGoogleStackdriverTraceAddress[] = "cloudtrace.googleapis.com";
 
 constexpr char kAgentKey[] = "g.co/agent";
 constexpr char kAgentValue[] = "opencensus-cpp";
+
+std::string ToString(const grpc::Status& status) {
+  return absl::StrCat("status code ", status.error_code(), " details \"",
+                      status.error_message(), "\"");
+}
 
 gpr_timespec ConvertToTimespec(absl::Time time) {
   gpr_timespec g_time;
@@ -243,64 +250,44 @@ void ConvertSpans(
   }
 }
 
-}  // namespace
+class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
+ public:
+  Handler(absl::string_view project_id,
+          const std::shared_ptr<grpc::Channel>& channel)
+      : project_id_(project_id),
+        stub_(::google::devtools::cloudtrace::v2::TraceService::NewStub(
+            channel)) {}
 
-Status StackdriverExporter::TraceClient::BatchWriteSpans(
-    const ::google::devtools::cloudtrace::v2::BatchWriteSpansRequest& request) {
-  ::google::protobuf::Empty response;
+  void Export(const std::vector<::opencensus::trace::exporter::SpanData>& spans)
+      override;
 
-  // Context for the client. It could be used to convey extra information to
-  // the server and/or tweak certain RPC behaviors. Deadline set for 3000
-  // milliseconds.
-  ClientContext context;
-  context.set_deadline(
-      ConvertToTimespec(absl::Now() + absl::Milliseconds(3000)));
+ private:
+  const std::string project_id_;
+  std::unique_ptr<google::devtools::cloudtrace::v2::TraceService::Stub> stub_;
+};
 
-  // The actual RPC that sends the span information to Stackdriver.
-  return stub_->BatchWriteSpans(&context, request, &response);
-}
-
-void StackdriverExporter::Register(absl::string_view project_id) {
-  StackdriverExporter* exporter = new StackdriverExporter(project_id);
-  auto creds = grpc::GoogleDefaultCredentials();
-  auto channel = ::grpc::CreateChannel(kGoogleStackDriverTraceAddress, creds);
-  exporter->trace_client_ = absl::make_unique<TraceClient>(channel);
-  ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
-      absl::WrapUnique<::opencensus::trace::exporter::SpanExporter::Handler>(
-          exporter));
-}
-
-void StackdriverExporter::Export(
+void Handler::Export(
     const std::vector<::opencensus::trace::exporter::SpanData>& spans) {
   ::google::devtools::cloudtrace::v2::BatchWriteSpansRequest request;
   request.set_name(absl::StrCat("projects/", project_id_));
   ConvertSpans(spans, project_id_, &request);
-
-  Status status = trace_client_->BatchWriteSpans(request);
-  // Act upon its status.
+  ::google::protobuf::Empty response;
+  ClientContext context;
+  context.set_deadline(
+      ConvertToTimespec(absl::Now() + absl::Milliseconds(3000)));
+  Status status = stub_->BatchWriteSpans(&context, request, &response);
   if (!status.ok()) {
-    // TODO: log error.
+    std::cerr << "BatchWriteSpans failed: " << ToString(status) << "\n";
   }
 }
 
-void StackdriverExporter::ExportForTesting(
-    absl::string_view project_id,
-    const std::vector<::opencensus::trace::exporter::SpanData>& spans) {
+}  // namespace
+
+void StackdriverExporter::Register(absl::string_view project_id) {
   auto creds = grpc::GoogleDefaultCredentials();
-  auto channel = ::grpc::CreateChannel(kGoogleStackDriverTraceAddress, creds);
-  std::unique_ptr<StackdriverExporter::TraceClient> trace_client =
-      absl::make_unique<TraceClient>(channel);
-
-  ::google::devtools::cloudtrace::v2::BatchWriteSpansRequest request;
-  request.set_name(absl::StrCat("projects/", project_id));
-  ConvertSpans(spans, project_id, &request);
-
-  Status status = trace_client->BatchWriteSpans(request);
-  // Act upon its status.
-  if (!status.ok()) {
-    std::cerr << "BatchWriteSpans failed with code " << status.error_code()
-              << ": " << status.error_message() << "\n";
-  }
+  auto channel = ::grpc::CreateChannel(kGoogleStackdriverTraceAddress, creds);
+  ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
+      absl::make_unique<Handler>(project_id, channel));
 }
 
 }  // namespace trace

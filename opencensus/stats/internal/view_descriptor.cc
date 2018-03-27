@@ -28,6 +28,7 @@
 #include "opencensus/stats/internal/measure_registry_impl.h"
 #include "opencensus/stats/internal/stats_exporter_impl.h"
 #include "opencensus/stats/measure_descriptor.h"
+#include "opencensus/stats/tag_key.h"
 #include "opencensus/stats/view.h"
 
 namespace opencensus {
@@ -63,7 +64,7 @@ ViewDescriptor& ViewDescriptor::set_aggregation(
   return *this;
 }
 
-ViewDescriptor& ViewDescriptor::add_column(absl::string_view tag_key) {
+ViewDescriptor& ViewDescriptor::add_column(TagKey tag_key) {
   columns_.emplace_back(tag_key);
   return *this;
 }
@@ -87,8 +88,11 @@ std::string ViewDescriptor::DebugString() const {
       "\"\n  measure: ", measure_descriptor().DebugString(),
       "\n  aggregation: ", aggregation_.DebugString(),
       "\n  aggregation window: ", aggregation_window_.DebugString(),
-      "\n  columns: ", absl::StrJoin(columns_, ":"), "\n  description: \"",
-      description_, "\"");
+      "\n  columns: ",
+      absl::StrJoin(
+          columns_, ":",
+          [](std::string* out, TagKey key) { return out->append(key.name()); }),
+      "\n  description: \"", description_, "\"");
 }
 
 bool ViewDescriptor::operator==(const ViewDescriptor& other) const {

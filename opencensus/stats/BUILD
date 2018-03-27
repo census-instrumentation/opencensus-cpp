@@ -57,14 +57,18 @@ cc_library(
         "internal/aggregation.cc",
         "internal/aggregation_window.cc",
         "internal/bucket_boundaries.cc",
+        "internal/delta_producer.cc",
         "internal/distribution.cc",
         "internal/measure.cc",
+        "internal/measure_data.cc",
         "internal/measure_descriptor.cc",
         "internal/measure_registry.cc",
         "internal/measure_registry_impl.cc",
         "internal/set_aggregation_window.cc",
         "internal/stats_exporter.cc",
         "internal/stats_manager.cc",
+        "internal/tag_key.cc",
+        "internal/tag_set.cc",
         "internal/view.cc",
         "internal/view_data.cc",
         "internal/view_data_impl.cc",
@@ -75,6 +79,8 @@ cc_library(
         "bucket_boundaries.h",
         "distribution.h",
         "internal/aggregation_window.h",
+        "internal/delta_producer.h",
+        "internal/measure_data.h",
         "internal/measure_registry_impl.h",
         "internal/set_aggregation_window.h",
         "internal/stats_exporter_impl.h",
@@ -84,12 +90,15 @@ cc_library(
         "measure_descriptor.h",
         "measure_registry.h",
         "stats_exporter.h",
+        "tag_key.h",
+        "tag_set.h",
         "view.h",
         "view_data.h",
         "view_descriptor.h",
     ],
     copts = DEFAULT_COPTS,
     deps = [
+        "//opencensus/common/internal:hash_mix",
         "//opencensus/common/internal:stats_object",
         "//opencensus/common/internal:string_vector_hash",
         "@com_google_absl//absl/base:core_headers",
@@ -129,6 +138,16 @@ cc_test(
 )
 
 cc_test(
+    name = "delta_producer_stats_test",
+    srcs = ["internal/delta_producer_stats_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":core",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "distribution_test",
     srcs = ["internal/distribution_test.cc"],
     copts = TEST_COPTS,
@@ -145,6 +164,19 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":core",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "measure_data_test",
+    size = "small",
+    srcs = ["internal/measure_data_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":core",
+        ":test_utils",
+        "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -181,6 +213,28 @@ cc_test(
         ":core",
         ":recording",
         "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "tag_key_test",
+    size = "small",
+    srcs = ["internal/tag_key_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":core",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "tag_set_test",
+    size = "small",
+    srcs = ["internal/tag_set_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":core",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -90,8 +90,8 @@ const stats::ViewDescriptor& ClientErrorCountCumulative() {
           .set_name("grpc.io/client/error_count/cumulative")
           .set_measure(kRpcClientErrorCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey)
-          .add_column(kStatusTagKey);
+          .add_column(MethodTagKey())
+          .add_column(StatusTagKey());
   return descriptor;
 }
 
@@ -101,7 +101,7 @@ const stats::ViewDescriptor& ClientRequestBytesCumulative() {
           .set_name("grpc.io/client/request_bytes/cumulative")
           .set_measure(kRpcClientRequestBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -111,7 +111,7 @@ const stats::ViewDescriptor& ClientResponseBytesCumulative() {
           .set_name("grpc.io/client/response_bytes/cumulative")
           .set_measure(kRpcClientResponseBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -121,7 +121,7 @@ const stats::ViewDescriptor& ClientRoundtripLatencyCumulative() {
           .set_name("grpc.io/client/roundtrip_latency/cumulative")
           .set_measure(kRpcClientRoundtripLatencyMeasureName)
           .set_aggregation(MillisDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -131,7 +131,7 @@ const stats::ViewDescriptor& ClientServerElapsedTimeCumulative() {
           .set_name("grpc.io/client/server_elapsed_time/cumulative")
           .set_measure(kRpcClientServerElapsedTimeMeasureName)
           .set_aggregation(MillisDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -141,7 +141,7 @@ const stats::ViewDescriptor& ClientStartedCountCumulative() {
           .set_name("grpc.io/client/started_count/cumulative")
           .set_measure(kRpcClientStartedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -151,7 +151,7 @@ const stats::ViewDescriptor& ClientFinishedCountCumulative() {
           .set_name("grpc.io/client/finished_count/cumulative")
           .set_measure(kRpcClientFinishedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -161,7 +161,7 @@ const stats::ViewDescriptor& ClientRequestCountCumulative() {
           .set_name("grpc.io/client/request_count/cumulative")
           .set_measure(kRpcClientRequestCountMeasureName)
           .set_aggregation(CountDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -171,7 +171,7 @@ const stats::ViewDescriptor& ClientResponseCountCumulative() {
           .set_name("grpc.io/client/response_count/cumulative")
           .set_measure(kRpcClientResponseCountMeasureName)
           .set_aggregation(CountDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -182,8 +182,8 @@ const stats::ViewDescriptor& ServerErrorCountCumulative() {
           .set_name("grpc.io/server/error_count/cumulative")
           .set_measure(kRpcServerErrorCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey)
-          .add_column(kStatusTagKey);
+          .add_column(MethodTagKey())
+          .add_column(StatusTagKey());
   return descriptor;
 }
 
@@ -193,7 +193,7 @@ const stats::ViewDescriptor& ServerRequestBytesCumulative() {
           .set_name("grpc.io/server/request_bytes/cumulative")
           .set_measure(kRpcServerRequestBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -203,7 +203,7 @@ const stats::ViewDescriptor& ServerResponseBytesCumulative() {
           .set_name("grpc.io/server/response_bytes/cumulative")
           .set_measure(kRpcServerResponseBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -213,7 +213,7 @@ const stats::ViewDescriptor& ServerServerElapsedTimeCumulative() {
           .set_name("grpc.io/server/elapsed_time/cumulative")
           .set_measure(kRpcServerServerElapsedTimeMeasureName)
           .set_aggregation(MillisDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -223,7 +223,7 @@ const stats::ViewDescriptor& ServerStartedCountCumulative() {
           .set_name("grpc.io/server/started_count/cumulative")
           .set_measure(kRpcServerStartedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -233,7 +233,7 @@ const stats::ViewDescriptor& ServerFinishedCountCumulative() {
           .set_name("grpc.io/server/finished_count/cumulative")
           .set_measure(kRpcServerFinishedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -243,7 +243,7 @@ const stats::ViewDescriptor& ServerRequestCountCumulative() {
           .set_name("grpc.io/server/request_count/cumulative")
           .set_measure(kRpcServerRequestCountMeasureName)
           .set_aggregation(CountDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -253,7 +253,7 @@ const stats::ViewDescriptor& ServerResponseCountCumulative() {
           .set_name("grpc.io/server/response_count/cumulative")
           .set_measure(kRpcServerResponseCountMeasureName)
           .set_aggregation(CountDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -264,8 +264,8 @@ const stats::ViewDescriptor& ClientErrorCountMinute() {
           .set_name("grpc.io/client/error_count/minute")
           .set_measure(kRpcClientErrorCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey)
-          .add_column(kStatusTagKey);
+          .add_column(MethodTagKey())
+          .add_column(StatusTagKey());
   return descriptor;
 }
 
@@ -275,7 +275,7 @@ const stats::ViewDescriptor& ClientRequestBytesMinute() {
           .set_name("grpc.io/client/request_bytes/minute")
           .set_measure(kRpcClientRequestBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -285,7 +285,7 @@ const stats::ViewDescriptor& ClientResponseBytesMinute() {
           .set_name("grpc.io/client/response_bytes/minute")
           .set_measure(kRpcClientResponseBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -295,7 +295,7 @@ const stats::ViewDescriptor& ClientRoundtripLatencyMinute() {
           .set_name("grpc.io/client/roundtrip_latency/minute")
           .set_measure(kRpcClientRoundtripLatencyMeasureName)
           .set_aggregation(MillisDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -305,7 +305,7 @@ const stats::ViewDescriptor& ClientServerElapsedTimeMinute() {
           .set_name("grpc.io/client/server_elapsed_time/minute")
           .set_measure(kRpcClientServerElapsedTimeMeasureName)
           .set_aggregation(MillisDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -315,7 +315,7 @@ const stats::ViewDescriptor& ClientStartedCountMinute() {
           .set_name("grpc.io/client/started_count/minute")
           .set_measure(kRpcClientStartedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -325,7 +325,7 @@ const stats::ViewDescriptor& ClientFinishedCountMinute() {
           .set_name("grpc.io/client/finished_count/minute")
           .set_measure(kRpcClientFinishedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -335,7 +335,7 @@ const stats::ViewDescriptor& ClientRequestCountMinute() {
           .set_name("grpc.io/client/request_count/minute")
           .set_measure(kRpcClientRequestCountMeasureName)
           .set_aggregation(CountDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -345,7 +345,7 @@ const stats::ViewDescriptor& ClientResponseCountMinute() {
           .set_name("grpc.io/client/response_count/minute")
           .set_measure(kRpcClientResponseCountMeasureName)
           .set_aggregation(CountDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -356,8 +356,8 @@ const stats::ViewDescriptor& ServerErrorCountMinute() {
           .set_name("grpc.io/server/error_count/minute")
           .set_measure(kRpcServerErrorCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey)
-          .add_column(kStatusTagKey);
+          .add_column(MethodTagKey())
+          .add_column(StatusTagKey());
   return descriptor;
 }
 
@@ -367,7 +367,7 @@ const stats::ViewDescriptor& ServerRequestBytesMinute() {
           .set_name("grpc.io/server/request_bytes/minute")
           .set_measure(kRpcServerRequestBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -377,7 +377,7 @@ const stats::ViewDescriptor& ServerResponseBytesMinute() {
           .set_name("grpc.io/server/response_bytes/minute")
           .set_measure(kRpcServerResponseBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -387,7 +387,7 @@ const stats::ViewDescriptor& ServerServerElapsedTimeMinute() {
           .set_name("grpc.io/server/server_elapsed_time/minute")
           .set_measure(kRpcServerServerElapsedTimeMeasureName)
           .set_aggregation(MillisDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -397,7 +397,7 @@ const stats::ViewDescriptor& ServerStartedCountMinute() {
           .set_name("grpc.io/server/started_count/minute")
           .set_measure(kRpcServerStartedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -407,7 +407,7 @@ const stats::ViewDescriptor& ServerFinishedCountMinute() {
           .set_name("grpc.io/server/finished_count/minute")
           .set_measure(kRpcServerFinishedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -417,7 +417,7 @@ const stats::ViewDescriptor& ServerRequestCountMinute() {
           .set_name("grpc.io/server/request_count/minute")
           .set_measure(kRpcServerRequestCountMeasureName)
           .set_aggregation(CountDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -427,7 +427,7 @@ const stats::ViewDescriptor& ServerResponseCountMinute() {
           .set_name("grpc.io/server/response_count/minute")
           .set_measure(kRpcServerResponseCountMeasureName)
           .set_aggregation(CountDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -438,8 +438,8 @@ const stats::ViewDescriptor& ClientErrorCountHour() {
           .set_name("grpc.io/client/error_count/hour")
           .set_measure(kRpcClientErrorCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey)
-          .add_column(kStatusTagKey);
+          .add_column(MethodTagKey())
+          .add_column(StatusTagKey());
   return descriptor;
 }
 
@@ -449,7 +449,7 @@ const stats::ViewDescriptor& ClientRequestBytesHour() {
           .set_name("grpc.io/client/request_bytes/hour")
           .set_measure(kRpcClientRequestBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -459,7 +459,7 @@ const stats::ViewDescriptor& ClientResponseBytesHour() {
           .set_name("grpc.io/client/response_bytes/hour")
           .set_measure(kRpcClientResponseBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -469,7 +469,7 @@ const stats::ViewDescriptor& ClientRoundtripLatencyHour() {
           .set_name("grpc.io/client/roundtrip_latency/hour")
           .set_measure(kRpcClientRoundtripLatencyMeasureName)
           .set_aggregation(MillisDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -479,7 +479,7 @@ const stats::ViewDescriptor& ClientServerElapsedTimeHour() {
           .set_name("grpc.io/client/server_elapsed_time/hour")
           .set_measure(kRpcClientServerElapsedTimeMeasureName)
           .set_aggregation(MillisDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -489,7 +489,7 @@ const stats::ViewDescriptor& ClientStartedCountHour() {
           .set_name("grpc.io/client/started_count/hour")
           .set_measure(kRpcClientStartedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -499,7 +499,7 @@ const stats::ViewDescriptor& ClientFinishedCountHour() {
           .set_name("grpc.io/client/finished_count/hour")
           .set_measure(kRpcClientFinishedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -509,7 +509,7 @@ const stats::ViewDescriptor& ClientRequestCountHour() {
           .set_name("grpc.io/client/request_count/hour")
           .set_measure(kRpcClientRequestCountMeasureName)
           .set_aggregation(CountDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -519,7 +519,7 @@ const stats::ViewDescriptor& ClientResponseCountHour() {
           .set_name("grpc.io/client/response_count/hour")
           .set_measure(kRpcClientResponseCountMeasureName)
           .set_aggregation(CountDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -530,8 +530,8 @@ const stats::ViewDescriptor& ServerErrorCountHour() {
           .set_name("grpc.io/server/error_count/hour")
           .set_measure(kRpcServerErrorCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey)
-          .add_column(kStatusTagKey);
+          .add_column(MethodTagKey())
+          .add_column(StatusTagKey());
   return descriptor;
 }
 
@@ -541,7 +541,7 @@ const stats::ViewDescriptor& ServerRequestBytesHour() {
           .set_name("grpc.io/server/request_bytes/hour")
           .set_measure(kRpcServerRequestBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -551,7 +551,7 @@ const stats::ViewDescriptor& ServerResponseBytesHour() {
           .set_name("grpc.io/server/response_bytes/hour")
           .set_measure(kRpcServerResponseBytesMeasureName)
           .set_aggregation(BytesDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -561,7 +561,7 @@ const stats::ViewDescriptor& ServerServerElapsedTimeHour() {
           .set_name("grpc.io/server/server_elapsed_time/hour")
           .set_measure(kRpcServerServerElapsedTimeMeasureName)
           .set_aggregation(MillisDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -571,7 +571,7 @@ const stats::ViewDescriptor& ServerStartedCountHour() {
           .set_name("grpc.io/server/started_count/hour")
           .set_measure(kRpcServerStartedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -581,7 +581,7 @@ const stats::ViewDescriptor& ServerFinishedCountHour() {
           .set_name("grpc.io/server/finished_count/hour")
           .set_measure(kRpcServerFinishedCountMeasureName)
           .set_aggregation(stats::Aggregation::Sum())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -591,7 +591,7 @@ const stats::ViewDescriptor& ServerRequestCountHour() {
           .set_name("grpc.io/server/request_count/hour")
           .set_measure(kRpcServerRequestCountMeasureName)
           .set_aggregation(CountDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 
@@ -601,7 +601,7 @@ const stats::ViewDescriptor& ServerResponseCountHour() {
           .set_name("grpc.io/server/response_count/hour")
           .set_measure(kRpcServerResponseCountMeasureName)
           .set_aggregation(CountDistributionAggregation())
-          .add_column(kMethodTagKey);
+          .add_column(MethodTagKey());
   return descriptor;
 }
 

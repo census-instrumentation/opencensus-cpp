@@ -15,6 +15,7 @@
 #ifndef OPENCENSUS_STATS_INTERNAL_VIEW_DATA_IMPL_H_
 #define OPENCENSUS_STATS_INTERNAL_VIEW_DATA_IMPL_H_
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -27,6 +28,7 @@
 #include "opencensus/stats/aggregation.h"
 #include "opencensus/stats/distribution.h"
 #include "opencensus/stats/internal/aggregation_window.h"
+#include "opencensus/stats/internal/measure_data.h"
 #include "opencensus/stats/view_descriptor.h"
 
 namespace opencensus {
@@ -61,6 +63,10 @@ class ViewDataImpl {
 
   ViewDataImpl(const ViewDataImpl& other);
   ~ViewDataImpl();
+
+  // Returns a copy of the present state of the object and resets data() and
+  // start_time().
+  std::unique_ptr<ViewDataImpl> GetDeltaAndReset(absl::Time now);
 
   const Aggregation& aggregation() const { return aggregation_; }
   const AggregationWindow& aggregation_window() const {
@@ -107,7 +113,19 @@ class ViewDataImpl {
   void Add(double value, const std::vector<std::string>& tag_values,
            absl::Time now);
 
+  // Merges bulk data for the given tag values at 'now'. tag_values must be
+  // ordered according to the order of keys in the ViewDescriptor.
+  // TODO: Change to take Span<string_view> when heterogenous lookup is
+  // supported.
+  void Merge(const std::vector<std::string>& tag_values,
+             const MeasureData& data, absl::Time now);
+
  private:
+  // Implements GetDeltaAndReset(), copying aggregation_ and swapping data_ and
+  // start/end times. This is private so that it can be given a more descriptive
+  // name in the public API.
+  ViewDataImpl(ViewDataImpl* source, absl::Time now);
+
   Type TypeForDescriptor(const ViewDescriptor& descriptor);
 
   const Aggregation aggregation_;

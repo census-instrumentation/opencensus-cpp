@@ -16,7 +16,7 @@ load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
 
 licenses(["notice"])  # Apache License 2.0
 
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = ["//visibility:private"])
 
 # Libraries
 # ========================================================================= #
@@ -26,27 +26,12 @@ cc_library(
     srcs = ["internal/stackdriver_exporter.cc"],
     hdrs = ["stackdriver_exporter.h"],
     copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
     deps = [
         "//google/devtools/cloudtrace/v2:tracing_proto",
         "//opencensus/trace",
         "@com_github_grpc_grpc//:grpc++",
-        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
-    ],
-)
-
-# Tests
-# ========================================================================= #
-
-cc_test(
-    name = "stackdriver_exporter_test",
-    srcs = ["internal/stackdriver_exporter_test.cc"],
-    copts = TEST_COPTS,
-    deps = [
-        ":stackdriver_exporter",
-        "//opencensus/trace",
-        "@com_github_grpc_grpc//test/core/util:gpr_test_util",
-        "@com_google_googletest//:gtest_main",
     ],
 )

@@ -53,8 +53,8 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorNameAndType) {
 }
 
 TEST(StackdriverUtilsTest, SetMetricDescriptorLabels) {
-  const std::string tag_key_1 = "foo";
-  const std::string tag_key_2 = "bar";
+  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor().add_column(tag_key_1).add_column(
           tag_key_2);
@@ -65,10 +65,10 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorLabels) {
   EXPECT_EQ("opencensus_task", metric_descriptor.labels(0).key());
   EXPECT_EQ(google::api::LabelDescriptor::STRING,
             metric_descriptor.labels(0).value_type());
-  EXPECT_EQ(tag_key_1, metric_descriptor.labels(1).key());
+  EXPECT_EQ(tag_key_1.name(), metric_descriptor.labels(1).key());
   EXPECT_EQ(google::api::LabelDescriptor::STRING,
             metric_descriptor.labels(1).value_type());
-  EXPECT_EQ(tag_key_2, metric_descriptor.labels(2).key());
+  EXPECT_EQ(tag_key_2.name(), metric_descriptor.labels(2).key());
   EXPECT_EQ(google::api::LabelDescriptor::STRING,
             metric_descriptor.labels(2).value_type());
 }
@@ -85,8 +85,8 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorMetricKind) {
 TEST(StackdriverUtilsTest, SetMetricDescriptorValueType) {
   auto view_descriptor = opencensus::stats::ViewDescriptor();
   google::api::MetricDescriptor metric_descriptor;
-  opencensus::stats::MeasureRegistry::RegisterDouble("double_measure", "", "");
-  opencensus::stats::MeasureRegistry::RegisterInt("int_measure", "", "");
+  opencensus::stats::MeasureDouble::Register("double_measure", "", "");
+  opencensus::stats::MeasureInt64::Register("int_measure", "", "");
 
   // Sum depends on measure type.
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::Sum());
@@ -124,7 +124,7 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorValueType) {
 
 TEST(StackdriverUtilsTest, SetMetricDescriptorUnits) {
   const std::string units = "test_units";
-  opencensus::stats::MeasureRegistry::RegisterDouble("measure", units, "");
+  opencensus::stats::MeasureDouble::Register("measure", "", units);
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor().set_measure("measure");
   google::api::MetricDescriptor metric_descriptor;
@@ -144,12 +144,12 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorDescription) {
 }
 
 TEST(StackdriverUtilsTest, MakeTimeSeriesSumDouble) {
-  const auto measure = opencensus::stats::MeasureRegistry::RegisterDouble(
-      "measure_sum_double", "", "");
+  const auto measure =
+      opencensus::stats::MeasureDouble::Register("measure_sum_double", "", "");
   const std::string task = "test_task";
   const std::string view_name = "test_view";
-  const std::string tag_key_1 = "foo";
-  const std::string tag_key_2 = "bar";
+  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name(view_name)
@@ -172,24 +172,25 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumDouble) {
               ts.points(0).interval().end_time().seconds());
   }
 
-  EXPECT_THAT(
-      time_series,
-      ::testing::UnorderedElementsAre(
-          testing::TimeSeriesDouble(
-              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v1"}},
-              1.0),
-          testing::TimeSeriesDouble(
-              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v2"}},
-              2.0)));
+  EXPECT_THAT(time_series,
+              ::testing::UnorderedElementsAre(
+                  testing::TimeSeriesDouble({{"opencensus_task", task},
+                                             {tag_key_1.name(), "v1"},
+                                             {tag_key_2.name(), "v1"}},
+                                            1.0),
+                  testing::TimeSeriesDouble({{"opencensus_task", task},
+                                             {tag_key_1.name(), "v1"},
+                                             {tag_key_2.name(), "v2"}},
+                                            2.0)));
 }
 
 TEST(StackdriverUtilsTest, MakeTimeSeriesSumInt) {
-  const auto measure = opencensus::stats::MeasureRegistry::RegisterInt(
-      "measure_sum_int", "", "");
+  const auto measure =
+      opencensus::stats::MeasureInt64::Register("measure_sum_int", "", "");
   const std::string task = "test_task";
   const std::string view_name = "test_descriptor";
-  const std::string tag_key_1 = "foo";
-  const std::string tag_key_2 = "bar";
+  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name(view_name)
@@ -213,24 +214,25 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumInt) {
               ts.points(0).interval().end_time().seconds());
   }
 
-  EXPECT_THAT(
-      time_series,
-      ::testing::UnorderedElementsAre(
-          testing::TimeSeriesInt(
-              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v1"}},
-              1),
-          testing::TimeSeriesInt(
-              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v2"}},
-              2)));
+  EXPECT_THAT(time_series,
+              ::testing::UnorderedElementsAre(
+                  testing::TimeSeriesInt({{"opencensus_task", task},
+                                          {tag_key_1.name(), "v1"},
+                                          {tag_key_2.name(), "v1"}},
+                                         1),
+                  testing::TimeSeriesInt({{"opencensus_task", task},
+                                          {tag_key_1.name(), "v1"},
+                                          {tag_key_2.name(), "v2"}},
+                                         2)));
 }
 
 TEST(StackdriverUtilsTest, MakeTimeSeriesCountDouble) {
-  const auto measure = opencensus::stats::MeasureRegistry::RegisterDouble(
+  const auto measure = opencensus::stats::MeasureDouble::Register(
       "measure_count_double", "", "");
   const std::string task = "test_task";
   const std::string view_name = "test_descriptor";
-  const std::string tag_key_1 = "foo";
-  const std::string tag_key_2 = "bar";
+  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name(view_name)
@@ -255,24 +257,25 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesCountDouble) {
               ts.points(0).interval().end_time().seconds());
   }
 
-  EXPECT_THAT(
-      time_series,
-      ::testing::UnorderedElementsAre(
-          testing::TimeSeriesInt(
-              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v1"}},
-              2),
-          testing::TimeSeriesInt(
-              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v2"}},
-              1)));
+  EXPECT_THAT(time_series,
+              ::testing::UnorderedElementsAre(
+                  testing::TimeSeriesInt({{"opencensus_task", task},
+                                          {tag_key_1.name(), "v1"},
+                                          {tag_key_2.name(), "v1"}},
+                                         2),
+                  testing::TimeSeriesInt({{"opencensus_task", task},
+                                          {tag_key_1.name(), "v1"},
+                                          {tag_key_2.name(), "v2"}},
+                                         1)));
 }
 
 TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
-  const auto measure = opencensus::stats::MeasureRegistry::RegisterDouble(
+  const auto measure = opencensus::stats::MeasureDouble::Register(
       "measure_distribution_double", "", "");
   const std::string task = "test_task";
   const std::string view_name = "test_view";
-  const std::string tag_key_1 = "foo";
-  const std::string tag_key_2 = "bar";
+  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
   const auto bucket_boundaries =
       opencensus::stats::BucketBoundaries::Explicit({0});
   const auto view_descriptor =
@@ -306,15 +309,16 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
   auto distribution2 = TestUtils::MakeDistribution(&bucket_boundaries);
   TestUtils::AddToDistribution(&distribution2, 1.0);
 
-  EXPECT_THAT(
-      time_series,
-      ::testing::UnorderedElementsAre(
-          testing::TimeSeriesDistribution(
-              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v1"}},
-              distribution1),
-          testing::TimeSeriesDistribution(
-              {{"opencensus_task", task}, {tag_key_1, "v1"}, {tag_key_2, "v2"}},
-              distribution2)));
+  EXPECT_THAT(time_series,
+              ::testing::UnorderedElementsAre(
+                  testing::TimeSeriesDistribution({{"opencensus_task", task},
+                                                   {tag_key_1.name(), "v1"},
+                                                   {tag_key_2.name(), "v1"}},
+                                                  distribution1),
+                  testing::TimeSeriesDistribution({{"opencensus_task", task},
+                                                   {tag_key_1.name(), "v1"},
+                                                   {tag_key_2.name(), "v2"}},
+                                                  distribution2)));
 }
 
 }  // namespace

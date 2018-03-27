@@ -137,19 +137,21 @@ void SpanImpl::SetStatus(exporter::Status&& status) {
   }
 }
 
-void SpanImpl::End() { EndWithTime(absl::Now()); }
+bool SpanImpl::End() {
+  absl::MutexLock l(&mu_);
+  if (has_ended_) {
+    assert(false && "Invalid attempt to End() the same Span more than once.");
+    // In non-debug builds, just ignore the second End().
+    return false;
+  }
+  has_ended_ = true;
+  end_time_ = absl::Now();
+  return true;
+}
 
 bool SpanImpl::HasEnded() const {
   absl::MutexLock l(&mu_);
   return has_ended_;
-}
-
-void SpanImpl::EndWithTime(absl::Time end_time) {
-  absl::MutexLock l(&mu_);
-  if (!has_ended_) {
-    has_ended_ = true;
-    end_time_ = end_time;
-  }
 }
 
 exporter::SpanData SpanImpl::ToSpanData() const {

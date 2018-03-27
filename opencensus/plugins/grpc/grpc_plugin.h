@@ -41,8 +41,8 @@ opencensus::trace::Span GetSpanFromServerContext(grpc::ServerContext* context);
 
 // The tag key for the RPC method and status, set for all values recorded for
 // the following measures.
-extern const absl::string_view kMethodTagKey;
-extern const absl::string_view kStatusTagKey;
+opencensus::stats::TagKey MethodTagKey();
+opencensus::stats::TagKey StatusTagKey();
 
 // Names of measures used by the plugin--users can create views on these
 // measures but should not record data for them.

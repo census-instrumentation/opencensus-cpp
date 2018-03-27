@@ -17,14 +17,13 @@
 #include "absl/time/clock.h"
 #include "opencensus/stats/internal/stats_manager.h"
 #include "opencensus/stats/measure.h"
+#include "opencensus/stats/tag_key.h"
 
 namespace opencensus {
 namespace stats {
 
-void Record(
-    std::initializer_list<Measurement> measurements,
-    std::initializer_list<std::pair<absl::string_view, absl::string_view>>
-        tags) {
+void Record(std::initializer_list<Measurement> measurements,
+            std::initializer_list<std::pair<TagKey, absl::string_view>> tags) {
   StatsManager::Get()->Record(measurements, tags, absl::Now());
 }
 

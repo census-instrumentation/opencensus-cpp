@@ -22,7 +22,6 @@
 #include "opencensus/stats/internal/aggregation_window.h"
 #include "opencensus/stats/internal/set_aggregation_window.h"
 #include "opencensus/stats/measure.h"
-#include "opencensus/stats/measure_registry.h"
 #include "opencensus/stats/recording.h"
 #include "opencensus/stats/view.h"
 #include "opencensus/stats/view_descriptor.h"
@@ -73,14 +72,15 @@ struct IntervalWindow {
 // with a small number of tags.
 template <class AggregationFactory, class AggregationWindowFactory>
 void BM_Record(benchmark::State& state) {
-  const std::string tag_key_1 = "tag_key_1";
-  const std::string tag_key_2 = "tag_key_2";
+  const TagKey tag_key_1 = TagKey::Register("tag_key_1");
+  const TagKey tag_key_2 = TagKey::Register("tag_key_2");
   const std::string measure_name = MakeUniqueName();
-  MeasureDouble measure = MeasureRegistry::RegisterDouble(measure_name, "", "");
+  MeasureDouble measure = MeasureDouble::Register(measure_name, "", "");
   std::vector<std::unique_ptr<View>> views;
   for (int i = 0; i < state.range(0); ++i) {
-    // The view_key_* tag key is necessary to prevent these from being merged by
+    // This tag key is necessary to prevent these from being merged by
     // the StatsManager.
+    const TagKey view_tag_key = TagKey::Register(absl::StrCat("view_key_", i));
     ViewDescriptor descriptor =
         ViewDescriptor()
             .set_measure(measure_name)
@@ -88,7 +88,7 @@ void BM_Record(benchmark::State& state) {
             .set_aggregation(
                 AggregationFactory()(BucketBoundaries::Exponential(10, 10, 2)))
             .add_column(tag_key_1)
-            .add_column(absl::StrCat("view_key_", i));
+            .add_column(view_tag_key);
     SetAggregationWindow(AggregationWindowFactory()(absl::Hours(1)),
                          &descriptor);
     views.push_back(absl::make_unique<View>(descriptor));
@@ -118,14 +118,14 @@ BENCHMARK_TEMPLATE2(BM_Record, DistributionAggregation, IntervalWindow)
 // Benchmarks batched recording against a set of measures with a small number of
 // views on each, matching RPC stats recording.
 void BM_RecordBatched(benchmark::State& state) {
-  const std::string tag_key_1 = "tag_key_1";
-  const std::string tag_key_2 = "tag_key_2";
+  const TagKey tag_key_1 = TagKey::Register("tag_key_1");
+  const TagKey tag_key_2 = TagKey::Register("tag_key_2");
   const int num_measures = 6;
   std::vector<MeasureDouble> measures;
   std::vector<std::unique_ptr<View>> views;
   for (int i = 0; i < num_measures; ++i) {
     const std::string measure_name = MakeUniqueName();
-    measures.push_back(MeasureRegistry::RegisterDouble(measure_name, "", ""));
+    measures.push_back(MeasureDouble::Register(measure_name, "", ""));
 
     const ViewDescriptor count_descriptor =
         ViewDescriptor()
