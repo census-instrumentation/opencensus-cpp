@@ -24,7 +24,6 @@ load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
 cc_grpc_library(
     name = "annotations",
     srcs = ["annotations.proto"],
-    generate_mock = False,
     proto_only = False,
     use_external = True,
     well_known_protos = True,
@@ -34,7 +33,6 @@ cc_grpc_library(
 cc_grpc_library(
     name = "distribution",
     srcs = ["distribution.proto"],
-    generate_mock = False,
     proto_only = False,
     use_external = True,
     well_known_protos = True,
@@ -44,7 +42,6 @@ cc_grpc_library(
 cc_grpc_library(
     name = "http",
     srcs = ["http.proto"],
-    generate_mock = False,
     proto_only = False,
     use_external = True,
     well_known_protos = True,
@@ -54,7 +51,6 @@ cc_grpc_library(
 cc_grpc_library(
     name = "label",
     srcs = ["label.proto"],
-    generate_mock = False,
     proto_only = False,
     use_external = True,
     well_known_protos = True,
@@ -64,7 +60,6 @@ cc_grpc_library(
 cc_grpc_library(
     name = "metric",
     srcs = ["metric.proto"],
-    generate_mock = False,
     proto_only = False,
     use_external = True,
     well_known_protos = True,
@@ -74,7 +69,6 @@ cc_grpc_library(
 cc_grpc_library(
     name = "monitored_resource",
     srcs = ["monitored_resource.proto"],
-    generate_mock = False,
     proto_only = False,
     use_external = True,
     well_known_protos = True,
