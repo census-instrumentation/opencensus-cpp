@@ -59,12 +59,14 @@ cc_library(
         "internal/bucket_boundaries.cc",
         "internal/distribution.cc",
         "internal/measure.cc",
+        "internal/measure_data.cc",
         "internal/measure_descriptor.cc",
         "internal/measure_registry.cc",
         "internal/measure_registry_impl.cc",
         "internal/set_aggregation_window.cc",
         "internal/stats_exporter.cc",
         "internal/stats_manager.cc",
+        "internal/tag_set.cc",
         "internal/view.cc",
         "internal/view_data.cc",
         "internal/view_data_impl.cc",
@@ -75,6 +77,7 @@ cc_library(
         "bucket_boundaries.h",
         "distribution.h",
         "internal/aggregation_window.h",
+        "internal/measure_data.h",
         "internal/measure_registry_impl.h",
         "internal/set_aggregation_window.h",
         "internal/stats_exporter_impl.h",
@@ -84,6 +87,7 @@ cc_library(
         "measure_descriptor.h",
         "measure_registry.h",
         "stats_exporter.h",
+        "tag_set.h",
         "view.h",
         "view_data.h",
         "view_descriptor.h",
@@ -150,6 +154,19 @@ cc_test(
 )
 
 cc_test(
+    name = "measure_data_test",
+    size = "small",
+    srcs = ["internal/measure_data_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":core",
+        ":test_utils",
+        "@com_google_absl//absl/types:span",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "measure_registry_test",
     srcs = ["internal/measure_registry_test.cc"],
     copts = TEST_COPTS,
@@ -181,6 +198,17 @@ cc_test(
         ":core",
         ":recording",
         "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "tag_set_test",
+    size = "small",
+    srcs = ["internal/tag_set_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":core",
         "@com_google_googletest//:gtest_main",
     ],
 )
