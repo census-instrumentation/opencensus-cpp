@@ -202,22 +202,10 @@ class CurlEnv {
   ~CurlEnv() { curl_global_cleanup(); }
 };
 
-}  // namespace
-
-void ZipkinExporter::SendMessage(const std::string &msg, size_t size) const {
+void CurlSendMessage(const uint8_t *data, const ZipkinExporterOptions &options,
+                     size_t size, CURL *curl, struct curl_slist *headers,
+                     char *err_msg) {
   CURLcode res;
-  struct curl_slist *headers = nullptr;
-  char err_msg[CURL_ERROR_SIZE] = {0};
-  CURL *curl = curl_easy_init();
-
-  if (!curl) {
-    // Failed to create curl handle.
-    return;
-  }
-
-  headers = curl_slist_append(headers, "Content-Type: application/json");
-  headers = curl_slist_append(headers, "Expect:");
-  const uint8_t *data = reinterpret_cast<const uint8_t *>(msg.data());
 
   if (CURLE_OK !=
       (res = curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, err_msg))) {
@@ -226,7 +214,7 @@ void ZipkinExporter::SendMessage(const std::string &msg, size_t size) const {
     return;
   }
   if (CURLE_OK !=
-      (res = curl_easy_setopt(curl, CURLOPT_URL, options_.url.c_str()))) {
+      (res = curl_easy_setopt(curl, CURLOPT_URL, options.url.c_str()))) {
     // Failed to set url.
     std::cerr << curl_easy_strerror(res);
     return;
@@ -254,14 +242,14 @@ void ZipkinExporter::SendMessage(const std::string &msg, size_t size) const {
   }
   if (CURLE_OK !=
       curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT,
-                       absl::ToInt64Milliseconds(options_.connect_timeout))) {
+                       absl::ToInt64Milliseconds(options.connect_timeout))) {
     // Failed to set connect timeout.
     std::cerr << curl_easy_strerror(res);
     return;
   }
   if (CURLE_OK !=
       curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS,
-                       absl::ToInt64Milliseconds(options_.request_timeout))) {
+                       absl::ToInt64Milliseconds(options.request_timeout))) {
     // Failed to set request timeout.
     std::cerr << curl_easy_strerror(res);
     return;
@@ -272,15 +260,15 @@ void ZipkinExporter::SendMessage(const std::string &msg, size_t size) const {
     return;
   }
 
-  if (options_.proxy.empty()) {
+  if (options.proxy.empty()) {
     if (CURLE_OK !=
-        (res = curl_easy_setopt(curl, CURLOPT_PROXY, options_.proxy.c_str()))) {
+        (res = curl_easy_setopt(curl, CURLOPT_PROXY, options.proxy.c_str()))) {
       // Failed to set proxy.
       std::cerr << curl_easy_strerror(res);
       return;
     }
 
-    if (options_.http_proxy_tunnel) {
+    if (options.http_proxy_tunnel) {
       if (CURLE_OK !=
           (res = curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP))) {
         // Failed to set HTTP proxy type.
@@ -296,14 +284,14 @@ void ZipkinExporter::SendMessage(const std::string &msg, size_t size) const {
     }
   }
 
-  if (options_.max_redirect_times > 0) {
+  if (options.max_redirect_times > 0) {
     if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1))) {
       // Failed to enable follow location.
       std::cerr << curl_easy_strerror(res);
       return;
     }
     if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_MAXREDIRS,
-                                            options_.max_redirect_times))) {
+                                            options.max_redirect_times))) {
       // Failed to set max redirect times.
       std::cerr << curl_easy_strerror(res);
       return;
@@ -316,6 +304,25 @@ void ZipkinExporter::SendMessage(const std::string &msg, size_t size) const {
     std::cerr << curl_easy_strerror(res);
     return;
   }
+}
+
+}  // namespace
+
+void ZipkinExporter::SendMessage(const std::string &msg, size_t size) const {
+  struct curl_slist *headers = nullptr;
+  char err_msg[CURL_ERROR_SIZE] = {0};
+  CURL *curl = curl_easy_init();
+
+  if (!curl) {
+    // Failed to create curl handle.
+    return;
+  }
+
+  headers = curl_slist_append(headers, "Content-Type: application/json");
+  headers = curl_slist_append(headers, "Expect:");
+  const uint8_t *data = reinterpret_cast<const uint8_t *>(msg.data());
+
+  CurlSendMessage(data, options_, size, curl, headers, err_msg);
 
   curl_slist_free_all(headers);
   curl_easy_cleanup(curl);
