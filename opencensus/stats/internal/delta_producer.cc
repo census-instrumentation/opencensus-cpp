@@ -139,10 +139,5 @@ void DeltaProducer::RunHarvesterLoop() {
   }
 }
 
-void ExperimentalDeltaProducerRecord(
-    std::initializer_list<Measurement> measurements, TagSet tags) {
-  DeltaProducer::Get()->Record(measurements, std::move(tags));
-}
-
 }  // namespace stats
 }  // namespace opencensus

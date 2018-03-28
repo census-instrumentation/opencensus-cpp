@@ -66,23 +66,6 @@ int StatsManager::ViewInformation::RemoveConsumer() {
   return --num_consumers_;
 }
 
-void StatsManager::ViewInformation::Record(
-    double value, absl::Span<const std::pair<TagKey, absl::string_view>> tags,
-    absl::Time now) {
-  mu_->AssertHeld();
-  std::vector<std::string> tag_values(descriptor_.columns().size());
-  for (int i = 0; i < tag_values.size(); ++i) {
-    const TagKey column = descriptor_.columns()[i];
-    for (const auto& tag : tags) {
-      if (tag.first == column) {
-        tag_values[i] = std::string(tag.second);
-        break;
-      }
-    }
-  }
-  data_.Add(value, tag_values, now);
-}
-
 void StatsManager::ViewInformation::MergeMeasureData(const TagSet& tags,
                                                      const MeasureData& data,
                                                      absl::Time now) {
@@ -114,15 +97,6 @@ std::unique_ptr<ViewDataImpl> StatsManager::ViewInformation::GetData() {
 
 // ==========================================================================
 // // StatsManager::MeasureInformation
-
-void StatsManager::MeasureInformation::Record(
-    double value, absl::Span<const std::pair<TagKey, absl::string_view>> tags,
-    absl::Time now) {
-  mu_->AssertHeld();
-  for (auto& view : views_) {
-    view->Record(value, tags, now);
-  }
-}
 
 void StatsManager::MeasureInformation::MergeMeasureData(const TagSet& tags,
                                                         const MeasureData& data,
@@ -168,26 +142,6 @@ void StatsManager::MeasureInformation::RemoveView(
 StatsManager* StatsManager::Get() {
   static StatsManager* global_stats_manager = new StatsManager();
   return global_stats_manager;
-}
-
-void StatsManager::Record(
-    std::initializer_list<Measurement> measurements,
-    std::initializer_list<std::pair<TagKey, absl::string_view>> tags,
-    absl::Time now) {
-  absl::MutexLock l(&mu_);
-  for (const auto& measurement : measurements) {
-    if (MeasureRegistryImpl::IdValid(measurement.id_)) {
-      const uint64_t index = MeasureRegistryImpl::IdToIndex(measurement.id_);
-      switch (MeasureRegistryImpl::IdToType(measurement.id_)) {
-        case MeasureDescriptor::Type::kDouble:
-          measures_[index].Record(measurement.value_double_, tags, now);
-          break;
-        case MeasureDescriptor::Type::kInt64:
-          measures_[index].Record(measurement.value_int_, tags, now);
-          break;
-      }
-    }
-  }
 }
 
 void StatsManager::MergeDelta(const Delta& delta) {

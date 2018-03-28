@@ -138,16 +138,6 @@ cc_test(
 )
 
 cc_test(
-    name = "delta_producer_stats_test",
-    srcs = ["internal/delta_producer_stats_test.cc"],
-    copts = TEST_COPTS,
-    deps = [
-        ":core",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
     name = "distribution_test",
     srcs = ["internal/distribution_test.cc"],
     copts = TEST_COPTS,
@@ -212,6 +202,7 @@ cc_test(
     deps = [
         ":core",
         ":recording",
+        ":test_utils",
         "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
