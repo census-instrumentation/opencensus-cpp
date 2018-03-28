@@ -64,27 +64,12 @@ struct ZipkinExporterOptions {
   };
 };
 
-class ZipkinExporter
-    : public ::opencensus::trace::exporter::SpanExporter::Handler {
+class ZipkinExporter {
  public:
-  void Export(const std::vector<::opencensus::trace::exporter::SpanData> &spans)
-      override;
   static void Register(const ZipkinExporterOptions &options);
 
  private:
-  friend class ZipkinExporterTestPeer;
-
-  static void ExportForTesting(
-      const std::vector<::opencensus::trace::exporter::SpanData> &spans);
-
-  ZipkinExporter(const ZipkinExporterOptions &options) : options_(options) {}
-  ~ZipkinExporter() {}
-
-  // Send HTTP message to zipkin endpoint using libcurl.
-  void SendMessage(const std::string &msg, size_t size) const;
-
-  ZipkinExporterOptions options_;
-  ZipkinExporterOptions::Service service_;
+  ZipkinExporter() = delete;
 };
 
 }  // namespace trace

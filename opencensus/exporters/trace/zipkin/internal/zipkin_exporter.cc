@@ -35,6 +35,16 @@ constexpr char kZipkinLib[] = "zipkin/2.0";
 constexpr char ipv4_loopback[] = "127.0.0.1";
 constexpr char ipv6_loopback[] = "::1";
 
+std::string SerializeMessageEvent(
+    const ::opencensus::trace::exporter::MessageEvent &event) {
+  return absl::StrCat(
+      event.type() == ::opencensus::trace::exporter::MessageEvent::Type::SENT
+          ? "SENT"
+          : "RECEIVED",
+      "/", std::to_string(event.id()), "/",
+      std::to_string(event.compressed_size()));
+}
+
 std::string AttributeValueToString(
     const ::opencensus::trace::exporter::AttributeValue &value) {
   switch (value.type()) {
@@ -48,6 +58,7 @@ std::string AttributeValueToString(
       return std::to_string(value.int_value());
       break;
   }
+  ABSL_ASSERT(false && "Unknown AttributeValue type");
   return "";
 }
 
@@ -89,7 +100,7 @@ void SerializeJson(const ::opencensus::trace::exporter::SpanData &span,
   writer->Key("id");
   writer->String(span.context().span_id().ToHex());
 
-  // Write endpoint.  Census does not support this by default.
+  // Write endpoint.  OpenCensus does not support this by default.
   writer->Key("localEndpoint");
   writer->StartObject();
   writer->Key("serviceName");
@@ -114,6 +125,20 @@ void SerializeJson(const ::opencensus::trace::exporter::SpanData &span,
       writer->EndObject();
     }
     writer->EndArray(span.annotations().events().size());
+  }
+
+  if (!span.message_events().events().empty()) {
+    writer->Key("annotations");
+    writer->StartArray();
+    for (const auto &event : span.message_events().events()) {
+      writer->StartObject();
+      writer->Key("timestamp");
+      writer->Int64(absl::ToUnixMicros(event.timestamp()));
+      writer->Key("value");
+      writer->String(SerializeMessageEvent(event.event()));
+      writer->EndObject();
+    }
+    writer->EndArray(span.message_events().events().size());
   }
 
   if (!span.attributes().empty()) {
@@ -199,84 +224,68 @@ class CurlEnv {
   ~CurlEnv() { curl_global_cleanup(); }
 };
 
-void CurlSendMessage(const uint8_t *data, const ZipkinExporterOptions &options,
-                     size_t size, CURL *curl, struct curl_slist *headers,
-                     char *err_msg) {
+CURLcode CurlSendMessage(const uint8_t *data,
+                         const ZipkinExporterOptions &options, size_t size,
+                         CURL *curl, char *err_msg) {
   CURLcode res;
 
   if (CURLE_OK !=
       (res = curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, err_msg))) {
     // Failed to set curl error buffer.
-    std::cerr << curl_easy_strerror(res);
-    return;
+    return res;
   }
   if (CURLE_OK !=
       (res = curl_easy_setopt(curl, CURLOPT_URL, options.url.c_str()))) {
     // Failed to set url.
-    std::cerr << curl_easy_strerror(res);
-    return;
-  }
-  if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers))) {
-    // Failed to set http header.
-    std::cerr << curl_easy_strerror(res);
-    return;
+    return res;
   }
   if (CURLE_OK !=
       (res = curl_easy_setopt(curl, CURLOPT_USERAGENT, kZipkinLib))) {
     // Failed to set http user agent.
-    std::cerr << curl_easy_strerror(res);
-    return;
+    return res;
   }
   if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, size))) {
     // Failed to set http body size.
-    std::cerr << curl_easy_strerror(res);
-    return;
+    return res;
   }
   if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data))) {
     // Failed to set http body data.
-    std::cerr << curl_easy_strerror(res);
-    return;
+    return res;
   }
   if (CURLE_OK !=
       curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT,
                        absl::ToInt64Milliseconds(options.connect_timeout))) {
     // Failed to set connect timeout.
-    std::cerr << curl_easy_strerror(res);
-    return;
+    return res;
   }
   if (CURLE_OK !=
       curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS,
                        absl::ToInt64Milliseconds(options.request_timeout))) {
     // Failed to set request timeout.
-    std::cerr << curl_easy_strerror(res);
-    return;
+    return res;
   }
   if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1))) {
     // Failed to disable signals.
-    std::cerr << curl_easy_strerror(res);
-    return;
+    return res;
   }
 
   if (options.proxy.empty()) {
     if (CURLE_OK !=
         (res = curl_easy_setopt(curl, CURLOPT_PROXY, options.proxy.c_str()))) {
       // Failed to set proxy.
-      std::cerr << curl_easy_strerror(res);
-      return;
+      return res;
     }
 
     if (options.http_proxy_tunnel) {
       if (CURLE_OK !=
           (res = curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP))) {
         // Failed to set HTTP proxy type.
-        std::cerr << curl_easy_strerror(res);
-        return;
+        return res;
       }
       if (CURLE_OK !=
           (res = curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1))) {
         // Failed to set HTTP proxy tunnel.
-        std::cerr << curl_easy_strerror(res);
-        return;
+        return res;
       }
     }
   }
@@ -284,29 +293,44 @@ void CurlSendMessage(const uint8_t *data, const ZipkinExporterOptions &options,
   if (options.max_redirect_times > 0) {
     if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1))) {
       // Failed to enable follow location.
-      std::cerr << curl_easy_strerror(res);
-      return;
+      return res;
     }
     if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_MAXREDIRS,
                                             options.max_redirect_times))) {
       // Failed to set max redirect times.
-      std::cerr << curl_easy_strerror(res);
-      return;
+      return res;
     }
   }
 
   // Sending HTTP request to url.
   if (CURLE_OK != (res = curl_easy_perform(curl))) {
     // Failed to send http request.
-    std::cerr << curl_easy_strerror(res);
-    return;
+    return res;
   }
+
+  return res;
 }
 
 }  // namespace
 
-void ZipkinExporter::SendMessage(const std::string &msg, size_t size) const {
-  struct curl_slist *headers = nullptr;
+class ZipkinExportHandler
+    : public ::opencensus::trace::exporter::SpanExporter::Handler {
+ public:
+  ZipkinExportHandler(const ZipkinExporterOptions &options)
+      : options_(options) {}
+
+  void Export(const std::vector<::opencensus::trace::exporter::SpanData> &spans)
+      override;
+
+  // Send HTTP message to zipkin endpoint using libcurl.
+  void SendMessage(const std::string &msg, size_t size) const;
+
+  ZipkinExporterOptions options_;
+  ZipkinExporterOptions::Service service_;
+};
+
+void ZipkinExportHandler::SendMessage(const std::string &msg,
+                                      size_t size) const {
   char err_msg[CURL_ERROR_SIZE] = {0};
   CURL *curl = curl_easy_init();
 
@@ -315,32 +339,16 @@ void ZipkinExporter::SendMessage(const std::string &msg, size_t size) const {
     return;
   }
 
-  headers = curl_slist_append(headers, "Content-Type: application/json");
-  headers = curl_slist_append(headers, "Expect:");
-  const uint8_t *data = reinterpret_cast<const uint8_t *>(msg.data());
+  CURLcode res = CurlSendMessage(reinterpret_cast<const uint8_t *>(msg.data()),
+                                 options_, size, curl, err_msg);
+  if (res != CURLE_OK) {
+    std::cerr << curl_easy_strerror(res);
+  }
 
-  CurlSendMessage(data, options_, size, curl, headers, err_msg);
-
-  curl_slist_free_all(headers);
   curl_easy_cleanup(curl);
 }
 
-void ZipkinExporter::Register(const ZipkinExporterOptions &options) {
-  // Initialize libcurl. This MUST only be done once per process.
-  static CurlEnv *curl_lib = new CurlEnv();
-
-  // Create new exporter.
-  ZipkinExporter *exporter = new ZipkinExporter(options);
-  // Get IP address of current machine.
-  exporter->service_.service_name = options.service_name;
-  exporter->service_.af_type = options.af_type;
-  exporter->service_.ip_address = GetIpAddress(options.af_type);
-  ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
-      absl::WrapUnique<::opencensus::trace::exporter::SpanExporter::Handler>(
-          exporter));
-}
-
-void ZipkinExporter::Export(
+void ZipkinExportHandler::Export(
     const std::vector<::opencensus::trace::exporter::SpanData> &spans) {
   if (!spans.empty()) {
     std::string msg = EncodeJson(spans, service_);
@@ -348,16 +356,19 @@ void ZipkinExporter::Export(
   }
 }
 
-void ZipkinExporter::ExportForTesting(
-    const std::vector<::opencensus::trace::exporter::SpanData> &spans) {
-  if (!spans.empty()) {
-    ZipkinExporterOptions::Service service(
-        "TestService", ZipkinExporterOptions::AddressFamily::kIpv6);
-    service.ip_address =
-        GetIpAddress(ZipkinExporterOptions::AddressFamily::kIpv6);
-    std::string msg = EncodeJson(spans, service);
-    fprintf(stderr, "%s\n", msg.c_str());
-  }
+void ZipkinExporter::Register(const ZipkinExporterOptions &options) {
+  // Initialize libcurl. This MUST only be done once per process.
+  static CurlEnv *curl_lib = new CurlEnv();
+
+  // Create new exporter.
+  ZipkinExportHandler *handler = new ZipkinExportHandler(options);
+  // Get IP address of current machine.
+  handler->service_.service_name = options.service_name;
+  handler->service_.af_type = options.af_type;
+  handler->service_.ip_address = GetIpAddress(options.af_type);
+  ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
+      absl::WrapUnique<::opencensus::trace::exporter::SpanExporter::Handler>(
+          handler));
 }
 
 }  // namespace trace
