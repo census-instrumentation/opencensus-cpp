@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "absl/time/clock.h"
+#include "absl/time/time.h"
 #include "opencensus/stats/stats.h"
 
 #include "gtest/gtest.h"
@@ -80,6 +82,8 @@ TEST(ViewAndRecordingExample, Sum) {
   // Once the view is created, usage records under example.com/Bar/FooUsage.
   foo.Use(1);
   foo.Use(4);
+  // Sleep to allow the data to propagate to views.
+  absl::SleepFor(absl::Seconds(6));
 
   // The stats consumer can now query the recorded data.
   if (view.IsValid()) {

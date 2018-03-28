@@ -40,6 +40,9 @@ class TestUtils final {
 
   static void AddToDistribution(Distribution* distribution, double value);
 
+  // Flushes the DeltaProducer, propagating recorded stats to views.
+  static void Flush();
+
   TestUtils() = delete;
 };
 
