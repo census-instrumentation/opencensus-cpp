@@ -32,6 +32,7 @@
 #include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
 #include "opencensus/exporters/trace/stdout/stdout_exporter.h"
 #include "opencensus/plugins/grpc/grpc_plugin.h"
+#include "opencensus/stats/stats.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/trace_config.h"
@@ -42,6 +43,22 @@ namespace {
 using examples::HelloReply;
 using examples::HelloRequest;
 using examples::HelloService;
+
+ABSL_CONST_INIT const char kLettersMeasureName[] =
+    "example.org/measure/letters";
+
+opencensus::stats::MeasureInt64 LettersMeasure() {
+  static const opencensus::stats::MeasureInt64 measure =
+      opencensus::stats::MeasureInt64::Register(
+          kLettersMeasureName, "Number of letters in processed names.", "By");
+  return measure;
+}
+
+opencensus::stats::TagKey CaseKey() {
+  static const opencensus::stats::TagKey key =
+      opencensus::stats::TagKey::Register("example.org/uppercased");
+  return key;
+}
 
 // A helper function that performs some work in its own Span.
 void PerformWork(opencensus::trace::Span* parent) {
@@ -67,7 +84,10 @@ class HelloServiceImpl final : public HelloService::Service {
     PerformWork(&span);
     span.AddAnnotation("Sleeping.");
     absl::SleepFor(absl::Milliseconds(30));
-    // TODO: Record() custom stats.
+    // Record custom stats.
+    opencensus::stats::Record(
+        {{LettersMeasure(), request->name().size()}},
+        {{CaseKey(), isupper(request->name()[0]) ? "upper" : "lower"}});
     std::cerr << "SayHello RPC handled.\n";
     return grpc::Status::OK;
   }
@@ -105,6 +125,21 @@ int main(int argc, char** argv) {
   // Expose a Prometheus endpoint.
   prometheus::Exposer exposer("127.0.0.1:8080");
   exposer.RegisterCollectable(exporter);
+
+  // Init custom measure.
+  LettersMeasure();
+
+  // Add a View for custom stats.
+  const opencensus::stats::ViewDescriptor letters_view =
+      opencensus::stats::ViewDescriptor()
+          .set_name("example.org/view/letters_view")
+          .set_description("number of letters in names greeted over time")
+          .set_measure(kLettersMeasureName)
+          .set_aggregation(opencensus::stats::Aggregation::Sum())
+          .add_column(CaseKey());
+  opencensus::stats::View view(letters_view);
+  assert(view.IsValid());
+  letters_view.RegisterForExport();
 
   // Start the RPC server. You shouldn't see any output from gRPC before this.
   std::cerr << "gRPC starting.\n";
