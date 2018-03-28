@@ -56,7 +56,7 @@ opencensus::stats::MeasureInt64 LettersMeasure() {
 
 opencensus::stats::TagKey CaseKey() {
   static const opencensus::stats::TagKey key =
-      opencensus::stats::TagKey::Register("example.org/uppercased");
+      opencensus::stats::TagKey::Register("example_uppercased");
   return key;
 }
 
