@@ -54,17 +54,19 @@ std::string AttributeValueToString(
 std::string SerializeAnnotation(
     const ::opencensus::trace::exporter::Annotation &annotation) {
   std::string annotation_str(annotation.description());
-  absl::StrAppend(&annotation_str, " (");
-  size_t count = 0;
-  for (const auto &attribute : annotation.attributes()) {
-    absl::StrAppend(&annotation_str, attribute.first, ":",
-                    AttributeValueToString(attribute.second));
+  if (!annotation.attributes().empty()) {
+    absl::StrAppend(&annotation_str, " (");
+    size_t count = 0;
+    for (const auto &attribute : annotation.attributes()) {
+      absl::StrAppend(&annotation_str, attribute.first, ":",
+                      AttributeValueToString(attribute.second));
 
-    if (++count < annotation.attributes().size()) {
-      absl::StrAppend(&annotation_str, ", ");
+      if (++count < annotation.attributes().size()) {
+        absl::StrAppend(&annotation_str, ", ");
+      }
     }
+    absl::StrAppend(&annotation_str, ")");
   }
-  absl::StrAppend(&annotation_str, ")");
   return annotation_str;
 }
 
@@ -79,13 +81,13 @@ void SerializeJson(const ::opencensus::trace::exporter::SpanData &span,
   writer->Key("traceId");
   writer->String(span.context().trace_id().ToHex());
 
-  writer->Key("id");
-  writer->String(span.context().span_id().ToHex());
-
   if (span.parent_span_id().IsValid()) {
     writer->Key("parentId");
     writer->String(span.parent_span_id().ToHex());
   }
+
+  writer->Key("id");
+  writer->String(span.context().span_id().ToHex());
 
   // Write endpoint.  Census does not support this by default.
   writer->Key("localEndpoint");
@@ -94,11 +96,10 @@ void SerializeJson(const ::opencensus::trace::exporter::SpanData &span,
   writer->String(service.service_name);
   if (service.af_type == ZipkinExporterOptions::AddressFamily::kIpv6) {
     writer->Key("ipv6");
-    writer->String(service.ip_address);
   } else {
     writer->Key("ipv4");
-    writer->String(service.ip_address);
   }
+  writer->String(service.ip_address);
   writer->EndObject();
 
   if (!span.annotations().events().empty()) {
@@ -117,16 +118,12 @@ void SerializeJson(const ::opencensus::trace::exporter::SpanData &span,
 
   if (!span.attributes().empty()) {
     writer->Key("tags");
-    writer->StartArray();
+    writer->StartObject();
     for (const auto &attribute : span.attributes()) {
-      writer->StartObject();
-      writer->Key("key");
       writer->String(attribute.first);
-      writer->Key("value");
       writer->String(AttributeValueToString(attribute.second));
-      writer->EndObject();
     }
-    writer->EndArray(span.attributes().size());
+    writer->EndObject();
   }
 
   writer->Key("timestamp");

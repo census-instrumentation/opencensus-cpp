@@ -46,6 +46,10 @@ TEST_F(ZipkinExporterTestPeer, ExportTrace) {
   span2.AddAnnotation("Annotation2",
                       {{"TestString", "Test"}, {"TestInt", 123}});
   auto span3 = ::opencensus::trace::Span::StartSpan("Span3", &span2, opts);
+  span3.AddAttributes({{"key1", "value1"},
+                       {"int_key", 123},
+                       {"another_key", "another_value"},
+                       {"bool_key", true}});
   absl::SleepFor(absl::Milliseconds(300));
   span3.End();
   span2.End();
