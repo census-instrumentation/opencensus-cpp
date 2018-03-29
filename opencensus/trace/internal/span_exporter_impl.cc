@@ -64,7 +64,7 @@ bool SpanExporterImpl::IsBufferFull() const {
 
 void SpanExporterImpl::RunWorkerLoop() {
   std::vector<opencensus::trace::exporter::SpanData> span_data_;
-  std::vector<std::shared_ptr<opencensus::trace::SpanImpl>> spans_copy_;
+  std::vector<std::shared_ptr<opencensus::trace::SpanImpl>> batch_;
   // Thread loops forever.
   // TODO: Add in shutdown mechanism.
   absl::Time next_forced_export_time = absl::Now() + interval_;
@@ -79,13 +79,13 @@ void SpanExporterImpl::RunWorkerLoop() {
       if (spans_.empty()) {
         continue;
       }
-      std::swap(spans_copy_, spans_);
+      std::swap(batch_, spans_);
     }
-    for (const auto& span : spans_copy_) {
+    for (const auto& span : batch_) {
       span_data_.emplace_back(span->ToSpanData());
     }
+    batch_.clear();
     Export(span_data_);
-    spans_copy_.clear();
     span_data_.clear();
   }
 }
@@ -96,6 +96,19 @@ void SpanExporterImpl::Export(const std::vector<SpanData>& span_data) {
   for (const auto& handler : handlers_) {
     handler->Export(span_data);
   }
+}
+
+void SpanExporterImpl::ExportForTesting() {
+  std::vector<opencensus::trace::exporter::SpanData> span_data_;
+  std::vector<std::shared_ptr<opencensus::trace::SpanImpl>> batch_;
+  {
+    absl::MutexLock l(&span_mu_);
+    std::swap(batch_, spans_);
+  }
+  for (const auto& span : batch_) {
+    span_data_.emplace_back(span->ToSpanData());
+  }
+  Export(span_data_);
 }
 
 }  // namespace exporter

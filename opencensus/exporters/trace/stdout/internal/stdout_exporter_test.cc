@@ -14,36 +14,51 @@
 
 #include "opencensus/exporters/trace/stdout/stdout_exporter.h"
 
+#include <iostream>
+#include <sstream>
+
 #include "absl/time/clock.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "opencensus/trace/exporter/span_exporter.h"
 #include "opencensus/trace/internal/local_span_store.h"
 #include "opencensus/trace/span.h"
 
 namespace opencensus {
-namespace exporters {
 namespace trace {
+namespace exporter {
+
+class SpanExporterTestPeer {
+ public:
+  static constexpr auto& ExportForTesting = SpanExporter::ExportForTesting;
+};
+
+}  // namespace exporter
+}  // namespace trace
+}  // namespace opencensus
+
 namespace {
 
-TEST(TraceExporterTest, ExportTrace) {
-  StdoutExporter::Register();
+using ::testing::HasSubstr;
+
+TEST(StdoutExporterTest, Export) {
+  std::stringstream s;
+  ::opencensus::exporters::trace::StdoutExporter::Register(&s);
   static ::opencensus::trace::AlwaysSampler sampler;
   ::opencensus::trace::StartSpanOptions opts = {&sampler};
 
   auto span1 = ::opencensus::trace::Span::StartSpan("Span1", nullptr, opts);
-  absl::SleepFor(absl::Milliseconds(100));
   auto span2 = ::opencensus::trace::Span::StartSpan("Span2", &span1, opts);
-  absl::SleepFor(absl::Milliseconds(200));
   auto span3 = ::opencensus::trace::Span::StartSpan("Span3", &span2, opts);
-  absl::SleepFor(absl::Milliseconds(300));
+  span3.AddAnnotation("Needle.");
   span3.End();
   span2.End();
   span1.End();
 
-  // Wait for exporter.
-  absl::SleepFor(absl::Milliseconds(5200));
+  opencensus::trace::exporter::SpanExporterTestPeer::ExportForTesting();
+  const std::string str = s.str();
+  std::cout << str;
+  EXPECT_THAT(str, HasSubstr("Needle."));
 }
 
 }  // namespace
-}  // namespace trace
-}  // namespace exporters
-}  // namespace opencensus

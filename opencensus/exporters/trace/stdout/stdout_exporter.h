@@ -15,16 +15,16 @@
 #ifndef OPENCENSUS_EXPORTERS_TRACE_STDOUT_STDOUT_EXPORTER_H_
 #define OPENCENSUS_EXPORTERS_TRACE_STDOUT_STDOUT_EXPORTER_H_
 
+#include <iostream>
+
 namespace opencensus {
 namespace exporters {
 namespace trace {
 
 class StdoutExporter {
  public:
-  static void Register();
-
- private:
-  class Handler;
+  StdoutExporter() = delete;
+  static void Register(std::ostream* stream = &std::cout);
 };
 
 }  // namespace trace
