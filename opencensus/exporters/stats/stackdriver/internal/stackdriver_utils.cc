@@ -160,7 +160,10 @@ void SetMetricDescriptor(
   }
   metric_descriptor->set_metric_kind(google::api::MetricDescriptor::CUMULATIVE);
   metric_descriptor->set_value_type(GetValueType(view_descriptor));
-  metric_descriptor->set_unit(view_descriptor.measure_descriptor().units());
+  metric_descriptor->set_unit(
+      view_descriptor.aggregation() == opencensus::stats::Aggregation::Count()
+          ? "1"
+          : view_descriptor.measure_descriptor().units());
   metric_descriptor->set_description(view_descriptor.description());
 }
 
