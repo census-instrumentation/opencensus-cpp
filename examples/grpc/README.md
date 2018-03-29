@@ -90,6 +90,10 @@ Go to https://console.cloud.google.com/monitoring to see stats:
 * Click on Resources &rarr; Metrics Explorer.
 * Choose the "global" Resource Type.
 
+Example:
+
+![Example of stats](https://i.imgur.com/OSomV4W.png)
+
 ### Tracing
 
 Go to https://console.cloud.google.com/traces/traces to see traces. Example:

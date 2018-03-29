@@ -32,6 +32,7 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         "//opencensus/stats",
+        "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",
     ],
 )

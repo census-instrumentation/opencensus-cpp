@@ -120,10 +120,6 @@ class DeltaProducer final {
   std::thread harvester_thread_ GUARDED_BY(harvester_mu_);
 };
 
-// TODO: Replace Record with this when ready.
-void ExperimentalDeltaProducerRecord(
-    std::initializer_list<Measurement> measurements, TagSet tags = TagSet({}));
-
 }  // namespace stats
 }  // namespace opencensus
 

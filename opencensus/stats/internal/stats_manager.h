@@ -57,11 +57,6 @@ class StatsManager final {
     // holding *mu_.
     int RemoveConsumer();
 
-    // Requires holding *mu_.
-    void Record(double value,
-                absl::Span<const std::pair<TagKey, absl::string_view>> tags,
-                absl::Time now);
-
     // Adds 'data' under 'tags' as of 'now'. Requires holding *mu_;
     void MergeMeasureData(const TagSet& tags, const MeasureData& data,
                           absl::Time now);
@@ -89,11 +84,6 @@ class StatsManager final {
  public:
   static StatsManager* Get();
 
-  // Records 'measurements' against all views tracking each measure.
-  void Record(std::initializer_list<Measurement> measurements,
-              std::initializer_list<std::pair<TagKey, absl::string_view>> tags,
-              absl::Time now) LOCKS_EXCLUDED(mu_);
-
   // Merges all data from 'delta' at the present time.
   void MergeDelta(const Delta& delta) LOCKS_EXCLUDED(mu_);
 
@@ -115,13 +105,6 @@ class StatsManager final {
   class MeasureInformation {
    public:
     explicit MeasureInformation(absl::Mutex* mu) : mu_(mu) {}
-
-    // records 'value' against all views tracking 'measure' at time 'now'.
-    // Presently only supports doubles; recorded ints are converted to doubles
-    // internally.
-    void Record(double value,
-                absl::Span<const std::pair<TagKey, absl::string_view>> tags,
-                absl::Time now);
 
     // Merges measure_data into all views under this measure. Requires holding
     // *mu_;
