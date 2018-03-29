@@ -38,11 +38,15 @@ using examples::HelloService;
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc != 2) {
-    std::cerr << "Usage: " << argv[0] << " host:port\n";
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0] << " host:port [name]\n";
     return 1;
   }
   const std::string hostport = argv[1];
+  std::string name = "world";
+  if (argc >= 3) {
+    name = argv[2];
+  }
 
   // Register the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
   opencensus::RegisterGrpcPlugin();
@@ -69,7 +73,7 @@ int main(int argc, char** argv) {
     grpc::ClientContext ctx;
     HelloRequest request;
     HelloReply reply;
-    request.set_name("world");
+    request.set_name(name);
     std::cout << "Sending request: \"" << request.ShortDebugString() << "\"\n";
 
     grpc::Status status = stub->SayHello(&ctx, request, &reply);
