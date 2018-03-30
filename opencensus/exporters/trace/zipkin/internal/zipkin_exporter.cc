@@ -110,6 +110,8 @@ void SerializeJson(const ::opencensus::trace::exporter::SpanData &span,
   } else {
     writer->Key("ipv4");
   }
+  writer->Key("port");
+  writer->String("0");
   writer->String(service.ip_address);
   writer->EndObject();
 
@@ -226,64 +228,69 @@ class CurlEnv {
 
 CURLcode CurlSendMessage(const uint8_t *data,
                          const ZipkinExporterOptions &options, size_t size,
-                         CURL *curl, char *err_msg) {
+                         const struct curl_slist *headers, CURL *curl,
+                         char *err_msg) {
   CURLcode res;
 
-  if (CURLE_OK !=
-      (res = curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, err_msg))) {
+  if ((res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers)) != CURLE_OK) {
+    // Failed to set curl header.
+    return res;
+  }
+  if ((res = curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, err_msg)) !=
+      CURLE_OK) {
     // Failed to set curl error buffer.
     return res;
   }
-  if (CURLE_OK !=
-      (res = curl_easy_setopt(curl, CURLOPT_URL, options.url.c_str()))) {
+  if ((res = curl_easy_setopt(curl, CURLOPT_URL, options.url.c_str())) !=
+      CURLE_OK) {
     // Failed to set url.
     return res;
   }
-  if (CURLE_OK !=
-      (res = curl_easy_setopt(curl, CURLOPT_USERAGENT, kZipkinLib))) {
+  if ((res = curl_easy_setopt(curl, CURLOPT_USERAGENT, kZipkinLib)) !=
+      CURLE_OK) {
     // Failed to set http user agent.
     return res;
   }
-  if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, size))) {
+  if ((res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, size)) != CURLE_OK) {
     // Failed to set http body size.
     return res;
   }
-  if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data))) {
+  if ((res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data)) != CURLE_OK) {
     // Failed to set http body data.
     return res;
   }
-  if (CURLE_OK !=
-      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT,
-                       absl::ToInt64Milliseconds(options.connect_timeout))) {
+  if ((res = curl_easy_setopt(
+           curl, CURLOPT_CONNECTTIMEOUT,
+           absl::ToInt64Milliseconds(options.connect_timeout))) != CURLE_OK) {
     // Failed to set connect timeout.
     return res;
   }
-  if (CURLE_OK !=
-      curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS,
-                       absl::ToInt64Milliseconds(options.request_timeout))) {
+  if ((res = curl_easy_setopt(
+           curl, CURLOPT_TIMEOUT_MS,
+           absl::ToInt64Milliseconds(options.request_timeout))) != CURLE_OK) {
     // Failed to set request timeout.
     return res;
   }
-  if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1))) {
+  if ((res = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1)) != CURLE_OK) {
     // Failed to disable signals.
     return res;
   }
 
   if (options.proxy.empty()) {
-    if (CURLE_OK !=
-        (res = curl_easy_setopt(curl, CURLOPT_PROXY, options.proxy.c_str()))) {
+    if ((res = curl_easy_setopt(curl, CURLOPT_PROXY, options.proxy.c_str())) !=
+        CURLE_OK) {
       // Failed to set proxy.
       return res;
     }
 
     if (options.http_proxy_tunnel) {
-      if (CURLE_OK !=
-          (res = curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP))) {
+      if ((res = curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP)) !=
+          CURLE_OK) {
         // Failed to set HTTP proxy type.
         return res;
       }
-      if (CURLE_OK !=
-          (res = curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1))) {
+      if ((res = curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1)) !=
+          CURLE_OK) {
         // Failed to set HTTP proxy tunnel.
         return res;
       }
@@ -291,19 +298,19 @@ CURLcode CurlSendMessage(const uint8_t *data,
   }
 
   if (options.max_redirect_times > 0) {
-    if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1))) {
+    if ((res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1)) != CURLE_OK) {
       // Failed to enable follow location.
       return res;
     }
-    if (CURLE_OK != (res = curl_easy_setopt(curl, CURLOPT_MAXREDIRS,
-                                            options.max_redirect_times))) {
+    if ((res = curl_easy_setopt(curl, CURLOPT_MAXREDIRS,
+                                options.max_redirect_times)) != CURLE_OK) {
       // Failed to set max redirect times.
       return res;
     }
   }
 
   // Sending HTTP request to url.
-  if (CURLE_OK != (res = curl_easy_perform(curl))) {
+  if ((res = curl_easy_perform(curl)) != CURLE_OK) {
     // Failed to send http request.
     return res;
   }
@@ -333,18 +340,21 @@ void ZipkinExportHandler::SendMessage(const std::string &msg,
                                       size_t size) const {
   char err_msg[CURL_ERROR_SIZE] = {0};
   CURL *curl = curl_easy_init();
+  struct curl_slist *headers = nullptr;
 
   if (!curl) {
     // Failed to create curl handle.
     return;
   }
 
+  headers = curl_slist_append(headers, "Content-Type: application/json");
   CURLcode res = CurlSendMessage(reinterpret_cast<const uint8_t *>(msg.data()),
-                                 options_, size, curl, err_msg);
+                                 options_, size, headers, curl, err_msg);
   if (res != CURLE_OK) {
-    std::cerr << curl_easy_strerror(res);
+    std::cerr << "curl error: " << curl_easy_strerror(res);
   }
 
+  curl_slist_free_all(headers);
   curl_easy_cleanup(curl);
 }
 

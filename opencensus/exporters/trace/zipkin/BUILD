@@ -39,3 +39,18 @@ cc_library(
         "@com_github_rapidjson//:rapidjson",
     ],
 )
+
+# Tests
+# ========================================================================= #
+
+cc_test(
+    name = "zipkin_exporter_test",
+    srcs = ["internal/zipkin_exporter_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":zipkin_exporter",
+        "//opencensus/trace",
+        "@com_google_absl//absl/time",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
