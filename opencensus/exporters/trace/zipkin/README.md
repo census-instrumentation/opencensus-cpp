@@ -30,9 +30,9 @@ Zipkin's tracing model is not identical to the model used by OpenCensus. Here is
 
 The traces will show up on the Zipkin webpage UI. If you are using the default address it will be "http://127.0.0.1:9411/zipkin". Click on find traces. The trace sent from the exporter should appear. Click on it and it should look something like this:
 
-![Example Trace](https://imgur.com/7bNWraI)
+![Example Trace](https://i.imgur.com/7bNWraI.png)
 
 The individual spans can be clicked on, which will list the tracing information
 for that particular span.
 
-![Example Span](https://imgur.com/S2yVHtu)
+![Example Span](https://i.imgur.com/S2yVHtu.png)
