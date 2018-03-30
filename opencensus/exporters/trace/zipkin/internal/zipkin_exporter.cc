@@ -110,8 +110,6 @@ void SerializeJson(const ::opencensus::trace::exporter::SpanData &span,
   } else {
     writer->Key("ipv4");
   }
-  writer->Key("port");
-  writer->String("0");
   writer->String(service.ip_address);
   writer->EndObject();
 
@@ -347,6 +345,8 @@ void ZipkinExportHandler::SendMessage(const std::string &msg,
     return;
   }
 
+  // This is required for the server to recognize that it is a json encoded
+  // message.
   headers = curl_slist_append(headers, "Content-Type: application/json");
   CURLcode res = CurlSendMessage(reinterpret_cast<const uint8_t *>(msg.data()),
                                  options_, size, headers, curl, err_msg);
@@ -372,8 +372,8 @@ void ZipkinExporter::Register(const ZipkinExporterOptions &options) {
 
   // Create new exporter.
   ZipkinExportHandler *handler = new ZipkinExportHandler(options);
-  // Get IP address of current machine.
   handler->service_.service_name = options.service_name;
+  // Get IP address of current machine.
   handler->service_.af_type = options.af_type;
   handler->service_.ip_address = GetIpAddress(options.af_type);
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(

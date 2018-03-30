@@ -51,6 +51,7 @@ TEST_F(ZipkinExporterTestPeer, ExportTrace) {
                        {"int_key", 123},
                        {"another_key", "another_value"},
                        {"bool_key", true}});
+  span3.AddAnnotation("Annotation3", {{"TestString", "Test"}});
   span3.AddSentMessageEvent(2, 3, 4);
   span3.AddReceivedMessageEvent(3, 4, 5);
   absl::SleepFor(absl::Milliseconds(300));
@@ -58,9 +59,8 @@ TEST_F(ZipkinExporterTestPeer, ExportTrace) {
   span2.End();
   span1.End();
 
-  while (true) {
-    absl::SleepFor(absl::Seconds(2));
-  }
+  // Wait long enough for spans to be exporter to zipkin server.
+  absl::SleepFor(absl::Seconds(6));
 }
 
 }  // namespace trace

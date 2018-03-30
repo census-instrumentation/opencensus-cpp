@@ -124,15 +124,11 @@ config_setting(
 cc_library(
     name = "curl",
     srcs = glob([
-        "lib/*.c",
-        "lib/vauth/*.c",
-        "lib/vtls/*.c",
+        "lib/**/*.c",
     ]),
     hdrs = glob([
         "include/curl/*.h",
-        "lib/*.h",
-        "lib/vtls/*.h",
-        "lib/vauth/*.h",
+        "lib/**/*.h",
     ]),
     includes = ["include/", "lib/"],
     copts = CURL_COPTS + [
