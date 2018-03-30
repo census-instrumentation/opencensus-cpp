@@ -108,8 +108,8 @@ int main(int argc, char** argv) {
   // Register the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
   opencensus::RegisterGrpcPlugin();
 
-  // Register the experimental gRPC views (latency, error count, etc).
-  opencensus::ExperimentalRegisterGrpcViewsForExport();
+  // Register the gRPC views (latency, error count, etc).
+  opencensus::RegisterGrpcViewsForExport();
 
   // Register exporters for Stackdriver.
   RegisterStackdriverExporters();

@@ -69,12 +69,12 @@ class CensusContext {
 };
 
 // Serialize outgoing server stats. Returns the number of bytes serialized.
-size_t ServerStatsSerialize(uint64_t server_elapsed_time, char *buf,
+size_t ServerStatsSerialize(uint64_t server_latency, char *buf,
                             size_t buf_size);
 
 // Deserialize incoming server stats. Returns the number of bytes deserialized.
 size_t ServerStatsDeserialize(const char *buf, size_t buf_size,
-                              uint64_t *server_elapsed_time);
+                              uint64_t *server_latency);
 
 // Deserialize the incoming SpanContext and generate a new server context based
 // on that. This new span will never be a root span. This should only be called

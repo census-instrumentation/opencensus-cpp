@@ -67,6 +67,7 @@ class CensusClientCallData : public grpc::CallData {
   grpc_linked_mdelem stats_bin_;
   grpc_linked_mdelem tracing_bin_;
   // Client method.
+  absl::string_view method_;
   std::string qualified_method_;
   grpc_slice path_;
   // The recv trailing metadata callbacks.

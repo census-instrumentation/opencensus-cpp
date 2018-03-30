@@ -218,13 +218,13 @@ class RpcServerStatsEncoding {
     }
 
     uint8_t version = buf[kVersionIdOffset];
-    uint32_t fieldID = buf[kServerElapsedTimeOffset];
-    if (version != kVersionId || fieldID != kServerElapsedTimeField) {
+    uint32_t fieldID = buf[kServerLatencyOffset];
+    if (version != kVersionId || fieldID != kServerLatencyField) {
       *time = 0;
       return kEncodeDecodeFailure;
     }
-    *time = absl::little_endian::Load64(
-        &buf[kServerElapsedTimeOffset + kFieldIdSize]);
+    *time =
+        absl::little_endian::Load64(&buf[kServerLatencyOffset + kFieldIdSize]);
     return kRpcServerStatsSize;
   }
 
@@ -238,8 +238,8 @@ class RpcServerStatsEncoding {
     }
 
     buf[kVersionIdOffset] = kVersionId;
-    buf[kServerElapsedTimeOffset] = kServerElapsedTimeField;
-    absl::little_endian::Store64(&buf[kServerElapsedTimeOffset + kFieldIdSize],
+    buf[kServerLatencyOffset] = kServerLatencyField;
+    absl::little_endian::Store64(&buf[kServerLatencyOffset + kFieldIdSize],
                                  time);
     return kRpcServerStatsSize;
   }
@@ -255,15 +255,15 @@ class RpcServerStatsEncoding {
   static constexpr size_t kVersionId = 0;
 
   enum FieldIdValue {
-    kServerElapsedTimeField = 0,
+    kServerLatencyField = 0,
   };
 
   enum FieldSize {
-    kServerElapsedTimeSize = 8,
+    kServerLatencySize = 8,
   };
 
   enum FieldIdOffset {
-    kServerElapsedTimeOffset = kVersionIdSize,
+    kServerLatencyOffset = kVersionIdSize,
   };
 
   RpcServerStatsEncoding() = delete;
