@@ -112,7 +112,7 @@ new_http_archive(
     strip_prefix = "curl-master",
     build_file_content =
 """
-load("@io_opencensus_cpp//opencensus/exporters/trace/zipkin:curl.bzl", "CURL_COPTS")
+load("@io_opencensus_cpp//opencensus:curl.bzl", "CURL_COPTS")
 package(features = ['no_copts_tokenization'])
 
 config_setting(

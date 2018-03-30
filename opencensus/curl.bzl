@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Compiler options for building zipkin exporter.
+# Compiler options for building libcurl.
 
 CURL_COPTS = select({
     # TODO: Add in windows defines

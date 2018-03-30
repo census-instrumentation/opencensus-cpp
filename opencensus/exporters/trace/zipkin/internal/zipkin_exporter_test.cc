@@ -43,7 +43,7 @@ TEST_F(ZipkinExporterTestPeer, ExportTrace) {
   absl::SleepFor(absl::Milliseconds(100));
   span1.AddAnnotation("Annotation1", {{"TestBool", true}});
   auto span2 = ::opencensus::trace::Span::StartSpan("Span2", &span1, opts);
-  absl::SleepFor(absl::Milliseconds(200));
+  absl::SleepFor(absl::Milliseconds(100));
   span2.AddAnnotation("Annotation2",
                       {{"TestString", "Test"}, {"TestInt", 123}});
   auto span3 = ::opencensus::trace::Span::StartSpan("Span3", &span2, opts);
@@ -54,9 +54,11 @@ TEST_F(ZipkinExporterTestPeer, ExportTrace) {
   span3.AddAnnotation("Annotation3", {{"TestString", "Test"}});
   span3.AddSentMessageEvent(2, 3, 4);
   span3.AddReceivedMessageEvent(3, 4, 5);
-  absl::SleepFor(absl::Milliseconds(300));
+  absl::SleepFor(absl::Milliseconds(100));
   span3.End();
+  absl::SleepFor(absl::Milliseconds(100));
   span2.End();
+  absl::SleepFor(absl::Milliseconds(100));
   span1.End();
 
   // Wait long enough for spans to be exporter to zipkin server.
