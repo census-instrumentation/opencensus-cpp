@@ -18,6 +18,7 @@
 
 #include "absl/memory/memory.h"
 #include "absl/time/time.h"
+#include "opencensus/stats/internal/delta_producer.h"
 
 namespace opencensus {
 namespace stats {
@@ -47,6 +48,9 @@ Distribution TestUtils::MakeDistribution(const BucketBoundaries* buckets) {
 void TestUtils::AddToDistribution(Distribution* distribution, double value) {
   distribution->Add(value);
 }
+
+// static
+void TestUtils::Flush() { DeltaProducer::Get()->Flush(); }
 
 }  // namespace testing
 }  // namespace stats

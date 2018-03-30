@@ -133,6 +133,18 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorUnits) {
   EXPECT_EQ(units, metric_descriptor.unit());
 }
 
+TEST(StackdriverUtilsTest, SetMetricDescriptorUnitsCount) {
+  opencensus::stats::MeasureDouble::Register("measure", "", "test_units");
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor()
+          .set_measure("measure")
+          .set_aggregation(opencensus::stats::Aggregation::Count());
+  google::api::MetricDescriptor metric_descriptor;
+  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+
+  EXPECT_EQ("1", metric_descriptor.unit());
+}
+
 TEST(StackdriverUtilsTest, SetMetricDescriptorDescription) {
   const std::string description = "test description";
   const auto view_descriptor =

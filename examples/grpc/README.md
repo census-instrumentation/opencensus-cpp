@@ -13,7 +13,7 @@ Usage:
 ```shell
 bazel build :all
 ../../bazel-bin/examples/grpc/hello_server 9001
-../../bazel-bin/examples/grpc/hello_client [::]:9001
+../../bazel-bin/examples/grpc/hello_client "[::]:9001"
 ```
 
 You can see the Prometheus stats on http://127.0.0.1:8080/metrics
@@ -89,6 +89,10 @@ Go to https://console.cloud.google.com/monitoring to see stats:
 
 * Click on Resources &rarr; Metrics Explorer.
 * Choose the "global" Resource Type.
+
+Example:
+
+![Example of stats](https://i.imgur.com/OSomV4W.png)
 
 ### Tracing
 
