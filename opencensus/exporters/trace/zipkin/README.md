@@ -5,12 +5,14 @@ to Zipkin using OpenCensus.
 
 Usage:
 
+Start the zipkin server.
 ```shell
-# start zipkin server
 java -jar zipkin.jar --logging.level.zipkin=DEBUG --logging.level.zipkin2=DEBUG
-# build OpenCensus example
+```
+
+Build and run the OpenCensus example.
+```shell
 bazel build opencensus/...
-# run example
 ./bazel-bin/opencensus/exporters/trace/zipkin/zipkin_exporter_test
 ```
 

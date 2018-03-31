@@ -53,7 +53,7 @@ struct ZipkinExporterOptions {
 
   struct Service {
     Service() : af_type(AddressFamily::kIpv4) {}
-    Service(const std::string &service_name, AddressFamily af_type)
+    Service(const std::string& service_name, AddressFamily af_type)
         : service_name(service_name), af_type(af_type) {}
 
     std::string service_name;
@@ -66,7 +66,7 @@ struct ZipkinExporterOptions {
 
 class ZipkinExporter {
  public:
-  static void Register(const ZipkinExporterOptions &options);
+  static void Register(const ZipkinExporterOptions& options);
 
  private:
   ZipkinExporter() = delete;
