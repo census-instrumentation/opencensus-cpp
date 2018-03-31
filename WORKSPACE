@@ -104,3 +104,60 @@ load("@com_github_jupp0r_prometheus_cpp//:repositories.bzl",
 # Load dependencies individually since we load some of them above.
 load_prometheus_client_model()
 load_civetweb()
+
+# Curl library - used by zipkin exporter.
+new_http_archive(
+    name = "com_github_curl",
+    urls = ["https://github.com/curl/curl/archive/master.zip"],
+    strip_prefix = "curl-master",
+    build_file_content =
+"""
+load("@io_opencensus_cpp//opencensus:curl.bzl", "CURL_COPTS")
+package(features = ['no_copts_tokenization'])
+
+config_setting(
+    name = "windows",
+    values = {"cpu": "x64_windows"},
+    visibility = [ "//visibility:private" ],
+)
+
+cc_library(
+    name = "curl",
+    srcs = glob([
+        "lib/**/*.c",
+    ]),
+    hdrs = glob([
+        "include/curl/*.h",
+        "lib/**/*.h",
+    ]),
+    includes = ["include/", "lib/"],
+    copts = CURL_COPTS + [
+        "-DOS=\\"os\\"",
+        "-DCURL_EXTERN_SYMBOL=__attribute__((__visibility__(\\"default\\")))",
+    ],
+    visibility = ["//visibility:public"],
+)
+"""
+)
+
+# Rapidjson library - used by zipkin exporter.
+new_http_archive(
+    name = "com_github_rapidjson",
+    urls = ["https://github.com/Tencent/rapidjson/archive/master.zip"],
+    strip_prefix = "rapidjson-master",
+    build_file_content =
+"""
+cc_library(
+    name = "rapidjson",
+    srcs = [],
+    hdrs = glob([
+        "include/rapidjson/*.h",
+        "include/rapidjson/internal/*.h",
+        "include/rapidjson/error/*.h",
+    ]),
+    includes = ["include/"],
+    defines = ["RAPIDJSON_HAS_STDSTRING=1",],
+    visibility = ["//visibility:public"],
+)
+"""
+)
