@@ -27,6 +27,7 @@ cc_library(
     deps = [
         ":stackdriver_utils",
         "//google/monitoring/v3:metric_service",
+        "//opencensus/common/internal/grpc:status",
         "//opencensus/stats",
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/strings",

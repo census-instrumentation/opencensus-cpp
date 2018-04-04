@@ -23,11 +23,9 @@
 #include "absl/time/clock.h"
 #include "google/devtools/cloudtrace/v2/tracing.grpc.pb.h"
 #include "include/grpc++/grpc++.h"
+#include "opencensus/common/internal/grpc/status.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/exporter/span_exporter.h"
-
-using grpc::ClientContext;
-using grpc::Status;
 
 namespace opencensus {
 namespace exporters {
@@ -41,11 +39,6 @@ constexpr char kGoogleStackdriverTraceAddress[] = "cloudtrace.googleapis.com";
 
 constexpr char kAgentKey[] = "g.co/agent";
 constexpr char kAgentValue[] = "opencensus-cpp";
-
-std::string ToString(const grpc::Status& status) {
-  return absl::StrCat("status code ", status.error_code(), " details \"",
-                      status.error_message(), "\"");
-}
 
 gpr_timespec ConvertToTimespec(absl::Time time) {
   gpr_timespec g_time;
@@ -272,12 +265,13 @@ void Handler::Export(
   request.set_name(absl::StrCat("projects/", project_id_));
   ConvertSpans(spans, project_id_, &request);
   ::google::protobuf::Empty response;
-  ClientContext context;
+  grpc::ClientContext context;
   context.set_deadline(
       ConvertToTimespec(absl::Now() + absl::Milliseconds(3000)));
-  Status status = stub_->BatchWriteSpans(&context, request, &response);
+  grpc::Status status = stub_->BatchWriteSpans(&context, request, &response);
   if (!status.ok()) {
-    std::cerr << "BatchWriteSpans failed: " << ToString(status) << "\n";
+    std::cerr << "BatchWriteSpans failed: "
+              << opencensus::common::ToString(status) << "\n";
   }
 }
 
