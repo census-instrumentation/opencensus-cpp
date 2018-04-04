@@ -137,14 +137,13 @@ grpc_error *CensusClientCallData::Init(grpc_call_element *elem,
                                        const grpc_call_element_args *args) {
   path_ = grpc_slice_ref_internal(args->path);
   start_time_ = absl::Now();
-  qualified_method_ = StrCat("Sent.", GetMethod(&path_));
+  method_ = GetMethod(&path_);
+  qualified_method_ = absl::StrCat("Sent.", method_);
   GRPC_CLOSURE_INIT(&on_done_recv_message_, OnDoneRecvMessageCb, elem,
                     grpc_schedule_on_exec_ctx);
   GRPC_CLOSURE_INIT(&on_done_recv_trailing_metadata_,
                     OnDoneRecvTrailingMetadataCb, elem,
                     grpc_schedule_on_exec_ctx);
-  stats::Record({{RpcClientStartedCount(), 1}},
-                {{MethodTagKey(), qualified_method_}});
   return GRPC_ERROR_NONE;
 }
 
@@ -155,18 +154,15 @@ void CensusClientCallData::Destroy(grpc_call_element *elem,
   const uint64_t response_size = GetIncomingDataSize(final_info);
   double latency_ms = absl::ToDoubleMilliseconds(absl::Now() - start_time_);
   stats::Record(
-      {{RpcClientErrorCount(),
-        final_info->final_status == GRPC_STATUS_OK ? 0 : 1},
-       {RpcClientRequestBytes(), static_cast<double>(request_size)},
-       {RpcClientResponseBytes(), static_cast<double>(response_size)},
+      {{RpcClientSentBytesPerRpc(), static_cast<double>(request_size)},
+       {RpcClientReceivedBytesPerRpc(), static_cast<double>(response_size)},
        {RpcClientRoundtripLatency(), latency_ms},
-       {RpcClientServerElapsedTime(),
+       {RpcClientServerLatency(),
         static_cast<double>(elapsed_time_) * kNumMillisPerNanosecond},
-       {RpcClientFinishedCount(), 1},
-       {RpcClientRequestCount(), sent_message_count_},
-       {RpcClientResponseCount(), recv_message_count_}},
-      {{MethodTagKey(), qualified_method_},
-       {StatusTagKey(), StatusCodeToString(final_info->final_status)}});
+       {RpcClientSentMessagesPerRpc(), sent_message_count_},
+       {RpcClientReceivedMessagesPerRpc(), recv_message_count_}},
+      {{ClientMethodTagKey(), method_},
+       {ClientStatusTagKey(), StatusCodeToString(final_info->final_status)}});
   grpc_slice_unref_internal(path_);
   context_.EndSpan();
 }
