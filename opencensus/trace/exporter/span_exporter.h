@@ -24,13 +24,11 @@ namespace opencensus {
 namespace trace {
 namespace exporter {
 
-class SpanExporterImpl;
-
-// SpanExporter tracks Exporters. Thread-safe.
+// SpanExporter allows Exporters to register. Thread-safe.
 class SpanExporter final {
  public:
   // Handlers allow different tracing services to export recorded data for
-  // sampled spans in their own format. The exporter should provide a static
+  // sampled spans in their own format. Every exporter must provide a static
   // Register() method that takes any arguments needed by the exporter (e.g. a
   // URL to export to) and calls SpanExporter::RegisterHandler itself.
   class Handler {
@@ -41,6 +39,12 @@ class SpanExporter final {
 
   // This should only be called by Handler's Register() method.
   static void RegisterHandler(std::unique_ptr<Handler> handler);
+
+ private:
+  friend class SpanExporterTestPeer;
+
+  // Forces an export, only for testing purposes.
+  static void ExportForTesting();
 };
 
 }  // namespace exporter

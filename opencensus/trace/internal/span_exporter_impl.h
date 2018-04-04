@@ -49,6 +49,7 @@ class SpanExporterImpl {
   // SpanData will take place at a later time via the background thread. This
   // is intended to be called at the Span::End().
   void AddSpan(const std::shared_ptr<opencensus::trace::SpanImpl>& span_impl);
+
   // Registers a handler with the exporter. This is intended to be done at
   // initialization.
   void RegisterHandler(std::unique_ptr<SpanExporter::Handler> handler);
@@ -63,6 +64,7 @@ class SpanExporterImpl {
   SpanExporterImpl& operator=(const SpanExporterImpl&) = delete;
   SpanExporterImpl& operator=(SpanExporterImpl&&) = delete;
   friend class Span;
+  friend class SpanExporter;  // For ExportForTesting() only.
 
   void StartExportThread() EXCLUSIVE_LOCKS_REQUIRED(handler_mu_);
   void RunWorkerLoop();
@@ -70,6 +72,8 @@ class SpanExporterImpl {
   // Calls all registered handlers and exports the spans contained in span_data.
   void Export(const std::vector<SpanData>& span_data);
 
+  // Only for testing purposes: runs the export on the current thread and
+  // returns when complete.
   void ExportForTesting();
 
   // Returns true if the spans_ buffer has filled up.
