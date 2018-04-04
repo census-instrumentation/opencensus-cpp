@@ -15,13 +15,10 @@
 #ifndef OPENCENSUS_EXPORTERS_TRACE_ZIPKIN_ZIPKIN_EXPORTER_H_
 #define OPENCENSUS_EXPORTERS_TRACE_ZIPKIN_ZIPKIN_EXPORTER_H_
 
-#include <memory>
 #include <string>
 
-#include "absl/memory/memory.h"
+#include "absl/strings/string_view.h"
 #include "absl/time/time.h"
-#include "opencensus/trace/exporter/span_exporter.h"
-#include "opencensus/trace/span.h"
 
 namespace opencensus {
 namespace exporters {

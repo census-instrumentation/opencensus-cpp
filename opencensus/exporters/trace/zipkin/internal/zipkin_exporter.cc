@@ -21,9 +21,10 @@
 #include <curl/curl.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/str_join.h"
 #include "opencensus/trace/exporter/attribute_value.h"
+#include "opencensus/trace/exporter/span_exporter.h"
 
 namespace opencensus {
 namespace exporters {
@@ -41,8 +42,7 @@ std::string SerializeMessageEvent(
       event.type() == ::opencensus::trace::exporter::MessageEvent::Type::SENT
           ? "SENT"
           : "RECEIVED",
-      "/", std::to_string(event.id()), "/",
-      std::to_string(event.compressed_size()));
+      "/", event.id(), "/", event.compressed_size());
 }
 
 std::string AttributeValueToString(
@@ -308,10 +308,7 @@ CURLcode CurlSendMessage(const uint8_t* data,
   }
 
   // Sending HTTP request to url.
-  if ((res = curl_easy_perform(curl)) != CURLE_OK) {
-    // Failed to send http request.
-    return res;
-  }
+  res = curl_easy_perform(curl);
 
   return res;
 }
