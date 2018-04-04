@@ -20,6 +20,7 @@
 #include "google/monitoring/v3/metric_service.grpc.pb.h"
 #include "google/protobuf/empty.pb.h"
 #include "include/grpc++/grpc++.h"
+#include "opencensus/common/internal/grpc/status.h"
 #include "opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
 #include "opencensus/stats/stats.h"
 
@@ -33,11 +34,6 @@ constexpr char kGoogleStackdriverStatsAddress[] = "monitoring.googleapis.com";
 constexpr char kProjectIdPrefix[] = "projects/";
 // Stackdriver limits a single CreateTimeSeries request to 200 series.
 constexpr int kTimeSeriesBatchSize = 200;
-
-std::string ToString(const grpc::Status& status) {
-  return absl::StrCat("status code ", status.error_code(), " details \"",
-                      status.error_message(), "\"");
-}
 
 }  // namespace
 
@@ -109,8 +105,8 @@ void StackdriverExporter::Handler::ExportViewData(
     ::grpc::Status status =
         stub_->CreateTimeSeries(&context, request, &response);
     if (!status.ok()) {
-      std::cerr << "CreateTimeSeries request failed: " << ToString(status)
-                << "\n";
+      std::cerr << "CreateTimeSeries request failed: "
+                << opencensus::common::ToString(status) << "\n";
     }
   }
 }
@@ -137,8 +133,8 @@ bool StackdriverExporter::Handler::MaybeRegisterView(
   ::grpc::Status status =
       stub_->CreateMetricDescriptor(&context, request, &response);
   if (!status.ok()) {
-    std::cerr << "CreateMetricDescriptor request failed: " << ToString(status)
-              << "\n";
+    std::cerr << "CreateMetricDescriptor request failed: "
+              << opencensus::common::ToString(status) << "\n";
     return false;
   }
   registered_descriptors_.emplace_hint(it, descriptor.name(), descriptor);
