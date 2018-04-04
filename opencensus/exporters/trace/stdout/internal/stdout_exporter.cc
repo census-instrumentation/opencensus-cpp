@@ -25,23 +25,28 @@
 namespace opencensus {
 namespace exporters {
 namespace trace {
+namespace {
 
-class StdoutExporter::Handler
-    : public ::opencensus::trace::exporter::SpanExporter::Handler {
+class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
+ public:
+  Handler(std::ostream* stream) : stream_(stream) {}
+
   void Export(const std::vector<::opencensus::trace::exporter::SpanData>& spans)
-      override;
+      override {
+    for (const auto& span : spans) {
+      *stream_ << span.DebugString() << "\n";
+    }
+  }
+
+ private:
+  std::ostream* stream_;
 };
 
-void StdoutExporter::Handler::Export(
-    const std::vector<::opencensus::trace::exporter::SpanData>& spans) {
-  for (const auto& span : spans) {
-    std::cout << span.DebugString() << "\n";
-  }
-}
+}  // namespace
 
-void StdoutExporter::Register() {
+void StdoutExporter::Register(std::ostream* stream) {
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
-      absl::make_unique<Handler>());
+      absl::make_unique<Handler>(stream));
 }
 
 }  // namespace trace

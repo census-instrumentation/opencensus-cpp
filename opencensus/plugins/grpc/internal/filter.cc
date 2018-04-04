@@ -39,15 +39,15 @@ void GenerateClientContext(absl::string_view method, CensusContext *ctxt,
   new (ctxt) CensusContext(method);
 }
 
-size_t ServerStatsSerialize(uint64_t server_elapsed_time, char *buf,
+size_t ServerStatsSerialize(uint64_t server_latency, char *buf,
                             size_t buf_size) {
-  return RpcServerStatsEncoding::Encode(server_elapsed_time, buf, buf_size);
+  return RpcServerStatsEncoding::Encode(server_latency, buf, buf_size);
 }
 
 size_t ServerStatsDeserialize(const char *buf, size_t buf_size,
-                              uint64_t *server_elapsed_time) {
+                              uint64_t *server_latency) {
   return RpcServerStatsEncoding::Decode(absl::string_view(buf, buf_size),
-                                        server_elapsed_time);
+                                        server_latency);
 }
 
 uint64_t GetIncomingDataSize(const grpc_call_final_info *final_info) {

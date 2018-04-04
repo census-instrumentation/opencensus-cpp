@@ -1,4 +1,4 @@
-// Copyright 2017, OpenCensus Authors
+// Copyright 2018, OpenCensus Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/trace/exporter/span_exporter.h"
+#include "opencensus/common/internal/grpc/status.h"
 
-#include <memory>
-#include <utility>
-
-#include "opencensus/trace/internal/span_exporter_impl.h"
+#include "gtest/gtest.h"
+#include "include/grpc++/support/status.h"
 
 namespace opencensus {
-namespace trace {
-namespace exporter {
+namespace common {
+namespace {
 
-// static
-void SpanExporter::RegisterHandler(std::unique_ptr<Handler> handler) {
-  SpanExporterImpl::Get()->RegisterHandler(std::move(handler));
+TEST(StatusTest, OK) { EXPECT_EQ("OK", ToString(grpc::Status())); }
+
+TEST(StatusTest, NotOK) {
+  EXPECT_EQ("RESOURCE_EXHAUSTED: You must construct additional pylons.",
+            ToString(grpc::Status(grpc::StatusCode::RESOURCE_EXHAUSTED,
+                                  "You must construct additional pylons.")));
 }
 
-// static
-void SpanExporter::ExportForTesting() {
-  SpanExporterImpl::Get()->ExportForTesting();
-}
-
-}  // namespace exporter
-}  // namespace trace
+}  // namespace
+}  // namespace common
 }  // namespace opencensus

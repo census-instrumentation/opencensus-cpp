@@ -14,12 +14,19 @@
 
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <memory>
+#include <vector>
+
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
 #include "google/monitoring/v3/metric_service.grpc.pb.h"
 #include "google/protobuf/empty.pb.h"
 #include "include/grpc++/grpc++.h"
+#include "opencensus/common/internal/grpc/status.h"
 #include "opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
 #include "opencensus/stats/stats.h"
 
@@ -33,11 +40,6 @@ constexpr char kGoogleStackdriverStatsAddress[] = "monitoring.googleapis.com";
 constexpr char kProjectIdPrefix[] = "projects/";
 // Stackdriver limits a single CreateTimeSeries request to 200 series.
 constexpr int kTimeSeriesBatchSize = 200;
-
-std::string ToString(const grpc::Status& status) {
-  return absl::StrCat("status code ", status.error_code(), " details \"",
-                      status.error_message(), "\"");
-}
 
 }  // namespace
 
@@ -92,25 +94,39 @@ void StackdriverExporter::Handler::ExportViewData(
                        view_time_series.end());
   }
 
-  // TODO: use asynchronous RPCs.
-  int i = 0;
-  while (i < time_series.size()) {
+  const int num_rpcs =
+      ceil(static_cast<double>(time_series.size()) / kTimeSeriesBatchSize);
+
+  std::vector<std::pair<grpc::Status, ::grpc::ClientContext>> responses(
+      num_rpcs);
+  // We can safely re-use an empty response--it is never updated.
+  google::protobuf::Empty response;
+  grpc::CompletionQueue cq;
+
+  for (int rpc_index = 0; rpc_index < num_rpcs; ++rpc_index) {
     auto request = google::monitoring::v3::CreateTimeSeriesRequest();
     request.set_name(project_id_);
-    for (int batch_index = 0; batch_index < kTimeSeriesBatchSize;
-         ++batch_index) {
+    const int batch_end = std::min(static_cast<int>(time_series.size()),
+                                   (rpc_index + 1) * kTimeSeriesBatchSize);
+    for (int i = rpc_index * kTimeSeriesBatchSize; i < batch_end; ++i) {
       *request.add_time_series() = time_series[i];
-      if (++i >= time_series.size()) {
-        break;
+    };
+    auto rpc(stub_->AsyncCreateTimeSeries(&responses[rpc_index].second, request,
+                                          &cq));
+    rpc->Finish(&response, &responses[rpc_index].first,
+                (void*)(uintptr_t)rpc_index);
+  }
+
+  cq.Shutdown();
+  void* tag;
+  bool ok;
+  while (cq.Next(&tag, &ok)) {
+    if (ok) {
+      const auto& status = responses[(uintptr_t)tag].first;
+      if (!status.ok()) {
+        std::cerr << "CreateTimeSeries request failed: "
+                  << opencensus::common::ToString(status) << "\n";
       }
-    }
-    ::grpc::ClientContext context;
-    google::protobuf::Empty response;
-    ::grpc::Status status =
-        stub_->CreateTimeSeries(&context, request, &response);
-    if (!status.ok()) {
-      std::cerr << "CreateTimeSeries request failed: " << ToString(status)
-                << "\n";
     }
   }
 }
@@ -137,8 +153,8 @@ bool StackdriverExporter::Handler::MaybeRegisterView(
   ::grpc::Status status =
       stub_->CreateMetricDescriptor(&context, request, &response);
   if (!status.ok()) {
-    std::cerr << "CreateMetricDescriptor request failed: " << ToString(status)
-              << "\n";
+    std::cerr << "CreateMetricDescriptor request failed: "
+              << opencensus::common::ToString(status) << "\n";
     return false;
   }
   registered_descriptors_.emplace_hint(it, descriptor.name(), descriptor);

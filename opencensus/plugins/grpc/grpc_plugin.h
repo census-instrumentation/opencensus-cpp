@@ -30,99 +30,85 @@ namespace opencensus {
 // defined below.
 void RegisterGrpcPlugin();
 
+// RPC stats definitions, defined by
+// https://github.com/census-instrumentation/opencensus-specs/blob/master/stats/gRPC.md
+
 // Registers the cumulative gRPC views so that they will be exported by any
 // registered stats exporter.
 // For on-task stats, construct a View using the ViewDescriptors below.
-// Experimental: These view definitions are subject to change.
-void ExperimentalRegisterGrpcViewsForExport();
+void RegisterGrpcViewsForExport();
 
 // Returns the tracing Span for the current RPC.
 opencensus::trace::Span GetSpanFromServerContext(grpc::ServerContext* context);
 
-// The tag key for the RPC method and status, set for all values recorded for
-// the following measures.
-opencensus::stats::TagKey MethodTagKey();
-opencensus::stats::TagKey StatusTagKey();
+// The tag keys set when recording RPC stats.
+opencensus::stats::TagKey ClientMethodTagKey();
+opencensus::stats::TagKey ClientStatusTagKey();
+opencensus::stats::TagKey ServerMethodTagKey();
+opencensus::stats::TagKey ServerStatusTagKey();
 
 // Names of measures used by the plugin--users can create views on these
 // measures but should not record data for them.
-extern const absl::string_view kRpcClientErrorCountMeasureName;
-extern const absl::string_view kRpcClientRequestBytesMeasureName;
-extern const absl::string_view kRpcClientResponseBytesMeasureName;
+extern const absl::string_view kRpcClientSentMessagesPerRpcMeasureName;
+extern const absl::string_view kRpcClientSentBytesPerRpcMeasureName;
+extern const absl::string_view kRpcClientReceivedMessagesPerRpcMeasureName;
+extern const absl::string_view kRpcClientReceivedBytesPerRpcMeasureName;
 extern const absl::string_view kRpcClientRoundtripLatencyMeasureName;
-extern const absl::string_view kRpcClientServerElapsedTimeMeasureName;
-extern const absl::string_view kRpcClientStartedCountMeasureName;
-extern const absl::string_view kRpcClientFinishedCountMeasureName;
-extern const absl::string_view kRpcClientRequestCountMeasureName;
-extern const absl::string_view kRpcClientResponseCountMeasureName;
+extern const absl::string_view kRpcClientServerLatencyMeasureName;
 
-extern const absl::string_view kRpcServerErrorCountMeasureName;
-extern const absl::string_view kRpcServerRequestBytesMeasureName;
-extern const absl::string_view kRpcServerResponseBytesMeasureName;
-extern const absl::string_view kRpcServerServerElapsedTimeMeasureName;
-extern const absl::string_view kRpcServerStartedCountMeasureName;
-extern const absl::string_view kRpcServerFinishedCountMeasureName;
-extern const absl::string_view kRpcServerRequestCountMeasureName;
-extern const absl::string_view kRpcServerResponseCountMeasureName;
+extern const absl::string_view kRpcServerSentMessagesPerRpcMeasureName;
+extern const absl::string_view kRpcServerSentBytesPerRpcMeasureName;
+extern const absl::string_view kRpcServerReceivedMessagesPerRpcMeasureName;
+extern const absl::string_view kRpcServerReceivedBytesPerRpcMeasureName;
+extern const absl::string_view kRpcServerServerLatencyMeasureName;
 
 // Canonical gRPC view definitions.
-// These view definitions are subject to change.
-const stats::ViewDescriptor& ClientErrorCountCumulative();
-const stats::ViewDescriptor& ClientRequestBytesCumulative();
-const stats::ViewDescriptor& ClientResponseBytesCumulative();
+const stats::ViewDescriptor& ClientSentMessagesPerRpcCumulative();
+const stats::ViewDescriptor& ClientSentBytesPerRpcCumulative();
+const stats::ViewDescriptor& ClientReceivedMessagesPerRpcCumulative();
+const stats::ViewDescriptor& ClientReceivedBytesPerRpcCumulative();
 const stats::ViewDescriptor& ClientRoundtripLatencyCumulative();
-const stats::ViewDescriptor& ClientServerElapsedTimeCumulative();
-const stats::ViewDescriptor& ClientStartedCountCumulative();
-const stats::ViewDescriptor& ClientFinishedCountCumulative();
-const stats::ViewDescriptor& ClientRequestCountCumulative();
-const stats::ViewDescriptor& ClientResponseCountCumulative();
+const stats::ViewDescriptor& ClientServerLatencyCumulative();
+const stats::ViewDescriptor& ClientCompletedRpcsCumulative();
 
-const stats::ViewDescriptor& ServerErrorCountCumulative();
-const stats::ViewDescriptor& ServerRequestBytesCumulative();
-const stats::ViewDescriptor& ServerResponseBytesCumulative();
-const stats::ViewDescriptor& ServerServerElapsedTimeCumulative();
+const stats::ViewDescriptor& ServerSentBytesPerRpcCumulative();
+const stats::ViewDescriptor& ServerReceivedBytesPerRpcCumulative();
+const stats::ViewDescriptor& ServerServerLatencyCumulative();
 const stats::ViewDescriptor& ServerStartedCountCumulative();
-const stats::ViewDescriptor& ServerFinishedCountCumulative();
-const stats::ViewDescriptor& ServerRequestCountCumulative();
-const stats::ViewDescriptor& ServerResponseCountCumulative();
+const stats::ViewDescriptor& ServerCompletedRpcsCumulative();
+const stats::ViewDescriptor& ServerSentMessagesPerRpcCumulative();
+const stats::ViewDescriptor& ServerReceivedMessagesPerRpcCumulative();
 
-const stats::ViewDescriptor& ClientErrorCountMinute();
-const stats::ViewDescriptor& ClientRequestBytesMinute();
-const stats::ViewDescriptor& ClientResponseBytesMinute();
+const stats::ViewDescriptor& ClientSentMessagesPerRpcMinute();
+const stats::ViewDescriptor& ClientSentBytesPerRpcMinute();
+const stats::ViewDescriptor& ClientReceivedMessagesPerRpcMinute();
+const stats::ViewDescriptor& ClientReceivedBytesPerRpcMinute();
 const stats::ViewDescriptor& ClientRoundtripLatencyMinute();
-const stats::ViewDescriptor& ClientServerElapsedTimeMinute();
-const stats::ViewDescriptor& ClientStartedCountMinute();
-const stats::ViewDescriptor& ClientFinishedCountMinute();
-const stats::ViewDescriptor& ClientRequestCountMinute();
-const stats::ViewDescriptor& ClientResponseCountMinute();
+const stats::ViewDescriptor& ClientServerLatencyMinute();
+const stats::ViewDescriptor& ClientCompletedRpcsMinute();
 
-const stats::ViewDescriptor& ServerErrorCountMinute();
-const stats::ViewDescriptor& ServerRequestBytesMinute();
-const stats::ViewDescriptor& ServerResponseBytesMinute();
-const stats::ViewDescriptor& ServerServerElapsedTimeMinute();
-const stats::ViewDescriptor& ServerStartedCountMinute();
-const stats::ViewDescriptor& ServerFinishedCountMinute();
-const stats::ViewDescriptor& ServerRequestCountMinute();
-const stats::ViewDescriptor& ServerResponseCountMinute();
+const stats::ViewDescriptor& ServerSentMessagesPerRpcMinute();
+const stats::ViewDescriptor& ServerSentBytesPerRpcMinute();
+const stats::ViewDescriptor& ServerReceivedMessagesPerRpcMinute();
+const stats::ViewDescriptor& ServerReceivedBytesPerRpcMinute();
+const stats::ViewDescriptor& ServerServerLatencyMinute();
+const stats::ViewDescriptor& ServerCompletedRpcsMinute();
 
-const stats::ViewDescriptor& ClientErrorCountHour();
-const stats::ViewDescriptor& ClientRequestBytesHour();
-const stats::ViewDescriptor& ClientResponseBytesHour();
+const stats::ViewDescriptor& ClientSentMessagesPerRpcHour();
+const stats::ViewDescriptor& ClientSentBytesPerRpcHour();
+const stats::ViewDescriptor& ClientReceivedMessagesPerRpcHour();
+const stats::ViewDescriptor& ClientReceivedBytesPerRpcHour();
 const stats::ViewDescriptor& ClientRoundtripLatencyHour();
-const stats::ViewDescriptor& ClientServerElapsedTimeHour();
-const stats::ViewDescriptor& ClientStartedCountHour();
-const stats::ViewDescriptor& ClientFinishedCountHour();
-const stats::ViewDescriptor& ClientRequestCountHour();
-const stats::ViewDescriptor& ClientResponseCountHour();
+const stats::ViewDescriptor& ClientServerLatencyHour();
+const stats::ViewDescriptor& ClientCompletedRpcsHour();
 
-const stats::ViewDescriptor& ServerErrorCountHour();
-const stats::ViewDescriptor& ServerRequestBytesHour();
-const stats::ViewDescriptor& ServerResponseBytesHour();
-const stats::ViewDescriptor& ServerServerElapsedTimeHour();
+const stats::ViewDescriptor& ServerSentMessagesPerRpcHour();
+const stats::ViewDescriptor& ServerSentBytesPerRpcHour();
+const stats::ViewDescriptor& ServerReceivedMessagesPerRpcHour();
+const stats::ViewDescriptor& ServerReceivedBytesPerRpcHour();
+const stats::ViewDescriptor& ServerServerLatencyHour();
 const stats::ViewDescriptor& ServerStartedCountHour();
-const stats::ViewDescriptor& ServerFinishedCountHour();
-const stats::ViewDescriptor& ServerRequestCountHour();
-const stats::ViewDescriptor& ServerResponseCountHour();
+const stats::ViewDescriptor& ServerCompletedRpcsHour();
 
 }  // namespace opencensus
 

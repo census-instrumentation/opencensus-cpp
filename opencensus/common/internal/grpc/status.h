@@ -1,4 +1,4 @@
-// Copyright 2017, OpenCensus Authors
+// Copyright 2018, OpenCensus Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/trace/exporter/span_exporter.h"
+#ifndef OPENCENSUS_COMMON_INTERNAL_GRPC_STATUS_H_
+#define OPENCENSUS_COMMON_INTERNAL_GRPC_STATUS_H_
 
-#include <memory>
-#include <utility>
+#include <string>
 
-#include "opencensus/trace/internal/span_exporter_impl.h"
+#include "include/grpc++/support/status.h"
 
 namespace opencensus {
-namespace trace {
-namespace exporter {
+namespace common {
 
-// static
-void SpanExporter::RegisterHandler(std::unique_ptr<Handler> handler) {
-  SpanExporterImpl::Get()->RegisterHandler(std::move(handler));
-}
+// Returns a string of the status code name and message.
+std::string ToString(const grpc::Status& status);
 
-// static
-void SpanExporter::ExportForTesting() {
-  SpanExporterImpl::Get()->ExportForTesting();
-}
-
-}  // namespace exporter
-}  // namespace trace
+}  // namespace common
 }  // namespace opencensus
+
+#endif  // OPENCENSUS_COMMON_INTERNAL_GRPC_STATUS_H_
