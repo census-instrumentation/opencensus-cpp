@@ -53,13 +53,20 @@ io::prometheus::client::MetricType MetricType(
   }
 }
 
-void SetValue(double value, io::prometheus::client::Metric* metric) {
+void SetValue(double value, io::prometheus::client::MetricType type,
+              io::prometheus::client::Metric* metric) {
   metric->mutable_untyped()->set_value(value);
 }
-void SetValue(int64_t value, io::prometheus::client::Metric* metric) {
-  metric->mutable_counter()->set_value(value);
+void SetValue(int64_t value, io::prometheus::client::MetricType type,
+              io::prometheus::client::Metric* metric) {
+  if (type == io::prometheus::client::MetricType::COUNTER) {
+    metric->mutable_counter()->set_value(value);
+  } else {
+    metric->mutable_untyped()->set_value(value);
+  }
 }
 void SetValue(const opencensus::stats::Distribution& value,
+              io::prometheus::client::MetricType type,
               io::prometheus::client::Metric* metric) {
   auto* histogram = metric->mutable_histogram();
   histogram->set_sample_count(value.count());
@@ -82,6 +89,7 @@ void SetValue(const opencensus::stats::Distribution& value,
 template <typename T>
 void SetData(const opencensus::stats::ViewDescriptor& descriptor,
              const opencensus::stats::ViewData::DataMap<T>& data, int64_t time,
+             io::prometheus::client::MetricType type,
              io::prometheus::client::MetricFamily* metric_family) {
   for (const auto& row : data) {
     auto* metric = metric_family->add_metric();
@@ -91,7 +99,7 @@ void SetData(const opencensus::stats::ViewDescriptor& descriptor,
       label->set_name(SanitizeName(descriptor.columns()[i].name()));
       label->set_value(row.first[i]);
     }
-    SetValue(row.second, metric);
+    SetValue(row.second, type, metric);
   }
 }
 
@@ -100,24 +108,26 @@ void SetData(const opencensus::stats::ViewDescriptor& descriptor,
 void SetMetricFamily(const opencensus::stats::ViewDescriptor& descriptor,
                      const opencensus::stats::ViewData& data,
                      io::prometheus::client::MetricFamily* metric_family) {
+  const io::prometheus::client::MetricType type =
+      MetricType(descriptor.aggregation().type());
   // TODO(sturdy): convert common units into base units (e.g. ms->s).
   metric_family->set_name(SanitizeName(absl::StrCat(
       descriptor.name(), "_", descriptor.measure_descriptor().units())));
   metric_family->set_help(descriptor.description());
-  metric_family->set_type(MetricType(descriptor.aggregation().type()));
+  metric_family->set_type(type);
 
   const int64_t time = absl::ToUnixMillis(data.end_time());
   switch (data.type()) {
     case opencensus::stats::ViewData::Type::kDouble: {
-      SetData(descriptor, data.double_data(), time, metric_family);
+      SetData(descriptor, data.double_data(), time, type, metric_family);
       break;
     }
     case opencensus::stats::ViewData::Type::kInt64: {
-      SetData(descriptor, data.int_data(), time, metric_family);
+      SetData(descriptor, data.int_data(), time, type, metric_family);
       break;
     }
     case opencensus::stats::ViewData::Type::kDistribution: {
-      SetData(descriptor, data.distribution_data(), time, metric_family);
+      SetData(descriptor, data.distribution_data(), time, type, metric_family);
       break;
     }
   }
