@@ -84,10 +84,10 @@ TEST_F(StatsManagerTest, Count) {
           ::testing::Pair(::testing::ElementsAre("value1", "value2"), 1.0)));
 }
 
-TEST_F(StatsManagerTest, Sum) {
+TEST_F(StatsManagerTest, SumDouble) {
   ViewDescriptor view_descriptor = ViewDescriptor()
-                                       .set_measure(kSecondMeasureId)
-                                       .set_name("sum")
+                                       .set_measure(kFirstMeasureId)
+                                       .set_name("sum_double")
                                        .set_aggregation(Aggregation::Sum())
                                        .add_column(key1_)
                                        .add_column(key2_);
@@ -96,12 +96,12 @@ TEST_F(StatsManagerTest, Sum) {
   EXPECT_TRUE(view.GetData().double_data().empty());
 
   // Stats under a different measure should be ignored.
-  Record({{FirstMeasure(), 1.0}});
+  Record({{SecondMeasure(), 1}});
   testing::TestUtils::Flush();
   EXPECT_TRUE(view.GetData().double_data().empty());
 
-  Record({{SecondMeasure(), 2}, {SecondMeasure(), 3}});
-  Record({{SecondMeasure(), 4}},
+  Record({{FirstMeasure(), 2.0}, {FirstMeasure(), 3.0}});
+  Record({{FirstMeasure(), 4.0}},
          {{key1_, "value1"}, {key2_, "value2"}, {key3_, "value3"}});
   testing::TestUtils::Flush();
   const opencensus::stats::ViewData data = view.GetData();
@@ -110,6 +110,34 @@ TEST_F(StatsManagerTest, Sum) {
       ::testing::UnorderedElementsAre(
           ::testing::Pair(::testing::ElementsAre("", ""), 5.0),
           ::testing::Pair(::testing::ElementsAre("value1", "value2"), 4.0)));
+}
+
+TEST_F(StatsManagerTest, SumInt) {
+  ViewDescriptor view_descriptor = ViewDescriptor()
+                                       .set_measure(kSecondMeasureId)
+                                       .set_name("sum_int")
+                                       .set_aggregation(Aggregation::Sum())
+                                       .add_column(key1_)
+                                       .add_column(key2_);
+  View view(view_descriptor);
+  ASSERT_EQ(ViewData::Type::kInt64, view.GetData().type());
+  EXPECT_TRUE(view.GetData().int_data().empty());
+
+  // Stats under a different measure should be ignored.
+  Record({{FirstMeasure(), 1.0}});
+  testing::TestUtils::Flush();
+  EXPECT_TRUE(view.GetData().int_data().empty());
+
+  Record({{SecondMeasure(), 2}, {SecondMeasure(), 3}});
+  Record({{SecondMeasure(), 4}},
+         {{key1_, "value1"}, {key2_, "value2"}, {key3_, "value3"}});
+  testing::TestUtils::Flush();
+  const opencensus::stats::ViewData data = view.GetData();
+  EXPECT_THAT(
+      data.int_data(),
+      ::testing::UnorderedElementsAre(
+          ::testing::Pair(::testing::ElementsAre("", ""), 5),
+          ::testing::Pair(::testing::ElementsAre("value1", "value2"), 4)));
 }
 
 TEST_F(StatsManagerTest, Distribution) {

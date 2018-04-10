@@ -20,6 +20,8 @@
 
 #include "absl/memory/memory.h"
 #include "opencensus/stats/distribution.h"
+#include "opencensus/stats/measure_descriptor.h"
+#include "opencensus/stats/view_descriptor.h"
 
 namespace opencensus {
 namespace stats {
@@ -31,7 +33,12 @@ ViewDataImpl::Type ViewDataImpl::TypeForDescriptor(
     case AggregationWindow::Type::kDelta:
       switch (descriptor.aggregation().type()) {
         case Aggregation::Type::kSum:
-          return ViewDataImpl::Type::kDouble;
+          switch (descriptor.measure_descriptor().type()) {
+            case MeasureDescriptor::Type::kDouble:
+              return ViewDataImpl::Type::kDouble;
+            case MeasureDescriptor::Type::kInt64:
+              return ViewDataImpl::Type::kInt64;
+          }
         case Aggregation::Type::kCount:
           return ViewDataImpl::Type::kInt64;
         case Aggregation::Type::kDistribution:
@@ -169,7 +176,8 @@ void ViewDataImpl::Add(double value, const std::vector<std::string>& tag_values,
       break;
     }
     case Type::kInt64: {
-      ++int_data_[tag_values];
+      int_data_[tag_values] +=
+          (aggregation_.type() == Aggregation::Type::kSum ? value : 1);
       break;
     }
     case Type::kDistribution: {
@@ -218,7 +226,9 @@ void ViewDataImpl::Merge(const std::vector<std::string>& tag_values,
       break;
     }
     case Type::kInt64: {
-      int_data_[tag_values] += data.count();
+      int_data_[tag_values] +=
+          (aggregation_.type() == Aggregation::Type::kSum ? data.sum()
+                                                          : data.count());
       break;
     }
     case Type::kDistribution: {
