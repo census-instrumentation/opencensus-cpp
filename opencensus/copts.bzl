@@ -42,7 +42,7 @@ DEFAULT_COPTS = select({
 TEST_COPTS = DEFAULT_COPTS + select({
     "//opencensus:llvm_compiler": LLVM_TEST_FLAGS,
     # Disable "not all control paths return a value"; functions that return
-    # out of a switch on an enum cause build errors otherwise.    
+    # out of a switch on an enum cause build errors otherwise.
     "//opencensus:windows": MSVC_TEST_FLAGS + ["/wd4715"],
     "//conditions:default": GCC_TEST_FLAGS,
 })
