@@ -31,6 +31,7 @@ namespace {
 TEST(DebugStringTest, Aggregation) {
   EXPECT_NE("", Aggregation::Count().DebugString());
   EXPECT_NE("", Aggregation::Sum().DebugString());
+  EXPECT_NE("", Aggregation::LastValue().DebugString());
 
   const BucketBoundaries buckets = BucketBoundaries::Explicit({0, 1});
   EXPECT_PRED_FORMAT2(::testing::IsSubstring, buckets.DebugString(),

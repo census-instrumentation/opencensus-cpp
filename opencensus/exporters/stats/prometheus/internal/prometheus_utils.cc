@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/base/macros.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
@@ -48,6 +49,8 @@ io::prometheus::client::MetricType MetricType(
       return io::prometheus::client::MetricType::COUNTER;
     case opencensus::stats::Aggregation::Type::kSum:
       return io::prometheus::client::MetricType::UNTYPED;
+    case opencensus::stats::Aggregation::Type::kLastValue:
+      return io::prometheus::client::MetricType::GAUGE;
     case opencensus::stats::Aggregation::Type::kDistribution:
       return io::prometheus::client::MetricType::HISTOGRAM;
   }
@@ -55,14 +58,31 @@ io::prometheus::client::MetricType MetricType(
 
 void SetValue(double value, io::prometheus::client::MetricType type,
               io::prometheus::client::Metric* metric) {
-  metric->mutable_untyped()->set_value(value);
+  if (type == io::prometheus::client::MetricType::UNTYPED) {
+    metric->mutable_untyped()->set_value(value);
+  } else {
+    ABSL_ASSERT(type == io::prometheus::client::MetricType::GAUGE);
+    metric->mutable_gauge()->set_value(value);
+  }
 }
+
 void SetValue(int64_t value, io::prometheus::client::MetricType type,
               io::prometheus::client::Metric* metric) {
-  if (type == io::prometheus::client::MetricType::COUNTER) {
-    metric->mutable_counter()->set_value(value);
-  } else {
-    metric->mutable_untyped()->set_value(value);
+  switch (type) {
+    case io::prometheus::client::MetricType::COUNTER: {
+      metric->mutable_counter()->set_value(value);
+      break;
+    }
+    case io::prometheus::client::MetricType::GAUGE: {
+      metric->mutable_gauge()->set_value(value);
+      break;
+    }
+    case io::prometheus::client::MetricType::UNTYPED: {
+      metric->mutable_untyped()->set_value(value);
+      break;
+    }
+    default:
+      ABSL_ASSERT(false && "Invalid MetricType for int64 value.");
   }
 }
 void SetValue(const opencensus::stats::Distribution& value,

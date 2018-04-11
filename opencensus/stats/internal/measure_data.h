@@ -16,6 +16,7 @@
 #define OPENCENSUS_STATS_INTERNAL_MEASURE_DATA_H_
 
 #include <cstdint>
+#include <limits>
 #include <vector>
 
 #include "absl/types/span.h"
@@ -35,6 +36,7 @@ class MeasureData final {
 
   void Add(double value);
 
+  double last_value() const { return last_value_; }
   uint64_t count() const { return count_; }
   double sum() const { return count_ * mean_; }
 
@@ -53,6 +55,7 @@ class MeasureData final {
  private:
   const absl::Span<const BucketBoundaries> boundaries_;
 
+  double last_value_ = std::numeric_limits<double>::quiet_NaN();
   uint64_t count_ = 0;
   double mean_ = 0;
   double sum_of_squared_deviation_ = 0;

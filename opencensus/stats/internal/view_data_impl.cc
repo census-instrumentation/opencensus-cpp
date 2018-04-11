@@ -18,6 +18,7 @@
 #include <iostream>
 #include <memory>
 
+#include "absl/base/macros.h"
 #include "absl/memory/memory.h"
 #include "opencensus/stats/distribution.h"
 #include "opencensus/stats/measure_descriptor.h"
@@ -33,6 +34,7 @@ ViewDataImpl::Type ViewDataImpl::TypeForDescriptor(
     case AggregationWindow::Type::kDelta:
       switch (descriptor.aggregation().type()) {
         case Aggregation::Type::kSum:
+        case Aggregation::Type::kLastValue:
           switch (descriptor.measure_descriptor().type()) {
             case MeasureDescriptor::Type::kDouble:
               return ViewDataImpl::Type::kDouble;
@@ -108,7 +110,12 @@ ViewDataImpl::ViewDataImpl(const ViewDataImpl& other, absl::Time now)
             &distribution.max_,
             absl::Span<uint64_t>(distribution.bucket_counts_), now);
       }
+      break;
     }
+    case Aggregation::Type::kLastValue:
+      std::cerr << "Interval/LastValue is not supported.\n";
+      ABSL_ASSERT(0 && "Interval/LastValue is not supported.\n");
+      break;
   }
 }
 
@@ -172,13 +179,31 @@ void ViewDataImpl::Merge(const std::vector<std::string>& tag_values,
   end_time_ = std::max(end_time_, now);
   switch (type_) {
     case Type::kDouble: {
-      double_data_[tag_values] += data.sum();
+      if (aggregation_.type() == Aggregation::Type::kSum) {
+        double_data_[tag_values] += data.sum();
+      } else {
+        ABSL_ASSERT(aggregation_.type() == Aggregation::Type::kLastValue);
+        double_data_[tag_values] = data.last_value();
+      }
       break;
     }
     case Type::kInt64: {
-      int_data_[tag_values] +=
-          (aggregation_.type() == Aggregation::Type::kSum ? data.sum()
-                                                          : data.count());
+      switch (aggregation_.type()) {
+        case Aggregation::Type::kCount: {
+          int_data_[tag_values] += data.count();
+          break;
+        }
+        case Aggregation::Type::kSum: {
+          int_data_[tag_values] += data.sum();
+          break;
+        }
+        case Aggregation::Type::kLastValue: {
+          int_data_[tag_values] = data.last_value();
+          break;
+        }
+        default:
+          ABSL_ASSERT(false && "Invalid aggregation for type.");
+      }
       break;
     }
     case Type::kDistribution: {

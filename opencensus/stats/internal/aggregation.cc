@@ -23,15 +23,16 @@ std::string Aggregation::DebugString() const {
   switch (type_) {
     case Type::kCount: {
       return "Count";
-      break;
     }
     case Type::kSum: {
       return "Sum";
-      break;
     }
     case Type::kDistribution: {
       return absl::StrCat("Distribution with ",
                           bucket_boundaries_.DebugString());
+    }
+    case Type::kLastValue: {
+      return "Last Value";
     }
   }
 }
