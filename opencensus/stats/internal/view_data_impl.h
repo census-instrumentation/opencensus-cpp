@@ -106,13 +106,6 @@ class ViewDataImpl {
   absl::Time start_time() const { return start_time_; }
   absl::Time end_time() const { return end_time_; }
 
-  // Adds data for the given tag values at 'now'. tag_values must be ordered
-  // according to the order of keys in the ViewDescriptor.
-  // TODO: Change to take Span<string_view> when heterogenous lookup is
-  // supported.
-  void Add(double value, const std::vector<std::string>& tag_values,
-           absl::Time now);
-
   // Merges bulk data for the given tag values at 'now'. tag_values must be
   // ordered according to the order of keys in the ViewDescriptor.
   // TODO: Change to take Span<string_view> when heterogenous lookup is

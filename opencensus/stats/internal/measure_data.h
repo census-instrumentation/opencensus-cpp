@@ -51,7 +51,7 @@ class MeasureData final {
                          absl::Span<T> histogram_buckets) const;
 
  private:
-  absl::Span<const BucketBoundaries> boundaries_;
+  const absl::Span<const BucketBoundaries> boundaries_;
 
   uint64_t count_ = 0;
   double mean_ = 0;

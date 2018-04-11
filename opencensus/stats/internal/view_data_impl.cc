@@ -167,56 +167,6 @@ ViewDataImpl::ViewDataImpl(const ViewDataImpl& other)
   }
 }
 
-void ViewDataImpl::Add(double value, const std::vector<std::string>& tag_values,
-                       absl::Time now) {
-  end_time_ = std::max(end_time_, now);
-  switch (type_) {
-    case Type::kDouble: {
-      double_data_[tag_values] += value;
-      break;
-    }
-    case Type::kInt64: {
-      int_data_[tag_values] +=
-          (aggregation_.type() == Aggregation::Type::kSum ? value : 1);
-      break;
-    }
-    case Type::kDistribution: {
-      DataMap<Distribution>::iterator it = distribution_data_.find(tag_values);
-      if (it == distribution_data_.end()) {
-        it = distribution_data_.emplace_hint(
-            it, tag_values, Distribution(&aggregation_.bucket_boundaries()));
-      }
-      it->second.Add(value);
-      break;
-    }
-    case Type::kStatsObject: {
-      DataMap<IntervalStatsObject>::iterator it =
-          interval_data_.find(tag_values);
-      if (aggregation_.type() == Aggregation::Type::kDistribution) {
-        const auto& buckets = aggregation_.bucket_boundaries();
-        if (it == interval_data_.end()) {
-          it = interval_data_.emplace_hint(
-              it, std::piecewise_construct, std::make_tuple(tag_values),
-              std::make_tuple(buckets.num_buckets() + 5,
-                              aggregation_window_.duration(), now));
-        }
-        it->second.AddToDistribution(value, buckets.BucketForValue(value), now);
-      } else {
-        if (it == interval_data_.end()) {
-          it = interval_data_.emplace_hint(
-              it, std::piecewise_construct, std::make_tuple(tag_values),
-              std::make_tuple(1, aggregation_window_.duration(), now));
-        }
-        if (aggregation_ == Aggregation::Count()) {
-          it->second.MutableCurrentBucket(now)[0] += 1.0;
-        } else {
-          it->second.MutableCurrentBucket(now)[0] += value;
-        }
-      }
-    }
-  }
-}
-
 void ViewDataImpl::Merge(const std::vector<std::string>& tag_values,
                          const MeasureData& data, absl::Time now) {
   end_time_ = std::max(end_time_, now);

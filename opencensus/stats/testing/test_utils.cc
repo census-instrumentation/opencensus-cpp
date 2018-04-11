@@ -14,11 +14,16 @@
 
 #include "opencensus/stats/testing/test_utils.h"
 
+#include <initializer_list>
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/time/time.h"
+#include "opencensus/stats/bucket_boundaries.h"
 #include "opencensus/stats/internal/delta_producer.h"
+#include "opencensus/stats/internal/measure_data.h"
 
 namespace opencensus {
 namespace stats {
@@ -29,8 +34,12 @@ ViewData TestUtils::MakeViewData(
     const ViewDescriptor& descriptor,
     std::initializer_list<std::pair<std::vector<std::string>, double>> values) {
   auto impl = absl::make_unique<ViewDataImpl>(absl::UnixEpoch(), descriptor);
+  std::vector<BucketBoundaries> boundaries = {
+      descriptor.aggregation().bucket_boundaries()};
   for (const auto& value : values) {
-    impl->Add(value.second, value.first, absl::UnixEpoch());
+    MeasureData measure_data = MeasureData(boundaries);
+    measure_data.Add(value.second);
+    impl->Merge(value.first, measure_data, absl::UnixEpoch());
   }
   if (impl->type() == ViewDataImpl::Type::kStatsObject) {
     return ViewData(absl::make_unique<ViewDataImpl>(*impl, absl::UnixEpoch()));
