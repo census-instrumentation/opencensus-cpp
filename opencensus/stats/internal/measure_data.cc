@@ -77,8 +77,14 @@ void MeasureData::AddToDistribution(const BucketBoundaries& boundaries,
   *count = new_count;
   *mean = new_mean;
 
-  *min = std::min(*min, min_);
-  *max = std::max(*max, max_);
+  if (*count == count_) {
+    // Overwrite in case the destination was zero-initialized.
+    *min = min_;
+    *max = max_;
+  } else {
+    *min = std::min(*min, min_);
+    *max = std::max(*max, max_);
+  }
 
   int histogram_index =
       std::find(boundaries_.begin(), boundaries_.end(), boundaries) -

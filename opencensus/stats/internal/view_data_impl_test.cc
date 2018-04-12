@@ -30,6 +30,15 @@ namespace opencensus {
 namespace stats {
 namespace {
 
+void AddToViewDataImpl(double value, const std::vector<std::string>& tags,
+                       absl::Time time,
+                       const std::vector<BucketBoundaries>& boundaries,
+                       ViewDataImpl* data) {
+  MeasureData measure_data = MeasureData(boundaries);
+  measure_data.Add(value);
+  data->Merge(tags, measure_data, time);
+}
+
 TEST(ViewDataImplTest, Sum) {
   const absl::Time start_time = absl::UnixEpoch();
   const absl::Time end_time = absl::UnixEpoch() + absl::Seconds(1);
@@ -38,9 +47,9 @@ TEST(ViewDataImplTest, Sum) {
   const std::vector<std::string> tags1({"value1", "value2a"});
   const std::vector<std::string> tags2({"value1", "value2b"});
 
-  data.Add(1, tags1, start_time);
-  data.Add(2, tags1, start_time);
-  data.Add(5, tags2, end_time);
+  AddToViewDataImpl(1, tags1, start_time, {}, &data);
+  AddToViewDataImpl(2, tags1, start_time, {}, &data);
+  AddToViewDataImpl(5, tags2, end_time, {}, &data);
 
   EXPECT_EQ(Aggregation::Sum(), data.aggregation());
   EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
@@ -60,9 +69,9 @@ TEST(ViewDataImplTest, Count) {
   const std::vector<std::string> tags1({"value1", "value2a"});
   const std::vector<std::string> tags2({"value1", "value2b"});
 
-  data.Add(1, tags1, start_time);
-  data.Add(2, tags1, start_time);
-  data.Add(5, tags2, end_time);
+  AddToViewDataImpl(1, tags1, start_time, {}, &data);
+  AddToViewDataImpl(2, tags1, start_time, {}, &data);
+  AddToViewDataImpl(5, tags2, end_time, {}, &data);
 
   EXPECT_EQ(Aggregation::Count(), data.aggregation());
   EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
@@ -83,9 +92,9 @@ TEST(ViewDataImplTest, Distribution) {
   const std::vector<std::string> tags1({"value1", "value2a"});
   const std::vector<std::string> tags2({"value1", "value2b"});
 
-  data.Add(1, tags1, start_time);
-  data.Add(5, tags1, end_time);
-  data.Add(15, tags2, end_time);
+  AddToViewDataImpl(1, tags1, start_time, {buckets}, &data);
+  AddToViewDataImpl(5, tags1, end_time, {buckets}, &data);
+  AddToViewDataImpl(15, tags2, end_time, {buckets}, &data);
 
   EXPECT_EQ(Aggregation::Distribution(buckets), data.aggregation());
   EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
@@ -108,11 +117,11 @@ TEST(ViewDataImplTest, StatsObjectToCount) {
   const std::vector<std::string> tags1({"value1", "value2a"});
   const std::vector<std::string> tags2({"value1", "value2b"});
 
-  data.Add(1, tags1, time);
-  data.Add(2, tags1, time);
-  data.Add(2, tags2, time);
+  AddToViewDataImpl(1, tags1, time, {}, &data);
+  AddToViewDataImpl(2, tags1, time, {}, &data);
+  AddToViewDataImpl(2, tags2, time, {}, &data);
   time += interval / 2;
-  data.Add(1, tags1, time);
+  AddToViewDataImpl(1, tags1, time, {}, &data);
 
   const ViewDataImpl export_data1(data, time);
   EXPECT_EQ(Aggregation::Count(), export_data1.aggregation());
@@ -143,11 +152,11 @@ TEST(ViewDataImplTest, StatsObjectToSum) {
   const std::vector<std::string> tags1({"value1", "value2a"});
   const std::vector<std::string> tags2({"value1", "value2b"});
 
-  data.Add(1, tags1, time);
-  data.Add(3, tags1, time);
-  data.Add(2, tags2, time);
+  AddToViewDataImpl(1, tags1, time, {}, &data);
+  AddToViewDataImpl(3, tags1, time, {}, &data);
+  AddToViewDataImpl(2, tags2, time, {}, &data);
   time += interval / 2;
-  data.Add(2, tags1, time);
+  AddToViewDataImpl(2, tags1, time, {}, &data);
 
   const ViewDataImpl export_data1(data, time);
   EXPECT_EQ(Aggregation::Sum(), export_data1.aggregation());
@@ -180,11 +189,11 @@ TEST(ViewDataImplTest, StatsObjectToDistribution) {
   const std::vector<std::string> tags1({"value1", "value2a"});
   const std::vector<std::string> tags2({"value1", "value2b"});
 
-  data.Add(5, tags1, time);
-  data.Add(15, tags1, time);
-  data.Add(0, tags2, time);
+  AddToViewDataImpl(5, tags1, time, {buckets}, &data);
+  AddToViewDataImpl(15, tags1, time, {buckets}, &data);
+  AddToViewDataImpl(0, tags2, time, {buckets}, &data);
   time += interval / 2;
-  data.Add(10, tags1, time);
+  AddToViewDataImpl(10, tags1, time, {buckets}, &data);
 
   const ViewDataImpl export_data1(data, time);
   EXPECT_EQ(Aggregation::Distribution(buckets), export_data1.aggregation());
