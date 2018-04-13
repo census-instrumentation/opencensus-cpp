@@ -157,6 +157,78 @@ TEST(SetMetricFamilyTest, SumInt) {
   )");
 }
 
+TEST(SetMetricFamilyTest, LastValueDouble) {
+  const auto measure = opencensus::stats::MeasureDouble::Register(
+      "measure_last_value_double", "", "units");
+  const std::string task = "test_task";
+  const std::string view_name = "test_descriptor";
+  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor()
+          .set_name(view_name)
+          .set_measure(measure.GetDescriptor().name())
+          .set_aggregation(opencensus::stats::Aggregation::LastValue())
+          .add_column(tag_key_1)
+          .add_column(tag_key_2);
+  const opencensus::stats::ViewData data = TestUtils::MakeViewData(
+      view_descriptor,
+      {{{"v1", "v1"}, 1.0}, {{"v1", "v1"}, 3.0}, {{"v1", "v2"}, 2.0}});
+  io::prometheus::client::MetricFamily actual;
+  SetMetricFamily(view_descriptor, data, &actual);
+
+  CompareMetricFamilies(actual, R"(
+      name: "test_descriptor_units"
+      type: GAUGE
+      metric {
+        label { name: "foo" value: "v1" }
+        label { name: "bar" value: "v1" }
+        gauge { value: 3.0 }
+      }
+      metric {
+        label { name: "foo" value: "v1" }
+        label { name: "bar" value: "v2" }
+        gauge { value: 2.0 }
+      }
+  )");
+}
+
+TEST(SetMetricFamilyTest, LastValueInt64) {
+  const auto measure = opencensus::stats::MeasureInt64::Register(
+      "measure_last_value_int", "", "units");
+  const std::string task = "test_task";
+  const std::string view_name = "test_descriptor";
+  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor()
+          .set_name(view_name)
+          .set_measure(measure.GetDescriptor().name())
+          .set_aggregation(opencensus::stats::Aggregation::LastValue())
+          .add_column(tag_key_1)
+          .add_column(tag_key_2);
+  const opencensus::stats::ViewData data = TestUtils::MakeViewData(
+      view_descriptor,
+      {{{"v1", "v1"}, 1}, {{"v1", "v1"}, 3}, {{"v1", "v2"}, 2}});
+  io::prometheus::client::MetricFamily actual;
+  SetMetricFamily(view_descriptor, data, &actual);
+
+  CompareMetricFamilies(actual, R"(
+      name: "test_descriptor_units"
+      type: GAUGE
+      metric {
+        label { name: "foo" value: "v1" }
+        label { name: "bar" value: "v1" }
+        gauge { value: 3 }
+      }
+      metric {
+        label { name: "foo" value: "v1" }
+        label { name: "bar" value: "v2" }
+        gauge { value: 2 }
+      }
+  )");
+}
+
 TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
   const auto measure = opencensus::stats::MeasureDouble::Register(
       "measure_distribution_double", "", "units");

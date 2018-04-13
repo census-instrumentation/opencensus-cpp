@@ -24,6 +24,7 @@
 #include "opencensus/stats/distribution.h"
 #include "opencensus/stats/internal/aggregation_window.h"
 #include "opencensus/stats/internal/set_aggregation_window.h"
+#include "opencensus/stats/measure.h"
 #include "opencensus/stats/view_descriptor.h"
 
 namespace opencensus {
@@ -105,6 +106,56 @@ TEST(ViewDataImplTest, Distribution) {
               ::testing::ElementsAre(2, 0));
   EXPECT_THAT(data.distribution_data().find(tags2)->second.bucket_counts(),
               ::testing::ElementsAre(0, 1));
+}
+
+TEST(ViewDataImplTest, LastValueDouble) {
+  const absl::Time start_time = absl::UnixEpoch();
+  const absl::Time end_time = absl::UnixEpoch() + absl::Seconds(1);
+  const std::string measure_name = "last_value_double";
+  MeasureDouble::Register(measure_name, "", "");
+  const auto descriptor = ViewDescriptor()
+                              .set_measure(measure_name)
+                              .set_aggregation(Aggregation::LastValue());
+  ViewDataImpl data(start_time, descriptor);
+  const std::vector<std::string> tags1({"value1", "value2a"});
+  const std::vector<std::string> tags2({"value1", "value2b"});
+
+  AddToViewDataImpl(1.0, tags1, start_time, {}, &data);
+  AddToViewDataImpl(5.0, tags1, end_time, {}, &data);
+  AddToViewDataImpl(15.0, tags2, end_time, {}, &data);
+
+  EXPECT_EQ(Aggregation::LastValue(), data.aggregation());
+  EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
+  EXPECT_EQ(start_time, data.start_time());
+  EXPECT_EQ(end_time, data.end_time());
+  EXPECT_THAT(data.double_data(),
+              ::testing::UnorderedElementsAre(::testing::Pair(tags1, 5.0),
+                                              ::testing::Pair(tags2, 15.0)));
+}
+
+TEST(ViewDataImplTest, LastValueInt64) {
+  const absl::Time start_time = absl::UnixEpoch();
+  const absl::Time end_time = absl::UnixEpoch() + absl::Seconds(1);
+  const std::string measure_name = "last_value_int";
+  MeasureInt64::Register(measure_name, "", "");
+  const auto descriptor = ViewDescriptor()
+                              .set_measure(measure_name)
+                              .set_aggregation(Aggregation::LastValue());
+  ViewDataImpl data(start_time, descriptor);
+  const std::vector<std::string> tags1({"value1", "value2a"});
+  const std::vector<std::string> tags2({"value1", "value2b"});
+
+  AddToViewDataImpl(1, tags1, start_time, {}, &data);
+  AddToViewDataImpl(5, tags1, end_time, {}, &data);
+  AddToViewDataImpl(15, tags2, end_time, {}, &data);
+
+  EXPECT_EQ(Aggregation::LastValue(), data.aggregation());
+  EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
+  EXPECT_EQ(start_time, data.start_time());
+  EXPECT_EQ(end_time, data.end_time());
+  EXPECT_THAT(data.int_data(),
+              ::testing::UnorderedElementsAre(::testing::Pair(tags1, 5),
+                                              ::testing::Pair(tags2, 15)));
 }
 
 TEST(ViewDataImplTest, StatsObjectToCount) {

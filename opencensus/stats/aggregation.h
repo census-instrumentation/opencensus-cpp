@@ -47,10 +47,16 @@ class Aggregation final {
     return Aggregation(Type::kDistribution, std::move(buckets));
   }
 
+  // LastValue aggregation returns the last value recorded.
+  static Aggregation LastValue() {
+    return Aggregation(Type::kLastValue, BucketBoundaries::Explicit({}));
+  }
+
   enum class Type {
     kCount,
     kSum,
     kDistribution,
+    kLastValue,
   };
 
   Type type() const { return type_; }

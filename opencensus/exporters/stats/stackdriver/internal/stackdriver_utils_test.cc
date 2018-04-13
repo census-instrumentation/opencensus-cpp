@@ -77,6 +77,23 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorMetricKind) {
   auto view_descriptor = opencensus::stats::ViewDescriptor();
   google::api::MetricDescriptor metric_descriptor;
 
+  view_descriptor.set_aggregation(opencensus::stats::Aggregation::Count());
+  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  EXPECT_EQ(google::api::MetricDescriptor::CUMULATIVE,
+            metric_descriptor.metric_kind());
+
+  view_descriptor.set_aggregation(opencensus::stats::Aggregation::Sum());
+  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  EXPECT_EQ(google::api::MetricDescriptor::CUMULATIVE,
+            metric_descriptor.metric_kind());
+
+  view_descriptor.set_aggregation(opencensus::stats::Aggregation::LastValue());
+  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  EXPECT_EQ(google::api::MetricDescriptor::GAUGE,
+            metric_descriptor.metric_kind());
+
+  view_descriptor.set_aggregation(opencensus::stats::Aggregation::Distribution(
+      opencensus::stats::BucketBoundaries::Explicit({})));
   SetMetricDescriptor("", view_descriptor, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::CUMULATIVE,
             metric_descriptor.metric_kind());

@@ -73,6 +73,7 @@ google::api::MetricDescriptor::ValueType GetValueType(
     case opencensus::stats::Aggregation::Type::kCount:
       return google::api::MetricDescriptor::INT64;
     case opencensus::stats::Aggregation::Type::kSum:
+    case opencensus::stats::Aggregation::Type::kLastValue:
       switch (descriptor.measure_descriptor().type()) {
         case opencensus::stats::MeasureDescriptor::Type::kDouble:
           return google::api::MetricDescriptor::DOUBLE;
@@ -158,7 +159,11 @@ void SetMetricDescriptor(
   for (const auto& tag_key : view_descriptor.columns()) {
     SetLabelDescriptor(tag_key.name(), metric_descriptor->add_labels());
   }
-  metric_descriptor->set_metric_kind(google::api::MetricDescriptor::CUMULATIVE);
+  metric_descriptor->set_metric_kind(
+      view_descriptor.aggregation().type() ==
+              opencensus::stats::Aggregation::Type::kLastValue
+          ? google::api::MetricDescriptor::GAUGE
+          : google::api::MetricDescriptor::CUMULATIVE);
   metric_descriptor->set_value_type(GetValueType(view_descriptor));
   metric_descriptor->set_unit(
       view_descriptor.aggregation() == opencensus::stats::Aggregation::Count()

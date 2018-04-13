@@ -37,6 +37,7 @@ MeasureData::MeasureData(absl::Span<const BucketBoundaries> boundaries)
 }
 
 void MeasureData::Add(double value) {
+  last_value_ = value;
   // Update using the method of provisional means.
   ++count_;
   ABSL_ASSERT(count_ > 0 && "Histogram count overflow.");
