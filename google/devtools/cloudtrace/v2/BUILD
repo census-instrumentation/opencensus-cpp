@@ -41,5 +41,6 @@ cc_grpc_library(
     well_known_protos = True,
     deps = [
         ":trace_proto",
+        "//google/api:annotations",
     ],
 )
