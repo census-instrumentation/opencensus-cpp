@@ -121,6 +121,12 @@ config_setting(
     visibility = [ "//visibility:private" ],
 )
 
+config_setting(
+    name = "osx",
+    values = {"cpu": "darwin"},
+    visibility = [ "//visibility:private" ],
+)
+
 cc_library(
     name = "curl",
     srcs = glob([
