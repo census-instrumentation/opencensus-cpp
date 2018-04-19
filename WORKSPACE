@@ -91,10 +91,11 @@ cc_library(
 """
 )
 
+# TODO: Remove protobuf dependency and reset to head.
 http_archive(
     name = "com_github_jupp0r_prometheus_cpp",
-    strip_prefix = "prometheus-cpp-master",
-    urls = ["https://github.com/jupp0r/prometheus-cpp/archive/master.zip"],
+    strip_prefix = "prometheus-cpp-a97127c9aeec8decb76cf3bec1fb9c9a0dd4a9fc",
+    urls = ["https://github.com/jupp0r/prometheus-cpp/archive/a97127c9aeec8decb76cf3bec1fb9c9a0dd4a9fc.zip"],
 )
 
 load("@com_github_jupp0r_prometheus_cpp//:repositories.bzl",
