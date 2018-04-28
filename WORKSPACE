@@ -21,13 +21,6 @@ http_archive(
     urls = ["https://github.com/abseil/abseil-cpp/archive/master.zip"],
 )
 
-# CCTZ (Time-zone framework). Used by absl.
-http_archive(
-    name = "com_googlesource_code_cctz",
-    strip_prefix = "cctz-master",
-    urls = ["https://github.com/google/cctz/archive/master.zip"],
-)
-
 # GoogleTest/GoogleMock framework.
 http_archive(
     name = "com_google_googletest",
@@ -57,7 +50,7 @@ bind(
 )
 
 # Google Benchmark library.
-# Adapted from cctz's WORKSPACE.
+# Adapted from cctz.
 # Upstream support for bazel is tracked in
 #  - https://github.com/google/benchmark/pull/329
 #  - https://github.com/google/benchmark/issues/191
