@@ -23,5 +23,5 @@ before_install:
 script:
   # We can't use --noshow_progress because Travis terminates the
   # build after 10 mins without output.
-  - bazel build $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(rule, //...)" | grep -v :_)
-  - bazel test $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)" | grep -v :_)
+  - bazel build $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k //...
+  - bazel test $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)")
