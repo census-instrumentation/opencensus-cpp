@@ -25,7 +25,7 @@
 #include "absl/synchronization/mutex.h"
 #include "google/monitoring/v3/metric_service.grpc.pb.h"
 #include "google/protobuf/empty.pb.h"
-#include "include/grpc++/grpc++.h"
+#include "include/grpcpp/grpcpp.h"
 #include "opencensus/common/internal/grpc/status.h"
 #include "opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
 #include "opencensus/stats/stats.h"

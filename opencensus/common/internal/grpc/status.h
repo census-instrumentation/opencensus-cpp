@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "include/grpc++/support/status.h"
+#include "include/grpcpp/support/status.h"
 
 namespace opencensus {
 namespace common {

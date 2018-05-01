@@ -24,7 +24,7 @@
 #include "google/monitoring/v3/metric_service.grpc.pb.h"
 #include "google/protobuf/empty.pb.h"
 #include "gtest/gtest.h"
-#include "include/grpc++/grpc++.h"
+#include "include/grpcpp/grpcpp.h"
 #include "opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
 #include "opencensus/exporters/stats/stackdriver/internal/time_series_matcher.h"
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
