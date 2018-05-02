@@ -14,7 +14,7 @@
 
 #include "opencensus/plugins/grpc/grpc_plugin.h"
 
-#include <grpc++/server_context.h>
+#include <grpcpp/server_context.h>
 
 #include "opencensus/plugins/grpc/internal/channel_filter.h"
 #include "opencensus/plugins/grpc/internal/client_filter.h"

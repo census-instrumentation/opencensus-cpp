@@ -19,7 +19,7 @@
 #include <memory>
 #include <string>
 
-#include <grpc++/grpc++.h>
+#include <grpcpp/grpcpp.h>
 
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"

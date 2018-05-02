@@ -17,7 +17,7 @@
 #include <memory>
 #include <string>
 
-#include <grpc++/grpc++.h>
+#include <grpcpp/grpcpp.h>
 
 #include "examples/grpc/hello.grpc.pb.h"
 #include "examples/grpc/hello.pb.h"

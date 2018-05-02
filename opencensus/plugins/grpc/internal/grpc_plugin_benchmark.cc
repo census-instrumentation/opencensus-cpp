@@ -19,7 +19,7 @@
 #include "absl/base/call_once.h"
 #include "absl/strings/str_cat.h"
 #include "benchmark/benchmark.h"
-#include "include/grpc++/grpc++.h"
+#include "include/grpcpp/grpcpp.h"
 #include "opencensus/plugins/grpc/grpc_plugin.h"
 #include "opencensus/plugins/grpc/internal/testing/echo.grpc.pb.h"
 #include "opencensus/stats/stats.h"
