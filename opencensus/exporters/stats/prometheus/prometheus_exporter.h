@@ -18,9 +18,9 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
-#include "metrics.pb.h"
 #include "opencensus/stats/stats.h"
 #include "prometheus/collectable.h"
+#include "prometheus/metric_family.h"
 
 namespace opencensus {
 namespace exporters {
@@ -41,7 +41,7 @@ namespace stats {
 // PrometheusExporter is thread-safe.
 class PrometheusExporter final : public ::prometheus::Collectable {
  public:
-  std::vector<io::prometheus::client::MetricFamily> Collect() override;
+  std::vector<prometheus::MetricFamily> Collect() override;
 };
 
 }  // namespace stats

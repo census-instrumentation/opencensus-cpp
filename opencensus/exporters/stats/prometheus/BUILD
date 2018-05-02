@@ -28,7 +28,6 @@ cc_library(
         ":prometheus_utils",
         "//opencensus/stats",
         "@com_github_jupp0r_prometheus_cpp//:prometheus_cpp",
-        "@prometheus_client_model",
     ],
 )
 
@@ -42,9 +41,9 @@ cc_library(
     copts = DEFAULT_COPTS,
     deps = [
         "//opencensus/stats",
+        "@com_github_jupp0r_prometheus_cpp//:prometheus_cpp",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
-        "@prometheus_client_model",
     ],
 )
 
@@ -61,8 +60,6 @@ cc_test(
         "//opencensus/stats:test_utils",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@com_google_protobuf//:protobuf",
-        "@prometheus_client_model",
     ],
 )
 

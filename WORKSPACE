@@ -84,19 +84,15 @@ cc_library(
 """
 )
 
-# TODO: Remove protobuf dependency and reset to head.
 http_archive(
     name = "com_github_jupp0r_prometheus_cpp",
-    strip_prefix = "prometheus-cpp-a97127c9aeec8decb76cf3bec1fb9c9a0dd4a9fc",
-    urls = ["https://github.com/jupp0r/prometheus-cpp/archive/a97127c9aeec8decb76cf3bec1fb9c9a0dd4a9fc.zip"],
+    strip_prefix = "prometheus-cpp-master",
+    urls = ["https://github.com/jupp0r/prometheus-cpp/archive/master.zip"],
 )
 
-load("@com_github_jupp0r_prometheus_cpp//:repositories.bzl",
-     "load_prometheus_client_model",
-     "load_civetweb")
+load("@com_github_jupp0r_prometheus_cpp//:repositories.bzl", "load_civetweb")
 
 # Load dependencies individually since we load some of them above.
-load_prometheus_client_model()
 load_civetweb()
 
 # Curl library - used by zipkin exporter.

@@ -14,14 +14,12 @@
 
 #include "opencensus/exporters/stats/prometheus/internal/prometheus_utils.h"
 
+#include <limits>
 #include <string>
 #include <vector>
 
 #include "gmock/gmock.h"
-#include "google/protobuf/text_format.h"
-#include "google/protobuf/util/message_differencer.h"
 #include "gtest/gtest.h"
-#include "metrics.pb.h"
 #include "opencensus/stats/stats.h"
 #include "opencensus/stats/testing/test_utils.h"
 
@@ -31,23 +29,6 @@ namespace opencensus {
 namespace exporters {
 namespace stats {
 namespace {
-
-// Parses 'expected' as a text MetricFamily proto and tests that 'actual' equals
-// 'expected', ignoring metric/label order.
-void CompareMetricFamilies(const io::prometheus::client::MetricFamily& actual,
-                           const std::string& expected_string) {
-  io::prometheus::client::MetricFamily expected;
-  google::protobuf::TextFormat::ParseFromString(expected_string, &expected);
-  google::protobuf::util::MessageDifferencer differencer;
-  const auto* metric_field_descriptor =
-      expected.GetDescriptor()->FindFieldByName("metric");
-  differencer.TreatAsSet(metric_field_descriptor);
-  differencer.TreatAsSet(
-      metric_field_descriptor->message_type()->FindFieldByName("label"));
-  std::string output;
-  differencer.ReportDifferencesToString(&output);
-  EXPECT_TRUE(differencer.Compare(expected, actual)) << output;
-}
 
 TEST(SetMetricFamilyTest, CountDouble) {
   const auto measure = opencensus::stats::MeasureDouble::Register(
@@ -66,23 +47,64 @@ TEST(SetMetricFamilyTest, CountDouble) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor,
       {{{"v1", "v1"}, 1.0}, {{"v1", "v1"}, 3.0}, {{"v1", "v2"}, 2.0}});
-  io::prometheus::client::MetricFamily actual;
+  prometheus::MetricFamily actual;
   SetMetricFamily(view_descriptor, data, &actual);
 
-  CompareMetricFamilies(actual, R"(
-      name: "test_descriptor_units"
-      type: COUNTER
-      metric {
-        label { name: "foo" value: "v1" }
-        label { name: "bar" value: "v1" }
-        counter { value: 2 }
-      }
-      metric {
-        label { name: "foo" value: "v1" }
-        label { name: "bar" value: "v2" }
-        counter { value: 1 }
-      }
-  )");
+  EXPECT_THAT(
+      actual,
+      ::testing::AllOf(
+          ::testing::Field(&prometheus::MetricFamily::name,
+                           "test_descriptor_units"),
+          ::testing::Field(&prometheus::MetricFamily::type,
+                           prometheus::MetricType::Counter),
+          ::testing::Field(
+              &prometheus::MetricFamily::metric,
+              ::testing::UnorderedElementsAre(
+                  ::testing::AllOf(
+                      ::testing::Field(
+                          &prometheus::ClientMetric::label,
+                          ::testing::UnorderedElementsAre(
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "foo"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")),
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "bar"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")))),
+                      ::testing::Field(
+                          &prometheus::ClientMetric::counter,
+                          ::testing::Field(
+                              &prometheus::ClientMetric::Counter::value, 2))),
+                  ::testing::AllOf(
+                      ::testing::Field(
+                          &prometheus::ClientMetric::label,
+                          ::testing::UnorderedElementsAre(
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "foo"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")),
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "bar"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v2")))),
+                      ::testing::Field(
+                          &prometheus::ClientMetric::counter,
+                          ::testing::Field(
+                              &prometheus::ClientMetric::Counter::value,
+                              1)))))));
 }
 
 TEST(SetMetricFamilyTest, SumDouble) {
@@ -102,23 +124,64 @@ TEST(SetMetricFamilyTest, SumDouble) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor,
       {{{"v1", "v1"}, 1.0}, {{"v1", "v1"}, 3.0}, {{"v1", "v2"}, 2.0}});
-  io::prometheus::client::MetricFamily actual;
+  prometheus::MetricFamily actual;
   SetMetricFamily(view_descriptor, data, &actual);
 
-  CompareMetricFamilies(actual, R"(
-      name: "test_descriptor_units"
-      type: UNTYPED
-      metric {
-        label { name: "foo" value: "v1" }
-        label { name: "bar" value: "v1" }
-        untyped { value: 4 }
-      }
-      metric {
-        label { name: "foo" value: "v1" }
-        label { name: "bar" value: "v2" }
-        untyped { value: 2 }
-      }
-  )");
+  EXPECT_THAT(
+      actual,
+      ::testing::AllOf(
+          ::testing::Field(&prometheus::MetricFamily::name,
+                           "test_descriptor_units"),
+          ::testing::Field(&prometheus::MetricFamily::type,
+                           prometheus::MetricType::Untyped),
+          ::testing::Field(
+              &prometheus::MetricFamily::metric,
+              ::testing::UnorderedElementsAre(
+                  ::testing::AllOf(
+                      ::testing::Field(
+                          &prometheus::ClientMetric::label,
+                          ::testing::UnorderedElementsAre(
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "foo"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")),
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "bar"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")))),
+                      ::testing::Field(
+                          &prometheus::ClientMetric::untyped,
+                          ::testing::Field(
+                              &prometheus::ClientMetric::Untyped::value, 4))),
+                  ::testing::AllOf(
+                      ::testing::Field(
+                          &prometheus::ClientMetric::label,
+                          ::testing::UnorderedElementsAre(
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "foo"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")),
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "bar"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v2")))),
+                      ::testing::Field(
+                          &prometheus::ClientMetric::untyped,
+                          ::testing::Field(
+                              &prometheus::ClientMetric::Untyped::value,
+                              2)))))));
 }
 
 TEST(SetMetricFamilyTest, SumInt) {
@@ -138,23 +201,64 @@ TEST(SetMetricFamilyTest, SumInt) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor,
       {{{"v1", "v1"}, 1}, {{"v1", "v1"}, 3}, {{"v1", "v2"}, 2}});
-  io::prometheus::client::MetricFamily actual;
+  prometheus::MetricFamily actual;
   SetMetricFamily(view_descriptor, data, &actual);
 
-  CompareMetricFamilies(actual, R"(
-      name: "test_descriptor_units"
-      type: UNTYPED
-      metric {
-        label { name: "bar" value: "v1" }
-        label { name: "foo" value: "v1" }
-        untyped { value: 4 }
-      }
-      metric {
-        label { name: "bar" value: "v2" }
-        label { name: "foo" value: "v1" }
-        untyped { value: 2 }
-      }
-  )");
+  EXPECT_THAT(
+      actual,
+      ::testing::AllOf(
+          ::testing::Field(&prometheus::MetricFamily::name,
+                           "test_descriptor_units"),
+          ::testing::Field(&prometheus::MetricFamily::type,
+                           prometheus::MetricType::Untyped),
+          ::testing::Field(
+              &prometheus::MetricFamily::metric,
+              ::testing::UnorderedElementsAre(
+                  ::testing::AllOf(
+                      ::testing::Field(
+                          &prometheus::ClientMetric::label,
+                          ::testing::UnorderedElementsAre(
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "foo"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")),
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "bar"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")))),
+                      ::testing::Field(
+                          &prometheus::ClientMetric::untyped,
+                          ::testing::Field(
+                              &prometheus::ClientMetric::Untyped::value, 4))),
+                  ::testing::AllOf(
+                      ::testing::Field(
+                          &prometheus::ClientMetric::label,
+                          ::testing::UnorderedElementsAre(
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "foo"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")),
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "bar"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v2")))),
+                      ::testing::Field(
+                          &prometheus::ClientMetric::untyped,
+                          ::testing::Field(
+                              &prometheus::ClientMetric::Untyped::value,
+                              2)))))));
 }
 
 TEST(SetMetricFamilyTest, LastValueDouble) {
@@ -174,23 +278,63 @@ TEST(SetMetricFamilyTest, LastValueDouble) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor,
       {{{"v1", "v1"}, 1.0}, {{"v1", "v1"}, 3.0}, {{"v1", "v2"}, 2.0}});
-  io::prometheus::client::MetricFamily actual;
+  prometheus::MetricFamily actual;
   SetMetricFamily(view_descriptor, data, &actual);
 
-  CompareMetricFamilies(actual, R"(
-      name: "test_descriptor_units"
-      type: GAUGE
-      metric {
-        label { name: "foo" value: "v1" }
-        label { name: "bar" value: "v1" }
-        gauge { value: 3.0 }
-      }
-      metric {
-        label { name: "foo" value: "v1" }
-        label { name: "bar" value: "v2" }
-        gauge { value: 2.0 }
-      }
-  )");
+  EXPECT_THAT(
+      actual,
+      ::testing::AllOf(
+          ::testing::Field(&prometheus::MetricFamily::name,
+                           "test_descriptor_units"),
+          ::testing::Field(&prometheus::MetricFamily::type,
+                           prometheus::MetricType::Gauge),
+          ::testing::Field(
+              &prometheus::MetricFamily::metric,
+              ::testing::UnorderedElementsAre(
+                  ::testing::AllOf(
+                      ::testing::Field(
+                          &prometheus::ClientMetric::label,
+                          ::testing::UnorderedElementsAre(
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "foo"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")),
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "bar"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")))),
+                      ::testing::Field(
+                          &prometheus::ClientMetric::gauge,
+                          ::testing::Field(
+                              &prometheus::ClientMetric::Gauge::value, 3))),
+                  ::testing::AllOf(
+                      ::testing::Field(
+                          &prometheus::ClientMetric::label,
+                          ::testing::UnorderedElementsAre(
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "foo"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")),
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "bar"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v2")))),
+                      ::testing::Field(
+                          &prometheus::ClientMetric::gauge,
+                          ::testing::Field(
+                              &prometheus::ClientMetric::Gauge::value, 2)))))));
 }
 
 TEST(SetMetricFamilyTest, LastValueInt64) {
@@ -210,23 +354,63 @@ TEST(SetMetricFamilyTest, LastValueInt64) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor,
       {{{"v1", "v1"}, 1}, {{"v1", "v1"}, 3}, {{"v1", "v2"}, 2}});
-  io::prometheus::client::MetricFamily actual;
+  prometheus::MetricFamily actual;
   SetMetricFamily(view_descriptor, data, &actual);
 
-  CompareMetricFamilies(actual, R"(
-      name: "test_descriptor_units"
-      type: GAUGE
-      metric {
-        label { name: "foo" value: "v1" }
-        label { name: "bar" value: "v1" }
-        gauge { value: 3 }
-      }
-      metric {
-        label { name: "foo" value: "v1" }
-        label { name: "bar" value: "v2" }
-        gauge { value: 2 }
-      }
-  )");
+  EXPECT_THAT(
+      actual,
+      ::testing::AllOf(
+          ::testing::Field(&prometheus::MetricFamily::name,
+                           "test_descriptor_units"),
+          ::testing::Field(&prometheus::MetricFamily::type,
+                           prometheus::MetricType::Gauge),
+          ::testing::Field(
+              &prometheus::MetricFamily::metric,
+              ::testing::UnorderedElementsAre(
+                  ::testing::AllOf(
+                      ::testing::Field(
+                          &prometheus::ClientMetric::label,
+                          ::testing::UnorderedElementsAre(
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "foo"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")),
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "bar"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")))),
+                      ::testing::Field(
+                          &prometheus::ClientMetric::gauge,
+                          ::testing::Field(
+                              &prometheus::ClientMetric::Gauge::value, 3))),
+                  ::testing::AllOf(
+                      ::testing::Field(
+                          &prometheus::ClientMetric::label,
+                          ::testing::UnorderedElementsAre(
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "foo"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")),
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "bar"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v2")))),
+                      ::testing::Field(
+                          &prometheus::ClientMetric::gauge,
+                          ::testing::Field(
+                              &prometheus::ClientMetric::Gauge::value, 2)))))));
 }
 
 TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
@@ -250,35 +434,135 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
                                                 {{"v1", "v1"}, 7.0},
                                                 {{"v1", "v2"}, 1.0},
                                                 {{"v1", "v2"}, 11.0}});
-  io::prometheus::client::MetricFamily actual;
+  prometheus::MetricFamily actual;
   SetMetricFamily(view_descriptor, data, &actual);
 
-  CompareMetricFamilies(actual, R"(
-      name: "test_descriptor_units"
-      type: HISTOGRAM
-      metric {
-        label { name: "foo" value: "v1" }
-        label { name: "bar" value: "v1" }
-        histogram {
-          sample_count: 2
-          sample_sum: 6.0
-          bucket { cumulative_count: 1 upper_bound: 0 }
-          bucket { cumulative_count: 2 upper_bound: 10 }
-          bucket { cumulative_count: 2 upper_bound: Inf }
-        }
-      }
-      metric {
-        label { name: "foo" value: "v1" }
-        label { name: "bar" value: "v2" }
-        histogram {
-          sample_count: 2
-          sample_sum: 12.0
-          bucket { cumulative_count: 0 upper_bound: 0 }
-          bucket { cumulative_count: 1 upper_bound: 10 }
-          bucket { cumulative_count: 2 upper_bound: Inf }
-        }
-      }
-  )");
+  EXPECT_THAT(
+      actual,
+      ::testing::AllOf(
+          ::testing::Field(&prometheus::MetricFamily::name,
+                           "test_descriptor_units"),
+          ::testing::Field(&prometheus::MetricFamily::type,
+                           prometheus::MetricType::Histogram),
+          ::testing::Field(
+              &prometheus::MetricFamily::metric,
+              ::testing::UnorderedElementsAre(
+                  ::testing::AllOf(
+                      ::testing::Field(
+                          &prometheus::ClientMetric::label,
+                          ::testing::UnorderedElementsAre(
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "foo"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")),
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "bar"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")))),
+                      ::testing::Field(
+                          &prometheus::ClientMetric::histogram,
+                          ::testing::AllOf(
+                              ::testing::Field(&prometheus::ClientMetric::
+                                                   Histogram::sample_count,
+                                               2),
+                              ::testing::Field(&prometheus::ClientMetric::
+                                                   Histogram::sample_sum,
+                                               6.0),
+                              ::testing::Field(
+                                  &prometheus::ClientMetric::Histogram::bucket,
+                                  ::testing::ElementsAre(
+                                      ::testing::AllOf(
+                                          ::testing::Field(
+                                              &prometheus::ClientMetric::
+                                                  Bucket::cumulative_count,
+                                              1),
+                                          ::testing::Field(
+                                              &prometheus::ClientMetric::
+                                                  Bucket::upper_bound,
+                                              0)),
+                                      ::testing::AllOf(
+                                          ::testing::Field(
+                                              &prometheus::ClientMetric::
+                                                  Bucket::cumulative_count,
+                                              2),
+                                          ::testing::Field(
+                                              &prometheus::ClientMetric::
+                                                  Bucket::upper_bound,
+                                              10)),
+                                      ::testing::AllOf(
+                                          ::testing::Field(
+                                              &prometheus::ClientMetric::
+                                                  Bucket::cumulative_count,
+                                              2),
+                                          ::testing::Field(
+                                              &prometheus::ClientMetric::
+                                                  Bucket::upper_bound,
+                                              std::numeric_limits<
+                                                  double>::infinity()))))))),
+                  ::testing::AllOf(
+                      ::testing::Field(
+                          &prometheus::ClientMetric::label,
+                          ::testing::UnorderedElementsAre(
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "foo"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v1")),
+                              ::testing::AllOf(
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::name,
+                                      "bar"),
+                                  ::testing::Field(
+                                      &prometheus::ClientMetric::Label::value,
+                                      "v2")))),
+                      ::testing::Field(
+                          &prometheus::ClientMetric::histogram,
+                          ::testing::AllOf(
+                              ::testing::Field(&prometheus::ClientMetric::
+                                                   Histogram::sample_count,
+                                               2),
+                              ::testing::Field(&prometheus::ClientMetric::
+                                                   Histogram::sample_sum,
+                                               12.0),
+                              ::testing::Field(
+                                  &prometheus::ClientMetric::Histogram::bucket,
+                                  ::testing::ElementsAre(
+                                      ::testing::AllOf(
+                                          ::testing::Field(
+                                              &prometheus::ClientMetric::
+                                                  Bucket::cumulative_count,
+                                              0),
+                                          ::testing::Field(
+                                              &prometheus::ClientMetric::
+                                                  Bucket::upper_bound,
+                                              0)),
+                                      ::testing::AllOf(
+                                          ::testing::Field(
+                                              &prometheus::ClientMetric::
+                                                  Bucket::cumulative_count,
+                                              1),
+                                          ::testing::Field(
+                                              &prometheus::ClientMetric::
+                                                  Bucket::upper_bound,
+                                              10)),
+                                      ::testing::AllOf(
+                                          ::testing::Field(
+                                              &prometheus::ClientMetric::
+                                                  Bucket::cumulative_count,
+                                              2),
+                                          ::testing::Field(
+                                              &prometheus::ClientMetric::
+                                                  Bucket::upper_bound,
+                                              std::numeric_limits<double>::
+                                                  infinity())))))))))));
 }
 
 }  // namespace

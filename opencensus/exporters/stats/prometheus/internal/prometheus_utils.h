@@ -18,8 +18,8 @@
 #include <utility>
 #include <vector>
 
-#include "metrics.pb.h"
 #include "opencensus/stats/stats.h"
+#include "prometheus/metric_family.h"
 
 namespace opencensus {
 namespace exporters {
@@ -28,7 +28,7 @@ namespace stats {
 // Populates metric_family based on view_descriptor and view_data.
 void SetMetricFamily(const opencensus::stats::ViewDescriptor& descriptor,
                      const opencensus::stats::ViewData& data,
-                     io::prometheus::client::MetricFamily* metric_family);
+                     prometheus::MetricFamily* metric_family);
 
 }  // namespace stats
 }  // namespace exporters
