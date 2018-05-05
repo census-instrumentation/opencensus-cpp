@@ -100,7 +100,8 @@ int main(int argc, char **argv) {
   span.AddAnnotation("Finished processing video.");
   span.End();
 
-  std::cout << "video_size_view definitions:" << video_size_view.DebugString() << "\n\n";
+  std::cout << "video_size_view definitions:" << video_size_view.DebugString()
+            << "\n\n";
 
   std::cout << "Waiting 10.1s for exporters to run...\n\n";
   absl::SleepFor(absl::Milliseconds(10100));
