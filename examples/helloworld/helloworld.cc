@@ -100,9 +100,13 @@ int main(int argc, char **argv) {
   span.AddAnnotation("Finished processing video.");
   span.End();
 
-  // Report view data.
   std::cout << "video_size_view definitions:" << video_size_view.DebugString()
-            << "\nView data:\n";
+            << "\n\n";
+
+  std::cout << "Waiting 10.1s for exporters to run...\n\n";
+  absl::SleepFor(absl::Milliseconds(10100));
+
+  std::cout << "View data:\n";
   const auto data = view.GetData();
   assert(data.type() == opencensus::stats::ViewData::Type::kDistribution);
   for (auto &it : data.distribution_data()) {
@@ -110,7 +114,4 @@ int main(int argc, char **argv) {
     for (auto &name : it.first) std::cout << name << " : ";
     std::cout << it.second.DebugString() << "\n";
   }
-
-  std::cout << "\nWaiting for exporters to run...\n";
-  absl::SleepFor(absl::Milliseconds(5100));
 }
