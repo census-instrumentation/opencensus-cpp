@@ -17,18 +17,17 @@
 #include <utility>
 #include <vector>
 
-#include "metrics.pb.h"
 #include "opencensus/exporters/stats/prometheus/internal/prometheus_utils.h"
 #include "opencensus/stats/stats.h"
+#include "prometheus/metric_family.h"
 
 namespace opencensus {
 namespace exporters {
 namespace stats {
 
-std::vector<io::prometheus::client::MetricFamily>
-PrometheusExporter::Collect() {
+std::vector<prometheus::MetricFamily> PrometheusExporter::Collect() {
   const auto data = opencensus::stats::StatsExporter::GetViewData();
-  std::vector<io::prometheus::client::MetricFamily> output(data.size());
+  std::vector<prometheus::MetricFamily> output(data.size());
   for (int i = 0; i < data.size(); ++i) {
     SetMetricFamily(data[i].first, data[i].second, &output[i]);
   }

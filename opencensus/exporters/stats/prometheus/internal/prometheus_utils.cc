@@ -16,6 +16,7 @@
 
 #include <cctype>
 #include <cstdint>
+#include <limits>
 #include <string>
 #include <utility>
 #include <vector>
@@ -24,8 +25,9 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
-#include "metrics.pb.h"
 #include "opencensus/stats/stats.h"
+#include "prometheus/metric.h"
+#include "prometheus/metric_type.h"
 
 namespace opencensus {
 namespace exporters {
@@ -42,43 +44,42 @@ std::string SanitizeName(absl::string_view name) {
   return sanitized;
 }
 
-io::prometheus::client::MetricType MetricType(
-    opencensus::stats::Aggregation::Type type) {
+prometheus::MetricType MetricType(opencensus::stats::Aggregation::Type type) {
   switch (type) {
     case opencensus::stats::Aggregation::Type::kCount:
-      return io::prometheus::client::MetricType::COUNTER;
+      return prometheus::MetricType::Counter;
     case opencensus::stats::Aggregation::Type::kSum:
-      return io::prometheus::client::MetricType::UNTYPED;
+      return prometheus::MetricType::Untyped;
     case opencensus::stats::Aggregation::Type::kLastValue:
-      return io::prometheus::client::MetricType::GAUGE;
+      return prometheus::MetricType::Gauge;
     case opencensus::stats::Aggregation::Type::kDistribution:
-      return io::prometheus::client::MetricType::HISTOGRAM;
+      return prometheus::MetricType::Histogram;
   }
 }
 
-void SetValue(double value, io::prometheus::client::MetricType type,
-              io::prometheus::client::Metric* metric) {
-  if (type == io::prometheus::client::MetricType::UNTYPED) {
-    metric->mutable_untyped()->set_value(value);
+void SetValue(double value, prometheus::MetricType type,
+              prometheus::ClientMetric* metric) {
+  if (type == prometheus::MetricType::Untyped) {
+    metric->untyped.value = value;
   } else {
-    ABSL_ASSERT(type == io::prometheus::client::MetricType::GAUGE);
-    metric->mutable_gauge()->set_value(value);
+    ABSL_ASSERT(type == prometheus::MetricType::Gauge);
+    metric->gauge.value = value;
   }
 }
 
-void SetValue(int64_t value, io::prometheus::client::MetricType type,
-              io::prometheus::client::Metric* metric) {
+void SetValue(int64_t value, prometheus::MetricType type,
+              prometheus::ClientMetric* metric) {
   switch (type) {
-    case io::prometheus::client::MetricType::COUNTER: {
-      metric->mutable_counter()->set_value(value);
+    case prometheus::MetricType::Counter: {
+      metric->counter.value = value;
       break;
     }
-    case io::prometheus::client::MetricType::GAUGE: {
-      metric->mutable_gauge()->set_value(value);
+    case prometheus::MetricType::Gauge: {
+      metric->gauge.value = value;
       break;
     }
-    case io::prometheus::client::MetricType::UNTYPED: {
-      metric->mutable_untyped()->set_value(value);
+    case prometheus::MetricType::Untyped: {
+      metric->untyped.value = value;
       break;
     }
     default:
@@ -86,40 +87,42 @@ void SetValue(int64_t value, io::prometheus::client::MetricType type,
   }
 }
 void SetValue(const opencensus::stats::Distribution& value,
-              io::prometheus::client::MetricType type,
-              io::prometheus::client::Metric* metric) {
-  auto* histogram = metric->mutable_histogram();
-  histogram->set_sample_count(value.count());
-  histogram->set_sample_sum(value.count() * value.mean());
+              prometheus::MetricType type, prometheus::ClientMetric* metric) {
+  auto& histogram = metric->histogram;
+  histogram.sample_count = value.count();
+  histogram.sample_sum = value.count() * value.mean();
 
   int64_t cumulative_count = 0;
+  histogram.bucket.reserve(value.bucket_boundaries().num_buckets());
   for (int i = 0; i < value.bucket_boundaries().num_buckets(); ++i) {
     cumulative_count += value.bucket_counts()[i];
-    auto* bucket = histogram->add_bucket();
-    bucket->set_cumulative_count(cumulative_count);
+    histogram.bucket.emplace_back();
+    histogram.bucket[i].cumulative_count = cumulative_count;
     // We use lower boundaries plus an underflow bucket; Prometheus uses upper
     // boundaries, including a +Inf boundary.
-    bucket->set_upper_bound(
+    histogram.bucket[i].upper_bound =
         i < value.bucket_boundaries().lower_boundaries().size()
             ? value.bucket_boundaries().lower_boundaries()[i]
-            : std::numeric_limits<double>::infinity());
+            : std::numeric_limits<double>::infinity();
   }
 }
 
 template <typename T>
 void SetData(const opencensus::stats::ViewDescriptor& descriptor,
              const opencensus::stats::ViewData::DataMap<T>& data, int64_t time,
-             io::prometheus::client::MetricType type,
-             io::prometheus::client::MetricFamily* metric_family) {
+             prometheus::MetricType type,
+             prometheus::MetricFamily* metric_family) {
+  metric_family->metric.reserve(data.size());
   for (const auto& row : data) {
-    auto* metric = metric_family->add_metric();
-    metric->set_timestamp_ms(time);
+    metric_family->metric.emplace_back();
+    prometheus::ClientMetric& metric = metric_family->metric.back();
+    metric.timestamp_ms = time;
+    metric.label.resize(descriptor.num_columns());
     for (int i = 0; i < descriptor.num_columns(); ++i) {
-      auto* label = metric->add_label();
-      label->set_name(SanitizeName(descriptor.columns()[i].name()));
-      label->set_value(row.first[i]);
+      metric.label[i].name = SanitizeName(descriptor.columns()[i].name());
+      metric.label[i].value = row.first[i];
     }
-    SetValue(row.second, type, metric);
+    SetValue(row.second, type, &metric);
   }
 }
 
@@ -127,14 +130,14 @@ void SetData(const opencensus::stats::ViewDescriptor& descriptor,
 
 void SetMetricFamily(const opencensus::stats::ViewDescriptor& descriptor,
                      const opencensus::stats::ViewData& data,
-                     io::prometheus::client::MetricFamily* metric_family) {
-  const io::prometheus::client::MetricType type =
+                     prometheus::MetricFamily* metric_family) {
+  const prometheus::MetricType type =
       MetricType(descriptor.aggregation().type());
   // TODO(sturdy): convert common units into base units (e.g. ms->s).
-  metric_family->set_name(SanitizeName(absl::StrCat(
-      descriptor.name(), "_", descriptor.measure_descriptor().units())));
-  metric_family->set_help(descriptor.description());
-  metric_family->set_type(type);
+  metric_family->name = SanitizeName(absl::StrCat(
+      descriptor.name(), "_", descriptor.measure_descriptor().units()));
+  metric_family->help = descriptor.description();
+  metric_family->type = type;
 
   const int64_t time = absl::ToUnixMillis(data.end_time());
   switch (data.type()) {
