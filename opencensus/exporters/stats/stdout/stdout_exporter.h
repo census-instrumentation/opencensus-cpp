@@ -15,18 +15,17 @@
 #ifndef OPENCENSUS_EXPORTERS_STATS_STDOUT_STDOUT_EXPORTER_H_
 #define OPENCENSUS_EXPORTERS_STATS_STDOUT_STDOUT_EXPORTER_H_
 
+#include <iostream>
+
 namespace opencensus {
 namespace exporters {
 namespace stats {
 
-// A stats exporter that exports views registered with StatsExporter to stdout.
-// StdoutExporter is immutable.
+// A stats exporter that writes to stdout.
 class StdoutExporter {
  public:
-  static void Register();
-
- private:
-  class Handler;
+  StdoutExporter() = delete;
+  static void Register(std::ostream* stream = &std::cout);
 };
 
 }  // namespace stats

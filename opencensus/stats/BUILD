@@ -43,7 +43,7 @@ cc_library(
     srcs = ["testing/test_utils.cc"],
     hdrs = ["testing/test_utils.h"],
     copts = DEFAULT_COPTS,
-    visibility = ["//visibility:public"],
+    visibility = ["//opencensus:__subpackages__"],
     deps = [
         ":core",
         "@com_google_absl//absl/memory",

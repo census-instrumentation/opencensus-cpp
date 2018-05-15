@@ -44,6 +44,7 @@ class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
 
 }  // namespace
 
+// static
 void StdoutExporter::Register(std::ostream* stream) {
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
       absl::make_unique<Handler>(stream));

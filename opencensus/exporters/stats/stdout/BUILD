@@ -31,3 +31,16 @@ cc_library(
         "@com_google_absl//absl/time",
     ],
 )
+
+cc_test(
+    name = "stdout_exporter_test",
+    srcs = ["internal/stdout_exporter_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":stdout_exporter",
+        "//opencensus/stats",
+        "//opencensus/stats:test_utils",
+        "@com_google_absl//absl/time",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
