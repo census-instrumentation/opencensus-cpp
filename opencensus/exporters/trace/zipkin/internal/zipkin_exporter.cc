@@ -365,7 +365,7 @@ void ZipkinExportHandler::Export(
 
 void ZipkinExporter::Register(const ZipkinExporterOptions& options) {
   // Initialize libcurl. This MUST only be done once per process.
-  static CurlEnv* curl_lib = new CurlEnv();
+  static CurlEnv* curl_lib ABSL_ATTRIBUTE_UNUSED = new CurlEnv();
 
   // Create new exporter.
   ZipkinExportHandler* handler = new ZipkinExportHandler(options);
