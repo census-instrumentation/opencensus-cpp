@@ -45,11 +45,10 @@ std::string DataToString(const opencensus::stats::Distribution& data) {
   return output;
 }
 
-}  // namespace
-
-class StdoutExporter::Handler
-    : public opencensus::stats::StatsExporter::Handler {
+class Handler : public opencensus::stats::StatsExporter::Handler {
  public:
+  Handler(std::ostream* stream) : stream_(stream) {}
+
   void ExportViewData(
       const std::vector<std::pair<opencensus::stats::ViewDescriptor,
                                   opencensus::stats::ViewData>>& data) override;
@@ -61,15 +60,11 @@ class StdoutExporter::Handler
       const opencensus::stats::ViewDescriptor& descriptor,
       absl::Time start_time, absl::Time end_time,
       const opencensus::stats::ViewData::DataMap<DataValueT>& data);
+
+  std::ostream* stream_;
 };
 
-// static
-void StdoutExporter::Register() {
-  opencensus::stats::StatsExporter::RegisterPushHandler(
-      absl::make_unique<StdoutExporter::Handler>());
-}
-
-void StdoutExporter::Handler::ExportViewData(
+void Handler::ExportViewData(
     const std::vector<std::pair<opencensus::stats::ViewDescriptor,
                                 opencensus::stats::ViewData>>& data) {
   for (const auto& datum : data) {
@@ -92,18 +87,17 @@ void StdoutExporter::Handler::ExportViewData(
 }
 
 template <typename DataValueT>
-void StdoutExporter::Handler::ExportViewDataImpl(
+void Handler::ExportViewDataImpl(
     const opencensus::stats::ViewDescriptor& descriptor, absl::Time start_time,
     absl::Time end_time,
     const opencensus::stats::ViewData::DataMap<DataValueT>& data) {
   if (data.size() == 0) {
-    std::cout << absl::StrCat("No data for view \"", descriptor.name(),
-                              "\" from ", absl::FormatTime(start_time),
-                              ".\n\n");
+    *stream_ << absl::StrCat("No data for view \"", descriptor.name(),
+                             "\" from ", absl::FormatTime(start_time), ".\n\n");
     return;
   }
-  // Build a string so we can write it to cout in one shot to minimize crosstalk
-  // if multiple threads write to cout simultaneously.
+  // Build a string so we can write it in one shot to minimize crosstalk if
+  // multiple threads write to stream_ simultaneously.
   std::string output = absl::StrCat("Data for view \"", descriptor.name(),
                                     "\" from ", absl::FormatTime(start_time),
                                     " to ", absl::FormatTime(end_time), ":\n");
@@ -116,7 +110,15 @@ void StdoutExporter::Handler::ExportViewDataImpl(
     absl::StrAppend(&output, DataToString(row.second));
   }
   absl::StrAppend(&output, "\n");
-  std::cout << output;
+  *stream_ << output;
+}
+
+}  // namespace
+
+// static
+void StdoutExporter::Register(std::ostream* stream) {
+  opencensus::stats::StatsExporter::RegisterPushHandler(
+      absl::make_unique<Handler>(stream));
 }
 
 }  // namespace stats

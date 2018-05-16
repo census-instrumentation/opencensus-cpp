@@ -86,8 +86,10 @@ void SetValue(int64_t value, prometheus::MetricType type,
       ABSL_ASSERT(false && "Invalid MetricType for int64 value.");
   }
 }
+
 void SetValue(const opencensus::stats::Distribution& value,
-              prometheus::MetricType type, prometheus::ClientMetric* metric) {
+              prometheus::MetricType type ABSL_ATTRIBUTE_UNUSED,
+              prometheus::ClientMetric* metric) {
   auto& histogram = metric->histogram;
   histogram.sample_count = value.count();
   histogram.sample_sum = value.count() * value.mean();
