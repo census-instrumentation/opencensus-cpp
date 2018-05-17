@@ -160,7 +160,6 @@ void SerializeJson(const ::opencensus::trace::exporter::SpanData& span,
   writer->EndObject();
 }
 
-// JSON encoding
 std::string EncodeJson(
     const std::vector<::opencensus::trace::exporter::SpanData>& spans,
     const ZipkinExporterOptions::Service& service) {
@@ -175,12 +174,9 @@ std::string EncodeJson(
   return buffer.GetString();
 }
 
-std::string GetIpAddress(ZipkinExporterOptions::AddressFamily af_type) {
-  struct ifaddrs* if_address_list;
-  struct ifaddrs* if_address;
-
-  getifaddrs(&if_address_list);
-  for (if_address = if_address_list; if_address != nullptr;
+std::string GetIpAddressHelper(ZipkinExporterOptions::AddressFamily af_type,
+                               ifaddrs* ifaddr_list) {
+  for (ifaddrs* if_address = ifaddr_list; if_address != nullptr;
        if_address = if_address->ifa_next) {
     if (if_address->ifa_addr == nullptr) {
       continue;
@@ -218,11 +214,28 @@ std::string GetIpAddress(ZipkinExporterOptions::AddressFamily af_type) {
     return ipv6_loopback;
 }
 
+std::string GetIpAddress(ZipkinExporterOptions::AddressFamily af_type) {
+  ifaddrs* ifaddr;
+  getifaddrs(&ifaddr);
+  std::string out = GetIpAddressHelper(af_type, ifaddr);
+  freeifaddrs(ifaddr);
+  return out;
+}
+
 class CurlEnv {
  public:
+  static CurlEnv* Get();
+
+ private:
   CurlEnv() { curl_global_init(CURL_GLOBAL_DEFAULT); }
   ~CurlEnv() { curl_global_cleanup(); }
 };
+
+// static
+CurlEnv* CurlEnv::Get() {
+  static CurlEnv* g_curl_env = new CurlEnv;
+  return g_curl_env;
+}
 
 CURLcode CurlSendMessage(const uint8_t* data,
                          const ZipkinExporterOptions& options, size_t size,
@@ -313,8 +326,6 @@ CURLcode CurlSendMessage(const uint8_t* data,
   return res;
 }
 
-}  // namespace
-
 class ZipkinExportHandler
     : public ::opencensus::trace::exporter::SpanExporter::Handler {
  public:
@@ -338,7 +349,7 @@ void ZipkinExportHandler::SendMessage(const std::string& msg,
   struct curl_slist* headers = nullptr;
 
   if (!curl) {
-    // Failed to create curl handle.
+    std::cerr << "Failed to create curl handle.\n";
     return;
   }
 
@@ -348,7 +359,7 @@ void ZipkinExportHandler::SendMessage(const std::string& msg,
   CURLcode res = CurlSendMessage(reinterpret_cast<const uint8_t*>(msg.data()),
                                  options_, size, headers, curl, err_msg);
   if (res != CURLE_OK) {
-    std::cerr << "curl error: " << curl_easy_strerror(res);
+    std::cerr << "curl error: " << curl_easy_strerror(res) << "\n";
   }
 
   curl_slist_free_all(headers);
@@ -363,9 +374,11 @@ void ZipkinExportHandler::Export(
   }
 }
 
+}  // namespace
+
 void ZipkinExporter::Register(const ZipkinExporterOptions& options) {
   // Initialize libcurl. This MUST only be done once per process.
-  static CurlEnv* curl_lib ABSL_ATTRIBUTE_UNUSED = new CurlEnv();
+  CurlEnv::Get();
 
   // Create new exporter.
   ZipkinExportHandler* handler = new ZipkinExportHandler(options);
