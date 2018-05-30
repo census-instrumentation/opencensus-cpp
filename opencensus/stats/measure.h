@@ -27,7 +27,8 @@ namespace stats {
 // that measure can retrieve the data for those events. Measures can only be
 // obtained from the static functions MeasureRegistry::Register() and
 // MeasureRegistry::GetMeasureByName().
-// Measure is immutable, and should be passed by value.
+// Measure is immutable, and should be passed by value. It has a trivial
+// destructor and can be safely used as a local static variable.
 template <typename MeasureT>
 class Measure final {
  public:
