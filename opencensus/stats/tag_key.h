@@ -24,7 +24,8 @@
 namespace opencensus {
 namespace stats {
 
-// TagKey is a lightweight, immutable representation of a tag key.
+// TagKey is a lightweight, immutable representation of a tag key. It has a
+// trivial destructor and can be safely used as a local static variable.
 class TagKey final {
  public:
   // Registers a tag key with 'name'. Registering the same name twice produces
