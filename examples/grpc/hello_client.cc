@@ -36,7 +36,7 @@ using examples::HelloReply;
 using examples::HelloRequest;
 using examples::HelloService;
 
-} // namespace
+}  // namespace
 
 int main(int argc, char **argv) {
   if (argc < 2) {

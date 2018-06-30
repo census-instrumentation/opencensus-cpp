@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <unistd.h>
 #include <cstdlib>
 #include <iostream>
-#include <unistd.h>
 
 #include "absl/strings/str_cat.h"
 #include "examples/grpc/stackdriver.h"
@@ -29,8 +29,7 @@ void RegisterStackdriverExporters() {
     return;
   }
   const char *hostname = getenv("HOSTNAME");
-  if (hostname == nullptr)
-    hostname = "hostname";
+  if (hostname == nullptr) hostname = "hostname";
   const std::string opencensus_task =
       absl::StrCat("cpp-", getpid(), "@", hostname);
   opencensus::exporters::stats::StackdriverExporter::Register(project_id,

@@ -66,7 +66,7 @@ void PerformWork(opencensus::trace::Span *parent) {
   auto span = opencensus::trace::Span::StartSpan("internal_work", parent);
   span.AddAttribute("my_attribute", "blue");
   span.AddAnnotation("Performing work.");
-  absl::SleepFor(absl::Milliseconds(20)); // Working hard here.
+  absl::SleepFor(absl::Milliseconds(20));  // Working hard here.
   span.End();
 }
 
@@ -93,7 +93,7 @@ class HelloServiceImpl final : public HelloService::Service {
   }
 };
 
-} // namespace
+}  // namespace
 
 int main(int argc, char **argv) {
   // Handle port argument.
