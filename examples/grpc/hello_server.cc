@@ -20,13 +20,13 @@
 #include <string>
 
 #include <grpcpp/grpcpp.h>
+#include <grpcpp/opencensus.h>
 
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
 #include "examples/grpc/hello.grpc.pb.h"
 #include "examples/grpc/hello.pb.h"
 #include "examples/grpc/stackdriver.h"
-#include "include/grpcpp/opencensus.h"
 #include "opencensus/exporters/stats/prometheus/prometheus_exporter.h"
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 #include "opencensus/exporters/stats/stdout/stdout_exporter.h"
