@@ -21,7 +21,8 @@ http_archive(
     urls = ["https://github.com/abseil/abseil-cpp/archive/master.zip"],
 )
 
-# GoogleTest/GoogleMock framework.
+# GoogleTest framework.
+# Only needed for tests, not to build the OpenCensus library.
 http_archive(
     name = "com_google_googletest",
     strip_prefix = "googletest-master",
@@ -50,40 +51,14 @@ bind(
 )
 
 # Google Benchmark library.
-# Adapted from cctz.
-# Upstream support for bazel is tracked in
-#  - https://github.com/google/benchmark/pull/329
-#  - https://github.com/google/benchmark/issues/191
-new_http_archive(
+# Only needed for benchmarks, not to build the OpenCensus library.
+http_archive(
     name = "com_google_benchmark",
     urls = ["https://github.com/google/benchmark/archive/master.zip"],
     strip_prefix = "benchmark-master",
-    build_file_content =
-"""
-config_setting(
-    name = "windows",
-    values = {"cpu": "x64_windows"},
-    visibility = [ "//visibility:private" ],
 )
 
-cc_library(
-    name = "benchmark",
-    srcs = glob([
-        "src/*.h",
-        "src/*.cc",
-    ]),
-    hdrs = glob(["include/benchmark/*.h"]),
-    copts = select({
-        "//:windows": ["-DHAVE_STD_REGEX"],
-        # HAVE_STD_REGEX didn't work.
-        "//conditions:default": ["-DHAVE_POSIX_REGEX"],
-    }),
-    includes = ["include"],
-    visibility = ["//visibility:public"],
-)
-"""
-)
-
+# Prometheus client library - used by Prometheus exporter.
 http_archive(
     name = "com_github_jupp0r_prometheus_cpp",
     strip_prefix = "prometheus-cpp-master",
@@ -92,7 +67,7 @@ http_archive(
 
 load("@com_github_jupp0r_prometheus_cpp//:repositories.bzl", "load_civetweb")
 
-# Load dependencies individually since we load some of them above.
+# Load Prometheus dependencies individually since we load some of them above.
 load_civetweb()
 
 # Curl library - used by zipkin exporter.
