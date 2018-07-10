@@ -49,6 +49,8 @@ ViewDataImpl::Type ViewDataImpl::TypeForDescriptor(
     case AggregationWindow::Type::kInterval:
       return ViewDataImpl::Type::kStatsObject;
   }
+  ABSL_ASSERT(false && "Bad ViewDataImpl type.");
+  return ViewDataImpl::Type::kDouble;
 }
 
 ViewDataImpl::ViewDataImpl(absl::Time start_time,

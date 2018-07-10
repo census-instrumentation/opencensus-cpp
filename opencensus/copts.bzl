@@ -18,7 +18,7 @@ Flags specified here must not impact ABI. Code compiled with and without these
 opts will be linked together, and in some cases headers compiled with and
 without these options will be part of the same program.
 
-We use the same flags as absl.
+We use the same flags as absl, plus turn some warnings into errors.
 """
 
 load(
@@ -31,18 +31,16 @@ load(
     "MSVC_TEST_FLAGS",
 )
 
+WERROR = ["-Werror=return-type", "-Werror=switch"]
+
 DEFAULT_COPTS = select({
-    "//opencensus:llvm_compiler": LLVM_FLAGS,
-    # Disable "not all control paths return a value"; functions that return
-    # out of a switch on an enum cause build errors otherwise.
-    "//opencensus:windows": MSVC_FLAGS + ["/wd4715"],
-    "//conditions:default": GCC_FLAGS,
+    "//opencensus:llvm_compiler": LLVM_FLAGS + WERROR,
+    "//opencensus:windows": MSVC_FLAGS,
+    "//conditions:default": GCC_FLAGS + WERROR,
 })
 
 TEST_COPTS = DEFAULT_COPTS + select({
-    "//opencensus:llvm_compiler": LLVM_TEST_FLAGS,
-    # Disable "not all control paths return a value"; functions that return
-    # out of a switch on an enum cause build errors otherwise.
-    "//opencensus:windows": MSVC_TEST_FLAGS + ["/wd4715"],
-    "//conditions:default": GCC_TEST_FLAGS,
+    "//opencensus:llvm_compiler": LLVM_TEST_FLAGS + WERROR,
+    "//opencensus:windows": MSVC_TEST_FLAGS,
+    "//conditions:default": GCC_TEST_FLAGS + WERROR,
 })
