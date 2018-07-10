@@ -83,6 +83,8 @@ google::api::MetricDescriptor::ValueType GetValueType(
     case opencensus::stats::Aggregation::Type::kDistribution:
       return google::api::MetricDescriptor::DISTRIBUTION;
   }
+  ABSL_ASSERT(false && "Bad descriptor type.");
+  return google::api::MetricDescriptor::DOUBLE;
 }
 
 // Overloaded function for converting ViewData value types to Points. The
@@ -197,6 +199,8 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
       return DataToTimeSeries(view_descriptor, data.distribution_data(),
                               base_time_series);
   }
+  ABSL_ASSERT(false && "Bad ViewData.type().");
+  return {};
 }
 
 void SetTimestamp(absl::Time time, google::protobuf::Timestamp* proto) {
