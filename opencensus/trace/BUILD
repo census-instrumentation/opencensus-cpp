@@ -279,7 +279,7 @@ cc_binary(
     linkstatic = 1,
     deps = [
         ":trace",
-        "@com_google_benchmark//:benchmark",
+        "@com_github_google_benchmark//:benchmark",
     ],
 )
 
@@ -292,7 +292,7 @@ cc_binary(
     linkstatic = 1,
     deps = [
         ":trace",
-        "@com_google_benchmark//:benchmark",
+        "@com_github_google_benchmark//:benchmark",
     ],
 )
 
@@ -305,6 +305,6 @@ cc_binary(
     linkstatic = 1,
     deps = [
         ":trace",
-        "@com_google_benchmark//:benchmark",
+        "@com_github_google_benchmark//:benchmark",
     ],
 )
