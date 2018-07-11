@@ -29,6 +29,14 @@ http_archive(
     urls = ["https://github.com/google/googletest/archive/master.zip"],
 )
 
+# Google Benchmark library.
+# Only needed for benchmarks, not to build the OpenCensus library.
+http_archive(
+    name = "com_github_google_benchmark",
+    urls = ["https://github.com/google/benchmark/archive/master.zip"],
+    strip_prefix = "benchmark-master",
+)
+
 # gRPC
 http_archive(
     name = "com_github_grpc_grpc",
@@ -48,14 +56,6 @@ bind(
 bind(
     name = "grpc_cpp_plugin",
     actual = "@com_github_grpc_grpc//:grpc_cpp_plugin",
-)
-
-# Google Benchmark library.
-# Only needed for benchmarks, not to build the OpenCensus library.
-http_archive(
-    name = "com_google_benchmark",
-    urls = ["https://github.com/google/benchmark/archive/master.zip"],
-    strip_prefix = "benchmark-master",
 )
 
 # Prometheus client library - used by Prometheus exporter.
