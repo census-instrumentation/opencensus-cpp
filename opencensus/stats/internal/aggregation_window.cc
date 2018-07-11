@@ -14,6 +14,8 @@
 
 #include "opencensus/stats/internal/aggregation_window.h"
 
+#include <cassert>
+
 #include "absl/strings/str_cat.h"
 
 namespace opencensus {
@@ -29,6 +31,8 @@ std::string AggregationWindow::DebugString() const {
       return absl::StrCat("Interval (", absl::ToDoubleSeconds(duration_),
                           "s window)");
   }
+  assert(false && "Bad AggregationWindow type.");
+  return "BAD TYPE";
 }
 
 }  // namespace stats

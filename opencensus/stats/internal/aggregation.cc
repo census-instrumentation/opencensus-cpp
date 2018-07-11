@@ -14,6 +14,8 @@
 
 #include "opencensus/stats/aggregation.h"
 
+#include <cassert>
+
 #include "absl/strings/str_cat.h"
 
 namespace opencensus {
@@ -21,20 +23,18 @@ namespace stats {
 
 std::string Aggregation::DebugString() const {
   switch (type_) {
-    case Type::kCount: {
+    case Type::kCount:
       return "Count";
-    }
-    case Type::kSum: {
+    case Type::kSum:
       return "Sum";
-    }
-    case Type::kDistribution: {
+    case Type::kDistribution:
       return absl::StrCat("Distribution with ",
                           bucket_boundaries_.DebugString());
-    }
-    case Type::kLastValue: {
+    case Type::kLastValue:
       return "Last Value";
-    }
   }
+  assert(false && "Invalid Aggregation type.");
+  return "BAD TYPE";
 }
 
 }  // namespace stats

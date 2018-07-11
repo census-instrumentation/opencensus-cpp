@@ -55,6 +55,8 @@ prometheus::MetricType MetricType(opencensus::stats::Aggregation::Type type) {
     case opencensus::stats::Aggregation::Type::kDistribution:
       return prometheus::MetricType::Histogram;
   }
+  ABSL_ASSERT(false && "Bad MetricType.");
+  return prometheus::MetricType::Untyped;
 }
 
 void SetValue(double value, prometheus::MetricType type,
