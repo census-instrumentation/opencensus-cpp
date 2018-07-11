@@ -41,6 +41,8 @@ ViewData::Type ViewData::type() const {
       // map.
       return Type::kDouble;
   }
+  ABSL_ASSERT(false && "Bad ViewData type.");
+  return Type::kDouble;
 }
 
 const ViewData::DataMap<double>& ViewData::double_data() const {
