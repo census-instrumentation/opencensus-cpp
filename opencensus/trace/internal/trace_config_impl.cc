@@ -26,7 +26,7 @@ namespace {
 constexpr uint32_t kMaxAttributes = 32;
 constexpr uint32_t kMaxAnnotations = 32;
 constexpr uint32_t kMaxMessageEvents = 128;
-constexpr uint32_t kMaxLinks = 128;
+constexpr uint32_t kMaxLinks = 32;
 constexpr double kDefaultSamplingProbability = 1e-4;
 
 TraceParams MakeDefaultTraceParams() {
