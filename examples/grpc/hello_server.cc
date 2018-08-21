@@ -37,7 +37,6 @@
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/trace_config.h"
 #include "prometheus/exposer.h"
-#include "src/cpp/ext/filters/census/grpc_plugin.h"
 
 namespace {
 
