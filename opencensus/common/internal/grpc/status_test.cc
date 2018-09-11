@@ -14,8 +14,8 @@
 
 #include "opencensus/common/internal/grpc/status.h"
 
+#include <grpcpp/support/status.h>
 #include "gtest/gtest.h"
-#include "include/grpcpp/support/status.h"
 
 namespace opencensus {
 namespace common {

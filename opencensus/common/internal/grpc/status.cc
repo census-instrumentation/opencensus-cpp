@@ -16,9 +16,9 @@
 
 #include <string>
 
+#include <grpcpp/support/status.h>
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
-#include "include/grpcpp/support/status.h"
 
 namespace opencensus {
 namespace common {
