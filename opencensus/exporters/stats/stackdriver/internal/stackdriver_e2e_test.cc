@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include <grpcpp/grpcpp.h>
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/clock.h"
@@ -24,7 +25,6 @@
 #include "google/monitoring/v3/metric_service.grpc.pb.h"
 #include "google/protobuf/empty.pb.h"
 #include "gtest/gtest.h"
-#include "include/grpcpp/grpcpp.h"
 #include "opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
 #include "opencensus/exporters/stats/stackdriver/internal/time_series_matcher.h"
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
