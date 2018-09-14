@@ -53,6 +53,10 @@ class TagSet final {
   bool operator==(const TagSet& other) const;
   bool operator!=(const TagSet& other) const { return !(*this == other); }
 
+  // Returns a human-readable string for debugging. Do not rely on its format or
+  // try to parse it.
+  std::string DebugString() const;
+
  private:
   void Initialize();
 
