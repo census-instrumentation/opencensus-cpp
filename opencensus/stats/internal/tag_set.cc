@@ -20,6 +20,8 @@
 #include <utility>
 #include <vector>
 
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "opencensus/common/internal/hash_mix.h"
 #include "opencensus/stats/tag_key.h"
@@ -59,6 +61,18 @@ std::size_t TagSet::Hash::operator()(const TagSet& tag_set) const {
 
 bool TagSet::operator==(const TagSet& other) const {
   return tags_ == other.tags_;
+}
+
+std::string TagSet::DebugString() const {
+  return absl::StrCat(
+      "{",
+      absl::StrJoin(
+          tags_, ", ",
+          [](std::string* o, std::pair<const TagKey&, const std::string&> kv) {
+            absl::StrAppend(o, "\"", kv.first.name(), "\": \"", kv.second,
+                            "\"");
+          }),
+      "}");
 }
 
 }  // namespace stats

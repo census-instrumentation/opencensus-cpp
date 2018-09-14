@@ -14,6 +14,7 @@
 
 #include "opencensus/stats/tag_set.h"
 
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -25,6 +26,8 @@
 namespace opencensus {
 namespace stats {
 namespace {
+
+using ::testing::HasSubstr;
 
 TEST(TagSetTest, ConstructorsEquivalent) {
   TagKey key = TagKey::Register("k");
@@ -87,6 +90,18 @@ TEST(TagSetTest, UnorderedMap) {
   map.emplace(ts, 1);
   EXPECT_NE(map.end(), map.find(ts));
   EXPECT_EQ(1, map.erase(ts));
+}
+
+TEST(TagSetTest, DebugStringContainsTags) {
+  TagKey k1 = TagKey::Register("key1");
+  TagKey k2 = TagKey::Register("key2");
+  TagSet ts({{k1, "value1"}, {k2, "value2"}});
+  const std::string s = ts.DebugString();
+  std::cout << s << "\n";
+  EXPECT_THAT(s, HasSubstr("key1"));
+  EXPECT_THAT(s, HasSubstr("value1"));
+  EXPECT_THAT(s, HasSubstr("key2"));
+  EXPECT_THAT(s, HasSubstr("value2"));
 }
 
 }  // namespace
