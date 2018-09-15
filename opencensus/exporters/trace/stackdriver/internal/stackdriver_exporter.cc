@@ -246,10 +246,12 @@ void ConvertSpans(
 class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
  public:
   Handler(absl::string_view project_id,
-          const std::shared_ptr<grpc::Channel>& channel)
+          const std::shared_ptr<grpc::Channel>& channel,
+          const StackdriverExporterOptions& opts)
       : project_id_(project_id),
-        stub_(::google::devtools::cloudtrace::v2::TraceService::NewStub(
-            channel)) {}
+        stub_(
+            ::google::devtools::cloudtrace::v2::TraceService::NewStub(channel)),
+        opts_(opts) {}
 
   void Export(const std::vector<::opencensus::trace::exporter::SpanData>& spans)
       override;
@@ -257,6 +259,7 @@ class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
  private:
   const std::string project_id_;
   std::unique_ptr<google::devtools::cloudtrace::v2::TraceService::Stub> stub_;
+  const StackdriverExporterOptions opts_;
 };
 
 void Handler::Export(
@@ -267,7 +270,7 @@ void Handler::Export(
   ::google::protobuf::Empty response;
   grpc::ClientContext context;
   context.set_deadline(
-      ConvertToTimespec(absl::Now() + absl::Milliseconds(3000)));
+      ConvertToTimespec(absl::Now() + absl::Seconds(opts_.rpc_deadline_secs)));
   grpc::Status status = stub_->BatchWriteSpans(&context, request, &response);
   if (!status.ok()) {
     std::cerr << "BatchWriteSpans failed: "
@@ -277,11 +280,23 @@ void Handler::Export(
 
 }  // namespace
 
-void StackdriverExporter::Register(absl::string_view project_id) {
+grpc::Status StackdriverExporter::Register(
+    absl::string_view project_id, const StackdriverExporterOptions& opts) {
   auto creds = grpc::GoogleDefaultCredentials();
   auto channel = ::grpc::CreateChannel(kGoogleStackdriverTraceAddress, creds);
+  if (opts.block_until_connected) {
+    if (!channel->WaitForStateChange(
+            GRPC_CHANNEL_IDLE,
+            ConvertToTimespec(absl::Now() +
+                              absl::Seconds(opts.rpc_deadline_secs)))) {
+      // channel->close()?
+      return grpc::Status(grpc::StatusCode::DEADLINE_EXCEEDED,
+                          "initial connection timed out");
+    }
+  }
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
-      absl::make_unique<Handler>(project_id, channel));
+      absl::make_unique<Handler>(project_id, channel, opts));
+  return grpc::Status::OK;
 }
 
 }  // namespace trace
