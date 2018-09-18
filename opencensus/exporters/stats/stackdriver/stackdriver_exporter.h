@@ -25,9 +25,12 @@ namespace stats {
 // Stackdriver. StackdriverExporter is thread-safe.
 class StackdriverExporter {
  public:
-  // Registers the exporter. By default, immediately returns OK and initializes
-  // in the background, unless opts.block_until_connected is true, in which case
-  // it blocks and returns a meaningful Status.
+  // Registers the exporter and sets the project ID and task value. project_id
+  // should be the exact id of the project, as in the GCP console, with no
+  // prefix--e.g. "sample-project-id". opencensus_task is used to uniquely
+  // identify the task in Stackdriver. The recommended format is
+  // "{LANGUAGE}-{PID}@{HOSTNAME}"; if {PID} is not available a random number
+  // may be used.
   static void Register(absl::string_view project_id,
                        absl::string_view opencensus_task);
 
