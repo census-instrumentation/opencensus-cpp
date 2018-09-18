@@ -11,10 +11,8 @@ matrix:
 compiler: clang
 
 # - Limit memory.
-# - Limit amount of progress output. We can't use --noshow_progress because
-#   Travis terminates the build after 10 mins without output.
 # - Enable thread safety analysis (only works with clang).
-env: BAZEL_OPTIONS="--local_resources=4096,2,1.0 --experimental_ui_actions_shown=1 --copt=-Werror=thread-safety"
+env: BAZEL_OPTIONS="--local_resources=4096,2,1.0 --copt=-Werror=thread-safety"
 
 cache:
   directories:
@@ -32,8 +30,10 @@ before_install:
   - echo "build --experimental_strict_action_env" >> ~/.bazelrc
 
 script:
-  - bazel build $BAZEL_OPTIONS -k $(bazel query "kind(rule, //...)" | grep -v :_)
-  - bazel test $BAZEL_OPTIONS -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)" | grep -v :_)
+  # Limit the amount of progress output. We can't use --noshow_progress because
+  # Travis terminates the build after 10 mins without output.
+  - bazel build $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(rule, //...)" | grep -v :_)
+  - bazel test $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)" | grep -v :_)
 
 before_cache:
   # Before uploading cache.
