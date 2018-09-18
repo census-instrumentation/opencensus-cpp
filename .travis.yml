@@ -25,9 +25,9 @@ before_install:
   - if \[ "$TRAVIS_OS_NAME" == "linux" \]; then
       tools/format.sh ;
     fi
-  - wget https://github.com/bazelbuild/bazel/releases/download/0.11.1/bazel-0.11.1-installer-${BAZEL_OS}-x86_64.sh
-  - chmod +x bazel-0.11.1-installer-${BAZEL_OS}-x86_64.sh
-  - ./bazel-0.11.1-installer-${BAZEL_OS}-x86_64.sh --user
+  - wget https://github.com/bazelbuild/bazel/releases/download/0.17.1/bazel-0.17.1-installer-${BAZEL_OS}-x86_64.sh
+  - chmod +x bazel-0.17.1-installer-${BAZEL_OS}-x86_64.sh
+  - ./bazel-0.17.1-installer-${BAZEL_OS}-x86_64.sh --user
   - echo "build --disk_cache=$HOME/bazel-cache" > ~/.bazelrc
   - echo "build --experimental_strict_action_env" >> ~/.bazelrc
 
