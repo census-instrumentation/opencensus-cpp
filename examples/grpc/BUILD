@@ -55,6 +55,7 @@ cc_binary(
         "@com_github_grpc_grpc//:grpc++",
         "@com_github_grpc_grpc//:grpc_opencensus_plugin",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
     ],
 )
 
