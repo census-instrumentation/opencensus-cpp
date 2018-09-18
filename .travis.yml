@@ -9,7 +9,16 @@ matrix:
       env: BAZEL_OS=darwin
 
 compiler: clang
-env: BAZEL_OPTIONS="--local_resources=4096,2,1.0 --copt=-Werror=thread-safety"
+
+# - Limit memory.
+# - Limit amount of progress output. We can't use --noshow_progress because
+#   Travis terminates the build after 10 mins without output.
+# - Enable thread safety analysis (only works with clang).
+env: BAZEL_OPTIONS="--local_resources=4096,2,1.0 --experimental_ui_actions_shown=1 --copt=-Werror=thread-safety"
+
+cache:
+  directories:
+    - $HOME/bazel-cache
 
 before_install:
   # OS X does not have clang-format by default, and has a different sed.
@@ -19,9 +28,13 @@ before_install:
   - wget https://github.com/bazelbuild/bazel/releases/download/0.11.1/bazel-0.11.1-installer-${BAZEL_OS}-x86_64.sh
   - chmod +x bazel-0.11.1-installer-${BAZEL_OS}-x86_64.sh
   - ./bazel-0.11.1-installer-${BAZEL_OS}-x86_64.sh --user
+  - echo "build --disk_cache=$HOME/bazel-cache" > ~/.bazelrc
+  - echo "build --experimental_strict_action_env" >> ~/.bazelrc
 
 script:
-  # We can't use --noshow_progress because Travis terminates the
-  # build after 10 mins without output.
-  - bazel build $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(rule, //...)" | grep -v :_)
-  - bazel test $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)" | grep -v :_)
+  - bazel build $BAZEL_OPTIONS -k $(bazel query "kind(rule, //...)" | grep -v :_)
+  - bazel test $BAZEL_OPTIONS -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)" | grep -v :_)
+
+before_cache:
+  # Before uploading cache.
+  - du -sk $HOME/bazel-cache
