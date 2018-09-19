@@ -1,3 +1,6 @@
+# OpenCensus C++ Common library.
+# See ../../README.md for details.
+#
 # Copyright 2018, OpenCensus Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,27 +17,13 @@
 
 load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
 
-licenses(["notice"])  # Apache License 2.0
+licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:private"])
 
-# Libraries
-# ========================================================================= #
-
 cc_library(
-    name = "stackdriver_exporter",
-    srcs = ["internal/stackdriver_exporter.cc"],
-    hdrs = ["stackdriver_exporter.h"],
+    name = "common",
+    hdrs = ["version.h"],
     copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
-    deps = [
-        "//google/devtools/cloudtrace/v2:tracing_proto",
-        "//opencensus/common",
-        "//opencensus/common/internal/grpc:status",
-        "//opencensus/trace",
-        "@com_github_grpc_grpc//:grpc++",
-        "@com_google_absl//absl/base",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
-    ],
 )

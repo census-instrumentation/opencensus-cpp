@@ -24,6 +24,7 @@
 #include "absl/time/clock.h"
 #include "google/devtools/cloudtrace/v2/tracing.grpc.pb.h"
 #include "opencensus/common/internal/grpc/status.h"
+#include "opencensus/common/version.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/exporter/span_exporter.h"
 
@@ -38,7 +39,7 @@ constexpr size_t kDisplayNameStringLen = 128;
 constexpr char kGoogleStackdriverTraceAddress[] = "cloudtrace.googleapis.com";
 
 constexpr char kAgentKey[] = "g.co/agent";
-constexpr char kAgentValue[] = "opencensus-cpp";
+constexpr char kAgentValue[] = "opencensus-cpp [" OPENCENSUS_VERSION "]";
 
 bool Validate(const google::protobuf::Timestamp& t) {
   const auto sec = t.seconds();
