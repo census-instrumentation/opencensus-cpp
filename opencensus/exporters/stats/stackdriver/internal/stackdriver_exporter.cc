@@ -24,6 +24,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
+#include "absl/time/time.h"
 #include "google/monitoring/v3/metric_service.grpc.pb.h"
 #include "google/protobuf/empty.pb.h"
 #include "opencensus/common/internal/grpc/status.h"
@@ -107,6 +108,8 @@ void Handler::ExportViewData(
     for (int i = rpc_index * kTimeSeriesBatchSize; i < batch_end; ++i) {
       *request.add_time_series() = time_series[i];
     };
+    responses[rpc_index].second.set_deadline(
+        absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
     auto rpc(stub_->AsyncCreateTimeSeries(&responses[rpc_index].second, request,
                                           &cq));
     rpc->Finish(&response, &responses[rpc_index].first,
@@ -145,6 +148,7 @@ bool Handler::MaybeRegisterView(
   SetMetricDescriptor(project_id_, descriptor,
                       request.mutable_metric_descriptor());
   ::grpc::ClientContext context;
+  context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
   google::api::MetricDescriptor response;
   ::grpc::Status status =
       stub_->CreateMetricDescriptor(&context, request, &response);
