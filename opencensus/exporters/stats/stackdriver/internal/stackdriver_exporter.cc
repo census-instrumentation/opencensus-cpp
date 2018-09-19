@@ -21,10 +21,10 @@
 #include <vector>
 
 #include <grpcpp/grpcpp.h>
-#include "absl/time/time.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
+#include "absl/time/time.h"
 #include "google/monitoring/v3/metric_service.grpc.pb.h"
 #include "google/protobuf/empty.pb.h"
 #include "opencensus/common/internal/grpc/status.h"
@@ -117,7 +117,7 @@ void Handler::ExportViewData(
       *request.add_time_series() = time_series[i];
     };
     responses[rpc_index].second.set_deadline(
-      ConvertToTimespec(absl::Now() + opts_.rpc_deadline));
+        ConvertToTimespec(absl::Now() + opts_.rpc_deadline));
     auto rpc(stub_->AsyncCreateTimeSeries(&responses[rpc_index].second, request,
                                           &cq));
     rpc->Finish(&response, &responses[rpc_index].first,
