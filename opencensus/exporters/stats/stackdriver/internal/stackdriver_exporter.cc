@@ -94,8 +94,8 @@ void Handler::ExportViewData(
   const int num_rpcs =
       ceil(static_cast<double>(time_series.size()) / kTimeSeriesBatchSize);
 
-  std::vector<std::pair<grpc::Status, ::grpc::ClientContext>> responses(
-      num_rpcs);
+  std::vector<grpc::Status> status(num_rpcs);
+  std::vector<grpc::ClientContext> ctx(num_rpcs);
   // We can safely re-use an empty response--it is never updated.
   google::protobuf::Empty response;
   grpc::CompletionQueue cq;
@@ -108,12 +108,10 @@ void Handler::ExportViewData(
     for (int i = rpc_index * kTimeSeriesBatchSize; i < batch_end; ++i) {
       *request.add_time_series() = time_series[i];
     };
-    responses[rpc_index].second.set_deadline(
+    ctx[rpc_index].set_deadline(
         absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
-    auto rpc(stub_->AsyncCreateTimeSeries(&responses[rpc_index].second, request,
-                                          &cq));
-    rpc->Finish(&response, &responses[rpc_index].first,
-                (void*)(uintptr_t)rpc_index);
+    auto rpc(stub_->AsyncCreateTimeSeries(&ctx[rpc_index], request, &cq));
+    rpc->Finish(&response, &status[rpc_index], (void*)(uintptr_t)rpc_index);
   }
 
   cq.Shutdown();
@@ -121,10 +119,10 @@ void Handler::ExportViewData(
   bool ok;
   while (cq.Next(&tag, &ok)) {
     if (ok) {
-      const auto& status = responses[(uintptr_t)tag].first;
-      if (!status.ok()) {
+      const auto& s = status[(uintptr_t)tag];
+      if (!s.ok()) {
         std::cerr << "CreateTimeSeries request failed: "
-                  << opencensus::common::ToString(status) << "\n";
+                  << opencensus::common::ToString(s) << "\n";
       }
     }
   }
