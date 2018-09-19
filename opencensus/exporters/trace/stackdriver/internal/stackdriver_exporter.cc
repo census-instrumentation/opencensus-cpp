@@ -285,6 +285,13 @@ void StackdriverExporter::Register(const StackdriverOptions& opts) {
       absl::make_unique<Handler>(opts.project_id, channel));
 }
 
+// static, DEPRECATED
+void StackdriverExporter::Register(absl::string_view project_id) {
+  StackdriverOptions opts;
+  opts.project_id = std::string(project_id);
+  Register(opts);
+}
+
 }  // namespace trace
 }  // namespace exporters
 }  // namespace opencensus

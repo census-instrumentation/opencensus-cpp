@@ -30,6 +30,7 @@ cc_library(
         "//opencensus/common/internal/grpc:status",
         "//opencensus/stats",
         "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/time",

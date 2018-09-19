@@ -165,6 +165,15 @@ void StackdriverExporter::Register(const StackdriverOptions& opts) {
       absl::WrapUnique(new Handler(opts)));
 }
 
+// static, DEPRECATED
+void StackdriverExporter::Register(absl::string_view project_id,
+                                   absl::string_view opencensus_task) {
+  StackdriverOptions opts;
+  opts.project_id = std::string(project_id);
+  opts.opencensus_task = std::string(opencensus_task);
+  Register(opts);
+}
+
 }  // namespace stats
 }  // namespace exporters
 }  // namespace opencensus

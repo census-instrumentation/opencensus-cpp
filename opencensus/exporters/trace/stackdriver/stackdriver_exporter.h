@@ -17,6 +17,9 @@
 
 #include <string>
 
+#include "absl/base/macros.h"
+#include "absl/strings/string_view.h"
+
 namespace opencensus {
 namespace exporters {
 namespace trace {
@@ -30,6 +33,12 @@ class StackdriverExporter {
  public:
   // Registers the exporter.
   static void Register(const StackdriverOptions& opts);
+
+  // TODO: Retire this:
+  ABSL_DEPRECATED(
+      "Register() without StackdriverOptions is deprecated and "
+      "will be removed on or after 2019-03-20")
+  static void Register(absl::string_view project_id);
 
  private:
   StackdriverExporter() = delete;
