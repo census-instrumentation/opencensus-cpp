@@ -18,6 +18,7 @@
 #include <string>
 
 #include "absl/base/macros.h"
+#include "absl/time/time.h"
 #include "absl/strings/string_view.h"
 
 namespace opencensus {
@@ -32,6 +33,9 @@ struct StackdriverOptions {
   // The recommended format is "{LANGUAGE}-{PID}@{HOSTNAME}". If PID is not
   // available, a random number may be used.
   std::string opencensus_task;
+
+  // The RPC deadline to use when exporting to Stackdriver.
+  absl::Duration rpc_deadline = absl::Seconds(5);
 };
 
 // Exports stats for registered views (see opencensus/stats/stats_exporter.h) to
