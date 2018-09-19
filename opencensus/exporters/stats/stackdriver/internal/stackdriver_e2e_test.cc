@@ -66,7 +66,7 @@ class StackdriverE2eTest : public ::testing::Test {
                    "unset.\n";
       std::abort();
     }
-    opencensus::exporters::common::StackdriverOptions opts;
+    StackdriverOptions opts;
     opts.project_id = std::string(project_id_);
     opts.opencensus_task = "test_task";
     StackdriverExporter::Register(opts);

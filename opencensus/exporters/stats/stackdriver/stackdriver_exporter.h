@@ -15,19 +15,28 @@
 #ifndef OPENCENSUS_EXPORTERS_STATS_STACKDRIVER_STACKDRIVER_EXPORTER_H_
 #define OPENCENSUS_EXPORTERS_STATS_STACKDRIVER_STACKDRIVER_EXPORTER_H_
 
-#include "opencensus/exporters/common/stackdriver/stackdriver_options.h"
+#include <string>
 
 namespace opencensus {
 namespace exporters {
 namespace stats {
 
+struct StackdriverOptions {
+  // The Stackdriver project ID to use.
+  std::string project_id;
+
+  // The opencensus_task is used to uniquely identify the task in Stackdriver.
+  // The recommended format is "{LANGUAGE}-{PID}@{HOSTNAME}". If PID is not
+  // available, a random number may be used.
+  std::string opencensus_task;
+};
+
 // Exports stats for registered views (see opencensus/stats/stats_exporter.h) to
 // Stackdriver. StackdriverExporter is thread-safe.
 class StackdriverExporter {
  public:
-  // Registers the exporter. Ensure that opts.opencensus_task is set.
-  static void Register(
-      const ::opencensus::exporters::common::StackdriverOptions& opts);
+  // Registers the exporter.
+  static void Register(const StackdriverOptions& opts);
 
  private:
   StackdriverExporter() = delete;

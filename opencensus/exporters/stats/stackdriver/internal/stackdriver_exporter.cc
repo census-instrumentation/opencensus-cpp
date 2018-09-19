@@ -27,7 +27,6 @@
 #include "google/monitoring/v3/metric_service.grpc.pb.h"
 #include "google/protobuf/empty.pb.h"
 #include "opencensus/common/internal/grpc/status.h"
-#include "opencensus/exporters/common/stackdriver/stackdriver_options.h"
 #include "opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
 #include "opencensus/stats/stats.h"
 
@@ -36,8 +35,6 @@ namespace exporters {
 namespace stats {
 
 namespace {
-
-using ::opencensus::exporters::common::StackdriverOptions;
 
 constexpr char kGoogleStackdriverStatsAddress[] = "monitoring.googleapis.com";
 constexpr char kProjectIdPrefix[] = "projects/";

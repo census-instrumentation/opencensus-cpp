@@ -39,16 +39,16 @@ documentation for configuring roles. The "Monitoring Editor" role is required.
 
 ### Register the exporter
 
+Include:
+
 ```c++
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
-#include "opencensus/exporters/common/stackdriver/stackdriver_options.h"
 ```
 
-Add dependencies on:
+Add a BUILD dependency on:
 
 ```
 "@io_opencensus_cpp//exporters/stats/stackdriver:stackdriver_exporter",
-"@io_opencensus_cpp//opencensus/exporters/common/stackdriver:stackdriver_options",
 ```
 
 In your application's initialization code, register the exporter:
@@ -57,7 +57,7 @@ In your application's initialization code, register the exporter:
 const char* hostname = getenv("HOSTNAME");
 if (hostname == nullptr) hostname = "hostname";
 
-opencensus::exporters::common::StackdriverOptions opts;
+opencensus::exporters::stats::StackdriverOptions opts;
 opts.project_id = "my-stackdriver-project-id";
 opts.opencensus_task = absl::StrCat("cpp-", getpid(), "@", hostname);
 
