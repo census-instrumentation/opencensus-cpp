@@ -42,14 +42,6 @@ constexpr char kProjectIdPrefix[] = "projects/";
 // Stackdriver limits a single CreateTimeSeries request to 200 series.
 constexpr int kTimeSeriesBatchSize = 200;
 
-gpr_timespec ConvertToTimespec(absl::Time time) {
-  const int64_t secs = absl::ToUnixSeconds(time);
-  gpr_timespec ts;
-  ts.tv_sec = secs;
-  ts.tv_nsec = absl::ToInt64Nanoseconds(time - absl::FromUnixSeconds(secs));
-  return ts;
-}
-
 class Handler : public ::opencensus::stats::StatsExporter::Handler {
  public:
   explicit Handler(const StackdriverOptions& opts);
@@ -117,7 +109,7 @@ void Handler::ExportViewData(
       *request.add_time_series() = time_series[i];
     };
     responses[rpc_index].second.set_deadline(
-        ConvertToTimespec(absl::Now() + opts_.rpc_deadline));
+        absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
     auto rpc(stub_->AsyncCreateTimeSeries(&responses[rpc_index].second, request,
                                           &cq));
     rpc->Finish(&response, &responses[rpc_index].first,
@@ -156,7 +148,7 @@ bool Handler::MaybeRegisterView(
   SetMetricDescriptor(project_id_, descriptor,
                       request.mutable_metric_descriptor());
   ::grpc::ClientContext context;
-  context.set_deadline(ConvertToTimespec(absl::Now() + opts_.rpc_deadline));
+  context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
   google::api::MetricDescriptor response;
   ::grpc::Status status =
       stub_->CreateMetricDescriptor(&context, request, &response);
