@@ -30,9 +30,14 @@ void RegisterStackdriverExporters() {
   }
   const char *hostname = getenv("HOSTNAME");
   if (hostname == nullptr) hostname = "hostname";
-  const std::string opencensus_task =
-      absl::StrCat("cpp-", getpid(), "@", hostname);
-  opencensus::exporters::stats::StackdriverExporter::Register(project_id,
-                                                              opencensus_task);
-  opencensus::exporters::trace::StackdriverExporter::Register(project_id);
+
+  opencensus::exporters::stats::StackdriverOptions stats_opts;
+  stats_opts.project_id = project_id;
+  stats_opts.opencensus_task = absl::StrCat("cpp-", getpid(), "@", hostname);
+
+  opencensus::exporters::trace::StackdriverOptions trace_opts;
+  trace_opts.project_id = project_id;
+
+  opencensus::exporters::stats::StackdriverExporter::Register(stats_opts);
+  opencensus::exporters::trace::StackdriverExporter::Register(trace_opts);
 }

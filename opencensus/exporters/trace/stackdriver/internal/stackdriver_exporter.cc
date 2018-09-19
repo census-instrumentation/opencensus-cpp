@@ -277,11 +277,19 @@ void Handler::Export(
 
 }  // namespace
 
-void StackdriverExporter::Register(absl::string_view project_id) {
+// static
+void StackdriverExporter::Register(const StackdriverOptions& opts) {
   auto creds = grpc::GoogleDefaultCredentials();
   auto channel = ::grpc::CreateChannel(kGoogleStackdriverTraceAddress, creds);
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
-      absl::make_unique<Handler>(project_id, channel));
+      absl::make_unique<Handler>(opts.project_id, channel));
+}
+
+// static, DEPRECATED
+void StackdriverExporter::Register(absl::string_view project_id) {
+  StackdriverOptions opts;
+  opts.project_id = std::string(project_id);
+  Register(opts);
 }
 
 }  // namespace trace
