@@ -30,7 +30,6 @@ cc_library(
     deps = [
         "//google/devtools/cloudtrace/v2:tracing_proto",
         "//opencensus/common/internal/grpc:status",
-        "//opencensus/exporters/common/stackdriver:stackdriver_options",
         "//opencensus/trace",
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/memory",

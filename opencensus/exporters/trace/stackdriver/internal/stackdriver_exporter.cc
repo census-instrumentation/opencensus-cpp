@@ -24,7 +24,6 @@
 #include "absl/time/clock.h"
 #include "google/devtools/cloudtrace/v2/tracing.grpc.pb.h"
 #include "opencensus/common/internal/grpc/status.h"
-#include "opencensus/exporters/common/stackdriver/stackdriver_options.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/exporter/span_exporter.h"
 
@@ -32,8 +31,6 @@ namespace opencensus {
 namespace exporters {
 namespace trace {
 namespace {
-
-using ::opencensus::exporters::common::StackdriverOptions;
 
 constexpr size_t kAttributeStringLen = 256;
 constexpr size_t kAnnotationStringLen = 256;

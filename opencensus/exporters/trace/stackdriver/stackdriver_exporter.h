@@ -15,17 +15,21 @@
 #ifndef OPENCENSUS_EXPORTERS_TRACE_STACKDRIVER_STACKDRIVER_EXPORTER_H_
 #define OPENCENSUS_EXPORTERS_TRACE_STACKDRIVER_STACKDRIVER_EXPORTER_H_
 
-#include "opencensus/exporters/common/stackdriver/stackdriver_options.h"
+#include <string>
 
 namespace opencensus {
 namespace exporters {
 namespace trace {
 
+struct StackdriverOptions {
+  // The Stackdriver project ID to use.
+  std::string project_id;
+};
+
 class StackdriverExporter {
  public:
   // Registers the exporter.
-  static void Register(
-      const ::opencensus::exporters::common::StackdriverOptions& opts);
+  static void Register(const StackdriverOptions& opts);
 
  private:
   StackdriverExporter() = delete;

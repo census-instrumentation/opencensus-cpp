@@ -18,7 +18,6 @@
 
 #include "absl/strings/str_cat.h"
 #include "examples/grpc/stackdriver.h"
-#include "opencensus/exporters/common/stackdriver/stackdriver_options.h"
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 #include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
 
@@ -36,9 +35,8 @@ void RegisterStackdriverExporters() {
   stats_opts.project_id = project_id;
   stats_opts.opencensus_task = absl::StrCat("cpp-", getpid(), "@", hostname);
 
-  opencensus::exporters::common::StackdriverOptions trace_opts;
+  opencensus::exporters::trace::StackdriverOptions trace_opts;
   trace_opts.project_id = project_id;
-  trace_opts.opencensus_task = absl::StrCat("cpp-", getpid(), "@", hostname);
 
   opencensus::exporters::stats::StackdriverExporter::Register(stats_opts);
   opencensus::exporters::trace::StackdriverExporter::Register(trace_opts);
