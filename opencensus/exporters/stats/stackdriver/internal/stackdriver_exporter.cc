@@ -41,10 +41,7 @@ constexpr char kProjectIdPrefix[] = "projects/";
 // Stackdriver limits a single CreateTimeSeries request to 200 series.
 constexpr int kTimeSeriesBatchSize = 200;
 
-}  // namespace
-
-class StackdriverExporter::Handler
-    : public ::opencensus::stats::StatsExporter::Handler {
+class Handler : public ::opencensus::stats::StatsExporter::Handler {
  public:
   Handler(absl::string_view project_id, absl::string_view opencensus_task);
 
@@ -70,15 +67,15 @@ class StackdriverExporter::Handler
       registered_descriptors_ GUARDED_BY(mu_);
 };
 
-StackdriverExporter::Handler::Handler(absl::string_view project_id,
-                                      absl::string_view opencensus_task)
+Handler::Handler(absl::string_view project_id,
+                 absl::string_view opencensus_task)
     : project_id_(absl::StrCat(kProjectIdPrefix, project_id)),
       opencensus_task_(opencensus_task),
       stub_(google::monitoring::v3::MetricService::NewStub(
           ::grpc::CreateChannel(kGoogleStackdriverStatsAddress,
                                 ::grpc::GoogleDefaultCredentials()))) {}
 
-void StackdriverExporter::Handler::ExportViewData(
+void Handler::ExportViewData(
     const std::vector<std::pair<opencensus::stats::ViewDescriptor,
                                 opencensus::stats::ViewData>>& data) {
   // TODO: refactor to avoid copying the timeseries.
@@ -131,7 +128,7 @@ void StackdriverExporter::Handler::ExportViewData(
   }
 }
 
-bool StackdriverExporter::Handler::MaybeRegisterView(
+bool Handler::MaybeRegisterView(
     const opencensus::stats::ViewDescriptor& descriptor) {
   const auto& it = registered_descriptors_.find(descriptor.name());
   if (it != registered_descriptors_.end()) {
@@ -161,11 +158,13 @@ bool StackdriverExporter::Handler::MaybeRegisterView(
   return true;
 }
 
+}  // namespace
+
 // static
 void StackdriverExporter::Register(absl::string_view project_id,
                                    absl::string_view opencensus_task) {
-  opencensus::stats::StatsExporter::RegisterPushHandler(absl::WrapUnique(
-      new StackdriverExporter::Handler(project_id, opencensus_task)));
+  opencensus::stats::StatsExporter::RegisterPushHandler(
+      absl::WrapUnique(new Handler(project_id, opencensus_task)));
 }
 
 }  // namespace stats

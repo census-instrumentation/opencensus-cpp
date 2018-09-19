@@ -35,7 +35,7 @@ that key.
 
 Please refer to the [Stats access controls](https://cloud.google.com/monitoring/access-control)
 and [Trace access controls](https://cloud.google.com/trace/docs/iam)
-documentation for configuring roles.
+documentation for configuring roles. The "Monitoring Editor" role is required.
 
 ### Register the exporter
 
