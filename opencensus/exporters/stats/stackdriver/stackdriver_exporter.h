@@ -15,7 +15,7 @@
 #ifndef OPENCENSUS_EXPORTERS_STATS_STACKDRIVER_STACKDRIVER_EXPORTER_H_
 #define OPENCENSUS_EXPORTERS_STATS_STACKDRIVER_STACKDRIVER_EXPORTER_H_
 
-#include "absl/strings/string_view.h"
+#include "opencensus/exporters/common/stackdriver/stackdriver_options.h"
 
 namespace opencensus {
 namespace exporters {
@@ -25,14 +25,9 @@ namespace stats {
 // Stackdriver. StackdriverExporter is thread-safe.
 class StackdriverExporter {
  public:
-  // Registers the exporter and sets the project ID and task value. project_id
-  // should be the exact id of the project, as in the GCP console, with no
-  // prefix--e.g. "sample-project-id". opencensus_task is used to uniquely
-  // identify the task in Stackdriver. The recommended format is
-  // "{LANGUAGE}-{PID}@{HOSTNAME}"; if {PID} is not available a random number
-  // may be used.
-  static void Register(absl::string_view project_id,
-                       absl::string_view opencensus_task);
+  // Registers the exporter. Ensure that opts.opencensus_task is set.
+  static void Register(
+      const ::opencensus::exporters::common::StackdriverOptions& opts);
 
  private:
   StackdriverExporter() = delete;

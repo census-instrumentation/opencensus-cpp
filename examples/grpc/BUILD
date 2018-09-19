@@ -34,6 +34,7 @@ cc_library(
     hdrs = ["stackdriver.h"],
     copts = DEFAULT_COPTS,
     deps = [
+        "//opencensus/exporters/common/stackdriver:stackdriver_options",
         "//opencensus/exporters/stats/stackdriver:stackdriver_exporter",
         "//opencensus/exporters/trace/stackdriver:stackdriver_exporter",
         "@com_google_absl//absl/strings",

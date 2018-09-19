@@ -12,27 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef OPENCENSUS_EXPORTERS_TRACE_STACKDRIVER_STACKDRIVER_EXPORTER_H_
-#define OPENCENSUS_EXPORTERS_TRACE_STACKDRIVER_STACKDRIVER_EXPORTER_H_
+#ifndef OPENCENSUS_EXPORTERS_COMMON_STACKDRIVER_STACKDRIVER_OPTIONS_H_
+#define OPENCENSUS_EXPORTERS_COMMON_STACKDRIVER_STACKDRIVER_OPTIONS_H_
 
-#include "opencensus/exporters/common/stackdriver/stackdriver_options.h"
+#include <string>
 
 namespace opencensus {
 namespace exporters {
-namespace trace {
+namespace common {
 
-class StackdriverExporter {
- public:
-  // Registers the exporter.
-  static void Register(
-      const ::opencensus::exporters::common::StackdriverOptions& opts);
+struct StackdriverOptions {
+  // The Stackdriver project ID to use.
+  std::string project_id;
 
- private:
-  StackdriverExporter() = delete;
+  // Used by the stats exporter, the opencensus_task is used to uniquely
+  // identify the task in Stackdriver. The recommended format is
+  // "{LANGUAGE}-{PID}@{HOSTNAME}". If PID is not available, a random number may
+  // be used.
+  std::string opencensus_task;
 };
 
-}  // namespace trace
+}  // namespace common
 }  // namespace exporters
 }  // namespace opencensus
 
-#endif  // OPENCENSUS_EXPORTERS_TRACE_STACKDRIVER_STACKDRIVER_EXPORTER_H_
+#endif  // OPENCENSUS_EXPORTERS_COMMON_STACKDRIVER_STACKDRIVER_OPTIONS_H_

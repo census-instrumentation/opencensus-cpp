@@ -24,6 +24,7 @@
 #include "absl/time/clock.h"
 #include "google/devtools/cloudtrace/v2/tracing.grpc.pb.h"
 #include "opencensus/common/internal/grpc/status.h"
+#include "opencensus/exporters/common/stackdriver/stackdriver_options.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/exporter/span_exporter.h"
 
@@ -31,6 +32,8 @@ namespace opencensus {
 namespace exporters {
 namespace trace {
 namespace {
+
+using ::opencensus::exporters::common::StackdriverOptions;
 
 constexpr size_t kAttributeStringLen = 256;
 constexpr size_t kAnnotationStringLen = 256;
@@ -277,11 +280,12 @@ void Handler::Export(
 
 }  // namespace
 
-void StackdriverExporter::Register(absl::string_view project_id) {
+// static
+void StackdriverExporter::Register(const StackdriverOptions& opts) {
   auto creds = grpc::GoogleDefaultCredentials();
   auto channel = ::grpc::CreateChannel(kGoogleStackdriverTraceAddress, creds);
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
-      absl::make_unique<Handler>(project_id, channel));
+      absl::make_unique<Handler>(opts.project_id, channel));
 }
 
 }  // namespace trace

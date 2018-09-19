@@ -35,7 +35,7 @@ namespace exporters {
 namespace stats {
 namespace {
 
-// This is a true end-to-end test for the stackdriver exporter, connecting to
+// This is a true end-to-end test for the Stackdriver Exporter, connecting to
 // production Stackdriver. As such, it is subject to failures in networking or
 // the Stackdriver backend; it also cannot be run multiple times simultaneously
 // under the same Cloud project.
@@ -66,7 +66,10 @@ class StackdriverE2eTest : public ::testing::Test {
                    "unset.\n";
       std::abort();
     }
-    StackdriverExporter::Register(project_id_, "test_task");
+    opencensus::exporters::common::StackdriverOptions opts;
+    opts.project_id = std::string(project_id_);
+    opts.opencensus_task = "test_task";
+    StackdriverExporter::Register(opts);
   }
 
   // Retrieves data exported under 'descriptor'.

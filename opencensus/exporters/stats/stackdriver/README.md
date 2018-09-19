@@ -39,20 +39,33 @@ documentation for configuring roles. The "Monitoring Editor" role is required.
 
 ### Register the exporter
 
-`#include opencensus/exporters/stats/stackdriver/stackdriver_exporter.h` (if
-using Bazel, this requires a dependency on
-`"@io_opencensus_cpp//exporters/stats/stackdriver:stackdriver_exporter"`).
+```c++
+#include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
+#include "opencensus/exporters/common/stackdriver/stackdriver_options.h"
+```
+
+Add dependencies on:
+
+```
+"@io_opencensus_cpp//exporters/stats/stackdriver:stackdriver_exporter",
+"@io_opencensus_cpp//opencensus/exporters/common/stackdriver:stackdriver_options",
+```
+
 In your application's initialization code, register the exporter:
+
 ```c++
 const char* hostname = getenv("HOSTNAME");
 if (hostname == nullptr) hostname = "hostname";
-const std::string opencensus_task =
-    absl::StrCat("cpp-", getpid(), "@", hostname);
-opencensus::exporters::stats::StackdriverExporter::Register(
-    "my-stackdriver-project-id", opencensus_task);
+
+opencensus::exporters::common::StackdriverOptions opts;
+opts.project_id = "my-stackdriver-project-id";
+opts.opencensus_task = absl::StrCat("cpp-", getpid(), "@", hostname);
+
+opencensus::exporters::stats::StackdriverExporter::Register(opts);
 ```
-The `opencensus_task` may be anything, but must be unique among all exporters
-simultaneously exporting to Stackdriver concurrently; the format
+
+The `opencensus_task` may be anything, but must be unique among all processes
+simultaneously exporting to Stackdriver. The format
 `"cpp-${PROCESS_ID}@${HOSTNAME}"` is recommended.
 
 ### Register views and record stats

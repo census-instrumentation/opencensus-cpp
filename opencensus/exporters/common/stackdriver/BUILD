@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
+load("//opencensus:copts.bzl", "DEFAULT_COPTS")
 
 licenses(["notice"])  # Apache License 2.0
 
@@ -22,18 +22,10 @@ package(default_visibility = ["//visibility:private"])
 # ========================================================================= #
 
 cc_library(
-    name = "stackdriver_exporter",
-    srcs = ["internal/stackdriver_exporter.cc"],
-    hdrs = ["stackdriver_exporter.h"],
+    name = "stackdriver_options",
+    srcs = [],
+    hdrs = ["stackdriver_options.h"],
     copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
-    deps = [
-        "//google/devtools/cloudtrace/v2:tracing_proto",
-        "//opencensus/common/internal/grpc:status",
-        "//opencensus/exporters/common/stackdriver:stackdriver_options",
-        "//opencensus/trace",
-        "@com_github_grpc_grpc//:grpc++",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
-    ],
+    deps = [],
 )

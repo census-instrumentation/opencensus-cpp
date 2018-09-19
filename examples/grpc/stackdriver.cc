@@ -18,6 +18,7 @@
 
 #include "absl/strings/str_cat.h"
 #include "examples/grpc/stackdriver.h"
+#include "opencensus/exporters/common/stackdriver/stackdriver_options.h"
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 #include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
 
@@ -30,9 +31,11 @@ void RegisterStackdriverExporters() {
   }
   const char *hostname = getenv("HOSTNAME");
   if (hostname == nullptr) hostname = "hostname";
-  const std::string opencensus_task =
-      absl::StrCat("cpp-", getpid(), "@", hostname);
-  opencensus::exporters::stats::StackdriverExporter::Register(project_id,
-                                                              opencensus_task);
-  opencensus::exporters::trace::StackdriverExporter::Register(project_id);
+
+  opencensus::exporters::common::StackdriverOptions opts;
+  opts.project_id = project_id;
+  opts.opencensus_task = absl::StrCat("cpp-", getpid(), "@", hostname);
+
+  opencensus::exporters::stats::StackdriverExporter::Register(opts);
+  opencensus::exporters::trace::StackdriverExporter::Register(opts);
 }
