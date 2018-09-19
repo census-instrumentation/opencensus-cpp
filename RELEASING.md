@@ -30,11 +30,11 @@ token](https://help.github.com/articles/creating-a-personal-access-token-for-the
 
 2.  For `master` branch:
 
-    -   Change version files to the next minor snapshot (e.g. `0.2.0-SNAPSHOT`).
+    -   Change version files to the next minor snapshot (e.g. `0.2.0-dev`).
 
     ```bash
     $ git checkout -b bump-version master
-    # Change version to next minor (and keep -SNAPSHOT)
+    # Change version to next minor (and keep -dev)
     $ sed -i 's/[0-9]\+\.[0-9]\+\.[0-9]\+\(.*CURRENT_OPENCENSUS_VERSION\)/'$MAJOR.$((MINOR+1)).0'\1/' \
       "${VERSION_FILES[@]}"
     # // TODO: Add instructions how to check that everything passes tests.
@@ -51,27 +51,27 @@ token](https://help.github.com/articles/creating-a-personal-access-token-for-the
 
 3.  For `vMajor.Minor.x` branch:
 
-    -   Change version files to remove "-SNAPSHOT" for the next release
+    -   Change version files to remove "-dev" for the next release
         version (e.g. `0.4.0`). Commit the result and make a tag:
 
     ```bash
     $ git checkout -b release v$MAJOR.$MINOR.x
-    # Change version to remove -SNAPSHOT
-    $ sed -i 's/-SNAPSHOT\(.*CURRENT_OPENCENSUS_VERSION\)/\1/' "${VERSION_FILES[@]}"
+    # Change version to remove -dev
+    $ sed -i 's/-dev\(.*CURRENT_OPENCENSUS_VERSION\)/\1/' "${VERSION_FILES[@]}"
     # // TODO: Add instructions how to check that everything passes tests.
     $ git commit -a -m "Bump version to $MAJOR.$MINOR.$PATCH"
     $ git tag -a v$MAJOR.$MINOR.$PATCH -m "Version $MAJOR.$MINOR.$PATCH"
     ```
 
     -   Change root build files to the next snapshot version (e.g.
-        `0.4.1-SNAPSHOT`). Commit the result:
+        `0.4.1-dev`). Commit the result:
 
     ```bash
-    # Change version to next patch and add -SNAPSHOT
-    $ sed -i 's/[0-9]\+\.[0-9]\+\.[0-9]\+\(.*CURRENT_OPENCENSUS_VERSION\)/'$MAJOR.$MINOR.$((PATCH+1))-SNAPSHOT'\1/' \
+    # Change version to next patch and add -dev
+    $ sed -i 's/[0-9]\+\.[0-9]\+\.[0-9]\+\(.*CURRENT_OPENCENSUS_VERSION\)/'$MAJOR.$MINOR.$((PATCH+1))-dev'\1/' \
      "${VERSION_FILES[@]}"
     # // TODO: Add instructions how to check that everything passes tests.
-    $ git commit -a -m "Bump version to $MAJOR.$MINOR.$((PATCH+1))-SNAPSHOT"
+    $ git commit -a -m "Bump version to $MAJOR.$MINOR.$((PATCH+1))-dev"
     ```
 
     -   Go through PR review and push the release tag and updated release branch
