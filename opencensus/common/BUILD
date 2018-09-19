@@ -19,11 +19,10 @@ load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
 
 licenses(["notice"])  # Apache 2.0
 
-package(default_visibility = ["//visibility:private"])
+package(default_visibility = ["//opencensus:__subpackages__"])
 
 cc_library(
-    name = "common",
+    name = "version",
     hdrs = ["version.h"],
     copts = DEFAULT_COPTS,
-    visibility = ["//visibility:public"],
 )
