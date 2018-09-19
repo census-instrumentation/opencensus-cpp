@@ -40,14 +40,6 @@ constexpr char kGoogleStackdriverTraceAddress[] = "cloudtrace.googleapis.com";
 constexpr char kAgentKey[] = "g.co/agent";
 constexpr char kAgentValue[] = "opencensus-cpp";
 
-gpr_timespec ConvertToTimespec(absl::Time time) {
-  gpr_timespec g_time;
-  int64_t secs = absl::ToUnixSeconds(time);
-  g_time.tv_sec = secs;
-  g_time.tv_nsec = (time - absl::FromUnixSeconds(secs)) / absl::Nanoseconds(1);
-  return g_time;
-}
-
 bool Validate(const google::protobuf::Timestamp& t) {
   const auto sec = t.seconds();
   const auto ns = t.nanos();
@@ -245,9 +237,9 @@ void ConvertSpans(
 
 class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
  public:
-  Handler(absl::string_view project_id,
+  Handler(const StackdriverOptions& opts,
           const std::shared_ptr<grpc::Channel>& channel)
-      : project_id_(project_id),
+      : opts_(opts),
         stub_(::google::devtools::cloudtrace::v2::TraceService::NewStub(
             channel)) {}
 
@@ -255,19 +247,18 @@ class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
       override;
 
  private:
-  const std::string project_id_;
+  const StackdriverOptions opts_;
   std::unique_ptr<google::devtools::cloudtrace::v2::TraceService::Stub> stub_;
 };
 
 void Handler::Export(
     const std::vector<::opencensus::trace::exporter::SpanData>& spans) {
   ::google::devtools::cloudtrace::v2::BatchWriteSpansRequest request;
-  request.set_name(absl::StrCat("projects/", project_id_));
-  ConvertSpans(spans, project_id_, &request);
+  request.set_name(absl::StrCat("projects/", opts_.project_id));
+  ConvertSpans(spans, opts_.project_id, &request);
   ::google::protobuf::Empty response;
   grpc::ClientContext context;
-  context.set_deadline(
-      ConvertToTimespec(absl::Now() + absl::Milliseconds(3000)));
+  context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
   grpc::Status status = stub_->BatchWriteSpans(&context, request, &response);
   if (!status.ok()) {
     std::cerr << "BatchWriteSpans failed: "
@@ -282,7 +273,7 @@ void StackdriverExporter::Register(const StackdriverOptions& opts) {
   auto creds = grpc::GoogleDefaultCredentials();
   auto channel = ::grpc::CreateChannel(kGoogleStackdriverTraceAddress, creds);
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
-      absl::make_unique<Handler>(opts.project_id, channel));
+      absl::make_unique<Handler>(opts, channel));
 }
 
 // static, DEPRECATED

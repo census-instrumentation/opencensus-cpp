@@ -19,6 +19,7 @@
 
 #include "absl/base/macros.h"
 #include "absl/strings/string_view.h"
+#include "absl/time/time.h"
 
 namespace opencensus {
 namespace exporters {
@@ -27,6 +28,9 @@ namespace trace {
 struct StackdriverOptions {
   // The Stackdriver project ID to use.
   std::string project_id;
+
+  // The RPC deadline to use when exporting to Stackdriver.
+  absl::Duration rpc_deadline = absl::Seconds(5);
 };
 
 class StackdriverExporter {
