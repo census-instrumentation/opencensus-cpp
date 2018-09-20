@@ -29,6 +29,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//google/devtools/cloudtrace/v2:tracing_proto",
+        "//opencensus/common:version",
         "//opencensus/common/internal/grpc:status",
         "//opencensus/trace",
         "@com_github_grpc_grpc//:grpc++",
