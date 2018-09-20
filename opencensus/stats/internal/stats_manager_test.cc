@@ -51,9 +51,12 @@ class StatsManagerTest : public ::testing::Test {
     testing::TestUtils::Flush();
   }
 
-  const TagKey key1_ = TagKey::Register("key1");
-  const TagKey key2_ = TagKey::Register("key2");
-  const TagKey key3_ = TagKey::Register("key3");
+  const opencensus::tags::TagKey key1_ =
+      opencensus::tags::TagKey::Register("key1");
+  const opencensus::tags::TagKey key2_ =
+      opencensus::tags::TagKey::Register("key2");
+  const opencensus::tags::TagKey key3_ =
+      opencensus::tags::TagKey::Register("key3");
 };
 
 TEST_F(StatsManagerTest, Count) {

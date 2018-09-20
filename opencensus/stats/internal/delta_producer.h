@@ -35,7 +35,8 @@ namespace stats {
 // Delta is thread-compatible.
 class Delta final {
  public:
-  void Record(std::initializer_list<Measurement> measurements, TagSet tags);
+  void Record(std::initializer_list<Measurement> measurements,
+              opencensus::tags::TagMap tags);
 
   // Swaps registered_boundaries_ and delta_ with *other, clears delta_, and
   // updates registered_boundaries_.
@@ -46,7 +47,8 @@ class Delta final {
   // Clears registered_boundaries_ and delta_.
   void clear();
 
-  const std::unordered_map<TagSet, std::vector<MeasureData>, TagSet::Hash>&
+  const std::unordered_map<opencensus::tags::TagMap, std::vector<MeasureData>,
+                           opencensus::tags::TagMap::Hash>&
   delta() const {
     return delta_;
   }
@@ -58,7 +60,9 @@ class Delta final {
 
   // The actual data. Each MeasureData[] contains one element for each
   // registered measure.
-  std::unordered_map<TagSet, std::vector<MeasureData>, TagSet::Hash> delta_;
+  std::unordered_map<opencensus::tags::TagMap, std::vector<MeasureData>,
+                     opencensus::tags::TagMap::Hash>
+      delta_;
 };
 
 // DeltaProducer is thread-safe.
@@ -74,8 +78,8 @@ class DeltaProducer final {
   // exist.
   void AddBoundaries(uint64_t index, const BucketBoundaries& boundaries);
 
-  void Record(std::initializer_list<Measurement> measurements, TagSet tags)
-      LOCKS_EXCLUDED(delta_mu_);
+  void Record(std::initializer_list<Measurement> measurements,
+              opencensus::tags::TagMap tags) LOCKS_EXCLUDED(delta_mu_);
 
   // Flushes the active delta and blocks until it is harvested.
   void Flush() LOCKS_EXCLUDED(delta_mu_, harvester_mu_);

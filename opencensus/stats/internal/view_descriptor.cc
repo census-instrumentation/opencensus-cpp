@@ -64,7 +64,7 @@ ViewDescriptor& ViewDescriptor::set_aggregation(
   return *this;
 }
 
-ViewDescriptor& ViewDescriptor::add_column(TagKey tag_key) {
+ViewDescriptor& ViewDescriptor::add_column(opencensus::tags::TagKey tag_key) {
   columns_.emplace_back(tag_key);
   return *this;
 }
@@ -89,9 +89,10 @@ std::string ViewDescriptor::DebugString() const {
       "\n  aggregation: ", aggregation_.DebugString(),
       "\n  aggregation window: ", aggregation_window_.DebugString(),
       "\n  columns: ",
-      absl::StrJoin(
-          columns_, ":",
-          [](std::string* out, TagKey key) { return out->append(key.name()); }),
+      absl::StrJoin(columns_, ":",
+                    [](std::string* out, opencensus::tags::TagKey key) {
+                      return out->append(key.name());
+                    }),
       "\n  description: \"", description_, "\"");
 }
 

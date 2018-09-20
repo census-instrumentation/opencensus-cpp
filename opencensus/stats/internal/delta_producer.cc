@@ -31,7 +31,7 @@ namespace opencensus {
 namespace stats {
 
 void Delta::Record(std::initializer_list<Measurement> measurements,
-                   TagSet tags) {
+                   opencensus::tags::TagMap tags) {
   auto it = delta_.find(tags);
   if (it == delta_.end()) {
     it = delta_.emplace_hint(it, std::piecewise_construct,
@@ -101,7 +101,7 @@ void DeltaProducer::AddBoundaries(uint64_t index,
 }
 
 void DeltaProducer::Record(std::initializer_list<Measurement> measurements,
-                           TagSet tags) {
+                           opencensus::tags::TagMap tags) {
   absl::MutexLock l(&delta_mu_);
   active_delta_.Record(measurements, std::move(tags));
 }

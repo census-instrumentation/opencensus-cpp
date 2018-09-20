@@ -58,8 +58,8 @@ class StatsManager final {
     int RemoveConsumer();
 
     // Adds 'data' under 'tags' as of 'now'. Requires holding *mu_;
-    void MergeMeasureData(const TagSet& tags, const MeasureData& data,
-                          absl::Time now);
+    void MergeMeasureData(const opencensus::tags::TagMap& tags,
+                          const MeasureData& data, absl::Time now);
 
     // Retrieves a copy of the data.
     std::unique_ptr<ViewDataImpl> GetData() LOCKS_EXCLUDED(*mu_);
@@ -108,8 +108,8 @@ class StatsManager final {
 
     // Merges measure_data into all views under this measure. Requires holding
     // *mu_;
-    void MergeMeasureData(const TagSet& tags, const MeasureData& data,
-                          absl::Time now);
+    void MergeMeasureData(const opencensus::tags::TagMap& tags,
+                          const MeasureData& data, absl::Time now);
 
     ViewInformation* AddConsumer(const ViewDescriptor& descriptor);
     void RemoveView(const ViewInformation* handle);

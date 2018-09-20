@@ -67,9 +67,11 @@ class ViewDescriptor final {
   // number of tags, key-value pairs; the aggregated data for each view will be
   // broken down by the distinct values of each tag key matching one of the
   // view's columns.
-  ViewDescriptor& add_column(TagKey tag_key);
+  ViewDescriptor& add_column(opencensus::tags::TagKey tag_key);
   size_t num_columns() const { return columns_.size(); }
-  const std::vector<TagKey>& columns() const { return columns_; }
+  const std::vector<opencensus::tags::TagKey>& columns() const {
+    return columns_;
+  }
 
   // Sets a human-readable description for the view.
   ViewDescriptor& set_description(absl::string_view description);
@@ -104,7 +106,7 @@ class ViewDescriptor final {
   uint64_t measure_id_;
   Aggregation aggregation_;
   AggregationWindow aggregation_window_;
-  std::vector<TagKey> columns_;
+  std::vector<opencensus::tags::TagKey> columns_;
   std::string description_;
 };
 
