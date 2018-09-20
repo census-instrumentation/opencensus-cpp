@@ -112,6 +112,8 @@ class SpanGenerator {
   }
 };
 
+Span::Span() {}
+
 Span Span::BlankSpan() { return Span(); }
 
 Span Span::StartSpan(absl::string_view name, const Span* parent,
@@ -139,20 +141,21 @@ Span::Span(const SpanContext& context, SpanImpl* impl)
   }
 }
 
-void Span::AddAttribute(absl::string_view key, AttributeValueRef attribute) {
+void Span::AddAttribute(absl::string_view key,
+                        AttributeValueRef attribute) const {
   if (IsRecording()) {
     span_impl_->AddAttributes({{key, attribute}});
   }
 }
 
-void Span::AddAttributes(AttributesRef attributes) {
+void Span::AddAttributes(AttributesRef attributes) const {
   if (IsRecording()) {
     span_impl_->AddAttributes(attributes);
   }
 }
 
 void Span::AddAnnotation(absl::string_view description,
-                         AttributesRef attributes) {
+                         AttributesRef attributes) const {
   if (IsRecording()) {
     span_impl_->AddAnnotation(description, attributes);
   }
@@ -160,7 +163,7 @@ void Span::AddAnnotation(absl::string_view description,
 
 void Span::AddSentMessageEvent(uint32_t message_id,
                                uint32_t compressed_message_size,
-                               uint32_t uncompressed_message_size) {
+                               uint32_t uncompressed_message_size) const {
   if (IsRecording()) {
     span_impl_->AddMessageEvent(exporter::MessageEvent::Type::SENT, message_id,
                                 compressed_message_size,
@@ -170,7 +173,7 @@ void Span::AddSentMessageEvent(uint32_t message_id,
 
 void Span::AddReceivedMessageEvent(uint32_t message_id,
                                    uint32_t compressed_message_size,
-                                   uint32_t uncompressed_message_size) {
+                                   uint32_t uncompressed_message_size) const {
   if (IsRecording()) {
     span_impl_->AddMessageEvent(exporter::MessageEvent::Type::RECEIVED,
                                 message_id, compressed_message_size,
@@ -179,7 +182,7 @@ void Span::AddReceivedMessageEvent(uint32_t message_id,
 }
 
 void Span::AddParentLink(const SpanContext& parent_ctx,
-                         AttributesRef attributes) {
+                         AttributesRef attributes) const {
   if (IsRecording()) {
     span_impl_->AddLink(parent_ctx, exporter::Link::Type::kParentLinkedSpan,
                         attributes);
@@ -187,23 +190,24 @@ void Span::AddParentLink(const SpanContext& parent_ctx,
 }
 
 void Span::AddChildLink(const SpanContext& child_ctx,
-                        AttributesRef attributes) {
+                        AttributesRef attributes) const {
   if (IsRecording()) {
     span_impl_->AddLink(child_ctx, exporter::Link::Type::kChildLinkedSpan,
                         attributes);
   }
 }
 
-void Span::SetStatus(StatusCode canonical_code, absl::string_view message) {
+void Span::SetStatus(StatusCode canonical_code,
+                     absl::string_view message) const {
   if (IsRecording()) {
     span_impl_->SetStatus(exporter::Status(canonical_code, message));
   }
 }
 
-void Span::End() {
+void Span::End() const {
   if (IsRecording()) {
     if (!span_impl_->End()) {
-      // In non-debug builds, ignore the second End().
+      // The Span already ended, ignore this call.
       return;
     }
     exporter::RunningSpanStoreImpl::Get()->RemoveSpan(span_impl_);

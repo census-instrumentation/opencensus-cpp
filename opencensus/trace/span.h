@@ -66,7 +66,12 @@ struct StartSpanOptions {
   const std::vector<Span*> parent_links;
 };
 
-// Span represents a trace span. It has a SpanContext. Span is thread-safe.
+// Span represents a sub-operation in a larger Trace.
+//
+// A Span is uniquely identified by a SpanContext. The Span object is just a
+// handle to add Annotations and Attributes in an implementation-defined data
+// structure, hence all these operations are marked const. The Span must be
+// explicitly End()ed when the suboperation is complete. Span is thread-safe.
 class Span final {
  public:
   // Constructs a no-op Span with an invalid context. Attempts to add
@@ -80,7 +85,7 @@ class Span final {
   //   auto root_span = ::opencensus::trace::Span::StartSpan("MyOperation");
   //
   // Example for child span:
-  //   // Constructing a ProbabilitySampler can be expensive.
+  //   // Constructing a ProbabilitySampler can be expensive, use static.
   //   static ::opencensus::trace::ProbabilitySampler sampler(0.1);
   //   auto child_span = ::opencensus::trace::Span::StartSpan(
   //       "SubOperation", &root_span, {&sampler});
@@ -92,42 +97,52 @@ class Span final {
       absl::string_view name, const SpanContext& parent_ctx,
       const StartSpanOptions& options = StartSpanOptions());
 
+  // Spans can be copied, in order to e.g. hand the Span off to a callback.
+  Span(const Span&) = default;
+  Span& operator=(const Span&) = default;
+
+  // Spans can be move-constructed, but this is mostly for convenient syntax,
+  // not performance reasons.
+  Span(Span&&) = default;
+  Span& operator=(Span&&) = delete;
+
   // Attempts to insert an attribute into the Span, unless it already exists in
   // which case it will update the value of that attribute. If the max number of
   // attributes is exceeded, one of the previous attributes will be evicted.
   // AddAttributes is faster due to batching.
-  void AddAttribute(absl::string_view key, AttributeValueRef attribute);
-  void AddAttributes(AttributesRef attributes);
+  void AddAttribute(absl::string_view key, AttributeValueRef attribute) const;
+  void AddAttributes(AttributesRef attributes) const;
 
   // Adds an Annotation to the Span. If the max number of Annotations is
   // exceeded, an Annotation will be evicted in a FIFO manner.
   // In future, there will be a limit of 4 attributes per annotation.
   void AddAnnotation(absl::string_view description,
-                     AttributesRef attributes = {});
+                     AttributesRef attributes = {}) const;
 
   // Adds a MessageEvent to the Span. If the max number of MessageEvents is
   // exceeded, a MessageEvent will be evicted in a FIFO manner.
   void AddSentMessageEvent(uint32_t message_id,
                            uint32_t compressed_message_size,
-                           uint32_t uncompressed_message_size);
+                           uint32_t uncompressed_message_size) const;
   void AddReceivedMessageEvent(uint32_t message_id,
                                uint32_t compressed_message_size,
-                               uint32_t uncompressed_message_size);
+                               uint32_t uncompressed_message_size) const;
 
   // Adds a Link to the Span. If the max number of Links is exceeded, a Link
   // will be evicted in a FIFO manner. In future, there will be a limit of 32
   // attributes per link.
   void AddParentLink(const SpanContext& parent_ctx,
-                     AttributesRef attributes = {});
+                     AttributesRef attributes = {}) const;
   void AddChildLink(const SpanContext& child_ctx,
-                    AttributesRef attributes = {});
+                    AttributesRef attributes = {}) const;
 
   // Sets the status of the Span. See status_code.h for canonical codes.
-  void SetStatus(StatusCode canonical_code, absl::string_view message = "");
+  void SetStatus(StatusCode canonical_code,
+                 absl::string_view message = "") const;
 
   // Marks the end of a Span. No further changes can be made to the Span after
   // End is called.
-  void End();
+  void End() const;
 
   // Returns the SpanContext associated with this Span.
   const SpanContext& context() const;
@@ -142,7 +157,7 @@ class Span final {
   bool IsRecording() const;
 
  private:
-  Span() {}
+  Span();
   Span(const SpanContext& context, SpanImpl* impl);
 
   // Returns span_impl_, only used for testing.
@@ -153,7 +168,8 @@ class Span final {
   const SpanContext context_;
 
   // Shared pointer to the underlying Span representation. This is nullptr for
-  // Spans which are not recording events.
+  // Spans which are not recording events. This is an implementation detail, not
+  // part of the public API.
   std::shared_ptr<SpanImpl> span_impl_;
 
   friend class ::opencensus::trace::exporter::RunningSpanStoreImpl;
