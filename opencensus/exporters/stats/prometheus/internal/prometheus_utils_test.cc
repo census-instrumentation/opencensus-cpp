@@ -35,8 +35,8 @@ TEST(SetMetricFamilyTest, CountDouble) {
       "measure_count_double", "", "units");
   const std::string task = "test_task";
   const std::string view_name = "test_descriptor";
-  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
-  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
+  const auto tag_key_1 = opencensus::tags::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::tags::TagKey::Register("bar");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name(view_name)
@@ -112,8 +112,8 @@ TEST(SetMetricFamilyTest, SumDouble) {
       "measure_sum_double", "", "units");
   const std::string task = "test_task";
   const std::string view_name = "test_descriptor";
-  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
-  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
+  const auto tag_key_1 = opencensus::tags::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::tags::TagKey::Register("bar");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name(view_name)
@@ -189,8 +189,8 @@ TEST(SetMetricFamilyTest, SumInt) {
       opencensus::stats::MeasureInt64::Register("measure_sum_int", "", "units");
   const std::string task = "test_task";
   const std::string view_name = "test_descriptor";
-  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
-  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
+  const auto tag_key_1 = opencensus::tags::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::tags::TagKey::Register("bar");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name(view_name)
@@ -266,8 +266,8 @@ TEST(SetMetricFamilyTest, LastValueDouble) {
       "measure_last_value_double", "", "units");
   const std::string task = "test_task";
   const std::string view_name = "test_descriptor";
-  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
-  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
+  const auto tag_key_1 = opencensus::tags::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::tags::TagKey::Register("bar");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name(view_name)
@@ -342,8 +342,8 @@ TEST(SetMetricFamilyTest, LastValueInt64) {
       "measure_last_value_int", "", "units");
   const std::string task = "test_task";
   const std::string view_name = "test_descriptor";
-  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
-  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
+  const auto tag_key_1 = opencensus::tags::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::tags::TagKey::Register("bar");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name(view_name)
@@ -417,8 +417,8 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
   const auto measure = opencensus::stats::MeasureDouble::Register(
       "measure_distribution_double", "", "units");
   const std::string view_name = "test_descriptor";
-  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
-  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
+  const auto tag_key_1 = opencensus::tags::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::tags::TagKey::Register("bar");
   const auto bucket_boundaries =
       opencensus::stats::BucketBoundaries::Explicit({0, 10});
   const auto view_descriptor =

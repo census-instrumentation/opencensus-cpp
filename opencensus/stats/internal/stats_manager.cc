@@ -26,9 +26,9 @@
 #include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/internal/measure_data.h"
 #include "opencensus/stats/internal/measure_registry_impl.h"
-#include "opencensus/stats/tag_key.h"
-#include "opencensus/stats/tag_set.h"
 #include "opencensus/stats/view_descriptor.h"
+#include "opencensus/tags/tag_key.h"
+#include "opencensus/tags/tag_map.h"
 
 namespace opencensus {
 namespace stats {

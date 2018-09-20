@@ -27,7 +27,7 @@
 #include "opencensus/stats/distribution.h"
 #include "opencensus/stats/internal/measure_data.h"
 #include "opencensus/stats/measure.h"
-#include "opencensus/stats/tag_set.h"
+#include "opencensus/tags/tag_map.h"
 
 namespace opencensus {
 namespace stats {

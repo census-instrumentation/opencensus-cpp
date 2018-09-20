@@ -22,7 +22,7 @@
 #include "opencensus/stats/aggregation.h"
 #include "opencensus/stats/internal/aggregation_window.h"
 #include "opencensus/stats/measure_descriptor.h"
-#include "opencensus/stats/tag_key.h"
+#include "opencensus/tags/tag_key.h"
 
 namespace opencensus {
 namespace stats {

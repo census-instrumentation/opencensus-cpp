@@ -34,9 +34,9 @@ opencensus::stats::MeasureDouble FooUsage() {
   return foo_usage;
 }
 
-opencensus::stats::TagKey FooIdTagKey() {
+opencensus::tags::TagKey FooIdTagKey() {
   static const auto foo_id_tag_key =
-      opencensus::stats::TagKey::Register("foo_id");
+      opencensus::tags::TagKey::Register("foo_id");
   return foo_id_tag_key;
 }
 

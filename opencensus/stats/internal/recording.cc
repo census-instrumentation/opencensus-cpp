@@ -17,7 +17,7 @@
 #include "absl/time/clock.h"
 #include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/measure.h"
-#include "opencensus/stats/tag_set.h"
+#include "opencensus/tags/tag_map.h"
 
 namespace opencensus {
 namespace stats {

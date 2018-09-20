@@ -28,8 +28,8 @@ int main(int argc, char** argv) {
       std::make_shared<opencensus::exporters::stats::PrometheusExporter>();
   exposer.RegisterCollectable(exporter);
 
-  const auto key1 = opencensus::stats::TagKey::Register("key1");
-  const auto key2 = opencensus::stats::TagKey::Register("key2");
+  const auto key1 = opencensus::tags::TagKey::Register("key1");
+  const auto key2 = opencensus::tags::TagKey::Register("key2");
 
   // Create a view and register it with the exporter.
   const std::string foo_usage_measure_name = "example.com/Foo/FooUsage";

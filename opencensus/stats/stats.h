@@ -24,10 +24,10 @@
 #include "opencensus/stats/measure_registry.h"    // IWYU pragma: export
 #include "opencensus/stats/recording.h"           // IWYU pragma: export
 #include "opencensus/stats/stats_exporter.h"      // IWYU pragma: export
-#include "opencensus/stats/tag_key.h"             // IWYU pragma: export
-#include "opencensus/stats/tag_set.h"             // IWYU pragma: export
 #include "opencensus/stats/view.h"                // IWYU pragma: export
 #include "opencensus/stats/view_data.h"           // IWYU pragma: export
 #include "opencensus/stats/view_descriptor.h"     // IWYU pragma: export
+#include "opencensus/tags/tag_key.h"              // IWYU pragma: export
+#include "opencensus/tags/tag_map.h"              // IWYU pragma: export
 
 #endif  // OPENCENSUS_STATS_STATS_H_

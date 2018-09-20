@@ -28,8 +28,8 @@
 #include "opencensus/stats/internal/measure_registry_impl.h"
 #include "opencensus/stats/internal/stats_exporter_impl.h"
 #include "opencensus/stats/measure_descriptor.h"
-#include "opencensus/stats/tag_key.h"
 #include "opencensus/stats/view.h"
+#include "opencensus/tags/tag_key.h"
 
 namespace opencensus {
 namespace stats {
