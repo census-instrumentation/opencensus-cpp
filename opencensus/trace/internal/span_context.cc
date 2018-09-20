@@ -23,6 +23,10 @@ bool SpanContext::operator==(const SpanContext& that) const {
   return trace_id_ == that.trace_id() && span_id_ == that.span_id();
 }
 
+bool SpanContext::operator!=(const SpanContext& that) const {
+  return !(*this == that);
+}
+
 bool SpanContext::IsValid() const {
   return trace_id_.IsValid() && span_id_.IsValid();
 }

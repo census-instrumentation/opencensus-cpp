@@ -47,6 +47,7 @@ TEST(SpanContextTest, Equality) {
   SpanContext ctx4{TraceId(trace_id), SpanId(span_id), TraceOptions(opts)};
 
   EXPECT_EQ(ctx1, ctx1);
+  EXPECT_NE(ctx1, ctx2);
   EXPECT_EQ(ctx1, ctx3) << "Same contents, different objects.";
   EXPECT_EQ(ctx1, ctx4) << "Comparison ignores options.";
   EXPECT_FALSE(ctx1 == ctx2);
