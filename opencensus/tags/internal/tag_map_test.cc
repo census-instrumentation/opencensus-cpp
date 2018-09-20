@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/stats/tag_set.h"
+#include "opencensus/tags/tag_map.h"
 
 #include <iostream>
 #include <string>
@@ -24,18 +24,18 @@
 #include "gtest/gtest.h"
 
 namespace opencensus {
-namespace stats {
+namespace tags {
 namespace {
 
 using ::testing::HasSubstr;
 
-TEST(TagSetTest, ConstructorsEquivalent) {
+TEST(TagMapTest, ConstructorsEquivalent) {
   TagKey key = TagKey::Register("k");
   const std::vector<std::pair<TagKey, std::string>> tags({{key, "v"}});
-  EXPECT_EQ(TagSet(tags), TagSet({{key, "v"}}));
+  EXPECT_EQ(TagMap(tags), TagMap({{key, "v"}}));
 }
 
-TEST(TagSetTest, TagsSorted) {
+TEST(TagMapTest, TagsSorted) {
   TagKey k1 = TagKey::Register("b");
   TagKey k2 = TagKey::Register("c");
   TagKey k3 = TagKey::Register("a");
@@ -43,59 +43,59 @@ TEST(TagSetTest, TagsSorted) {
       {k1, "v"}, {k2, "v"}, {k3, "v"}};
   const std::vector<std::pair<TagKey, std::string>> tags(
       {{k2, "v"}, {k3, "v"}, {k1, "v"}});
-  EXPECT_THAT(TagSet(tags).tags(), ::testing::ElementsAreArray(expected));
-  EXPECT_THAT(TagSet({{k2, "v"}, {k1, "v"}, {k3, "v"}}).tags(),
+  EXPECT_THAT(TagMap(tags).tags(), ::testing::ElementsAreArray(expected));
+  EXPECT_THAT(TagMap({{k2, "v"}, {k1, "v"}, {k3, "v"}}).tags(),
               ::testing::ElementsAreArray(expected));
 }
 
-TEST(TagSetTest, EqualityDisregardsOrder) {
+TEST(TagMapTest, EqualityDisregardsOrder) {
   TagKey k1 = TagKey::Register("k1");
   TagKey k2 = TagKey::Register("k2");
-  EXPECT_EQ(TagSet({{k1, "v1"}, {k2, "v2"}}), TagSet({{k2, "v2"}, {k1, "v1"}}));
+  EXPECT_EQ(TagMap({{k1, "v1"}, {k2, "v2"}}), TagMap({{k2, "v2"}, {k1, "v1"}}));
 }
 
-TEST(TagSetTest, EqualityRespectsMissingKeys) {
+TEST(TagMapTest, EqualityRespectsMissingKeys) {
   TagKey k1 = TagKey::Register("k1");
   TagKey k2 = TagKey::Register("k2");
-  EXPECT_NE(TagSet({{k1, "v1"}, {k2, "v2"}}), TagSet({{k1, "v1"}}));
+  EXPECT_NE(TagMap({{k1, "v1"}, {k2, "v2"}}), TagMap({{k1, "v1"}}));
 }
 
-TEST(TagSetTest, EqualityRespectsKeyValuePairings) {
+TEST(TagMapTest, EqualityRespectsKeyValuePairings) {
   TagKey k1 = TagKey::Register("k1");
   TagKey k2 = TagKey::Register("k2");
-  EXPECT_NE(TagSet({{k1, "v1"}, {k2, "v2"}}), TagSet({{k1, "v2"}, {k2, "v1"}}));
+  EXPECT_NE(TagMap({{k1, "v1"}, {k2, "v2"}}), TagMap({{k1, "v2"}, {k2, "v1"}}));
 }
 
-TEST(TagSetTest, HashDisregardsOrder) {
+TEST(TagMapTest, HashDisregardsOrder) {
   TagKey k1 = TagKey::Register("k1");
   TagKey k2 = TagKey::Register("k2");
-  TagSet ts1({{k1, "v1"}, {k2, "v2"}});
-  TagSet ts2({{k2, "v2"}, {k1, "v1"}});
-  EXPECT_EQ(TagSet::Hash()(ts1), TagSet::Hash()(ts2));
+  TagMap ts1({{k1, "v1"}, {k2, "v2"}});
+  TagMap ts2({{k2, "v2"}, {k1, "v1"}});
+  EXPECT_EQ(TagMap::Hash()(ts1), TagMap::Hash()(ts2));
 }
 
-TEST(TagSetTest, HashRespectsKeyValuePairings) {
+TEST(TagMapTest, HashRespectsKeyValuePairings) {
   TagKey k1 = TagKey::Register("k1");
   TagKey k2 = TagKey::Register("k2");
-  TagSet ts1({{k1, "v1"}, {k2, "v2"}});
-  TagSet ts2({{k1, "v2"}, {k2, "v1"}});
-  EXPECT_NE(TagSet::Hash()(ts1), TagSet::Hash()(ts2));
+  TagMap ts1({{k1, "v1"}, {k2, "v2"}});
+  TagMap ts2({{k1, "v2"}, {k2, "v1"}});
+  EXPECT_NE(TagMap::Hash()(ts1), TagMap::Hash()(ts2));
 }
 
-TEST(TagSetTest, UnorderedMap) {
+TEST(TagMapTest, UnorderedMap) {
   // Test that the operators and hash are compatible with std::unordered_map.
   TagKey key = TagKey::Register("key");
-  std::unordered_map<TagSet, int, TagSet::Hash> map;
-  TagSet ts = {{key, "value"}};
+  std::unordered_map<TagMap, int, TagMap::Hash> map;
+  TagMap ts = {{key, "value"}};
   map.emplace(ts, 1);
   EXPECT_NE(map.end(), map.find(ts));
   EXPECT_EQ(1, map.erase(ts));
 }
 
-TEST(TagSetTest, DebugStringContainsTags) {
+TEST(TagMapTest, DebugStringContainsTags) {
   TagKey k1 = TagKey::Register("key1");
   TagKey k2 = TagKey::Register("key2");
-  TagSet ts({{k1, "value1"}, {k2, "value2"}});
+  TagMap ts({{k1, "value1"}, {k2, "value2"}});
   const std::string s = ts.DebugString();
   std::cout << s << "\n";
   EXPECT_THAT(s, HasSubstr("key1"));
@@ -105,5 +105,5 @@ TEST(TagSetTest, DebugStringContainsTags) {
 }
 
 }  // namespace
-}  // namespace stats
+}  // namespace tags
 }  // namespace opencensus

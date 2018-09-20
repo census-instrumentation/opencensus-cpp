@@ -67,8 +67,6 @@ cc_library(
         "internal/set_aggregation_window.cc",
         "internal/stats_exporter.cc",
         "internal/stats_manager.cc",
-        "internal/tag_key.cc",
-        "internal/tag_set.cc",
         "internal/view.cc",
         "internal/view_data.cc",
         "internal/view_data_impl.cc",
@@ -98,9 +96,9 @@ cc_library(
     ],
     copts = DEFAULT_COPTS,
     deps = [
-        "//opencensus/common/internal:hash_mix",
         "//opencensus/common/internal:stats_object",
         "//opencensus/common/internal:string_vector_hash",
+        "//opencensus/tags",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
@@ -204,28 +202,6 @@ cc_test(
         ":recording",
         ":test_utils",
         "@com_google_absl//absl/types:optional",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "tag_key_test",
-    size = "small",
-    srcs = ["internal/tag_key_test.cc"],
-    copts = TEST_COPTS,
-    deps = [
-        ":core",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "tag_set_test",
-    size = "small",
-    srcs = ["internal/tag_set_test.cc"],
-    copts = TEST_COPTS,
-    deps = [
-        ":core",
         "@com_google_googletest//:gtest_main",
     ],
 )
