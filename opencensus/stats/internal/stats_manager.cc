@@ -26,9 +26,9 @@
 #include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/internal/measure_data.h"
 #include "opencensus/stats/internal/measure_registry_impl.h"
-#include "opencensus/stats/tag_key.h"
-#include "opencensus/stats/tag_set.h"
 #include "opencensus/stats/view_descriptor.h"
+#include "opencensus/tags/tag_key.h"
+#include "opencensus/tags/tag_map.h"
 
 namespace opencensus {
 namespace stats {
@@ -66,13 +66,13 @@ int StatsManager::ViewInformation::RemoveConsumer() {
   return --num_consumers_;
 }
 
-void StatsManager::ViewInformation::MergeMeasureData(const TagSet& tags,
-                                                     const MeasureData& data,
-                                                     absl::Time now) {
+void StatsManager::ViewInformation::MergeMeasureData(
+    const opencensus::tags::TagMap& tags, const MeasureData& data,
+    absl::Time now) {
   mu_->AssertHeld();
   std::vector<std::string> tag_values(descriptor_.columns().size());
   for (int i = 0; i < tag_values.size(); ++i) {
-    const TagKey column = descriptor_.columns()[i];
+    const opencensus::tags::TagKey column = descriptor_.columns()[i];
     for (const auto& tag : tags.tags()) {
       if (tag.first == column) {
         tag_values[i] = std::string(tag.second);
@@ -98,9 +98,9 @@ std::unique_ptr<ViewDataImpl> StatsManager::ViewInformation::GetData() {
 // ==========================================================================
 // // StatsManager::MeasureInformation
 
-void StatsManager::MeasureInformation::MergeMeasureData(const TagSet& tags,
-                                                        const MeasureData& data,
-                                                        absl::Time now) {
+void StatsManager::MeasureInformation::MergeMeasureData(
+    const opencensus::tags::TagMap& tags, const MeasureData& data,
+    absl::Time now) {
   mu_->AssertHeld();
   for (auto& view : views_) {
     view->MergeMeasureData(tags, data, now);

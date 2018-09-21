@@ -17,12 +17,13 @@
 #include "absl/time/clock.h"
 #include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/measure.h"
-#include "opencensus/stats/tag_set.h"
+#include "opencensus/tags/tag_map.h"
 
 namespace opencensus {
 namespace stats {
 
-void Record(std::initializer_list<Measurement> measurements, TagSet tags) {
+void Record(std::initializer_list<Measurement> measurements,
+            opencensus::tags::TagMap tags) {
   DeltaProducer::Get()->Record(measurements, std::move(tags));
 }
 

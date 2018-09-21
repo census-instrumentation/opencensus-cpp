@@ -43,7 +43,7 @@ TEST(StdoutExporterTest, Export) {
   std::stringstream s;
   ::opencensus::exporters::stats::StdoutExporter::Register(&s);
 
-  auto key = ::opencensus::stats::TagKey::Register("test_key");
+  auto key = ::opencensus::tags::TagKey::Register("test_key");
   auto measure = ::opencensus::stats::MeasureDouble::Register(
       "example.com/Test/Measure", "Test description.", "1");
   auto descriptor = ::opencensus::stats::ViewDescriptor()

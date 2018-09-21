@@ -17,9 +17,9 @@
 #include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/measure.h"
 #include "opencensus/stats/recording.h"
-#include "opencensus/stats/tag_key.h"
 #include "opencensus/stats/testing/test_utils.h"
 #include "opencensus/stats/view.h"
+#include "opencensus/tags/tag_key.h"
 
 namespace opencensus {
 namespace stats {
@@ -51,9 +51,12 @@ class StatsManagerTest : public ::testing::Test {
     testing::TestUtils::Flush();
   }
 
-  const TagKey key1_ = TagKey::Register("key1");
-  const TagKey key2_ = TagKey::Register("key2");
-  const TagKey key3_ = TagKey::Register("key3");
+  const opencensus::tags::TagKey key1_ =
+      opencensus::tags::TagKey::Register("key1");
+  const opencensus::tags::TagKey key2_ =
+      opencensus::tags::TagKey::Register("key2");
+  const opencensus::tags::TagKey key3_ =
+      opencensus::tags::TagKey::Register("key3");
 };
 
 TEST_F(StatsManagerTest, Count) {

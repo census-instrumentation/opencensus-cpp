@@ -90,10 +90,10 @@ class StackdriverE2eTest : public ::testing::Test {
       google::monitoring::v3::MetricService::NewStub(::grpc::CreateChannel(
           kGoogleStackdriverStatsAddress, ::grpc::GoogleDefaultCredentials()));
 
-  const opencensus::stats::TagKey key1_ =
-      opencensus::stats::TagKey::Register("key1");
-  const opencensus::stats::TagKey key2_ =
-      opencensus::stats::TagKey::Register("key2");
+  const opencensus::tags::TagKey key1_ =
+      opencensus::tags::TagKey::Register("key1");
+  const opencensus::tags::TagKey key2_ =
+      opencensus::tags::TagKey::Register("key2");
 };
 
 const absl::string_view StackdriverE2eTest::project_id_ =
