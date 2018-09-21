@@ -56,6 +56,10 @@ class SpanContext final {
   // not TraceOptions!
   bool operator==(const SpanContext& that) const;
 
+  // Compares two SpanContexts for inequality. Only compares TraceId and SpanId,
+  // not TraceOptions!
+  bool operator!=(const SpanContext& that) const;
+
   // Returns true if SpanId and TraceId are valid.
   bool IsValid() const;
 
