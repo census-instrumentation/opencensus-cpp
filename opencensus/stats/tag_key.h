@@ -15,38 +15,16 @@
 #ifndef OPENCENSUS_STATS_TAG_KEY_H_
 #define OPENCENSUS_STATS_TAG_KEY_H_
 
-#include <cstddef>
-#include <cstdint>
-#include <string>
-
-#include "absl/strings/string_view.h"
+#include "absl/base/macros.h"
+#include "opencensus/tags/tag_key.h"
 
 namespace opencensus {
 namespace stats {
 
-// TagKey is a lightweight, immutable representation of a tag key. It has a
-// trivial destructor and can be safely used as a local static variable.
-class TagKey final {
- public:
-  // Registers a tag key with 'name'. Registering the same name twice produces
-  // equal TagKeys.
-  static TagKey Register(absl::string_view name);
-
-  const std::string& name() const;
-
-  bool operator==(TagKey other) const { return id_ == other.id_; }
-  bool operator!=(TagKey other) const { return id_ != other.id_; }
-  bool operator<(TagKey other) const { return id_ < other.id_; }
-
-  // Returns a suitable hash of the TagKey. The implementation may change.
-  std::size_t hash() const { return id_; }
-
- private:
-  friend class TagKeyRegistry;
-  explicit TagKey(uint64_t id) : id_(id) {}
-
-  uint64_t id_;
-};
+ABSL_DEPRECATED(
+    "TagKey has moved to opencensus::tags. This is a compatibility "
+    "shim and will be removed on or after 2019-03-20")
+typedef opencensus::tags::TagKey TagKey;
 
 }  // namespace stats
 }  // namespace opencensus

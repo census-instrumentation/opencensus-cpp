@@ -15,55 +15,16 @@
 #ifndef OPENCENSUS_STATS_TAG_SET_H_
 #define OPENCENSUS_STATS_TAG_SET_H_
 
-#include <initializer_list>
-#include <string>
-#include <utility>
-#include <vector>
-
-#include "absl/strings/string_view.h"
-#include "opencensus/stats/tag_key.h"
+#include "absl/base/macros.h"
+#include "opencensus/tags/tag_map.h"
 
 namespace opencensus {
 namespace stats {
 
-// TagSet represents a set of key-value tags, and provides efficient equality
-// and hash operations. A TagSet is expensive to construct, and should be shared
-// between uses where possible.
-// TagSet is immutable.
-class TagSet final {
- public:
-  // Both constructors are not explicit so that Record({}, {{"k", "v"}}) works.
-  // This constructor is needed because even though we copy to a vector
-  // internally because c++ cannot deduce the conversion needed.
-  TagSet(std::initializer_list<std::pair<TagKey, absl::string_view>> tags);
-  // This constructor is needed so that callers can dynamically construct
-  // tagsets. It takes the argument by value to allow it to be moved.
-  TagSet(std::vector<std::pair<TagKey, std::string>> tags);
-
-  // Accesses the tags sorted by key (in an implementation-defined, not
-  // lexicographic, order).
-  const std::vector<std::pair<TagKey, std::string>>& tags() const {
-    return tags_;
-  }
-
-  struct Hash {
-    std::size_t operator()(const TagSet& tag_set) const;
-  };
-
-  bool operator==(const TagSet& other) const;
-  bool operator!=(const TagSet& other) const { return !(*this == other); }
-
-  // Returns a human-readable string for debugging. Do not rely on its format or
-  // try to parse it. Do not use it to retrieve tags.
-  std::string DebugString() const;
-
- private:
-  void Initialize();
-
-  std::size_t hash_;
-  // TODO: add an option to store string_views to avoid copies.
-  std::vector<std::pair<TagKey, std::string>> tags_;
-};
+ABSL_DEPRECATED(
+    "TagSet has moved to opencensus::tags::TagMap. This is a "
+    "compatibility shim and will be removed on or after 2019-03-20")
+typedef opencensus::tags::TagMap TagSet;
 
 }  // namespace stats
 }  // namespace opencensus

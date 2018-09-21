@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/stats/tag_key.h"
+#include "opencensus/tags/tag_key.h"
 
 #include <cstdint>
 #include <string>
@@ -23,18 +23,18 @@
 #include "absl/synchronization/mutex.h"
 
 namespace opencensus {
-namespace stats {
+namespace tags {
 
-class TagKeyRegistry final {
+class TagKeyRegistry {
  public:
   static TagKeyRegistry* Get() {
-    static TagKeyRegistry* global_tag_key_registry = new TagKeyRegistry();
+    static TagKeyRegistry* global_tag_key_registry = new TagKeyRegistry;
     return global_tag_key_registry;
   }
 
-  TagKey Register(absl::string_view name);
+  TagKey Register(absl::string_view name) LOCKS_EXCLUDED(mu_);
 
-  const std::string& TagKeyName(TagKey key) const {
+  const std::string& TagKeyName(TagKey key) const LOCKS_EXCLUDED(mu_) {
     absl::ReaderMutexLock l(&mu_);
     return registered_tag_keys_[key.id_];
   }
@@ -69,5 +69,5 @@ const std::string& TagKey::name() const {
   return TagKeyRegistry::Get()->TagKeyName(*this);
 }
 
-}  // namespace stats
+}  // namespace tags
 }  // namespace opencensus
