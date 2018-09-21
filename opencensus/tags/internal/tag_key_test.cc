@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/stats/tag_key.h"
+#include "opencensus/tags/tag_key.h"
 
 #include "gtest/gtest.h"
 
 namespace opencensus {
-namespace stats {
+namespace tags {
 namespace {
 
 TEST(TagKeyTest, Name) {
@@ -40,5 +40,5 @@ TEST(TagKeyTest, Inequality) {
 }
 
 }  // namespace
-}  // namespace stats
+}  // namespace tags
 }  // namespace opencensus

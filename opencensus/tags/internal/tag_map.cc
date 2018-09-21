@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/stats/tag_set.h"
+#include "opencensus/tags/tag_map.h"
 
 #include <functional>
 #include <initializer_list>
@@ -24,12 +24,12 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "opencensus/common/internal/hash_mix.h"
-#include "opencensus/stats/tag_key.h"
+#include "opencensus/tags/tag_key.h"
 
 namespace opencensus {
-namespace stats {
+namespace tags {
 
-TagSet::TagSet(
+TagMap::TagMap(
     std::initializer_list<std::pair<TagKey, absl::string_view>> tags) {
   tags_.reserve(tags.size());
   for (const auto& tag : tags) {
@@ -38,12 +38,12 @@ TagSet::TagSet(
   Initialize();
 }
 
-TagSet::TagSet(std::vector<std::pair<TagKey, std::string>> tags)
+TagMap::TagMap(std::vector<std::pair<TagKey, std::string>> tags)
     : tags_(std::move(tags)) {
   Initialize();
 }
 
-void TagSet::Initialize() {
+void TagMap::Initialize() {
   std::sort(tags_.begin(), tags_.end());
 
   std::hash<std::string> hasher;
@@ -55,15 +55,15 @@ void TagSet::Initialize() {
   hash_ = mixer.get();
 }
 
-std::size_t TagSet::Hash::operator()(const TagSet& tag_set) const {
-  return tag_set.hash_;
+std::size_t TagMap::Hash::operator()(const TagMap& tags) const {
+  return tags.hash_;
 }
 
-bool TagSet::operator==(const TagSet& other) const {
+bool TagMap::operator==(const TagMap& other) const {
   return tags_ == other.tags_;
 }
 
-std::string TagSet::DebugString() const {
+std::string TagMap::DebugString() const {
   return absl::StrCat(
       "{",
       absl::StrJoin(
@@ -75,5 +75,5 @@ std::string TagSet::DebugString() const {
       "}");
 }
 
-}  // namespace stats
+}  // namespace tags
 }  // namespace opencensus
