@@ -23,7 +23,8 @@ FOR /F usebackq %%T IN (`bazel query "kind(rule, //...)" ^| FINDSTR /C:"\:_" /V`
 
 REM TODO: Remove --output_user_root after https://github.com/bazelbuild/bazel/issues/4149 is fixed.
 REM TODO: enable the full build when errors are resolved.
-bazel --output_user_root=c:/t/ build //opencensus/trace //opencensus/stats
+REM bazel --output_user_root=c:/t/ build //opencensus/trace //opencensus/stats
+bazel build //opencensus/trace //opencensus/stats
 REM bazel --output_user_root=c:/t/ build %BUILDABLES%
 
 IF %ERRORLEVEL% NEQ 0 EXIT /b %ERRORLEVEL%
