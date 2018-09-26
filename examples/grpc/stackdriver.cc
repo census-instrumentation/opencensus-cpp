@@ -27,7 +27,6 @@
 // OS X defines _POSIX_HOST_NAME_MAX instead.
 #ifndef HOST_NAME_MAX
 #ifdef _POSIX_HOST_NAME_MAX
-#error TODO FIXME remove this
 #define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
 #else
 #define HOST_NAME_MAX 255  // SUSv2 says 255 is the limit.
