@@ -20,8 +20,12 @@
 namespace opencensus {
 namespace context {
 
-// WithContext is an RAII object, only ever stack-allocate it. While it's in
-// scope, the execution will happen under a copy of the given Context.
+// WithContext is a scoped object that sets the current Context to the given
+// one, until the WithContext object is destroyed.
+//
+// Because it changes the current (thread local) context, NEVER allocate a
+// WithContext in one thread and deallocate in another. A simple way to ensure
+// this is to only ever stack-allocate it.
 class WithContext {
  public:
   explicit WithContext(const Context& ctx);
@@ -37,14 +41,6 @@ class WithContext {
 
   Context swapped_context_;
 };
-
-// Catch a bug where no name is given and the object is immediately discarded.
-#define WithContext(x)                                                     \
-  do {                                                                     \
-    static_assert(                                                         \
-        false,                                                             \
-        "WithContext needs to be an object on the stack and have a name"); \
-  } while (0)
 
 }  // namespace context
 }  // namespace opencensus

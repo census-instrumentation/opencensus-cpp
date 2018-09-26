@@ -34,31 +34,4 @@ TEST(WithContextTest, WithContextMovable) {
   opencensus::context::WithContext wc(std::move(ctx));
 }
 
-// Disable the rest of this file - these are non-compilation tests.
-// TODO: Run these as actual NC tests with bazel.
-#if 0
-TEST(WithContextTest, NCForgotName) {
-  using opencensus::context::Context;
-  using opencensus::context::WithContext;
-  Context ctx;
-  WithContext(ctx);  // Should be: WithContext wc(ctx);
-}
-
-TEST(WithContextTest, NCHeapAlloc) {
-  using opencensus::context::Context;
-  using opencensus::context::WithContext;
-  Context ctx;
-  auto* ptr = new WithContext(ctx);  // Should be on the stack.
-}
-
-#include "absl/memory/memory.h"
-
-TEST(WithContextTest, NCMakeUnique) {
-  using opencensus::context::Context;
-  using opencensus::context::WithContext;
-  Context ctx;
-  auto up = absl::make_unique<WithContext>(ctx);  // Should be on the stack.
-}
-#endif
-
 }  // namespace

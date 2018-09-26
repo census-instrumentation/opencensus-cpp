@@ -18,9 +18,6 @@
 
 #include "opencensus/context/context.h"
 
-// Guard macro from with_context.h.
-#undef WithContext
-
 namespace opencensus {
 namespace context {
 
