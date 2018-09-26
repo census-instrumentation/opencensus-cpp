@@ -25,19 +25,19 @@
 namespace {
 
 TEST(WithContextTest, WithContext) {
-  opencensus::context::Context ctx;
+  opencensus::context::Context ctx = opencensus::context::Context::Current();
   opencensus::context::WithContext wc(ctx);
 }
 
 TEST(WithContextTest, WithContextMovable) {
-  opencensus::context::Context ctx;
+  opencensus::context::Context ctx = opencensus::context::Context::Current();
   opencensus::context::WithContext wc(std::move(ctx));
 }
 
+// Disable the rest of this file - these are non-compilation tests.
+// TODO: Run these as actual NC tests with bazel.
 #if 0
 TEST(WithContextTest, NCForgotName) {
-  // Non-compilation test.
-  // TODO: Run this as an actual NC test.
   using opencensus::context::Context;
   using opencensus::context::WithContext;
   Context ctx;
@@ -45,7 +45,6 @@ TEST(WithContextTest, NCForgotName) {
 }
 
 TEST(WithContextTest, NCHeapAlloc) {
-  // Non-compilation test.
   using opencensus::context::Context;
   using opencensus::context::WithContext;
   Context ctx;
@@ -55,7 +54,6 @@ TEST(WithContextTest, NCHeapAlloc) {
 #include "absl/memory/memory.h"
 
 TEST(WithContextTest, NCMakeUnique) {
-  // Non-compilation test.
   using opencensus::context::Context;
   using opencensus::context::WithContext;
   Context ctx;

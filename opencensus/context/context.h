@@ -34,9 +34,6 @@ namespace context {
 // arbitrary keys and values.
 class Context {
  public:
-  // Creates a default Context.
-  Context();
-
   // Returns a const reference to the current (thread local) Context.
   static const Context& Current();
 
@@ -54,6 +51,9 @@ class Context {
   std::string DebugString() const;
 
  private:
+  // Creates a default Context.
+  Context();
+
   static Context* InternalMutableCurrent();
   friend void swap(Context& a, Context& b);
 
