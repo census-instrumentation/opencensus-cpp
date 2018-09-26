@@ -17,11 +17,22 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <limits.h>
 
 #include "absl/strings/str_cat.h"
 #include "examples/grpc/stackdriver.h"
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 #include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
+
+// OS X defines _POSIX_HOST_NAME_MAX instead.
+#ifndef HOST_NAME_MAX
+# ifdef _POSIX_HOST_NAME_MAX
+#  error TODO FIXME remove this
+#  define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
+# else
+#  define HOST_NAME_MAX 255 // SUSv2 says 255 is the limit.
+# endif
+#endif
 
 void RegisterStackdriverExporters() {
   const char *project_id = getenv("STACKDRIVER_PROJECT_ID");
