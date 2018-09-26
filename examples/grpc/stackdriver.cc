@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <limits.h>
 #include <unistd.h>
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <limits.h>
 
 #include "absl/strings/str_cat.h"
 #include "examples/grpc/stackdriver.h"
@@ -26,12 +26,12 @@
 
 // OS X defines _POSIX_HOST_NAME_MAX instead.
 #ifndef HOST_NAME_MAX
-# ifdef _POSIX_HOST_NAME_MAX
-#  error TODO FIXME remove this
-#  define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
-# else
-#  define HOST_NAME_MAX 255 // SUSv2 says 255 is the limit.
-# endif
+#ifdef _POSIX_HOST_NAME_MAX
+#error TODO FIXME remove this
+#define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
+#else
+#define HOST_NAME_MAX 255  // SUSv2 says 255 is the limit.
+#endif
 #endif
 
 void RegisterStackdriverExporters() {
