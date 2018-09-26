@@ -12,14 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <limits.h>
 #include <unistd.h>
+#include <cerrno>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 
 #include "absl/strings/str_cat.h"
 #include "examples/grpc/stackdriver.h"
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 #include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
+
+// OS X defines _POSIX_HOST_NAME_MAX instead.
+#ifndef HOST_NAME_MAX
+#ifdef _POSIX_HOST_NAME_MAX
+#define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
+#else
+#define HOST_NAME_MAX 255  // SUSv2 says 255 is the limit.
+#endif
+#endif
 
 void RegisterStackdriverExporters() {
   const char *project_id = getenv("STACKDRIVER_PROJECT_ID");
@@ -28,12 +40,20 @@ void RegisterStackdriverExporters() {
                  "not exporting to Stackdriver.\n";
     return;
   }
-  const char *hostname = getenv("HOSTNAME");
-  if (hostname == nullptr) hostname = "hostname";
+  char hostname[HOST_NAME_MAX + 1];
+  if (gethostname(hostname, sizeof(hostname)) == -1) {
+    std::cerr << "gethostname() failed: " << strerror(errno) << "\n";
+    strncpy(hostname, "hostname", sizeof(hostname) - 1);
+    hostname[sizeof(hostname) - 1] = 0;
+  }
 
   opencensus::exporters::stats::StackdriverOptions stats_opts;
   stats_opts.project_id = project_id;
   stats_opts.opencensus_task = absl::StrCat("cpp-", getpid(), "@", hostname);
+
+  std::cout << "RegisterStackdriverExporters:\n";
+  std::cout << "  project_id = \"" << stats_opts.project_id << "\"\n";
+  std::cout << "  opencensus_task = \"" << stats_opts.opencensus_task << "\"\n";
 
   opencensus::exporters::trace::StackdriverOptions trace_opts;
   trace_opts.project_id = project_id;
