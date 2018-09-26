@@ -170,7 +170,7 @@ class Span final {
   // Shared pointer to the underlying Span representation. This is nullptr for
   // Spans which are not recording events. This is an implementation detail, not
   // part of the public API.
-  std::shared_ptr<SpanImpl> span_impl_;
+  const std::shared_ptr<SpanImpl> span_impl_;
 
   friend class ::opencensus::trace::exporter::RunningSpanStoreImpl;
   friend class ::opencensus::trace::exporter::LocalSpanStoreImpl;
