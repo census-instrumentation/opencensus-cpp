@@ -220,5 +220,11 @@ bool Span::IsSampled() const { return context_.trace_options().IsSampled(); }
 
 bool Span::IsRecording() const { return span_impl_ != nullptr; }
 
+void swap(Span& a, Span& b) {
+  using std::swap;
+  swap(a.context_, b.context_);
+  swap(a.span_impl_, b.span_impl_);
+}
+
 }  // namespace trace
 }  // namespace opencensus

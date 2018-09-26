@@ -30,6 +30,9 @@
 
 namespace opencensus {
 class CensusContext;
+namespace context {
+class Context;
+}
 namespace trace {
 
 namespace exporter {
@@ -163,15 +166,19 @@ class Span final {
   // Returns span_impl_, only used for testing.
   std::shared_ptr<SpanImpl> span_impl_for_test() { return span_impl_; }
 
+  // Swaps contents, used for Context.
+  friend void swap(Span& a, Span& b);
+
   // Spans that aren't sampled still have a valid SpanContext that propagates,
   // but no span_impl_.
-  const SpanContext context_;
+  SpanContext context_;
 
   // Shared pointer to the underlying Span representation. This is nullptr for
   // Spans which are not recording events. This is an implementation detail, not
   // part of the public API.
-  const std::shared_ptr<SpanImpl> span_impl_;
+  std::shared_ptr<SpanImpl> span_impl_;
 
+  friend class ::opencensus::context::Context;
   friend class ::opencensus::trace::exporter::RunningSpanStoreImpl;
   friend class ::opencensus::trace::exporter::LocalSpanStoreImpl;
   friend class ::opencensus::trace::SpanTestPeer;
