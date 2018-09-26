@@ -44,9 +44,9 @@ opencensus::stats::MeasureInt64 VideoSizeMeasure() {
   return video_size;
 }
 
-opencensus::stats::TagKey FrontendKey() {
+opencensus::tags::TagKey FrontendKey() {
   static const auto frontend_key =
-      opencensus::stats::TagKey::Register("my.org/keys/frontend");
+      opencensus::tags::TagKey::Register("my.org/keys/frontend");
   return frontend_key;
 }
 

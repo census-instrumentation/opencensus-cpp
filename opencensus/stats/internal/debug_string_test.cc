@@ -62,7 +62,8 @@ TEST(DebugStringTest, ViewDescriptor) {
       AggregationWindow::Interval(absl::Minutes(1));
   const std::string measure_name = "bar";
   static const auto measure = MeasureDouble::Register(measure_name, "", "");
-  static const TagKey tag_key = TagKey::Register("tag_key_1");
+  static const opencensus::tags::TagKey tag_key =
+      opencensus::tags::TagKey::Register("tag_key_1");
   MeasureDouble::Register(measure_name, "", "");
   const std::string description = "description string";
   ViewDescriptor descriptor = ViewDescriptor()

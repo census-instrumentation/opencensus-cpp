@@ -20,7 +20,7 @@
 
 #include "absl/strings/string_view.h"
 #include "opencensus/stats/measure.h"
-#include "opencensus/stats/tag_set.h"
+#include "opencensus/tags/tag_map.h"
 
 namespace opencensus {
 namespace stats {
@@ -35,7 +35,7 @@ namespace stats {
 // If a record call fails to compile, ensure that all types match (using
 // static_cast to double or int64_t if necessary).
 void Record(std::initializer_list<Measurement> measurements,
-            TagSet tags = TagSet({}));
+            opencensus::tags::TagMap tags = {});
 
 }  // namespace stats
 }  // namespace opencensus

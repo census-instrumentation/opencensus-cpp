@@ -53,8 +53,8 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorNameAndType) {
 }
 
 TEST(StackdriverUtilsTest, SetMetricDescriptorLabels) {
-  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
-  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
+  const auto tag_key_1 = opencensus::tags::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::tags::TagKey::Register("bar");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor().add_column(tag_key_1).add_column(
           tag_key_2);
@@ -177,8 +177,8 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumDouble) {
       opencensus::stats::MeasureDouble::Register("measure_sum_double", "", "");
   const std::string task = "test_task";
   const std::string view_name = "test_view";
-  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
-  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
+  const auto tag_key_1 = opencensus::tags::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::tags::TagKey::Register("bar");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name(view_name)
@@ -218,8 +218,8 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumInt) {
       opencensus::stats::MeasureInt64::Register("measure_sum_int", "", "");
   const std::string task = "test_task";
   const std::string view_name = "test_descriptor";
-  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
-  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
+  const auto tag_key_1 = opencensus::tags::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::tags::TagKey::Register("bar");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name(view_name)
@@ -260,8 +260,8 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesCountDouble) {
       "measure_count_double", "", "");
   const std::string task = "test_task";
   const std::string view_name = "test_descriptor";
-  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
-  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
+  const auto tag_key_1 = opencensus::tags::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::tags::TagKey::Register("bar");
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor()
           .set_name(view_name)
@@ -303,8 +303,8 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
       "measure_distribution_double", "", "");
   const std::string task = "test_task";
   const std::string view_name = "test_view";
-  const auto tag_key_1 = opencensus::stats::TagKey::Register("foo");
-  const auto tag_key_2 = opencensus::stats::TagKey::Register("bar");
+  const auto tag_key_1 = opencensus::tags::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::tags::TagKey::Register("bar");
   const auto bucket_boundaries =
       opencensus::stats::BucketBoundaries::Explicit({0});
   const auto view_descriptor =

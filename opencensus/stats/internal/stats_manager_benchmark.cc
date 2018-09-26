@@ -72,15 +72,18 @@ struct IntervalWindow {
 // with a small number of tags.
 template <class AggregationFactory, class AggregationWindowFactory>
 void BM_Record(benchmark::State& state) {
-  const TagKey tag_key_1 = TagKey::Register("tag_key_1");
-  const TagKey tag_key_2 = TagKey::Register("tag_key_2");
+  const opencensus::tags::TagKey tag_key_1 =
+      opencensus::tags::TagKey::Register("tag_key_1");
+  const opencensus::tags::TagKey tag_key_2 =
+      opencensus::tags::TagKey::Register("tag_key_2");
   const std::string measure_name = MakeUniqueName();
   MeasureDouble measure = MeasureDouble::Register(measure_name, "", "");
   std::vector<std::unique_ptr<View>> views;
   for (int i = 0; i < state.range(0); ++i) {
     // This tag key is necessary to prevent these from being merged by
     // the StatsManager.
-    const TagKey view_tag_key = TagKey::Register(absl::StrCat("view_key_", i));
+    const opencensus::tags::TagKey view_tag_key =
+        opencensus::tags::TagKey::Register(absl::StrCat("view_key_", i));
     ViewDescriptor descriptor =
         ViewDescriptor()
             .set_measure(measure_name)
@@ -118,8 +121,10 @@ BENCHMARK_TEMPLATE2(BM_Record, DistributionAggregation, IntervalWindow)
 // Benchmarks batched recording against a set of measures with a small number of
 // views on each, matching RPC stats recording.
 void BM_RecordBatched(benchmark::State& state) {
-  const TagKey tag_key_1 = TagKey::Register("tag_key_1");
-  const TagKey tag_key_2 = TagKey::Register("tag_key_2");
+  const opencensus::tags::TagKey tag_key_1 =
+      opencensus::tags::TagKey::Register("tag_key_1");
+  const opencensus::tags::TagKey tag_key_2 =
+      opencensus::tags::TagKey::Register("tag_key_2");
   const int num_measures = 6;
   std::vector<MeasureDouble> measures;
   std::vector<std::unique_ptr<View>> views;

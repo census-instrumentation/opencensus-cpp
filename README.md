@@ -1,6 +1,7 @@
 # OpenCensus - A stats collection and distributed tracing framework
 [![Gitter chat][gitter-image]][gitter-url]
-[![Build Status][travis-image]][travis-url]
+[![Travis Build Status][travis-image]][travis-url]
+[![Appveyor Build Status][appveyor-image]][appveyor-url]
 
 OpenCensus is a toolkit for collecting application performance and behavior data. It currently
 includes an API for tracing and stats.
@@ -64,3 +65,5 @@ We are targeting the following compilers:
 [gitter-url]: https://gitter.im/census-instrumentation/lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 [travis-image]: https://travis-ci.org/census-instrumentation/opencensus-cpp.svg?branch=master
 [travis-url]: https://travis-ci.org/census-instrumentation/opencensus-cpp
+[appveyor-image]: https://ci.appveyor.com/api/projects/status/github/census-instrumentation/opencensus-cpp?branch=master&svg=true
+[appveyor-url]: https://ci.appveyor.com/project/opencensuscppteam/opencensus-cpp
