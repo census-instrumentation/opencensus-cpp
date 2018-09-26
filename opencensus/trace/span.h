@@ -157,7 +157,7 @@ class Span final {
   bool IsRecording() const;
 
  private:
-  Span();
+  Span() = delete;
   Span(const SpanContext& context, SpanImpl* impl);
 
   // Returns span_impl_, only used for testing.

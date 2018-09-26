@@ -112,9 +112,7 @@ class SpanGenerator {
   }
 };
 
-Span::Span() {}
-
-Span Span::BlankSpan() { return Span(); }
+Span Span::BlankSpan() { return Span(SpanContext(), nullptr); }
 
 Span Span::StartSpan(absl::string_view name, const Span* parent,
                      const StartSpanOptions& options) {
