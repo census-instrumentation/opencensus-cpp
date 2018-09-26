@@ -54,9 +54,6 @@ Add a BUILD dependency on:
 In your application's initialization code, register the exporter:
 
 ```c++
-const char* hostname = getenv("HOSTNAME");
-if (hostname == nullptr) hostname = "hostname";
-
 opencensus::exporters::stats::StackdriverOptions opts;
 opts.project_id = "my-stackdriver-project-id";
 opts.opencensus_task = absl::StrCat("cpp-", getpid(), "@", hostname);

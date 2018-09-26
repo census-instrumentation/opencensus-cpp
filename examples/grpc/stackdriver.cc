@@ -13,7 +13,9 @@
 // limitations under the License.
 
 #include <unistd.h>
+#include <cerrno>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 
 #include "absl/strings/str_cat.h"
@@ -28,8 +30,12 @@ void RegisterStackdriverExporters() {
                  "not exporting to Stackdriver.\n";
     return;
   }
-  const char *hostname = getenv("HOSTNAME");
-  if (hostname == nullptr) hostname = "hostname";
+  char hostname[HOST_NAME_MAX + 1];
+  if (gethostname(hostname, sizeof(hostname)) == -1) {
+    std::cerr << "gethostname() failed: " << strerror(errno) << "\n";
+    strncpy(hostname, "hostname", sizeof(hostname) - 1);
+    hostname[sizeof(hostname) - 1] = 0;
+  }
 
   opencensus::exporters::stats::StackdriverOptions stats_opts;
   stats_opts.project_id = project_id;
