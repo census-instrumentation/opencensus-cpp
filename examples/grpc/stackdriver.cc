@@ -41,6 +41,10 @@ void RegisterStackdriverExporters() {
   stats_opts.project_id = project_id;
   stats_opts.opencensus_task = absl::StrCat("cpp-", getpid(), "@", hostname);
 
+  std::cout << "RegisterStackdriverExporters:\n";
+  std::cout << "  project_id = \"" << stats_opts.project_id << "\"\n";
+  std::cout << "  opencensus_task = \"" << stats_opts.opencensus_task << "\"\n";
+
   opencensus::exporters::trace::StackdriverOptions trace_opts;
   trace_opts.project_id = project_id;
 
