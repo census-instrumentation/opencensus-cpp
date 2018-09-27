@@ -241,9 +241,9 @@ cc_binary(
     deps = [
         ":core",
         ":recording",
+        "@com_github_google_benchmark//:benchmark",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
-        "@com_github_google_benchmark//:benchmark",
     ],
 )

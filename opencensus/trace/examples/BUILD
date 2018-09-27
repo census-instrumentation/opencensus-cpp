@@ -31,9 +31,9 @@ cc_test(
     srcs = ["span_example.cc"],
     copts = TEST_COPTS,
     deps = [
+        "//opencensus/trace",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
-        "//opencensus/trace",
         "@com_google_googletest//:gtest_main",
     ],
 )
