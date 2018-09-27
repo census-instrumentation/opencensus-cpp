@@ -28,11 +28,12 @@ sed -i 's/ \+$//' $(find * -type f)
 CMD=clang-format
 $CMD -version
 $CMD -i -style=Google $(find . -name '*.cc' -or -name '*.h')
-if which buildifier; then
-  buildifier --version
+if which buildifier >/dev/null; then
+  echo "Running buildifier."
   buildifier WORKSPACE $(find . -name BUILD -o -name \*.bzl)
 else
-  echo "Can't find buildifier."
+  echo "Can't find buildifier. It can be installed with:"
+  echo "  go get github.com/bazelbuild/buildtools/buildifier"
 fi
 CHANGED="$(git ls-files --modified)"
 if [[ ! -z "$CHANGED" ]]; then
