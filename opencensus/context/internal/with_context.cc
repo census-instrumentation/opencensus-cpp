@@ -22,26 +22,26 @@
 namespace opencensus {
 namespace context {
 
-WithContext::WithContext(const Context& ctx)
-    : swapped_context_(ctx)
+WithContext::WithContext(const Context& ctx, bool cond)
+    : cond_(cond),
+      swapped_context_(cond ? ctx : Context())
 #ifndef NDEBUG
       ,
       original_context_(Context::InternalMutableCurrent())
 #endif
 {
-  using std::swap;
-  swap(*Context::InternalMutableCurrent(), swapped_context_);
+  ConditionalSwap();
 }
 
-WithContext::WithContext(Context&& ctx)
-    : swapped_context_(std::move(ctx))
+WithContext::WithContext(Context&& ctx, bool cond)
+    : cond_(cond),
+      swapped_context_(cond ? std::move(ctx) : Context())
 #ifndef NDEBUG
       ,
       original_context_(Context::InternalMutableCurrent())
 #endif
 {
-  using std::swap;
-  swap(*Context::InternalMutableCurrent(), swapped_context_);
+  ConditionalSwap();
 }
 
 WithContext::~WithContext() {
@@ -50,8 +50,14 @@ WithContext::~WithContext() {
          "WithContext must be destructed on the same thread as it was "
          "constructed.");
 #endif
-  using std::swap;
-  swap(*Context::InternalMutableCurrent(), swapped_context_);
+  ConditionalSwap();
+}
+
+void WithContext::ConditionalSwap() {
+  if (cond_) {
+    using std::swap;
+    swap(*Context::InternalMutableCurrent(), swapped_context_);
+  }
 }
 
 }  // namespace context
