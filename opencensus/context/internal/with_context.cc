@@ -14,6 +14,7 @@
 
 #include "opencensus/context/with_context.h"
 
+#include <cassert>
 #include <utility>
 
 #include "opencensus/context/context.h"
@@ -21,17 +22,34 @@
 namespace opencensus {
 namespace context {
 
-WithContext::WithContext(const Context& ctx) : swapped_context_(ctx) {
+WithContext::WithContext(const Context& ctx)
+    : swapped_context_(ctx)
+#ifndef NDEBUG
+      ,
+      original_context_(Context::InternalMutableCurrent())
+#endif
+{
   using std::swap;
   swap(*Context::InternalMutableCurrent(), swapped_context_);
 }
 
-WithContext::WithContext(Context&& ctx) : swapped_context_(std::move(ctx)) {
+WithContext::WithContext(Context&& ctx)
+    : swapped_context_(std::move(ctx))
+#ifndef NDEBUG
+      ,
+      original_context_(Context::InternalMutableCurrent())
+#endif
+{
   using std::swap;
   swap(*Context::InternalMutableCurrent(), swapped_context_);
 }
 
 WithContext::~WithContext() {
+#ifndef NDEBUG
+  assert(original_context_ == Context::InternalMutableCurrent() &&
+         "WithContext must be destructed on the same thread as it was "
+         "constructed.");
+#endif
   using std::swap;
   swap(*Context::InternalMutableCurrent(), swapped_context_);
 }

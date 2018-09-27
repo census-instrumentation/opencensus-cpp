@@ -40,6 +40,9 @@ class WithContext {
   WithContext& operator=(WithContext&&) = delete;
 
   Context swapped_context_;
+#ifndef NDEBUG
+  const Context* original_context_;
+#endif
 };
 
 }  // namespace context
