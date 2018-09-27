@@ -48,11 +48,11 @@ class WithContext {
 
   void ConditionalSwap();
 
-  const bool cond_;
   Context swapped_context_;
 #ifndef NDEBUG
   const Context* original_context_;
 #endif
+  const bool cond_;
 };
 
 }  // namespace context

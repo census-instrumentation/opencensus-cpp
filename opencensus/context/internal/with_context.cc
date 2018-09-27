@@ -23,24 +23,24 @@ namespace opencensus {
 namespace context {
 
 WithContext::WithContext(const Context& ctx, bool cond)
-    : cond_(cond),
-      swapped_context_(cond ? ctx : Context())
+    : swapped_context_(cond ? ctx : Context())
 #ifndef NDEBUG
       ,
       original_context_(Context::InternalMutableCurrent())
 #endif
-{
+      ,
+      cond_(cond) {
   ConditionalSwap();
 }
 
 WithContext::WithContext(Context&& ctx, bool cond)
-    : cond_(cond),
-      swapped_context_(cond ? std::move(ctx) : Context())
+    : swapped_context_(cond ? std::move(ctx) : Context())
 #ifndef NDEBUG
       ,
       original_context_(Context::InternalMutableCurrent())
 #endif
-{
+      ,
+      cond_(cond) {
   ConditionalSwap();
 }
 
