@@ -15,6 +15,7 @@
 #include "opencensus/context/with_context.h"
 
 #include <iostream>
+#include <thread>
 
 #include "gtest/gtest.h"
 #include "opencensus/context/context.h"
@@ -33,5 +34,22 @@ TEST(WithContextTest, WithContextMovable) {
   opencensus::context::Context ctx = opencensus::context::Context::Current();
   opencensus::context::WithContext wc(std::move(ctx));
 }
+
+#ifndef NDEBUG
+TEST(WithContextDeathTest, DestructorOnWrongThread) {
+  opencensus::context::Context ctx = opencensus::context::Context::Current();
+  EXPECT_DEATH_IF_SUPPORTED(
+      {
+        auto* wc = new opencensus::context::WithContext(ctx);
+        std::thread t([wc]() {
+          // Running the destructor in a different thread corrupts its
+          // thread-local Context. In debug mode, it assert()s.
+          delete wc;
+        });
+        t.join();
+      },
+      "must be destructed on the same thread");
+}
+#endif
 
 }  // namespace
