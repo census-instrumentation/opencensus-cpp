@@ -17,8 +17,14 @@ env: BAZEL_OPTIONS="--local_resources=4096,2,1.0 --copt=-Werror=thread-safety"
 cache:
   directories:
     - $HOME/bazel-cache
+    - $HOME/gopath/bin
 
 before_install:
+  # Install buildifier if it's not present. It needs at least go 1.8.
+  - if ! which buildifier >/dev/null; then
+      eval "$(gimme 1.11)" ;
+      go get -v github.com/bazelbuild/buildtools/buildifier ;
+    fi
   # OS X does not have clang-format by default, and has a different sed.
   - if \[ "$TRAVIS_OS_NAME" == "linux" \]; then
       tools/format.sh ;
