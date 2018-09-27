@@ -17,7 +17,6 @@
 BASE_CURL_COPTS = [
     # Disable everything else except HTTP protocol.
     "-DHTTP_ONLY=1",
-
     "-DENABLE_IPV6=1",
     "-DGETHOSTNAME_TYPE_ARG2=size_t",
     "-DGETSERVBYPORT_R_ARGS=6",

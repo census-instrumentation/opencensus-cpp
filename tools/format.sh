@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Formats code under opencensus/, exits with 0 if there were no changes.
+# Formats code, exits with 0 if there were no changes.
 if [[ ! -e tools/format.sh ]]; then
   echo "This tool must be run from the topmost OpenCensus directory." >&2
   exit 1
@@ -28,6 +28,12 @@ sed -i 's/ \+$//' $(find * -type f)
 CMD=clang-format
 $CMD -version
 $CMD -i -style=Google $(find . -name '*.cc' -or -name '*.h')
+if which buildifier; then
+  buildifier --version
+  buildifier WORKSPACE $(find . -name BUILD -o -name \*.bzl)
+else
+  echo "Can't find buildifier."
+fi
 CHANGED="$(git ls-files --modified)"
 if [[ ! -z "$CHANGED" ]]; then
   echo "The following files have changes:"

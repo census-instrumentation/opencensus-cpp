@@ -23,13 +23,13 @@ package(default_visibility = ["//visibility:private"])
 # The public tags API.
 cc_library(
     name = "tags",
-    hdrs = [
-      "tag_map.h",
-      "tag_key.h",
-    ],
     srcs = [
-      "internal/tag_key.cc",
-      "internal/tag_map.cc",
+        "internal/tag_key.cc",
+        "internal/tag_map.cc",
+    ],
+    hdrs = [
+        "tag_key.h",
+        "tag_map.h",
     ],
     copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],

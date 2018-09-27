@@ -81,6 +81,7 @@ cc_library(
     copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
     deps = [
+        "//opencensus/common/internal:random_lib",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/base:endian",
         "@com_google_absl//absl/memory",
@@ -88,7 +89,6 @@ cc_library(
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/time",
         "@com_google_absl//absl/types:span",
-        "//opencensus/common/internal:random_lib",
     ],
 )
 

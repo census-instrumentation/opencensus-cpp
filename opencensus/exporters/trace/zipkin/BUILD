@@ -32,11 +32,11 @@ cc_library(
     copts = DEFAULT_COPTS,
     deps = [
         "//opencensus/trace",
+        "@com_github_curl//:curl",
+        "@com_github_rapidjson//:rapidjson",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
-        "@com_github_curl//:curl",
-        "@com_github_rapidjson//:rapidjson",
     ],
 )
 

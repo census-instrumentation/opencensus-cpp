@@ -33,18 +33,19 @@ http_archive(
 # Only needed for benchmarks, not to build the OpenCensus library.
 http_archive(
     name = "com_github_google_benchmark",
-    urls = ["https://github.com/google/benchmark/archive/master.zip"],
     strip_prefix = "benchmark-master",
+    urls = ["https://github.com/google/benchmark/archive/master.zip"],
 )
 
 # gRPC
 http_archive(
     name = "com_github_grpc_grpc",
+    strip_prefix = "grpc-master",
     urls = ["https://github.com/grpc/grpc/archive/master.tar.gz"],
-    strip_prefix = "grpc-master"
 )
 
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
+
 grpc_deps()
 
 # These bind()s are needed for the cc_grpc_library() rule to work.
@@ -73,10 +74,8 @@ load_civetweb()
 # Curl library - used by zipkin exporter.
 new_http_archive(
     name = "com_github_curl",
-    urls = ["https://github.com/curl/curl/archive/master.zip"],
-    strip_prefix = "curl-master",
     build_file_content =
-"""
+        """
 load("@io_opencensus_cpp//opencensus:curl.bzl", "CURL_COPTS")
 package(features = ['no_copts_tokenization'])
 
@@ -108,16 +107,16 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
 )
-"""
+""",
+    strip_prefix = "curl-master",
+    urls = ["https://github.com/curl/curl/archive/master.zip"],
 )
 
 # Rapidjson library - used by zipkin exporter.
 new_http_archive(
     name = "com_github_rapidjson",
-    urls = ["https://github.com/Tencent/rapidjson/archive/master.zip"],
-    strip_prefix = "rapidjson-master",
     build_file_content =
-"""
+        """
 cc_library(
     name = "rapidjson",
     srcs = [],
@@ -130,5 +129,7 @@ cc_library(
     defines = ["RAPIDJSON_HAS_STDSTRING=1",],
     visibility = ["//visibility:public"],
 )
-"""
+""",
+    strip_prefix = "rapidjson-master",
+    urls = ["https://github.com/Tencent/rapidjson/archive/master.zip"],
 )
