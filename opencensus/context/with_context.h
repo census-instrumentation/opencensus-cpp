@@ -21,15 +21,22 @@ namespace opencensus {
 namespace context {
 
 // WithContext is a scoped object that sets the current Context to the given
-// one, until the WithContext object is destroyed.
+// one, until the WithContext object is destroyed. If the condition is false, it
+// doesn't do anything.
 //
-// Because it changes the current (thread local) context, NEVER allocate a
-// WithContext in one thread and deallocate in another. A simple way to ensure
-// this is to only ever stack-allocate it.
+// Because WithContext changes the current (thread local) context, NEVER
+// allocate a WithContext in one thread and deallocate in another. A simple way
+// to ensure this is to only ever stack-allocate it.
+//
+// Example usage:
+// {
+//   WithContext wc(op.ctx_);
+//   // Do work.
+// }
 class WithContext {
  public:
-  explicit WithContext(const Context& ctx);
-  explicit WithContext(Context&& ctx);
+  explicit WithContext(const Context& ctx, bool cond = true);
+  explicit WithContext(Context&& ctx, bool cond = true);
   ~WithContext();
 
  private:
@@ -39,10 +46,13 @@ class WithContext {
   WithContext& operator=(const WithContext&) = delete;
   WithContext& operator=(WithContext&&) = delete;
 
+  void ConditionalSwap();
+
   Context swapped_context_;
 #ifndef NDEBUG
   const Context* original_context_;
 #endif
+  const bool cond_;
 };
 
 }  // namespace context

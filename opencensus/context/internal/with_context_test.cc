@@ -35,6 +35,13 @@ TEST(WithContextTest, WithContextMovable) {
   opencensus::context::WithContext wc(std::move(ctx));
 }
 
+TEST(WithContextTest, WithContextConditional) {
+  opencensus::context::Context ctx = opencensus::context::Context::Current();
+  opencensus::context::WithContext wc1(ctx, true);
+  opencensus::context::WithContext wc2(ctx, false);
+  // TODO: Test swaps.
+}
+
 #ifndef NDEBUG
 TEST(WithContextDeathTest, DestructorOnWrongThread) {
   opencensus::context::Context ctx = opencensus::context::Context::Current();
