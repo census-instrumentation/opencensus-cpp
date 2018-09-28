@@ -87,3 +87,20 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+# Benchmarks
+# ========================================================================= #
+
+cc_binary(
+    name = "with_tag_map_benchmark",
+    testonly = 1,
+    srcs = ["internal/with_tag_map_benchmark.cc"],
+    copts = TEST_COPTS,
+    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
+    linkstatic = 1,
+    deps = [
+        ":tags",
+        ":with_tag_map",
+        "@com_github_google_benchmark//:benchmark",
+    ],
+)
