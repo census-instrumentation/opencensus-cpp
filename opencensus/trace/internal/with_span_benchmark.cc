@@ -14,7 +14,10 @@
 
 #include "opencensus/trace/with_span.h"
 
+#include <cstdlib>
+
 #include "benchmark/benchmark.h"
+#include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"
 
 namespace opencensus {
@@ -31,14 +34,31 @@ namespace {
 
 using opencensus::context::ContextTestPeer;
 
-void BM_WithSpan(benchmark::State& state) {
-  auto span = Span::StartSpan("MySpan");
+void BM_WithSpanUnsampled(benchmark::State& state) {
+  static ::opencensus::trace::NeverSampler sampler;
+  auto span = Span::StartSpan("MySpan", /*parent=*/nullptr, {&sampler});
+  if (span.IsRecording()) {
+    abort();
+  }
   for (auto _ : state) {
     WithSpan ws(span);
   }
   span.End();
 }
-BENCHMARK(BM_WithSpan);
+BENCHMARK(BM_WithSpanUnsampled);
+
+void BM_WithSpanSampled(benchmark::State& state) {
+  static ::opencensus::trace::AlwaysSampler sampler;
+  auto span = Span::StartSpan("MySpan", /*parent=*/nullptr, {&sampler});
+  if (!span.IsRecording()) {
+    abort();
+  }
+  for (auto _ : state) {
+    WithSpan ws(span);
+  }
+  span.End();
+}
+BENCHMARK(BM_WithSpanSampled);
 
 void BM_WithSpanConditionFalse(benchmark::State& state) {
   auto span = Span::StartSpan("MySpan");
