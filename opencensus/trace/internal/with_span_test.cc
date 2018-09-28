@@ -15,6 +15,7 @@
 #include "opencensus/trace/with_span.h"
 
 #include <iostream>
+#include <thread>
 
 #include "gtest/gtest.h"
 #include "opencensus/context/context.h"
@@ -105,5 +106,22 @@ TEST(WithSpanTest, DisabledViaConditional) {
   span2.End();
   span1.End();
 }
+
+#ifndef NDEBUG
+TEST(WithSpanDeathTest, DestructorOnWrongThread) {
+  auto span = opencensus::trace::Span::StartSpan("MySpan");
+  EXPECT_DEATH_IF_SUPPORTED(
+      {
+        auto* ws = new opencensus::trace::WithSpan(span);
+        std::thread t([ws]() {
+          // Running the destructor in a different thread corrupts its
+          // thread-local Context. In debug mode, it assert()s.
+          delete ws;
+        });
+        t.join();
+      },
+      "must be destructed on the same thread");
+}
+#endif
 
 }  // namespace
