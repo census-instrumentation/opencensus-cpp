@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #ifndef OPENCENSUS_TAGS_WITH_TAG_MAP_H_
 #define OPENCENSUS_TAGS_WITH_TAG_MAP_H_
 
@@ -23,12 +22,12 @@ namespace opencensus {
 namespace tags {
 
 // WithTagMap is a scoped object that sets the current TagMap to the given one,
-// until the WithTagMap object is destroyed. If the condition is false, it doesn't
-// do anything.
+// until the WithTagMap object is destroyed. If the condition is false, it
+// doesn't do anything.
 //
-// Because WithTagMap changes the current (thread local) context, NEVER allocate a
-// WithTagMap in one thread and deallocate in another. A simple way to ensure this
-// is to only ever stack-allocate it.
+// Because WithTagMap changes the current (thread local) context, NEVER allocate
+// a WithTagMap in one thread and deallocate in another. A simple way to ensure
+// this is to only ever stack-allocate it.
 //
 // Example usage:
 // {
