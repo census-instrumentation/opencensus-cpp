@@ -92,6 +92,18 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "with_span",
+    srcs = ["internal/with_span.cc"],
+    hdrs = ["with_span.h"],
+    copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":trace",
+        "//opencensus/context",
+    ],
+)
+
 # Tests
 # ========================================================================= #
 
@@ -267,6 +279,18 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "with_span_test",
+    srcs = ["internal/with_span_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":trace",
+        ":with_span",
+        "//opencensus/context",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 # Benchmarks
 # ========================================================================= #
 
@@ -305,6 +329,20 @@ cc_binary(
     linkstatic = 1,
     deps = [
         ":trace",
+        "@com_github_google_benchmark//:benchmark",
+    ],
+)
+
+cc_binary(
+    name = "with_span_benchmark",
+    testonly = 1,
+    srcs = ["internal/with_span_benchmark.cc"],
+    copts = TEST_COPTS,
+    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
+    linkstatic = 1,
+    deps = [
+        ":trace",
+        ":with_span",
         "@com_github_google_benchmark//:benchmark",
     ],
 )
