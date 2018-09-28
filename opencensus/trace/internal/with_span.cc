@@ -37,17 +37,6 @@ WithSpan::WithSpan(const Span& span, bool cond)
   ConditionalSwap();
 }
 
-WithSpan::WithSpan(Span&& span, bool cond)
-    : swapped_span_(std::move(span))
-#ifndef NDEBUG
-      ,
-      original_context_(Context::InternalMutableCurrent())
-#endif
-      ,
-      cond_(cond) {
-  ConditionalSwap();
-}
-
 WithSpan::~WithSpan() {
 #ifndef NDEBUG
   assert(original_context_ == Context::InternalMutableCurrent() &&

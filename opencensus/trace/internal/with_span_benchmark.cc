@@ -69,24 +69,6 @@ void BM_WithSpanConditionFalse(benchmark::State& state) {
 }
 BENCHMARK(BM_WithSpanConditionFalse);
 
-void BM_WithSpanConstructAndCopy(benchmark::State& state) {
-  for (auto _ : state) {
-    auto span = Span::StartSpan("MySpan");
-    WithSpan ws(span);
-    ContextTestPeer::CurrentSpan().End();
-  }
-}
-BENCHMARK(BM_WithSpanConstructAndCopy);
-
-void BM_WithSpanConstructAndMove(benchmark::State& state) {
-  for (auto _ : state) {
-    auto span = Span::StartSpan("MySpan");
-    WithSpan ws(std::move(span));
-    ContextTestPeer::CurrentSpan().End();
-  }
-}
-BENCHMARK(BM_WithSpanConstructAndMove);
-
 }  // namespace
 }  // namespace trace
 }  // namespace opencensus

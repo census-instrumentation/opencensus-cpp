@@ -37,8 +37,11 @@ namespace trace {
 class WithSpan {
  public:
   explicit WithSpan(const Span& span, bool cond = true);
-  explicit WithSpan(Span&& span, bool cond = true);
   ~WithSpan();
+
+  // No Span&& constructor because it encourages "consuming" the Span with a
+  // std::move(). It's better to hold on to the Span object because we have to
+  // call End() on it when the operation is finished.
 
  private:
   WithSpan() = delete;
