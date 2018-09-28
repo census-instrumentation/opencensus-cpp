@@ -75,6 +75,17 @@ TEST(WithTagsTest, TagsAreAddedAndRemoved) {
   ExpectNoTags();
 }
 
+TEST(WithTagsTest, RvalueConstructor) {
+  auto tags = Tags1();
+  ExpectNoTags();
+  {
+    opencensus::tags::WithTagMap wt(std::move(tags));
+    EXPECT_EQ(Tags1(), ContextTestPeer::CurrentTags())
+        << "Tags were installed.";
+  }
+  ExpectNoTags();
+}
+
 TEST(WithTagsTest, Nesting) {
   const auto tags1 = Tags1();
   const auto tags2 = Tags2();
