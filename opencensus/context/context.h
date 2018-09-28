@@ -22,6 +22,9 @@
 #include "opencensus/trace/span.h"
 
 namespace opencensus {
+namespace trace {
+class WithSpan;
+}  // namespace trace
 namespace context {
 
 // Context holds information specific to an operation, such as a TagMap and
@@ -57,7 +60,9 @@ class Context {
   static Context* InternalMutableCurrent();
   friend void swap(Context& a, Context& b);
 
+  friend class ContextTestPeer;
   friend class WithContext;
+  friend class ::opencensus::trace::WithSpan;
 
   opencensus::tags::TagMap tags_;
   opencensus::trace::Span span_;
