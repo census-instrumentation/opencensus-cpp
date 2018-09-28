@@ -41,6 +41,18 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "with_tag_map",
+    srcs = ["internal/with_tag_map.cc"],
+    hdrs = ["with_tag_map.h"],
+    copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":tags",
+        "//opencensus/context",
+    ],
+)
+
 # Tests
 # ========================================================================= #
 
@@ -60,6 +72,18 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":tags",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "with_tag_map_test",
+    srcs = ["internal/with_tag_map_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":tags",
+        ":with_tag_map",
+        "//opencensus/context",
         "@com_google_googletest//:gtest_main",
     ],
 )

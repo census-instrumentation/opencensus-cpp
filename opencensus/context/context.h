@@ -22,6 +22,9 @@
 #include "opencensus/trace/span.h"
 
 namespace opencensus {
+namespace tags {
+class WithTagMap;
+}  // namespace tags
 namespace trace {
 class WithSpan;
 }  // namespace trace
@@ -62,6 +65,7 @@ class Context {
 
   friend class ContextTestPeer;
   friend class WithContext;
+  friend class ::opencensus::tags::WithTagMap;
   friend class ::opencensus::trace::WithSpan;
 
   opencensus::tags::TagMap tags_;
