@@ -26,6 +26,7 @@ namespace tags {
 class WithTagMap;
 }  // namespace tags
 namespace trace {
+class ContextPeer;
 class WithSpan;
 }  // namespace trace
 namespace context {
@@ -66,6 +67,7 @@ class Context {
   friend class ContextTestPeer;
   friend class WithContext;
   friend class ::opencensus::tags::WithTagMap;
+  friend class ::opencensus::trace::ContextPeer;
   friend class ::opencensus::trace::WithSpan;
 
   opencensus::tags::TagMap tags_;
