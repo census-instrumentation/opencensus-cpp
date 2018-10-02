@@ -21,18 +21,8 @@
 #include "opencensus/trace/span.h"
 
 namespace opencensus {
-namespace context {
-class ContextTestPeer {
- public:
-  static const opencensus::trace::Span& CurrentSpan() {
-    return Context::InternalMutableCurrent()->span_;
-  }
-};
-}  // namespace context
 namespace trace {
 namespace {
-
-using opencensus::context::ContextTestPeer;
 
 void BM_WithSpanUnsampled(benchmark::State& state) {
   static ::opencensus::trace::NeverSampler sampler;
