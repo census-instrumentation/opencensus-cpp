@@ -93,6 +93,18 @@ cc_library(
 )
 
 cc_library(
+    name = "context_util",
+    srcs = ["internal/context_util.cc"],
+    hdrs = ["context_util.h"],
+    copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":trace",
+        "//opencensus/context",
+    ],
+)
+
+cc_library(
     name = "with_span",
     srcs = ["internal/with_span.cc"],
     hdrs = ["with_span.h"],
@@ -136,6 +148,19 @@ cc_test(
     deps = [
         ":trace",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "context_util_test",
+    srcs = ["internal/context_util_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":context_util",
+        ":trace",
+        ":with_span",
+        "//opencensus/context",
         "@com_google_googletest//:gtest_main",
     ],
 )
