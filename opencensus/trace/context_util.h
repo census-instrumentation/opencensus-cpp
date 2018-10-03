@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef OPENCENSUS_TRACE_FROM_CONTEXT_H_
-#define OPENCENSUS_TRACE_FROM_CONTEXT_H_
+#ifndef OPENCENSUS_TRACE_CONTEXT_UTIL_H_
+#define OPENCENSUS_TRACE_CONTEXT_UTIL_H_
 
 #include "opencensus/context/context.h"
 #include "opencensus/trace/span.h"
@@ -30,4 +30,4 @@ const Span& GetSpanFromContext(const opencensus::context::Context& ctx);
 }  // namespace trace
 }  // namespace opencensus
 
-#endif  // OPENCENSUS_TRACE_FROM_CONTEXT_H_
+#endif  // OPENCENSUS_TRACE_CONTEXT_UTIL_H_

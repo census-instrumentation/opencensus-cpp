@@ -93,9 +93,9 @@ cc_library(
 )
 
 cc_library(
-    name = "from_context",
-    srcs = ["internal/from_context.cc"],
-    hdrs = ["from_context.h"],
+    name = "context_util",
+    srcs = ["internal/context_util.cc"],
+    hdrs = ["context_util.h"],
     copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
     deps = [
@@ -153,11 +153,11 @@ cc_test(
 )
 
 cc_test(
-    name = "from_context_test",
-    srcs = ["internal/from_context_test.cc"],
+    name = "context_util_test",
+    srcs = ["internal/context_util_test.cc"],
     copts = TEST_COPTS,
     deps = [
-        ":from_context",
+        ":context_util",
         ":trace",
         ":with_span",
         "//opencensus/context",

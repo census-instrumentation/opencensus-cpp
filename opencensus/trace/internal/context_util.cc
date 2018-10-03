@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/trace/from_context.h"
+#include "opencensus/trace/context_util.h"
 
 #include "opencensus/context/context.h"
 #include "opencensus/trace/span.h"
