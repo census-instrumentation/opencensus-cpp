@@ -21,7 +21,7 @@
 namespace opencensus {
 namespace trace {
 
-// Returns the currently active Span.
+// Returns the Span from the current Context.
 const Span& GetCurrentSpan();
 
 // Returns the Span from the given Context.
