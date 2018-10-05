@@ -219,7 +219,7 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":trace",
-        "@com_google_absl//absl/synchronization",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

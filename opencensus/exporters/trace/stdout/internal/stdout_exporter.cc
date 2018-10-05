@@ -29,7 +29,7 @@ namespace {
 
 class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
  public:
-  Handler(std::ostream* stream) : stream_(stream) {}
+  explicit Handler(std::ostream* stream) : stream_(stream) {}
 
   void Export(const std::vector<::opencensus::trace::exporter::SpanData>& spans)
       override {

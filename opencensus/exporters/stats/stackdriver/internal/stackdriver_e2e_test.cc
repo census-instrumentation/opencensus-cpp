@@ -135,9 +135,8 @@ StackdriverE2eTest::RetrieveData(
     }
     if (response.next_page_token().empty()) {
       break;
-    } else {
-      request.set_page_token(response.next_page_token());
     }
+    request.set_page_token(response.next_page_token());
   }
   return data;
 }

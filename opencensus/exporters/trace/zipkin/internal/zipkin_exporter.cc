@@ -178,9 +178,7 @@ std::string GetIpAddressHelper(ZipkinExporterOptions::AddressFamily af_type,
                                ifaddrs* ifaddr_list) {
   for (ifaddrs* if_address = ifaddr_list; if_address != nullptr;
        if_address = if_address->ifa_next) {
-    if (if_address->ifa_addr == nullptr) {
-      continue;
-    }
+    if (if_address->ifa_addr == nullptr) continue;
     if (if_address->ifa_addr->sa_family == AF_INET) {
       if (af_type != ZipkinExporterOptions::AddressFamily::kIpv4) continue;
       char address[INET_ADDRSTRLEN];
@@ -189,10 +187,8 @@ std::string GetIpAddressHelper(ZipkinExporterOptions::AddressFamily af_type,
                       ->sin_addr),
                 address, INET_ADDRSTRLEN);
       std::string ipv4_address(address);
-      if (ipv4_address.compare(ipv4_loopback) == 0)
-        continue;
-      else
-        return ipv4_address;
+      if (ipv4_address.compare(ipv4_loopback) == 0) continue;
+      return ipv4_address;
     } else if (if_address->ifa_addr->sa_family == AF_INET6) {
       if (af_type != ZipkinExporterOptions::AddressFamily::kIpv6) continue;
       char address[INET6_ADDRSTRLEN];
@@ -201,10 +197,8 @@ std::string GetIpAddressHelper(ZipkinExporterOptions::AddressFamily af_type,
                       ->sin6_addr),
                 address, INET6_ADDRSTRLEN);
       std::string ipv6_address(address);
-      if (ipv6_address.compare(ipv6_loopback) == 0)
-        continue;
-      else
-        return ipv6_address;
+      if (ipv6_address.compare(ipv6_loopback) == 0) continue;
+      return ipv6_address;
     }
   }
 
@@ -233,7 +227,7 @@ class CurlEnv {
 
 // static
 CurlEnv* CurlEnv::Get() {
-  static CurlEnv* g_curl_env = new CurlEnv;
+  static auto* const g_curl_env = new CurlEnv;
   return g_curl_env;
 }
 
@@ -329,7 +323,7 @@ CURLcode CurlSendMessage(const uint8_t* data,
 class ZipkinExportHandler
     : public ::opencensus::trace::exporter::SpanExporter::Handler {
  public:
-  ZipkinExportHandler(const ZipkinExporterOptions& options)
+  explicit ZipkinExportHandler(const ZipkinExporterOptions& options)
       : options_(options) {}
 
   void Export(const std::vector<::opencensus::trace::exporter::SpanData>& spans)

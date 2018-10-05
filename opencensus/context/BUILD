@@ -36,6 +36,7 @@ cc_library(
     deps = [
         "//opencensus/tags",
         "//opencensus/trace",
+        "@com_google_absl//absl/strings",
     ],
 )
 
