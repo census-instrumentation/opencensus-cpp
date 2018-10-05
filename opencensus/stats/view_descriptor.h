@@ -15,10 +15,12 @@
 #ifndef OPENCENSUS_STATS_VIEW_DESCRIPTOR_H_
 #define OPENCENSUS_STATS_VIEW_DESCRIPTOR_H_
 
-#include <cstdlib>
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <vector>
 
+#include "absl/strings/string_view.h"
 #include "opencensus/stats/aggregation.h"
 #include "opencensus/stats/internal/aggregation_window.h"
 #include "opencensus/stats/measure_descriptor.h"

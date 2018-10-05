@@ -15,10 +15,8 @@
 #ifndef OPENCENSUS_STATS_RECORDING_H_
 #define OPENCENSUS_STATS_RECORDING_H_
 
-#include <cstdint>
 #include <initializer_list>
 
-#include "absl/strings/string_view.h"
 #include "opencensus/stats/measure.h"
 #include "opencensus/tags/tag_map.h"
 

@@ -15,7 +15,7 @@
 #ifndef OPENCENSUS_COMMON_INTERNAL_STRING_VECTOR_HASH_H_
 #define OPENCENSUS_COMMON_INTERNAL_STRING_VECTOR_HASH_H_
 
-#include <functional>
+#include <cstddef>
 #include <string>
 #include <vector>
 

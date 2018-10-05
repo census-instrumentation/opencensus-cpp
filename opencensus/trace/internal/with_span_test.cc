@@ -110,7 +110,7 @@ TEST(WithSpanTest, DisabledViaConditional) {
 #ifndef NDEBUG
 TEST(WithSpanDeathTest, DestructorOnWrongThread) {
   auto span = opencensus::trace::Span::StartSpan("MySpan");
-  EXPECT_DEATH_IF_SUPPORTED(
+  EXPECT_DEBUG_DEATH(
       {
         auto* ws = new opencensus::trace::WithSpan(span);
         std::thread t([ws]() {

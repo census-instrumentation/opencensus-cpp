@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <thread>  // NOLINT
+#ifndef OPENCENSUS_STATS_INTERNAL_STATS_EXPORTER_IMPL_H_
+#define OPENCENSUS_STATS_INTERNAL_STATS_EXPORTER_IMPL_H_
+
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -68,3 +71,5 @@ class StatsExporterImpl {
 
 }  // namespace stats
 }  // namespace opencensus
+
+#endif  // OPENCENSUS_STATS_INTERNAL_STATS_EXPORTER_IMPL_H_

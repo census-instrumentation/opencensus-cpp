@@ -17,7 +17,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "absl/time/clock.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "opencensus/stats/stats.h"

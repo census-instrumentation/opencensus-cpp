@@ -105,6 +105,7 @@ void SpanExporterImpl::ExportForTesting() {
     absl::MutexLock l(&span_mu_);
     std::swap(batch_, spans_);
   }
+  span_data_.reserve(batch_.size());
   for (const auto& span : batch_) {
     span_data_.emplace_back(span->ToSpanData());
   }

@@ -15,12 +15,11 @@
 #ifndef OPENCENSUS_COMMON_INTERNAL_RANDOM_H_
 #define OPENCENSUS_COMMON_INTERNAL_RANDOM_H_
 
+#include <cstddef>
 #include <cstdint>
-#include <cstring>
-#include <memory>
 #include <random>
-#include <vector>
 
+#include "absl/base/thread_annotations.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/time/clock.h"
 

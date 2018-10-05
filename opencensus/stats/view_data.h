@@ -15,6 +15,8 @@
 #ifndef OPENCENSUS_STATS_VIEW_DATA_H_
 #define OPENCENSUS_STATS_VIEW_DATA_H_
 
+#include <cstdint>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>

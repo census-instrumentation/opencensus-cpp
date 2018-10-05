@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/context/context.h"
-
 #include <functional>
 
 #include "benchmark/benchmark.h"
+#include "opencensus/context/context.h"
 
 namespace opencensus {
 namespace context {
