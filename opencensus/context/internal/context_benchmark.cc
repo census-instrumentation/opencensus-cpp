@@ -23,7 +23,7 @@ namespace context {
 namespace {
 
 void BM_ContextCurrent(benchmark::State& state) {
-  benchmark::DoNotOptimize(Context::Current()); // Force TLS initialization.
+  benchmark::DoNotOptimize(Context::Current());  // Force TLS initialization.
   for (auto _ : state) {
     benchmark::DoNotOptimize(Context::Current());
   }
@@ -41,7 +41,7 @@ BENCHMARK(BM_CopyDefaultContext);
 
 void BM_WrapDefaultContext(benchmark::State& state) {
   Context ctx = Context::Current();
-  std::function<void()> fn = [](){};
+  std::function<void()> fn = []() {};
   for (auto _ : state) {
     benchmark::DoNotOptimize(ctx.Wrap(fn));
   }
