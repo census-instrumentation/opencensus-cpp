@@ -25,7 +25,7 @@ namespace exporters {
 namespace trace {
 
 struct ZipkinExporterOptions {
-  explicit ZipkinExporterOptions(absl::string_view url) : url(url) {}
+  ZipkinExporterOptions(absl::string_view url) : url(url) {}
 
   // Uniform Resource Location for server that spans will be sent to.
   std::string url;
