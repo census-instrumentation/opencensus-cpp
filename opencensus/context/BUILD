@@ -61,3 +61,19 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+# Benchmarks
+# ========================================================================= #
+
+cc_binary(
+    name = "context_benchmark",
+    testonly = 1,
+    srcs = ["internal/context_benchmark.cc"],
+    copts = TEST_COPTS,
+    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
+    linkstatic = 1,
+    deps = [
+        ":context",
+        "@com_github_google_benchmark//:benchmark",
+    ],
+)
