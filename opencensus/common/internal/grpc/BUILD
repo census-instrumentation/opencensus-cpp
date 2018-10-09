@@ -40,6 +40,7 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":status",
+        "@com_github_grpc_grpc//:grpc++",
         "@com_google_googletest//:gtest_main",
     ],
 )

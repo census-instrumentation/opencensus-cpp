@@ -27,6 +27,7 @@ cc_library(
         "internal/aggregation_window.h",
         "internal/set_aggregation_window.h",
         "stats.h",
+        "stats_exporter.h",
     ],
     copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
@@ -116,6 +117,7 @@ cc_library(
     copts = DEFAULT_COPTS,
     deps = [
         ":core",
+        "//opencensus/tags",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
     ],
@@ -201,7 +203,7 @@ cc_test(
         ":core",
         ":recording",
         ":test_utils",
-        "@com_google_absl//absl/types:optional",
+        "//opencensus/tags",
         "@com_google_googletest//:gtest_main",
     ],
 )

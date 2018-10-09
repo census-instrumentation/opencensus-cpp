@@ -15,9 +15,9 @@
 #ifndef OPENCENSUS_COMMON_INTERNAL_STATS_OBJECT_H_
 #define OPENCENSUS_COMMON_INTERNAL_STATS_OBJECT_H_
 
-#include <math.h>
-#include <stddef.h>
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <limits>

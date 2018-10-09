@@ -54,6 +54,7 @@ cc_library(
     name = "string_vector_hash",
     hdrs = ["string_vector_hash.h"],
     copts = DEFAULT_COPTS,
+    deps = [":hash_mix"],
 )
 
 # Tests

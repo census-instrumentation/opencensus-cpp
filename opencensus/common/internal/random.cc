@@ -27,7 +27,7 @@ uint64_t Generator::Random64() {
 }
 
 Random* Random::GetRandom() {
-  static Random* global_random = new Random;
+  static auto* const global_random = new Random;
   return global_random;
 }
 
