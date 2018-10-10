@@ -24,10 +24,10 @@ before_install:
   # Skip format on OS X: it doesn't have clang-format by default, and has a different sed.
   - if \[ "$TRAVIS_OS_NAME" == "linux" \]; then
       if ! which buildifier >/dev/null; then
-        eval "$(gimme 1.11)" ;
-        go get -v github.com/bazelbuild/buildtools/buildifier ;
-      fi
-      tools/format.sh ;
+        eval "$(gimme 1.11)";
+        go get -v github.com/bazelbuild/buildtools/buildifier;
+      fi;
+      tools/format.sh;
     fi
   - wget https://github.com/bazelbuild/bazel/releases/download/0.17.1/bazel-0.17.1-installer-${BAZEL_OS}-x86_64.sh
   - chmod +x bazel-0.17.1-installer-${BAZEL_OS}-x86_64.sh
