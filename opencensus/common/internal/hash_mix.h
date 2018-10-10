@@ -29,7 +29,8 @@ class HashMix final {
   // Mixes in another *hashed* value.
   void Mix(std::size_t hash) {
     // A multiplier that has been found to provide good mixing.
-    constexpr std::size_t kMul = 0xdc3eb94af8ab4c93ULL;
+    constexpr std::size_t kMul =
+        static_cast<std::size_t>(0xdc3eb94af8ab4c93ULL);
     hash_ *= kMul;
     hash_ =
         ((hash << 19) | (hash >> (std::numeric_limits<size_t>::digits - 19))) +
