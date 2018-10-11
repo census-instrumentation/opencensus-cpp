@@ -42,6 +42,18 @@ cc_library(
 )
 
 cc_library(
+    name = "scoped_tags",
+    srcs = ["internal/scoped_tags.cc"],
+    hdrs = ["scoped_tags.h"],
+    copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":tags",
+        "//opencensus/context",
+    ],
+)
+
+cc_library(
     name = "with_tag_map",
     srcs = ["internal/with_tag_map.cc"],
     hdrs = ["with_tag_map.h"],
@@ -72,6 +84,18 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":tags",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "scoped_tags_test",
+    srcs = ["internal/scoped_tags_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":scoped_tags",
+        ":tags",
+        "//opencensus/context",
         "@com_google_googletest//:gtest_main",
     ],
 )
