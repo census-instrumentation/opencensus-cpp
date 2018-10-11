@@ -18,10 +18,7 @@
 #include <cstdlib>
 #include <deque>
 #include <iostream>
-#include <memory>
 #include <numeric>
-#include <random>
-#include <utility>
 
 #include "absl/strings/str_join.h"
 #include "absl/types/span.h"

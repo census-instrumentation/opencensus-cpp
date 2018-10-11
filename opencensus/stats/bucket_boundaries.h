@@ -15,7 +15,6 @@
 #ifndef OPENCENSUS_STATS_BUCKET_BOUNDARIES_H_
 #define OPENCENSUS_STATS_BUCKET_BOUNDARIES_H_
 
-#include <cstddef>
 #include <string>
 #include <utility>
 #include <vector>

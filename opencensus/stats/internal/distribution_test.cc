@@ -110,7 +110,7 @@ TEST(DistributionTest, ArbitrarySequence) {
                    *std::max_element(samples.begin(), samples.end()));
 }
 
-// As with stackdriver, non-finite values corrupt statistics.
+// As with Stackdriver, non-finite values corrupt statistics.
 TEST(DistributionTest, NaN) {
   BucketBoundaries buckets = BucketBoundaries::Explicit({});
   Distribution distribution = testing::TestUtils::MakeDistribution(&buckets);

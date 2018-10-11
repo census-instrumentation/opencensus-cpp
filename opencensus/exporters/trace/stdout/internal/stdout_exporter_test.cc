@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "opencensus/trace/exporter/span_exporter.h"
 #include "opencensus/trace/internal/local_span_store.h"
+#include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"
 
 namespace opencensus {

@@ -34,7 +34,9 @@ class Status final {
       : code_(code), message_(code == StatusCode::OK ? "" : message) {}
 
   Status(const Status&) = default;
+  Status(Status&&) = default;
   Status& operator=(const Status& x) = default;
+  Status& operator=(Status&& x) = default;
 
   // Returns true if the Status is OK.
   ABSL_MUST_USE_RESULT bool ok() const { return code_ == StatusCode::OK; }

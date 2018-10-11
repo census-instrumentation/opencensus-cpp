@@ -15,8 +15,11 @@
 #include "opencensus/exporters/stats/stdout/stdout_exporter.h"
 
 #include <cstdint>
-#include <functional>
 #include <iostream>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
@@ -30,7 +33,7 @@ namespace stats {
 
 namespace {
 
-// Functions to print data for different aggregation types.
+// Functions to format data for different aggregation types.
 std::string DataToString(double data) { return absl::StrCat(": ", data, "\n"); }
 std::string DataToString(int64_t data) {
   return absl::StrCat(": ", data, "\n");
@@ -47,7 +50,7 @@ std::string DataToString(const opencensus::stats::Distribution& data) {
 
 class Handler : public opencensus::stats::StatsExporter::Handler {
  public:
-  Handler(std::ostream* stream) : stream_(stream) {}
+  explicit Handler(std::ostream* stream) : stream_(stream) {}
 
   void ExportViewData(
       const std::vector<std::pair<opencensus::stats::ViewDescriptor,
@@ -91,7 +94,7 @@ void Handler::ExportViewDataImpl(
     const opencensus::stats::ViewDescriptor& descriptor, absl::Time start_time,
     absl::Time end_time,
     const opencensus::stats::ViewData::DataMap<DataValueT>& data) {
-  if (data.size() == 0) {
+  if (data.empty()) {
     *stream_ << absl::StrCat("No data for view \"", descriptor.name(),
                              "\" from ", absl::FormatTime(start_time), ".\n\n");
     return;

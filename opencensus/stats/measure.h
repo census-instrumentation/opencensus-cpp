@@ -15,9 +15,10 @@
 #ifndef OPENCENSUS_STATS_MEASURE_H_
 #define OPENCENSUS_STATS_MEASURE_H_
 
-#include "opencensus/stats/measure_descriptor.h"
-
 #include <cstdint>
+#include <type_traits>
+
+#include "opencensus/stats/measure_descriptor.h"
 
 namespace opencensus {
 namespace stats {

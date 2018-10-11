@@ -18,7 +18,7 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <thread>  // NOLINT
+#include <thread>
 #include <vector>
 
 #include "absl/base/thread_annotations.h"
@@ -32,7 +32,6 @@ namespace opencensus {
 namespace trace {
 
 class Span;
-class SpanExporterImpl;
 
 namespace exporter {
 

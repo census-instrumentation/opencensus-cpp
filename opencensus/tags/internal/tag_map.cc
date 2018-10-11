@@ -16,7 +16,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <functional>
 #include <initializer_list>
 #include <string>
 #include <utility>

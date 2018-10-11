@@ -14,8 +14,8 @@
 
 #include "opencensus/context/with_context.h"
 
-#include <iostream>
 #include <thread>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "opencensus/context/context.h"
@@ -45,7 +45,7 @@ TEST(WithContextTest, WithContextConditional) {
 #ifndef NDEBUG
 TEST(WithContextDeathTest, DestructorOnWrongThread) {
   opencensus::context::Context ctx = opencensus::context::Context::Current();
-  EXPECT_DEATH_IF_SUPPORTED(
+  EXPECT_DEBUG_DEATH(
       {
         auto* wc = new opencensus::context::WithContext(ctx);
         std::thread t([wc]() {

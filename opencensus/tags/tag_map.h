@@ -15,6 +15,7 @@
 #ifndef OPENCENSUS_TAGS_TAG_MAP_H_
 #define OPENCENSUS_TAGS_TAG_MAP_H_
 
+#include <cstddef>
 #include <initializer_list>
 #include <string>
 #include <utility>

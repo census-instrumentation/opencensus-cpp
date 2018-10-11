@@ -15,10 +15,7 @@
 #ifndef OPENCENSUS_STATS_STATS_EXPORTER_H_
 #define OPENCENSUS_STATS_STATS_EXPORTER_H_
 
-#include <cstdint>
-#include <functional>
 #include <memory>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 

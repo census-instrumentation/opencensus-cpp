@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <grpcpp/grpcpp.h>
+#include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"

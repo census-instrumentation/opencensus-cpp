@@ -15,6 +15,7 @@
 #ifndef OPENCENSUS_STATS_MEASURE_REGISTRY_H_
 #define OPENCENSUS_STATS_MEASURE_REGISTRY_H_
 
+#include "absl/strings/string_view.h"
 #include "opencensus/stats/measure.h"
 #include "opencensus/stats/measure_descriptor.h"
 

@@ -15,7 +15,7 @@
 #include "opencensus/stats/stats_exporter.h"
 #include "opencensus/stats/internal/stats_exporter_impl.h"
 
-#include <thread>  // NOLINT
+#include <thread>
 #include <utility>
 #include <vector>
 

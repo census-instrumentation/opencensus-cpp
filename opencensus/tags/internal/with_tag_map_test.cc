@@ -127,7 +127,7 @@ TEST(WithTagsTest, DisabledViaConditional) {
 TEST(WithTagsDeathTest, DestructorOnWrongThread) {
   const auto tags = Tags1();
 
-  EXPECT_DEATH_IF_SUPPORTED(
+  EXPECT_DEBUG_DEATH(
       {
         auto* wt = new opencensus::tags::WithTagMap(tags);
         std::thread t([wt]() {
