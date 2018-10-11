@@ -42,6 +42,18 @@ cc_library(
 )
 
 cc_library(
+    name = "context_util",
+    srcs = ["internal/context_util.cc"],
+    hdrs = ["context_util.h"],
+    copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":tags",
+        "//opencensus/context",
+    ],
+)
+
+cc_library(
     name = "with_tag_map",
     srcs = ["internal/with_tag_map.cc"],
     hdrs = ["with_tag_map.h"],
@@ -55,6 +67,19 @@ cc_library(
 
 # Tests
 # ========================================================================= #
+
+cc_test(
+    name = "context_util_test",
+    srcs = ["internal/context_util_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":context_util",
+        ":tags",
+        ":with_tag_map",
+        "//opencensus/context",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
 
 cc_test(
     name = "tag_key_test",
