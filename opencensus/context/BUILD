@@ -49,6 +49,10 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":context",
+        "//opencensus/tags:context_util",
+        "//opencensus/tags:with_tag_map",
+        "//opencensus/trace:context_util",
+        "//opencensus/trace:with_span",
         "@com_google_googletest//:gtest_main",
     ],
 )
