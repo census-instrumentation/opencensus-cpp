@@ -14,9 +14,18 @@
 
 #include "opencensus/context/context.h"
 
+#include <functional>
 #include <iostream>
 
 #include "gtest/gtest.h"
+#include "opencensus/tags/context_util.h"
+#include "opencensus/tags/tag_key.h"
+#include "opencensus/tags/tag_map.h"
+#include "opencensus/tags/with_tag_map.h"
+#include "opencensus/trace/context_util.h"
+#include "opencensus/trace/span.h"
+#include "opencensus/trace/span_context.h"
+#include "opencensus/trace/with_span.h"
 
 // Not in namespace ::opencensus::context in order to better reflect what user
 // code should look like.
@@ -28,32 +37,62 @@ void LogCurrentContext() {
   std::cout << "  current: " << s << "\n";
 }
 
-TEST(ContextTest, DefaultContext) { LogCurrentContext(); }
+void ExpectEmptyContext() {
+  EXPECT_TRUE(opencensus::tags::GetCurrentTagMap().tags().empty());
+  opencensus::trace::SpanContext zeroed_span_context;
+  EXPECT_EQ(zeroed_span_context, opencensus::trace::GetCurrentSpan().context());
+}
 
-void Callback1() {
-  std::cout << " inside function\n";
+opencensus::tags::TagMap ExampleTagMap() {
+  static const auto k1 = opencensus::tags::TagKey::Register("key1");
+  static const auto k2 = opencensus::tags::TagKey::Register("key2");
+  return opencensus::tags::TagMap({{k1, "v1"}, {k2, "v2"}});
+}
+
+TEST(ContextTest, DefaultContext) {
   LogCurrentContext();
+  ExpectEmptyContext();
+}
+
+void Callback1(const opencensus::trace::Span& expected_span) {
+  EXPECT_EQ(ExampleTagMap(), opencensus::tags::GetCurrentTagMap());
+  EXPECT_EQ(expected_span.context(),
+            opencensus::trace::GetCurrentSpan().context());
 }
 
 TEST(ContextTest, Wrap) {
-  std::function<void()> fn =
-      opencensus::context::Context::Current().Wrap(Callback1);
+  auto span = opencensus::trace::Span::StartSpan("MySpan");
+  std::function<void()> fn;
+  {
+    opencensus::tags::WithTagMap wt(ExampleTagMap());
+    opencensus::trace::WithSpan ws(span);
+    fn = opencensus::context::Context::Current().Wrap(
+        [span]() { Callback1(span); });
+  }
+  ExpectEmptyContext();
   fn();
+  span.End();
 }
 
 TEST(ContextTest, WrapDoesNotLeak) {
+  // Leak-sanitizer (part of ASAN) throws an error if this leaks.
+  auto span = opencensus::trace::Span::StartSpan("MySpan");
   {
-    std::function<void()> fn =
-        opencensus::context::Context::Current().Wrap(Callback1);
+    opencensus::tags::WithTagMap wt(ExampleTagMap());
+    opencensus::trace::WithSpan ws(span);
+    std::function<void()> fn = opencensus::context::Context::Current().Wrap(
+        [span]() { Callback1(span); });
   }
   // We never call fn().
+  span.End();
 }
 
 TEST(ContextTest, WrappedFnIsCopiable) {
-  std::function<void()> fn2;
+  std::function<void()> fn1, fn2;
   {
-    std::function<void()> fn1 =
-        opencensus::context::Context::Current().Wrap(Callback1);
+    opencensus::tags::WithTagMap wt(ExampleTagMap());
+    fn1 = opencensus::context::Context::Current().Wrap(
+        []() { Callback1(opencensus::trace::Span::BlankSpan()); });
     fn2 = fn1;
     fn1();
   }
