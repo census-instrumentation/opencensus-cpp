@@ -47,6 +47,7 @@ TagMap::TagMap(std::vector<std::pair<TagKey, std::string>> tags)
 void TagMap::Initialize() {
   std::sort(tags_.begin(), tags_.end());
 
+#ifndef NDEBUG
   auto compare_keys = [](const std::pair<TagKey, std::string>& a,
                          const std::pair<TagKey, std::string>& b) {
     return a.first == b.first;
@@ -54,6 +55,7 @@ void TagMap::Initialize() {
   assert(std::adjacent_find(tags_.begin(), tags_.end(), compare_keys) ==
              tags_.end() &&
          "Duplicate keys are not allowed in TagMap.");
+#endif
 
   std::hash<std::string> hasher;
   common::HashMix mixer;
