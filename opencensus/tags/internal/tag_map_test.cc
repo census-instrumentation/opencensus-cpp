@@ -104,6 +104,15 @@ TEST(TagMapTest, DebugStringContainsTags) {
   EXPECT_THAT(s, HasSubstr("value2"));
 }
 
+TEST(TagMapDeathTest, DuplicateKeysNotAllowed) {
+  TagKey k = TagKey::Register("k");
+  EXPECT_DEBUG_DEATH(
+      {
+        TagMap m({{k, "v1"}, {k, "v2"}});
+      },
+      "Duplicate keys are not allowed");
+}
+
 }  // namespace
 }  // namespace tags
 }  // namespace opencensus
