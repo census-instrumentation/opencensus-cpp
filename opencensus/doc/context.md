@@ -109,6 +109,11 @@ void RunMyOp(MyOperation* op) {
 }
 ```
 
+## Passing Context between threads
+
+New threads start with an empty context. Treat a new thread like running a
+callback and just `Wrap()` the function being run.
+
 ## Best Practices
 
 Always have the correct Context installed as the "current" Context.
