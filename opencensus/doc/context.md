@@ -9,14 +9,14 @@ Currently, the information that is held is:
 
 In future, this may be expanded.
 
-Each thread has a currently active Context. It's stored using thread-local
+Each thread has a currently active Context. It is stored using thread-local
 storage and can be retrieved with `Context::Current()`.
 
 Example:
 
 ```c++
-  std::cout << "The current context is: "
-            << Context::Current()::DebugString() << "n\";
+std::cout << "The current context is: "
+          << Context::Current()::DebugString() << "n\";
 ```
 
 ## Running under a different Context
@@ -80,7 +80,7 @@ void MyOpResume() {
 
 ## Capturing Context
 
-Prefer using `Wrap()`, but in cases where that's not possible, the current
+Prefer using `Wrap()`, but in cases where that is not possible, the current
 Context can be captured and installed later using `WithContext`.
 
 Example:
