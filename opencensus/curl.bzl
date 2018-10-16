@@ -185,10 +185,17 @@ LINUX_CURL_COPTS = [
 ]
 
 CURL_COPTS = select({
-    # TODO: Add in windows defines
     "//:windows": [
         # Disable everything else except HTTP protocol.
-        "-DHTTP_ONLY=1",
+        "/DHTTP_ONLY=1",
+        "/DCURL_STATICLIB",
+        "/DWIN32",
+        "/DBUILDING_LIBCURL",
+        "/DUSE_WIN32_IDN",
+        "/DWANT_IDN_PROTOTYPES",
+        "/DUSE_IPV6",
+        "/DUSE_WINDOWS_SSPI",
+        "/DUSE_SCHANNEL",
     ],
     "//:osx": BASE_CURL_COPTS,
     "//conditions:default": BASE_CURL_COPTS + LINUX_CURL_COPTS,
