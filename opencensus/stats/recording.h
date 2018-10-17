@@ -23,8 +23,8 @@
 namespace opencensus {
 namespace stats {
 
-// Records a list of Measurements under 'tags'. The recommended style is to
-// create Measurements as an initializer list, e.g.
+// Records a list of Measurements under the current Context's tags. The
+// recommended style is to create Measurements as an initializer list, e.g.:
 //
 //   Record({{measure_double, 2.5}, {measure_int, 1ll}});
 //
@@ -32,8 +32,14 @@ namespace stats {
 // integral values against MeasureInt64s, to prevent silent loss of precision.
 // If a record call fails to compile, ensure that all types match (using
 // static_cast to double or int64_t if necessary).
+void Record(std::initializer_list<Measurement> measurements);
+
+// Records a list of Measurements under the specified 'tags'. The current
+// Context's tags are ignored. e.g:
+//
+//   Record({{measure_double, 2.5}}, {{key, "value"}});
 void Record(std::initializer_list<Measurement> measurements,
-            opencensus::tags::TagMap tags = {});
+            opencensus::tags::TagMap tags);
 
 }  // namespace stats
 }  // namespace opencensus
