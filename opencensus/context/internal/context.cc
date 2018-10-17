@@ -22,6 +22,12 @@
 #include "opencensus/tags/tag_map.h"
 #include "opencensus/trace/span.h"
 
+#if defined(_MSC_VER)
+#define TLS __declspec(thread)
+#else
+#define TLS __thread
+#endif
+
 namespace opencensus {
 namespace context {
 
@@ -48,7 +54,7 @@ std::string Context::DebugString() const {
 
 // static
 Context* Context::InternalMutableCurrent() {
-  static __thread Context* thread_ctx = nullptr;
+  static TLS Context* thread_ctx = nullptr;
   if (thread_ctx == nullptr) thread_ctx = new Context;
   return thread_ctx;
 }

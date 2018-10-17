@@ -20,6 +20,8 @@
 #include "opencensus/stats/testing/test_utils.h"
 #include "opencensus/stats/view.h"
 #include "opencensus/tags/tag_key.h"
+#include "opencensus/tags/tag_map.h"
+#include "opencensus/tags/with_tag_map.h"
 
 namespace opencensus {
 namespace stats {
@@ -78,6 +80,33 @@ TEST_F(StatsManagerTest, Count) {
   Record({{FirstMeasure(), 2.0}, {FirstMeasure(), 3.0}});
   Record({{FirstMeasure(), 4.0}},
          {{key1_, "value1"}, {key2_, "value2"}, {key3_, "value3"}});
+  testing::TestUtils::Flush();
+  const opencensus::stats::ViewData data = view.GetData();
+  EXPECT_THAT(
+      data.int_data(),
+      ::testing::UnorderedElementsAre(
+          ::testing::Pair(::testing::ElementsAre("", ""), 2.0),
+          ::testing::Pair(::testing::ElementsAre("value1", "value2"), 1.0)));
+}
+
+TEST_F(StatsManagerTest, CountTagsFromContext) {
+  ViewDescriptor view_descriptor = ViewDescriptor()
+                                       .set_measure(kFirstMeasureId)
+                                       .set_name("count")
+                                       .set_aggregation(Aggregation::Count())
+                                       .add_column(key1_)
+                                       .add_column(key2_);
+  View view(view_descriptor);
+  ASSERT_EQ(ViewData::Type::kInt64, view.GetData().type());
+  EXPECT_TRUE(view.GetData().int_data().empty());
+
+  opencensus::tags::TagMap tags(
+      {{key1_, "value1"}, {key2_, "value2"}, {key3_, "value3"}});
+  Record({{FirstMeasure(), 2.0}, {FirstMeasure(), 3.0}});
+  {
+    opencensus::tags::WithTagMap wt(tags);
+    Record({{FirstMeasure(), 4.0}});
+  }
   testing::TestUtils::Flush();
   const opencensus::stats::ViewData data = view.GetData();
   EXPECT_THAT(

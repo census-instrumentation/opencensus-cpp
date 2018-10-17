@@ -14,13 +14,20 @@
 
 #include "opencensus/stats/recording.h"
 
-#include "absl/time/clock.h"
+#include <initializer_list>
+
 #include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/measure.h"
+#include "opencensus/tags/context_util.h"
 #include "opencensus/tags/tag_map.h"
 
 namespace opencensus {
 namespace stats {
+
+void Record(std::initializer_list<Measurement> measurements) {
+  DeltaProducer::Get()->Record(measurements,
+                               opencensus::tags::GetCurrentTagMap());
+}
 
 void Record(std::initializer_list<Measurement> measurements,
             opencensus::tags::TagMap tags) {

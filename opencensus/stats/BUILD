@@ -118,6 +118,7 @@ cc_library(
     deps = [
         ":core",
         "//opencensus/tags",
+        "//opencensus/tags:context_util",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
     ],
@@ -204,6 +205,7 @@ cc_test(
         ":recording",
         ":test_utils",
         "//opencensus/tags",
+        "//opencensus/tags:with_tag_map",
         "@com_google_googletest//:gtest_main",
     ],
 )

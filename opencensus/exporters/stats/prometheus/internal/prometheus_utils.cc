@@ -26,7 +26,6 @@
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
 #include "opencensus/stats/stats.h"
-#include "prometheus/metric.h"
 #include "prometheus/metric_type.h"
 
 namespace opencensus {
