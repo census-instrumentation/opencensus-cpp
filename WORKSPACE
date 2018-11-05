@@ -37,6 +37,62 @@ http_archive(
     urls = ["https://github.com/google/benchmark/archive/master.zip"],
 )
 
+# gRPC and Prometheus supply different BUILD files for zlib.
+# Override here due to https://github.com/jupp0r/prometheus-cpp/issues/211
+new_http_archive(
+    name = "com_github_madler_zlib",
+    build_file_content = """
+# For gRPC
+cc_library(
+    name = "z",
+    srcs = [
+        "adler32.c",
+        "compress.c",
+        "crc32.c",
+        "deflate.c",
+        "infback.c",
+        "inffast.c",
+        "inflate.c",
+        "inftrees.c",
+        "trees.c",
+        "uncompr.c",
+        "zutil.c",
+    ],
+    hdrs = [
+        "crc32.h",
+        "deflate.h",
+        "gzguts.h",
+        "inffast.h",
+        "inffixed.h",
+        "inflate.h",
+        "inftrees.h",
+        "trees.h",
+        "zconf.h",
+        "zlib.h",
+        "zutil.h",
+    ],
+    includes = [
+        ".",
+    ],
+    linkstatic = 1,
+    visibility = [
+        "//visibility:public",
+    ],
+)
+
+# For prometheus
+cc_library(
+    name = "zlib",
+    deps = [":z"],
+    hdrs = glob(["*.h"]),
+    includes = ["."],
+    visibility = ["//visibility:public"],
+)
+""",
+    strip_prefix = "zlib-master",
+    urls = ["https://github.com/madler/zlib/archive/master.zip"],
+)
+
 # gRPC
 http_archive(
     name = "com_github_grpc_grpc",
