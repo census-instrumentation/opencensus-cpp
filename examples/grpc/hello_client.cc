@@ -73,6 +73,8 @@ int main(int argc, char **argv) {
   {
     // The client Span ends when ctx falls out of scope.
     grpc::ClientContext ctx;
+    ctx.AddMetadata("key1", "value1");
+
     HelloRequest request;
     HelloReply reply;
     request.set_name(name);
