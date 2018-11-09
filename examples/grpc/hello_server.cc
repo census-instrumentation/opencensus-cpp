@@ -61,7 +61,7 @@ opencensus::tags::TagKey CaseKey() {
   return key;
 }
 
-absl::string_view sv(const ::grpc::string_ref &s) {
+absl::string_view ToStringView(const ::grpc::string_ref &s) {
   return absl::string_view(s.data(), s.size());
 }
 
@@ -97,8 +97,9 @@ class HelloServiceImpl final : public HelloService::Service {
     std::cerr << "  Metadata:\n";
     auto metadata = context->client_metadata();
     for (const auto &mdpair : metadata) {
-      std::cerr << "    \"" << absl::CEscape(sv(mdpair.first)) << "\": \""
-                << absl::CEscape(sv(mdpair.second)) << "\"\n";
+      std::cerr << "    \"" << absl::CEscape(ToStringView(mdpair.first))
+                << "\": \"" << absl::CEscape(ToStringView(mdpair.second))
+                << "\"\n";
     }
     std::cerr << "  (end of metadata)\n";
     return grpc::Status::OK;
