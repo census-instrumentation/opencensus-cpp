@@ -22,6 +22,7 @@
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/opencensus.h>
 
+#include "absl/strings/escaping.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
 #include "examples/grpc/hello.grpc.pb.h"
@@ -60,6 +61,10 @@ opencensus::tags::TagKey CaseKey() {
   return key;
 }
 
+absl::string_view ToStringView(const ::grpc::string_ref &s) {
+  return absl::string_view(s.data(), s.size());
+}
+
 // A helper function that performs some work in its own Span.
 void PerformWork(opencensus::trace::Span *parent) {
   auto span = opencensus::trace::Span::StartSpan("internal_work", parent);
@@ -87,7 +92,16 @@ class HelloServiceImpl final : public HelloService::Service {
     opencensus::stats::Record(
         {{LettersMeasure(), request->name().size()}},
         {{CaseKey(), isupper(request->name()[0]) ? "upper" : "lower"}});
+    // Give feedback on stderr.
     std::cerr << "SayHello RPC handled.\n";
+    std::cerr << "  Metadata:\n";
+    auto metadata = context->client_metadata();
+    for (const auto &mdpair : metadata) {
+      std::cerr << "    \"" << absl::CEscape(ToStringView(mdpair.first))
+                << "\": \"" << absl::CEscape(ToStringView(mdpair.second))
+                << "\"\n";
+    }
+    std::cerr << "  (end of metadata)\n";
     return grpc::Status::OK;
   }
 };
