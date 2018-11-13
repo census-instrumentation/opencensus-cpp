@@ -64,6 +64,7 @@ http_archive(
     name = "com_github_jupp0r_prometheus_cpp",
     strip_prefix = "prometheus-cpp-master",
     urls = ["https://github.com/jupp0r/prometheus-cpp/archive/master.zip"],
+    repo_mapping = {"@net_zlib_zlib": "@com_github_madler_zlib"},
 )
 
 load("@com_github_jupp0r_prometheus_cpp//:repositories.bzl", "load_civetweb")
