@@ -34,6 +34,8 @@ cc_library(
     deps = [
         ":core",
         ":recording",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
     ],
 )
 
