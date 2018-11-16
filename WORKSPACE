@@ -62,6 +62,7 @@ bind(
 # Prometheus client library - used by Prometheus exporter.
 http_archive(
     name = "com_github_jupp0r_prometheus_cpp",
+    repo_mapping = {"@net_zlib_zlib": "@com_github_madler_zlib"},
     strip_prefix = "prometheus-cpp-master",
     urls = ["https://github.com/jupp0r/prometheus-cpp/archive/master.zip"],
 )

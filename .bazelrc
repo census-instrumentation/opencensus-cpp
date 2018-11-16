@@ -4,6 +4,8 @@
 # Needed by gRPC to build on some platforms.
 build --copt -DGRPC_BAZEL_BUILD
 
+common --experimental_enable_repo_mapping
+
 # --config=asan : Address Sanitizer.
 common:asan --copt -fsanitize=address
 common:asan --copt -DADDRESS_SANITIZER
