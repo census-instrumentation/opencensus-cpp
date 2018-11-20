@@ -14,53 +14,49 @@
 # limitations under the License.
 # ~~~
 
-add_library(tags internal/tag_key.cc internal/tag_map.cc)
+opencensus_lib(tags
+               PUBLIC
+               SRCS
+               internal/tag_key.cc
+               internal/tag_map.cc
+               DEPS
+               absl::strings
+               common_hash_mix
+               absl::base
+               absl::synchronization)
 
-add_library(${PROJECT_NAME}::tags ALIAS tags)
+opencensus_lib(tags_context_util
+               PUBLIC
+               SRCS
+               internal/context_util.cc
+               DEPS
+               tags
+               context)
 
-target_link_libraries(tags
-                      PUBLIC absl::strings
-                      PRIVATE common.hash_mix absl::base absl::synchronization)
+opencensus_lib(tags_with_tag_map
+               PUBLIC
+               SRCS
+               internal/with_tag_map.cc
+               DEPS
+               tags
+               context
+               absl::strings)
 
-target_include_directories(tags PUBLIC ${OPENCENSUS_INCLUDE_DIR})
-
-# ----------------------------------------------------------------------
-
-add_library(tags.context_util internal/context_util.cc)
-
-add_library(${PROJECT_NAME}::tags.context_util ALIAS tags.context_util)
-
-target_link_libraries(tags.context_util PRIVATE tags context)
-
-target_include_directories(tags.context_util PUBLIC ${OPENCENSUS_INCLUDE_DIR})
-
-# ----------------------------------------------------------------------
-
-add_library(tags.with_tag_map internal/with_tag_map.cc)
-
-add_library(${PROJECT_NAME}::tags.with_tag_map ALIAS tags.with_tag_map)
-
-target_link_libraries(tags.with_tag_map PRIVATE tags context absl::strings)
-
-target_include_directories(tags.with_tag_map PUBLIC ${OPENCENSUS_INCLUDE_DIR})
-
-# ----------------------------------------------------------------------
-
-opencensus_test(tags.context_util_test
+opencensus_test(tags_context_util_test
                 internal/context_util_test.cc
                 tags
-                tags.context_util
-                tags.with_tag_map
+                tags_context_util
+                tags_with_tag_map
                 context)
 
-opencensus_test(tags.tag_key_test internal/tag_key_test.cc tags)
+opencensus_test(tags_tag_key_test internal/tag_key_test.cc tags)
 
-opencensus_test(tags.tag_map_test internal/tag_map_test.cc tags gmock)
+opencensus_test(tags_tag_map_test internal/tag_map_test.cc tags)
 
-opencensus_test(tags.with_tag_map_test
+opencensus_test(tags_with_tag_map_test
                 internal/with_tag_map_test.cc
                 tags
-                tags.with_tag_map
+                tags_with_tag_map
                 context)
 
 # TODO: benchmarks

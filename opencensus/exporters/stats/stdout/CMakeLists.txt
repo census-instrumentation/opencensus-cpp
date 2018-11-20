@@ -14,22 +14,19 @@
 # limitations under the License.
 # ~~~
 
-add_library(exporters.stats.stdout_exporter internal/stdout_exporter.cc)
-add_library(${PROJECT_NAME}::exporters.stats.stdout_exporter ALIAS
-            exporters.stats.stdout_exporter)
+opencensus_lib(exporters_stats_stdout
+               PUBLIC
+               SRCS
+               internal/stdout_exporter.cc
+               DEPS
+               stats
+               absl::memory
+               absl::strings
+               absl::time)
 
-target_link_libraries(exporters.stats.stdout_exporter
-                      PRIVATE stats
-                              absl::memory
-                              absl::strings
-                              absl::time)
-
-# ----------------------------------------------------------------------
-
-opencensus_test(exporters.stats.stdout_exporter_test
+opencensus_test(exporters_stats_stdout_test
                 internal/stdout_exporter_test.cc
-                exporters.stats.stdout_exporter
+                exporters_stats_stdout
                 stats
-                stats.test_utils
-                absl::time
-                gmock)
+                stats_test_utils
+                absl::time)

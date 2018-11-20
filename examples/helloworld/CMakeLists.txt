@@ -14,11 +14,13 @@
 # limitations under the License.
 # ~~~
 
-add_executable(helloworld helloworld.cc)
-target_link_libraries(helloworld
+find_package(Threads REQUIRED)
+
+add_executable(opencensus_examples_helloworld helloworld.cc)
+target_link_libraries(opencensus_examples_helloworld
+                      absl::strings
+                      opencensus-cpp::exporters_stats_stdout
+                      opencensus-cpp::exporters_trace_stdout
                       opencensus-cpp::stats
                       opencensus-cpp::trace
-                      absl::strings
-                      opencensus-cpp::exporters.stats.stdout_exporter
-                      opencensus-cpp::exporters.trace.stdout_exporter
                       Threads::Threads)

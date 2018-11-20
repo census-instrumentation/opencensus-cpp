@@ -11,3 +11,12 @@ Still TODO for CMake support:
 - Exporters other than stdout.
 - CI (Travis) support.
 - No shared library for now.
+
+Quickstart:
+
+```shell
+cmake -H. -Bbuild
+cmake --build build
+cmake --build build --target test
+./build/examples/helloworld/opencensus_examples_helloworld
+```

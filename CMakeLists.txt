@@ -24,9 +24,10 @@ if(CCACHE_PROGRAM)
 endif()
 
 project(opencensus-cpp VERSION 0.3.0 LANGUAGES CXX)
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-find_package(Threads REQUIRED)
+
+set(CMAKE_CXX_STANDARD 11)
 set(OPENCENSUS_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
 include(CTest) # Defines option BUILD_TESTING.
 enable_testing()
 
@@ -37,4 +38,6 @@ add_subdirectory(cmake)
 add_subdirectory(opencensus)
 
 # Example code.
-add_subdirectory(examples)
+if(BUILD_TESTING)
+  add_subdirectory(examples)
+endif()

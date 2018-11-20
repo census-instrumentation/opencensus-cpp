@@ -14,128 +14,104 @@
 # limitations under the License.
 # ~~~
 
-add_library(stats INTERFACE)
+opencensus_lib(stats PUBLIC DEPS stats_core stats_recording)
 
-add_library(${PROJECT_NAME}::stats ALIAS stats)
+opencensus_lib(stats_test_utils
+               PUBLIC
+               SRCS
+               testing/test_utils.cc
+               DEPS
+               stats_core
+               absl::memory
+               absl::time)
 
-target_link_libraries(stats INTERFACE stats.core stats.recording)
+opencensus_lib(stats_core
+               SRCS
+               internal/aggregation.cc
+               internal/aggregation_window.cc
+               internal/bucket_boundaries.cc
+               internal/delta_producer.cc
+               internal/distribution.cc
+               internal/measure.cc
+               internal/measure_data.cc
+               internal/measure_descriptor.cc
+               internal/measure_registry.cc
+               internal/measure_registry_impl.cc
+               internal/set_aggregation_window.cc
+               internal/stats_exporter.cc
+               internal/stats_manager.cc
+               internal/view.cc
+               internal/view_data.cc
+               internal/view_data_impl.cc
+               internal/view_descriptor.cc
+               DEPS
+               absl::base
+               common_stats_object
+               common_string_vector_hash
+               tags
+               absl::memory
+               absl::strings
+               absl::synchronization
+               absl::time
+               absl::optional
+               absl::span)
 
-target_include_directories(stats INTERFACE ${OPENCENSUS_INCLUDE_DIR})
-
-# ----------------------------------------------------------------------
-
-add_library(stats.test_utils testing/test_utils.cc)
-
-add_library(${PROJECT_NAME}::stats.test_utils ALIAS stats.test_utils)
-
-target_link_libraries(stats.test_utils
-                      PRIVATE stats.core absl::memory absl::time)
-
-target_include_directories(stats.test_utils PUBLIC ${OPENCENSUS_INCLUDE_DIR})
-
-# ----------------------------------------------------------------------
-
-add_library(stats.core
-            internal/aggregation.cc
-            internal/aggregation_window.cc
-            internal/bucket_boundaries.cc
-            internal/delta_producer.cc
-            internal/distribution.cc
-            internal/measure.cc
-            internal/measure_data.cc
-            internal/measure_descriptor.cc
-            internal/measure_registry.cc
-            internal/measure_registry_impl.cc
-            internal/set_aggregation_window.cc
-            internal/stats_exporter.cc
-            internal/stats_manager.cc
-            internal/view.cc
-            internal/view_data.cc
-            internal/view_data_impl.cc
-            internal/view_descriptor.cc)
-
-target_link_libraries(stats.core
-                      PUBLIC absl::base
-                      PRIVATE common.stats_object
-                              common.string_vector_hash
-                              tags
-                              absl::memory
-                              absl::strings
-                              absl::synchronization
-                              absl::time
-                              absl::optional
-                              absl::span)
-
-target_include_directories(stats.core PUBLIC ${OPENCENSUS_INCLUDE_DIR})
-
-# ----------------------------------------------------------------------
-
-add_library(stats.recording internal/recording.cc)
-
-target_link_libraries(stats.recording
-                      PRIVATE stats.core
-                              tags
-                              tags.context_util
-                              absl::strings
-                              absl::time)
-
-target_include_directories(stats.recording PUBLIC ${OPENCENSUS_INCLUDE_DIR})
+opencensus_lib(stats_recording
+               SRCS
+               internal/recording.cc
+               DEPS
+               stats_core
+               tags
+               tags_context_util
+               absl::strings
+               absl::time)
 
 # ----------------------------------------------------------------------
 # Tests
 # ----------------------------------------------------------------------
 
-opencensus_test(stats.debug_string_test
+opencensus_test(stats_debug_string_test
                 internal/debug_string_test.cc
-                stats.core
-                absl::time
-                gmock)
+                stats_core
+                absl::time)
 
-opencensus_test(stats.distribution_test
+opencensus_test(stats_distribution_test
                 internal/distribution_test.cc
-                stats.core
-                stats.test_utils
-                gmock)
+                stats_core
+                stats_test_utils)
 
-opencensus_test(stats.bucket_boundaries_test
-                internal/bucket_boundaries_test.cc
-                stats.core
-                gmock)
+opencensus_test(stats_bucket_boundaries_test internal/bucket_boundaries_test.cc
+                stats_core)
 
-opencensus_test(stats.measure_data_test
+opencensus_test(stats_measure_data_test
                 internal/measure_data_test.cc
-                stats.core
-                stats.test_utils
-                absl::span
-                gmock)
+                stats_core
+                stats_test_utils
+                absl::span)
 
-opencensus_test(stats.measure_registry_test
+opencensus_test(stats_measure_registry_test
                 internal/measure_registry_test.cc
-                stats.core
-                absl::strings
-                gmock)
+                stats_core
+                absl::strings)
 
-opencensus_test(stats.stats_exporter_test
+opencensus_test(stats_stats_exporter_test
                 internal/stats_exporter_test.cc
-                stats.core
-                stats.recording
+                stats_core
+                stats_recording
                 absl::memory
-                absl::time
-                gmock)
+                absl::time)
 
-opencensus_test(stats.stats_manager_test
+opencensus_test(stats_stats_manager_test
                 internal/stats_manager_test.cc
-                stats.core
-                stats.recording
-                stats.test_utils
+                stats_core
+                stats_recording
+                stats_test_utils
                 tags
-                tags.with_tag_map
-                gmock)
+                tags_with_tag_map)
 
-opencensus_test(stats.view_data_impl_test
+opencensus_test(stats_view_data_impl_test
                 internal/view_data_impl_test.cc
-                stats.core
-                absl::time
-                gmock)
+                stats_core
+                absl::time)
 
 # TODO: benchmarks

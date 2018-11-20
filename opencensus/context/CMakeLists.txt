@@ -14,26 +14,23 @@
 # limitations under the License.
 # ~~~
 
-add_library(context internal/context.cc internal/with_context.cc)
+opencensus_lib(context
+               PUBLIC
+               SRCS
+               internal/context.cc
+               internal/with_context.cc
+               DEPS
+               tags
+               trace)
 
-add_library(${PROJECT_NAME}::context ALIAS context)
-
-target_link_libraries(context PUBLIC absl::strings PRIVATE tags trace)
-
-target_include_directories(context PUBLIC ${OPENCENSUS_INCLUDE_DIR})
-
-# ----------------------------------------------------------------------
-
-opencensus_test(context.context_test
+opencensus_test(context_context_test
                 internal/context_test.cc
                 context
-                tags.context_util
-                tags.with_tag_map
-                trace.context_util
-                trace.with_span)
+                tags_context_util
+                tags_with_tag_map
+                trace_context_util
+                trace_with_span)
 
-opencensus_test(context.with_context_test internal/with_context_test.cc context)
-
-# ----------------------------------------------------------------------
+opencensus_test(context_with_context_test internal/with_context_test.cc context)
 
 # TODO: context_benchmark

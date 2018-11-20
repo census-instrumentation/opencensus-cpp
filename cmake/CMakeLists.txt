@@ -14,12 +14,54 @@
 # limitations under the License.
 # ~~~
 
-cmake_minimum_required(VERSION 3.5)
+function(prepend_opencensus OUT DEPS)
+  set(_DEPS "")
+  foreach(dep ${DEPS})
+    if("${dep}" MATCHES "::")
+      list(APPEND _DEPS "${dep}")
+    else()
+      list(APPEND _DEPS "opencensus_${dep}")
+    endif()
+  endforeach()
+  set(${OUT} ${_DEPS} PARENT_SCOPE)
+endfunction()
+
+# Helper function like bazel's cc_test. Usage: opencensus_test(trace_some_test
+# internal/some_test.cc dep1 dep2...)
+function(opencensus_test NAME SRC)
+  if(BUILD_TESTING)
+    set(_NAME "opencensus_${NAME}")
+    add_executable(${_NAME} ${SRC})
+    prepend_opencensus(DEPS "${ARGN}")
+    target_link_libraries(${_NAME} "${DEPS}" gmock gtest_main)
+    add_test(NAME ${_NAME} COMMAND ${_NAME})
+  endif()
+endfunction()
+
+# Helper function like bazel's cc_library.  Libraries are namespaced as
+# opencensus_* and public libraries are also aliased as opencensus-cpp::*.
+function(opencensus_lib NAME)
+  cmake_parse_arguments(ARG "PUBLIC" "" "SRCS;DEPS" ${ARGN})
+  set(_NAME "opencensus_${NAME}")
+  prepend_opencensus(ARG_DEPS "${ARG_DEPS}")
+  if(ARG_SRCS)
+    add_library(${_NAME} ${ARG_SRCS})
+    target_link_libraries(${_NAME} PUBLIC ${ARG_DEPS})
+    target_include_directories(${_NAME} PUBLIC ${OPENCENSUS_INCLUDE_DIR})
+  else()
+    add_library(${_NAME} INTERFACE)
+    target_link_libraries(${_NAME} INTERFACE ${ARG_DEPS})
+    target_include_directories(${_NAME} INTERFACE ${OPENCENSUS_INCLUDE_DIR})
+  endif()
+  if(ARG_PUBLIC)
+    add_library(${PROJECT_NAME}::${NAME} ALIAS ${_NAME})
+  endif()
+endfunction()
 
 # ----------------------------------------------------------------------
 if(BUILD_TESTING)
   if(NOT TARGET gtest_main)
-    message(STATUS "Dependency: googletest")
+    message(STATUS "Dependency: googletest (BUILD_TESTING=${BUILD_TESTING})")
 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/googletest.CMakeLists.txt
                    ${CMAKE_BINARY_DIR}/googletest-download/CMakeLists.txt)
@@ -40,16 +82,6 @@ if(BUILD_TESTING)
                      ${CMAKE_BINARY_DIR}/googletest-build EXCLUDE_FROM_ALL)
   endif()
 endif()
-
-# Helper function like bazel's cc_test. Usage:
-# opencensus_test(dir_name.test_name internal/test_source.cc dep1 dep2)
-function(opencensus_test NAME SRC)
-  if(BUILD_TESTING)
-    add_executable(${NAME} ${SRC})
-    target_link_libraries(${NAME} ${ARGN} gtest_main)
-    add_test(NAME ${NAME} COMMAND ${NAME})
-  endif()
-endfunction()
 
 # ----------------------------------------------------------------------
 # Load abseil second, it depends on googletest.

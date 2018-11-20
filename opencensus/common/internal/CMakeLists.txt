@@ -14,41 +14,26 @@
 # limitations under the License.
 # ~~~
 
-add_library(common.hash_mix INTERFACE)
-target_include_directories(common.hash_mix INTERFACE ${OPENCENSUS_INCLUDE_DIR})
+opencensus_lib(common_hash_mix)
 
-# ----------------------------------------------------------------------
+opencensus_lib(common_random
+               SRCS
+               random.cc
+               DEPS
+               absl::base
+               absl::synchronization
+               absl::time)
 
-add_library(common.random_lib random.cc)
+opencensus_lib(common_stats_object DEPS absl::time)
 
-target_link_libraries(common.random_lib
-                      PUBLIC absl::base
-                      PRIVATE absl::synchronization absl::time)
+opencensus_lib(common_string_vector_hash)
 
-target_include_directories(common.random_lib PUBLIC ${OPENCENSUS_INCLUDE_DIR})
+opencensus_test(common_random_test random_test.cc common_random)
 
-# ----------------------------------------------------------------------
-
-add_library(common.stats_object INTERFACE)
-target_include_directories(common.stats_object
-                           INTERFACE ${OPENCENSUS_INCLUDE_DIR})
-target_link_libraries(common.stats_object INTERFACE absl::time)
-
-# ----------------------------------------------------------------------
-
-add_library(common.string_vector_hash INTERFACE)
-target_include_directories(common.string_vector_hash
-                           INTERFACE ${OPENCENSUS_INCLUDE_DIR})
-
-# ----------------------------------------------------------------------
-
-opencensus_test(common.random_test random_test.cc common.random_lib)
-
-opencensus_test(common.stats_object_test
+opencensus_test(common_stats_object_test
                 stats_object_test.cc
-                common.stats_object
+                common_stats_object
                 absl::strings
-                absl::span
-                gmock)
+                absl::span)
 
 # TODO: random_benchmark

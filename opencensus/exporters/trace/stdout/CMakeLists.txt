@@ -14,18 +14,17 @@
 # limitations under the License.
 # ~~~
 
-add_library(exporters.trace.stdout_exporter internal/stdout_exporter.cc)
-add_library(${PROJECT_NAME}::exporters.trace.stdout_exporter ALIAS
-            exporters.trace.stdout_exporter)
+opencensus_lib(exporters_trace_stdout
+               PUBLIC
+               SRCS
+               internal/stdout_exporter.cc
+               DEPS
+               trace
+               absl::base
+               absl::memory)
 
-target_link_libraries(exporters.trace.stdout_exporter
-                      PRIVATE trace absl::base absl::memory)
-
-# ----------------------------------------------------------------------
-
-opencensus_test(exporters.trace.stdout_exporter_test
+opencensus_test(exporters_trace_stdout_test
                 internal/stdout_exporter_test.cc
-                exporters.trace.stdout_exporter
+                exporters_trace_stdout
                 trace
-                absl::time
-                gmock)
+                absl::time)

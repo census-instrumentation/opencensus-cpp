@@ -15,6 +15,3 @@
 # ~~~
 
 add_subdirectory(internal)
-
-add_library(common.version INTERFACE)
-target_include_directories(common.version INTERFACE ${OPENCENSUS_INCLUDE_DIR})
