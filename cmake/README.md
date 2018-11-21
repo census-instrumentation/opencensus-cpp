@@ -1,3 +1,5 @@
+# Experimental CMake support
+
 The files in this directory are mostly for dealing with dependencies.
 
 We use
@@ -12,11 +14,14 @@ Still TODO for CMake support:
 - CI (Travis) support.
 - No shared library for now.
 
-Quickstart:
+## Quickstart:
 
 ```shell
-cmake -H. -Bbuild
-cmake --build build
-cmake --build build --target test
-./build/examples/helloworld/opencensus_examples_helloworld
+cmake -H. -B.build
+cmake --build .build
+cmake --build .build --target test
+./.build/examples/helloworld/opencensus_examples_helloworld
 ```
+
+Using `.build` as the build dir so that it doesn't collide with the uppercase
+BUILD file on Windows.

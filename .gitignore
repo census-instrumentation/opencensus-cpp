@@ -22,4 +22,4 @@ bin
 TAGS
 
 /bazel-*
-/build
+/.build
