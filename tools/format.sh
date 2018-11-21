@@ -39,7 +39,7 @@ else
 fi
 if which cmake-format >/dev/null; then
   echo "Running cmake-format $(cmake-format --version 2>&1)."
-  cmake-format -i $($FIND -name CMakeLists.txt -o -name '*.cmake' -print)
+  cmake-format -i $($FIND -name '*CMakeLists.txt' -o -name '*.cmake' -print)
 else
   echo "Can't find cmake-format. It can be installed with:"
   echo "  pip install --user cmake_format"
