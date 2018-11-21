@@ -32,13 +32,14 @@ set(OPENCENSUS_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 include(CTest) # Defines option BUILD_TESTING.
 enable_testing()
 
-# Dependencies.
-add_subdirectory(cmake)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+include(OpenCensusDeps)
+include(OpenCensusHelpers)
 
 # OpenCensus code.
 add_subdirectory(opencensus)
 
-# Example code.
+# Example code only if testing is enabled.
 if(BUILD_TESTING)
   add_subdirectory(examples)
 endif()
