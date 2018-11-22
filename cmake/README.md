@@ -19,7 +19,7 @@ Still TODO for CMake support:
 ```shell
 cmake -H. -B.build
 cmake --build .build
-cmake --build .build --target test
+(cd .build && ctest --output-on-failure)
 ./.build/examples/helloworld/opencensus_examples_helloworld
 ```
 
