@@ -29,6 +29,12 @@ TEST(StatusTest, NotOK) {
                                   "You must construct additional pylons.")));
 }
 
+TEST(StatusTest, InvalidCode) {
+  EXPECT_EQ(
+      "invalid status code value: Invalid.",
+      ToString(grpc::Status(static_cast<grpc::StatusCode>(-1), "Invalid.")));
+}
+
 }  // namespace
 }  // namespace common
 }  // namespace opencensus
