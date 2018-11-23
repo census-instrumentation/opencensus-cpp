@@ -163,9 +163,11 @@ bool Handler::MaybeRegisterView(
 }  // namespace
 
 // static
-void StackdriverExporter::Register(const StackdriverOptions& opts) {
+grpc::Status StackdriverExporter::Register(const StackdriverOptions& opts) {
   opencensus::stats::StatsExporter::RegisterPushHandler(
       absl::WrapUnique(new Handler(opts)));
+  // TODO: Propagate errors to caller. For now we just return OK.
+  return grpc::Status::OK;
 }
 
 // static, DEPRECATED
