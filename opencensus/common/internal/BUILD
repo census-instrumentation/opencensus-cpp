@@ -44,7 +44,6 @@ cc_library(
     copts = DEFAULT_COPTS,
     deps = [
         "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
         "@com_google_absl//absl/types:span",
