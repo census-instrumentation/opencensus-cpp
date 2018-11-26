@@ -34,7 +34,6 @@ before_install:
   - ./bazel-0.19.2-installer-${BAZEL_OS}-x86_64.sh --user
   - echo "build --disk_cache=$HOME/bazel-cache" > ~/.bazelrc
   - echo "build --experimental_strict_action_env" >> ~/.bazelrc
-  - echo "build --no-such-flag" >> ~/.bazelrc
 
 script:
   # Limit the amount of progress output. We can't use --noshow_progress because
