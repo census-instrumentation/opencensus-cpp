@@ -29,9 +29,9 @@ before_install:
       fi;
       tools/format.sh;
     fi
-  - wget https://github.com/bazelbuild/bazel/releases/download/0.17.1/bazel-0.17.1-installer-${BAZEL_OS}-x86_64.sh
-  - chmod +x bazel-0.17.1-installer-${BAZEL_OS}-x86_64.sh
-  - ./bazel-0.17.1-installer-${BAZEL_OS}-x86_64.sh --user
+  - wget https://github.com/bazelbuild/bazel/releases/download/0.19.2/bazel-0.19.2-installer-${BAZEL_OS}-x86_64.sh
+  - chmod +x bazel-0.19.2-installer-${BAZEL_OS}-x86_64.sh
+  - ./bazel-0.19.2-installer-${BAZEL_OS}-x86_64.sh --user
   - echo "build --disk_cache=$HOME/bazel-cache" > ~/.bazelrc
   - echo "build --experimental_strict_action_env" >> ~/.bazelrc
 
@@ -42,5 +42,5 @@ script:
   - bazel test $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)" | grep -v :_)
 
 before_cache:
-  # Before uploading cache.
+  # Before uploading cache, report its size.
   - du -sk $HOME/bazel-cache
