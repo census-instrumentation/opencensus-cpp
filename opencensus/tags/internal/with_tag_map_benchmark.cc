@@ -27,8 +27,8 @@ namespace {
 // Returns an example TagMap.
 TagMap Tags() {
   static const auto k1 = TagKey::Register("key1");
-  static const auto k2 = TagKey::Register("key1");
-  static const auto k3 = TagKey::Register("key1");
+  static const auto k2 = TagKey::Register("key2");
+  static const auto k3 = TagKey::Register("key3");
   return TagMap({{k1, "val1"}, {k2, "val2"}, {k3, "val3"}});
 }
 
