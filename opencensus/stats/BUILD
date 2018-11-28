@@ -34,6 +34,8 @@ cc_library(
     deps = [
         ":core",
         ":recording",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
     ],
 )
 
@@ -105,7 +107,6 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/time",
-        "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
     ],
 )
@@ -119,8 +120,6 @@ cc_library(
         ":core",
         "//opencensus/tags",
         "//opencensus/tags:context_util",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/time",
     ],
 )
 
@@ -189,7 +188,6 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":core",
-        ":recording",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",

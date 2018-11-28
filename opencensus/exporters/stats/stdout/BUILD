@@ -40,7 +40,6 @@ cc_test(
         ":stdout_exporter",
         "//opencensus/stats",
         "//opencensus/stats:test_utils",
-        "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",
     ],
 )
