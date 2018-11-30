@@ -24,7 +24,7 @@ namespace common {
 
 grpc::ChannelArguments WithUserAgent() {
   grpc::ChannelArguments args;
-  args.SetUserAgentPrefix("opencensus-cpp [" OPENCENSUS_VERSION "]");
+  args.SetUserAgentPrefix("opencensus-cpp/" OPENCENSUS_VERSION);
   return args;
 }
 
