@@ -29,6 +29,7 @@
 #include "google/monitoring/v3/metric_service.grpc.pb.h"
 #include "google/protobuf/empty.pb.h"
 #include "opencensus/common/internal/grpc/status.h"
+#include "opencensus/common/internal/grpc/with_user_agent.h"
 #include "opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
 #include "opencensus/stats/stats.h"
 
@@ -73,8 +74,10 @@ Handler::Handler(const StackdriverOptions& opts)
     : opts_(opts),
       project_id_(absl::StrCat(kProjectIdPrefix, opts.project_id)),
       stub_(google::monitoring::v3::MetricService::NewStub(
-          ::grpc::CreateChannel(kGoogleStackdriverStatsAddress,
-                                ::grpc::GoogleDefaultCredentials()))) {}
+          ::grpc::CreateCustomChannel(kGoogleStackdriverStatsAddress,
+                                      ::grpc::GoogleDefaultCredentials(),
+                                      ::opencensus::common::WithUserAgent()))) {
+}
 
 void Handler::ExportViewData(
     const std::vector<std::pair<opencensus::stats::ViewDescriptor,
