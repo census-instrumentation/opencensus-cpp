@@ -12,8 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(prometheus)
+opencensus_lib(exporters_stats_prometheus_exporter
+               PUBLIC
+               SRCS
+               internal/prometheus_exporter.cc
+               DEPS
+               exporters_stats_prometheus_utils
+               stats)
 
-# add_subdirectory(stackdriver) TODO
-
-add_subdirectory(stdout)
+opencensus_lib(exporters_stats_prometheus_utils
+               PUBLIC
+               SRCS
+               internal/prometheus_utils.cc
+               DEPS
+               stats
+               absl::strings
+               absl::time)

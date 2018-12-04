@@ -58,3 +58,21 @@ if(NOT TARGET absl::base)
   add_subdirectory(${CMAKE_BINARY_DIR}/abseil-src
                    ${CMAKE_BINARY_DIR}/abseil-build EXCLUDE_FROM_ALL)
 endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/prometheus-cpp.CMakeLists.txt
+               ${CMAKE_BINARY_DIR}/prometheus-download/CMakeLists.txt)
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                RESULT_VARIABLE result
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/prometheus-download)
+if(result)
+  message(FATAL_ERROR "CMake step failed: ${result}")
+endif()
+execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                RESULT_VARIABLE result
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/prometheus-download)
+if(result)
+  message(FATAL_ERROR "Build step failed: ${result}")
+endif()
+
+add_subdirectory(${CMAKE_BINARY_DIR}/prometheus-src
+                 ${CMAKE_BINARY_DIR}/prometheus-build EXCLUDE_FROM_ALL)
