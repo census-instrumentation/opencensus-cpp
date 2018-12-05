@@ -64,7 +64,7 @@ bind(
 # Used by prometheus-cpp.
 local_repository(
     name = "net_zlib_zlib",
-    path = "tools/zlib"
+    path = "tools/zlib",
 )
 
 # Prometheus client library - used by Prometheus exporter.
