@@ -74,5 +74,9 @@ if(result)
   message(FATAL_ERROR "Build step failed: ${result}")
 endif()
 
+set(ENABLE_PULL OFF CACHE BOOL "Build prometheus-cpp pull library" FORCE)
+set(ENABLE_PUSH OFF CACHE BOOL "Build prometheus-cpp push library" FORCE)
+set(ENABLE_COMPRESSION OFF CACHE BOOL "Enable gzip compression for prometheus-cpp" FORCE)
+set(ENABLE_TESTING OFF CACHE BOOL "Build test for prometheus-cpp" FORCE)
 add_subdirectory(${CMAKE_BINARY_DIR}/prometheus-src
                  ${CMAKE_BINARY_DIR}/prometheus-build EXCLUDE_FROM_ALL)

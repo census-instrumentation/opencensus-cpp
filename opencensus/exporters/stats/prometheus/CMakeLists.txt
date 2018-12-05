@@ -27,4 +27,17 @@ opencensus_lib(exporters_stats_prometheus_utils
                DEPS
                stats
                absl::strings
-               absl::time)
+               absl::time
+               prometheus-cpp::core)
+
+opencensus_lib(exporters_stats_prometheus_test_server
+               internal/exporters_stats_prometheus_test_server.cc
+               stats
+               absl::time
+               prometheus-cpp::core)
+
+opencensus_test(exporters_stats_prometheus_utils_test
+                internal/prometheus_utils_test.cc
+                exporters_stats_prometheus_utils
+                stats
+                stats_test_utils)
