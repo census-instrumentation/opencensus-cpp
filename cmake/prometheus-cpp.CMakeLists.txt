@@ -19,7 +19,7 @@ project(prometheus-cpp-download NONE)
 include(ExternalProject)
 ExternalProject_Add(prometheus_cpp_project
 	GIT_REPOSITORY https://github.com/jupp0r/prometheus-cpp
-	GIT_TAG "v0.6.0"
+	GIT_TAG "master"
 	SOURCE_DIR "${CMAKE_BINARY_DIR}/prometheus-src"
 	BINARY_DIR "${CMAKE_BINARY_DIR}/prometheus-build"
 	UPDATE_COMMAND ""
