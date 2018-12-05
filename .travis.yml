@@ -29,9 +29,9 @@ before_install:
       fi;
       tools/format.sh;
     fi
-  - wget https://github.com/bazelbuild/bazel/releases/download/0.19.2/bazel-0.19.2-installer-${BAZEL_OS}-x86_64.sh
-  - chmod +x bazel-0.19.2-installer-${BAZEL_OS}-x86_64.sh
-  - ./bazel-0.19.2-installer-${BAZEL_OS}-x86_64.sh --user
+  - wget https://github.com/bazelbuild/bazel/releases/download/0.20.0/bazel-0.20.0-installer-${BAZEL_OS}-x86_64.sh
+  - chmod +x bazel-0.20.0-installer-${BAZEL_OS}-x86_64.sh
+  - ./bazel-0.20.0-installer-${BAZEL_OS}-x86_64.sh --user
   - echo "build --disk_cache=$HOME/bazel-cache" > ~/.bazelrc
   - echo "build --experimental_strict_action_env" >> ~/.bazelrc
 

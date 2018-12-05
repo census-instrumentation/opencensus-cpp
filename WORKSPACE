@@ -14,6 +14,8 @@
 
 workspace(name = "io_opencensus_cpp")
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
 # We depend on Abseil.
 http_archive(
     name = "com_google_absl",
@@ -59,10 +61,15 @@ bind(
     actual = "@com_github_grpc_grpc//:grpc_cpp_plugin",
 )
 
+# Used by prometheus-cpp.
+local_repository(
+    name = "net_zlib_zlib",
+    path = "tools/zlib"
+)
+
 # Prometheus client library - used by Prometheus exporter.
 http_archive(
     name = "com_github_jupp0r_prometheus_cpp",
-    repo_mapping = {"@net_zlib_zlib": "@com_github_madler_zlib"},
     strip_prefix = "prometheus-cpp-master",
     urls = ["https://github.com/jupp0r/prometheus-cpp/archive/master.zip"],
 )
@@ -73,7 +80,7 @@ load("@com_github_jupp0r_prometheus_cpp//:repositories.bzl", "load_civetweb")
 load_civetweb()
 
 # Curl library - used by zipkin exporter.
-new_http_archive(
+http_archive(
     name = "com_github_curl",
     build_file_content =
         """
@@ -114,7 +121,7 @@ cc_library(
 )
 
 # Rapidjson library - used by zipkin exporter.
-new_http_archive(
+http_archive(
     name = "com_github_rapidjson",
     build_file_content =
         """
