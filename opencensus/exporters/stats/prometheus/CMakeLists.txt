@@ -21,7 +21,6 @@ opencensus_lib(exporters_stats_prometheus
                stats)
 
 opencensus_lib(exporters_stats_prometheus_utils
-               PUBLIC
                SRCS
                internal/prometheus_utils.cc
                DEPS
