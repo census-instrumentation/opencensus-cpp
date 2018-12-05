@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-opencensus_lib(exporters_stats_prometheus_exporter
+opencensus_lib(exporters_stats_prometheus
                PUBLIC
                SRCS
                internal/prometheus_exporter.cc
