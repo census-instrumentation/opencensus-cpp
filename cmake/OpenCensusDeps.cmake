@@ -75,6 +75,7 @@ if(result)
 endif()
 
 set(ENABLE_PUSH OFF CACHE BOOL "Build prometheus-cpp push library" FORCE)
+set(ENABLE_PULL OFF CACHE BOOL "Build prometheus-cpp pull library" FORCE)
 set(ENABLE_COMPRESSION OFF
     CACHE BOOL "Enable gzip compression for prometheus-cpp"
     FORCE)
