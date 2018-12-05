@@ -61,6 +61,7 @@ bind(
     actual = "@com_github_grpc_grpc//:grpc_cpp_plugin",
 )
 
+# Used by prometheus-cpp.
 local_repository(
     name = "net_zlib_zlib",
     path = "tools/zlib"

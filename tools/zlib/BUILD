@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# @com_github_madler_zlib comes from grpc_deps in the outer workspace.
+
 cc_library(
     name = "z",
     deps = ["@com_github_madler_zlib//:z"],
