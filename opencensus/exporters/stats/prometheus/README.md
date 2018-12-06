@@ -49,7 +49,7 @@ tools in the Prometheus client library:
 ...
 
 opencensus::exporters::stats::PrometheusExporter exporter;
-prometheus::TextSerializer::TextSerializer serializer;
+prometheus::TextSerializer serializer;
 
 const std::vector<io::prometheus::client::MetricFamily> metrics =
     exporter.Collect();
