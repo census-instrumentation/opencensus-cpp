@@ -16,6 +16,6 @@
 
 cc_library(
     name = "z",
-    deps = ["@com_github_madler_zlib//:z"],
     visibility = ["//visibility:public"],
+    deps = ["@com_github_madler_zlib//:z"],
 )
