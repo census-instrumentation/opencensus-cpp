@@ -14,6 +14,7 @@
 # limitations under the License.
 set -e
 set -x
+
 # Install buildifier if it's not present. It needs at least go 1.8.
 if ! which buildifier >/dev/null; then
   eval "$(gimme 1.11)"
