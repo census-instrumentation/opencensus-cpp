@@ -36,6 +36,7 @@ class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
     for (const auto& span : spans) {
       *stream_ << span.DebugString() << "\n";
     }
+    stream_->flush();
   }
 
  private:
