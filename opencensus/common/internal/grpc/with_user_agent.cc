@@ -12,29 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/common/internal/grpc/status.h"
+#include "opencensus/common/internal/grpc/with_user_agent.h"
 
-#include <grpcpp/support/status.h>
-#include "gtest/gtest.h"
+#include <string>
+
+#include <grpcpp/support/channel_arguments.h>
+#include "opencensus/common/version.h"
 
 namespace opencensus {
 namespace common {
-namespace {
 
-TEST(StatusTest, OK) { EXPECT_EQ("OK", ToString(grpc::Status())); }
-
-TEST(StatusTest, NotOK) {
-  EXPECT_EQ("RESOURCE_EXHAUSTED: You must construct additional pylons.",
-            ToString(grpc::Status(grpc::StatusCode::RESOURCE_EXHAUSTED,
-                                  "You must construct additional pylons.")));
+grpc::ChannelArguments WithUserAgent() {
+  grpc::ChannelArguments args;
+  args.SetUserAgentPrefix("opencensus-cpp/" OPENCENSUS_VERSION);
+  return args;
 }
 
-TEST(StatusTest, InvalidCode) {
-  EXPECT_EQ(
-      "invalid status code value: Invalid.",
-      ToString(grpc::Status(static_cast<grpc::StatusCode>(-1), "Invalid.")));
-}
-
-}  // namespace
 }  // namespace common
 }  // namespace opencensus

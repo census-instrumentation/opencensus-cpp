@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
+load("//opencensus:copts.bzl", "DEFAULT_COPTS")
 
 licenses(["notice"])  # Apache License 2.0
 
@@ -31,10 +31,12 @@ cc_library(
         "//google/devtools/cloudtrace/v2:tracing_proto",
         "//opencensus/common:version",
         "//opencensus/common/internal/grpc:status",
+        "//opencensus/common/internal/grpc:with_user_agent",
         "//opencensus/trace",
         "@com_github_grpc_grpc//:grpc++",
-        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
     ],
 )

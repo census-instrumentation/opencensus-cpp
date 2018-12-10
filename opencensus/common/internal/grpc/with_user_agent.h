@@ -4,6 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
@@ -12,29 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/common/internal/grpc/status.h"
+#ifndef OPENCENSUS_COMMON_INTERNAL_GRPC_WITH_USER_AGENT_H_
+#define OPENCENSUS_COMMON_INTERNAL_GRPC_WITH_USER_AGENT_H_
 
-#include <grpcpp/support/status.h>
-#include "gtest/gtest.h"
+#include <grpcpp/support/channel_arguments.h>
 
 namespace opencensus {
 namespace common {
-namespace {
 
-TEST(StatusTest, OK) { EXPECT_EQ("OK", ToString(grpc::Status())); }
+// Returns grpc::ChannelArguments to prepend the OpenCensus user agent.
+grpc::ChannelArguments WithUserAgent();
 
-TEST(StatusTest, NotOK) {
-  EXPECT_EQ("RESOURCE_EXHAUSTED: You must construct additional pylons.",
-            ToString(grpc::Status(grpc::StatusCode::RESOURCE_EXHAUSTED,
-                                  "You must construct additional pylons.")));
-}
-
-TEST(StatusTest, InvalidCode) {
-  EXPECT_EQ(
-      "invalid status code value: Invalid.",
-      ToString(grpc::Status(static_cast<grpc::StatusCode>(-1), "Invalid.")));
-}
-
-}  // namespace
 }  // namespace common
 }  // namespace opencensus
+
+#endif  // OPENCENSUS_COMMON_INTERNAL_GRPC_WITH_USER_AGENT_H_

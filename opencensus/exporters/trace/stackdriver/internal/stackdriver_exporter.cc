@@ -24,6 +24,7 @@
 #include "absl/time/clock.h"
 #include "google/devtools/cloudtrace/v2/tracing.grpc.pb.h"
 #include "opencensus/common/internal/grpc/status.h"
+#include "opencensus/common/internal/grpc/with_user_agent.h"
 #include "opencensus/common/version.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/exporter/span_exporter.h"
@@ -271,8 +272,9 @@ void Handler::Export(
 
 // static
 grpc::Status StackdriverExporter::Register(const StackdriverOptions& opts) {
-  auto creds = grpc::GoogleDefaultCredentials();
-  auto channel = ::grpc::CreateChannel(kGoogleStackdriverTraceAddress, creds);
+  auto channel = ::grpc::CreateCustomChannel(
+      kGoogleStackdriverTraceAddress, ::grpc::GoogleDefaultCredentials(),
+      ::opencensus::common::WithUserAgent());
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
       absl::make_unique<Handler>(opts, channel));
   // TODO: Propagate errors to caller. For now we just return OK.
