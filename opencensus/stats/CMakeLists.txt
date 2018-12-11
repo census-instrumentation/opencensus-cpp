@@ -12,10 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-opencensus_lib(stats PUBLIC DEPS stats_core stats_recording)
+opencensus_lib(stats 
+               PUBLIC 
+               HDRS
+               internal/aggregation_window.h
+               internal/set_aggregation_window.h
+               stats.h
+               stats_exporter.h
+               DEPS 
+               stats_core 
+               stats_recording)
 
 opencensus_lib(stats_test_utils
                PUBLIC
+               HDRS
+               testing/test_utils.h
                SRCS
                testing/test_utils.cc
                DEPS
