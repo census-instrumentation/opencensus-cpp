@@ -26,11 +26,25 @@ project(opencensus-cpp VERSION 0.3.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include(CTest) # Defines option BUILD_TESTING.
-enable_testing()
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+
+IF(MSVC)
+    add_definitions(-DNOMINMAX)
+ENDIF()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    option(INSTALL_HEADERS "Install header files" ON)
+else()
+    option(INSTALL_HEADERS "Install header files" OFF)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-include(OpenCensusDeps)
+
+find_package(googletest REQUIRED) 
+find_package(abseil REQUIRED)
+
+include(CTest) # Defines option BUILD_TESTING.
+enable_testing()
 
 include(OpenCensusHelpers)
 
@@ -41,3 +55,10 @@ add_subdirectory(opencensus)
 if(BUILD_TESTING)
   add_subdirectory(examples)
 endif()
+
+install(
+    EXPORT opencensus-targets
+    FILE opencensus-config.cmake
+    NAMESPACE opencensus::
+    DESTINATION share/opencensus
+)
