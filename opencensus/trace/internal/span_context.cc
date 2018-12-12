@@ -67,10 +67,10 @@ SpanId FromDecimal(uint64_t n) {
 
 // Returns the decimal representation of the SpanId for the
 // X-Cloud-Trace-Context header.
-std::string ToDecimal(const SpanId& span_id) {
+uint64_t ToDecimal(const SpanId& span_id) {
   uint64_t n;
   span_id.CopyTo(reinterpret_cast<uint8_t*>(&n));
-  return absl::StrCat(absl::big_endian::ToHost64(n));
+  return absl::big_endian::ToHost64(n);
 }
 
 }  // namespace
