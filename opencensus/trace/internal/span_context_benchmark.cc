@@ -26,26 +26,34 @@ constexpr char kXCTCNoOptions[] =
 constexpr char kXCTCInvalidTraceId[] =
     "1234567890123456789012345678901x/18446744073709551615;o=1";
 
-void BM_ParseXCloudTraceContext_Full(benchmark::State& state) {
+void BM_FromCloudTraceContext_Full(benchmark::State& state) {
   while (state.KeepRunning()) {
     SpanContext::FromCloudTraceContextHeader(kXCTCFull);
   }
 }
-BENCHMARK(BM_ParseXCloudTraceContext_Full);
+BENCHMARK(BM_FromCloudTraceContext_Full);
 
-void BM_ParseXCloudTraceContext_NoOptions(benchmark::State& state) {
+void BM_FromCloudTraceContext_NoOptions(benchmark::State& state) {
   while (state.KeepRunning()) {
     SpanContext::FromCloudTraceContextHeader(kXCTCNoOptions);
   }
 }
-BENCHMARK(BM_ParseXCloudTraceContext_NoOptions);
+BENCHMARK(BM_FromCloudTraceContext_NoOptions);
 
-void BM_ParseXCloudTraceContext_InvalidTraceId(benchmark::State& state) {
+void BM_FromCloudTraceContext_InvalidTraceId(benchmark::State& state) {
   while (state.KeepRunning()) {
     SpanContext::FromCloudTraceContextHeader(kXCTCInvalidTraceId);
   }
 }
-BENCHMARK(BM_ParseXCloudTraceContext_InvalidTraceId);
+BENCHMARK(BM_FromCloudTraceContext_InvalidTraceId);
+
+void BM_ToCloudTraceContext(benchmark::State& state) {
+  auto ctx = SpanContext::FromCloudTraceContextHeader(kXCTCFull);
+  while (state.KeepRunning()) {
+    ctx.ToCloudTraceContextHeader();
+  }
+}
+BENCHMARK(BM_ToCloudTraceContext);
 
 }  // namespace
 }  // namespace trace
