@@ -21,6 +21,7 @@
 namespace opencensus {
 namespace trace {
 
+class SpanContext;
 class SpanGenerator;
 class SpanTestPeer;
 
@@ -51,6 +52,7 @@ class TraceOptions final {
   void CopyTo(uint8_t* buf) const;
 
  private:
+  friend class SpanContext;
   friend class SpanGenerator;
   friend class SpanTestPeer;
 

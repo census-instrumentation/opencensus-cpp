@@ -21,6 +21,8 @@
 namespace opencensus {
 namespace trace {
 
+class SpanContext;
+
 // SpanId represents an opaque 64-bit span identifier that uniquely identifies a
 // span within a trace. SpanId is immutable.
 class SpanId final {
@@ -46,6 +48,8 @@ class SpanId final {
   void CopyTo(uint8_t* buf) const;
 
  private:
+  friend class SpanContext;
+
   uint8_t rep_[kSize];
 };
 

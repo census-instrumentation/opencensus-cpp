@@ -57,14 +57,6 @@ bool IsHexDigits(absl::string_view s) {
   return true;
 }
 
-// Returns a SpanId which is a big-endian encoding of a decimal number, e.g.
-// from the X-Cloud-Trace-Context header.
-SpanId FromDecimal(uint64_t n) {
-  uint8_t buf[8];
-  absl::big_endian::Store64(buf, n);
-  return SpanId(buf);
-}
-
 // Returns the decimal representation of the SpanId for the
 // X-Cloud-Trace-Context header.
 std::string ToDecimal(const SpanId& span_id) {
@@ -78,22 +70,22 @@ std::string ToDecimal(const SpanId& span_id) {
 // static
 SpanContext SpanContext::FromCloudTraceContextHeader(absl::string_view header) {
   constexpr int kOptionsLen = 4;  // e.g. ";o=1"
-  static SpanContext invalid;
+  static SpanContext ctx;
 
   if (header.size() < kTraceIdLenHex + 2 || header[kTraceIdLenHex] != '/') {
     // Too short to contain a valid trace_id/span_id, or missing slash.
-    return invalid;
+    return ctx;
   }
 
   // Check if options are present.
   absl::string_view options = header.substr(header.size() - kOptionsLen);
-  uint8_t sampled = 0;
+  bool sampled = false;
   if (options[0] == ';' && options[1] == 'o' && options[2] == '=') {
     if (options.back() < '0' || options.back() > '3') {
-      return invalid;  // Invalid option.
+      return ctx;  // Invalid option.
     }
     if (options.back() == '1' || options.back() == '3') {
-      sampled = 1;
+      sampled = true;
     }
     // Remove from header to make parsing span_id easier.
     header = header.substr(0, header.size() - kOptionsLen);
@@ -103,19 +95,20 @@ SpanContext SpanContext::FromCloudTraceContextHeader(absl::string_view header) {
   absl::string_view span_id = header.substr(kTraceIdLenHex + 1);
   uint64_t n_span_id;
   if (!absl::SimpleAtoi(span_id, &n_span_id) || n_span_id == 0) {
-    return invalid;  // Invalid span_id.
+    return ctx;  // Invalid span_id.
   }
 
   // Parse trace_id.
   absl::string_view trace_id = header.substr(0, kTraceIdLenHex);
   if (!IsHexDigits(trace_id)) {
-    return invalid;  // Invalid hex digit.
+    return ctx;  // Invalid hex digit.
   }
   std::string trace_id_binary = absl::HexStringToBytes(trace_id);
 
-  return SpanContext(
-      TraceId(reinterpret_cast<const uint8_t*>(trace_id_binary.data())),
-      FromDecimal(n_span_id), TraceOptions(&sampled));
+  ctx.trace_id_ = TraceId(reinterpret_cast<const uint8_t*>(trace_id_binary.data()));
+  absl::big_endian::Store64(ctx.span_id_.rep_, n_span_id);
+  ctx.trace_options_.SetSampled(sampled);
+  return ctx;
 }
 
 std::string SpanContext::ToCloudTraceContextHeader() {
