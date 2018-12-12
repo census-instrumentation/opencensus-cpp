@@ -37,17 +37,13 @@ cc_library(
         "internal/running_span_store_impl.cc",
         "internal/sampler.cc",
         "internal/span.cc",
-        "internal/span_context.cc",
         "internal/span_data.cc",
         "internal/span_exporter.cc",
         "internal/span_exporter_impl.cc",
-        "internal/span_id.cc",
         "internal/span_impl.cc",
         "internal/status.cc",
         "internal/trace_config.cc",
         "internal/trace_config_impl.cc",
-        "internal/trace_id.cc",
-        "internal/trace_options.cc",
     ],
     hdrs = [
         "attribute_value_ref.h",
@@ -70,17 +66,14 @@ cc_library(
         "internal/trace_params_impl.h",
         "sampler.h",
         "span.h",
-        "span_context.h",
-        "span_id.h",
         "status_code.h",
         "trace_config.h",
-        "trace_id.h",
-        "trace_options.h",
         "trace_params.h",
     ],
     copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
     deps = [
+        ":span_context",
         "//opencensus/common/internal:random_lib",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/base:endian",
@@ -100,6 +93,28 @@ cc_library(
     deps = [
         ":trace",
         "//opencensus/context",
+    ],
+)
+
+cc_library(
+    name = "span_context",
+    srcs = [
+        "internal/span_context.cc",
+        "internal/span_id.cc",
+        "internal/trace_id.cc",
+        "internal/trace_options.cc",
+    ],
+    hdrs = [
+        "span_context.h",
+        "span_id.h",
+        "trace_id.h",
+        "trace_options.h",
+    ],
+    copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_google_absl//absl/base:endian",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -245,7 +260,7 @@ cc_test(
     srcs = ["internal/span_context_test.cc"],
     copts = TEST_COPTS,
     deps = [
-        ":trace",
+        ":span_context",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -331,6 +346,19 @@ cc_binary(
     linkstatic = 1,
     deps = [
         ":trace",
+        "@com_github_google_benchmark//:benchmark",
+    ],
+)
+
+cc_binary(
+    name = "span_context_benchmark",
+    testonly = 1,
+    srcs = ["internal/span_context_benchmark.cc"],
+    copts = TEST_COPTS,
+    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
+    linkstatic = 1,
+    deps = [
+        ":span_context",
         "@com_github_google_benchmark//:benchmark",
     ],
 )

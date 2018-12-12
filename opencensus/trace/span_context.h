@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <string>
 
+#include "absl/strings/string_view.h"
 #include "opencensus/trace/span_id.h"
 #include "opencensus/trace/trace_id.h"
 #include "opencensus/trace/trace_options.h"
@@ -65,6 +66,30 @@ class SpanContext final {
 
   // Returns hex strings separated with hyphens, e.g. "trace_id-span_id-options"
   std::string ToString() const;
+
+  // Parses the value of the "X-Cloud-Trace-Context: ..." header, returning a
+  // SpanContext. If parsing fails, IsValid will be false.
+  //
+  // The input format is: trace-id/span-id[;o=options]
+  // Where:
+  //   - trace-id is an opaque 16-byte binary string, encoded as 32 hex digits.
+  //   It must not be all zeroes.
+  //
+  //   - span-id is a decimal representation of a big-endian 64 bit value, and
+  //   must not have a value of zero.
+  //
+  //   - options is a single char from '0' to '3', but only 1 and 3 enable
+  //   tracing.
+  //
+  // Example: "12345678901234567890123456789012/12345;o=1"
+  //
+  // See also: https://cloud.google.com/trace/docs/troubleshooting
+  static SpanContext FromCloudTraceContextHeader(absl::string_view header);
+
+  // Returns a value for the X-Cloud-Trace-Context header.
+  std::string ToCloudTraceContextHeader();
+
+  // TODO: traceparent, grpc-trace-bin
 
  private:
   TraceId trace_id_;
