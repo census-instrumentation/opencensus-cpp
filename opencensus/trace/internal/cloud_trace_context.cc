@@ -103,7 +103,7 @@ SpanContext FromCloudTraceContextHeader(absl::string_view header) {
 
 std::string ToCloudTraceContextHeader(const SpanContext& ctx) {
   return absl::StrCat(ctx.trace_id().ToHex(), "/", ToDecimal(ctx.span_id()),
-                      ";o=", ctx.trace_options().IsSampled() ? "1" : "0");
+                      ctx.trace_options().IsSampled() ? ";o=1" : ";o=0");
 }
 
 }  // namespace propagation
