@@ -37,17 +37,13 @@ cc_library(
         "internal/running_span_store_impl.cc",
         "internal/sampler.cc",
         "internal/span.cc",
-        "internal/span_context.cc",
         "internal/span_data.cc",
         "internal/span_exporter.cc",
         "internal/span_exporter_impl.cc",
-        "internal/span_id.cc",
         "internal/span_impl.cc",
         "internal/status.cc",
         "internal/trace_config.cc",
         "internal/trace_config_impl.cc",
-        "internal/trace_id.cc",
-        "internal/trace_options.cc",
     ],
     hdrs = [
         "attribute_value_ref.h",
@@ -70,17 +66,15 @@ cc_library(
         "internal/trace_params_impl.h",
         "sampler.h",
         "span.h",
-        "span_context.h",
-        "span_id.h",
         "status_code.h",
         "trace_config.h",
-        "trace_id.h",
-        "trace_options.h",
         "trace_params.h",
     ],
     copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
     deps = [
+        ":cloud_trace_context",
+        ":span_context",
         "//opencensus/common/internal:random_lib",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/base:endian",
@@ -88,6 +82,23 @@ cc_library(
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/time",
         "@com_google_absl//absl/types:span",
+    ],
+)
+
+cc_library(
+    name = "cloud_trace_context",
+    srcs = [
+        "internal/cloud_trace_context.cc",
+    ],
+    hdrs = [
+        "propagation/cloud_trace_context.h",
+    ],
+    copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":span_context",
+        "@com_google_absl//absl/base:endian",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -100,6 +111,27 @@ cc_library(
     deps = [
         ":trace",
         "//opencensus/context",
+    ],
+)
+
+cc_library(
+    name = "span_context",
+    srcs = [
+        "internal/span_context.cc",
+        "internal/span_id.cc",
+        "internal/trace_id.cc",
+        "internal/trace_options.cc",
+    ],
+    hdrs = [
+        "span_context.h",
+        "span_id.h",
+        "trace_id.h",
+        "trace_options.h",
+    ],
+    copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -151,6 +183,17 @@ cc_test(
 )
 
 cc_test(
+    name = "cloud_trace_context_test",
+    srcs = ["internal/cloud_trace_context_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":cloud_trace_context",
+        ":span_context",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "context_util_test",
     srcs = ["internal/context_util_test.cc"],
     copts = TEST_COPTS,
@@ -168,6 +211,7 @@ cc_test(
     srcs = ["internal/link_test.cc"],
     copts = TEST_COPTS,
     deps = [
+        ":span_context",
         ":trace",
         "@com_google_googletest//:gtest_main",
     ],
@@ -188,6 +232,7 @@ cc_test(
     srcs = ["internal/running_span_store_test.cc"],
     copts = TEST_COPTS,
     deps = [
+        ":span_context",
         ":trace",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
@@ -212,6 +257,7 @@ cc_test(
     srcs = ["internal/span_test.cc"],
     copts = TEST_COPTS,
     deps = [
+        ":span_context",
         ":trace",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
@@ -223,7 +269,7 @@ cc_test(
     srcs = ["internal/span_id_test.cc"],
     copts = TEST_COPTS,
     deps = [
-        ":trace",
+        ":span_context",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -233,6 +279,7 @@ cc_test(
     srcs = ["internal/span_options_test.cc"],
     copts = TEST_COPTS,
     deps = [
+        ":span_context",
         ":trace",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
@@ -245,7 +292,7 @@ cc_test(
     srcs = ["internal/span_context_test.cc"],
     copts = TEST_COPTS,
     deps = [
-        ":trace",
+        ":span_context",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -289,7 +336,7 @@ cc_test(
     srcs = ["internal/trace_options_test.cc"],
     copts = TEST_COPTS,
     deps = [
-        ":trace",
+        ":span_context",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -299,6 +346,7 @@ cc_test(
     srcs = ["internal/with_span_test.cc"],
     copts = TEST_COPTS,
     deps = [
+        ":span_context",
         ":trace",
         ":with_span",
         "//opencensus/context",
@@ -314,10 +362,21 @@ cc_binary(
     testonly = 1,
     srcs = ["internal/attribute_value_ref_benchmark.cc"],
     copts = TEST_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
         ":trace",
+        "@com_github_google_benchmark//:benchmark",
+    ],
+)
+
+cc_binary(
+    name = "cloud_trace_context_benchmark",
+    testonly = 1,
+    srcs = ["internal/cloud_trace_context_benchmark.cc"],
+    copts = TEST_COPTS,
+    linkstatic = 1,
+    deps = [
+        ":cloud_trace_context",
         "@com_github_google_benchmark//:benchmark",
     ],
 )
@@ -327,9 +386,9 @@ cc_binary(
     testonly = 1,
     srcs = ["internal/span_benchmark.cc"],
     copts = TEST_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
+        ":span_context",
         ":trace",
         "@com_github_google_benchmark//:benchmark",
     ],
@@ -340,10 +399,9 @@ cc_binary(
     testonly = 1,
     srcs = ["internal/span_id_benchmark.cc"],
     copts = TEST_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
-        ":trace",
+        ":span_context",
         "@com_github_google_benchmark//:benchmark",
     ],
 )
@@ -353,7 +411,6 @@ cc_binary(
     testonly = 1,
     srcs = ["internal/with_span_benchmark.cc"],
     copts = TEST_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
         ":trace",
