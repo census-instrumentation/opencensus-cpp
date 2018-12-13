@@ -30,26 +30,33 @@ opencensus_lib(trace
                internal/running_span_store_impl.cc
                internal/sampler.cc
                internal/span.cc
-               internal/span_context.cc
                internal/span_data.cc
                internal/span_exporter.cc
                internal/span_exporter_impl.cc
-               internal/span_id.cc
                internal/span_impl.cc
                internal/status.cc
                internal/trace_config.cc
                internal/trace_config_impl.cc
-               internal/trace_id.cc
-               internal/trace_options.cc
                internal/with_span.cc
                DEPS
                common_random
+               trace_cloud_trace_context
+               trace_span_context
                absl::strings
                absl::base
                absl::memory
                absl::synchronization
                absl::time
                absl::span)
+
+opencensus_lib(trace_cloud_trace_context
+               PUBLIC
+               SRCS
+               internal/cloud_trace_context.cc
+               DEPS
+               trace_span_context
+               absl::base
+               absl::strings)
 
 opencensus_lib(trace_context_util
                PUBLIC
@@ -58,6 +65,16 @@ opencensus_lib(trace_context_util
                DEPS
                trace
                context)
+
+opencensus_lib(trace_span_context
+               PUBLIC
+               SRCS
+               internal/span_context.cc
+               internal/span_id.cc
+               internal/trace_id.cc
+               internal/trace_options.cc
+               DEPS
+               absl::strings)
 
 opencensus_lib(trace_with_span
                PUBLIC
@@ -78,6 +95,9 @@ opencensus_test(trace_attribute_value_ref_test
 
 opencensus_test(trace_attribute_value_test internal/attribute_value_test.cc
                 trace)
+
+opencensus_test(trace_cloud_trace_context_test
+                internal/cloud_trace_context_test.cc trace_cloud_trace_context)
 
 opencensus_test(trace_context_util_test
                 internal/context_util_test.cc
@@ -120,7 +140,7 @@ opencensus_test(trace_span_options_test
 
 opencensus_test(trace_span_context_test
                 internal/span_context_test.cc
-                trace
+                trace_span_context
                 absl::strings
                 absl::span)
 
