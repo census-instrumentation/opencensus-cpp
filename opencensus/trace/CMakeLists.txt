@@ -40,6 +40,7 @@ opencensus_lib(trace
                common_random
                trace_cloud_trace_context
                trace_span_context
+               trace_traceparent
                absl::strings
                absl::base
                absl::memory
@@ -72,6 +73,15 @@ opencensus_lib(trace_span_context
                internal/trace_id.cc
                internal/trace_options.cc
                DEPS
+               absl::strings)
+
+opencensus_lib(trace_traceparent
+               PUBLIC
+               SRCS
+               internal/traceparent.cc
+               DEPS
+               trace_span_context
+               absl::base
                absl::strings)
 
 opencensus_lib(trace_with_span
@@ -158,6 +168,9 @@ opencensus_test(trace_trace_config_test
                 absl::time)
 
 opencensus_test(trace_trace_options_test internal/trace_options_test.cc trace)
+
+opencensus_test(trace_traceparent_test internal/traceparent_test.cc
+                trace_traceparent)
 
 opencensus_test(trace_with_span_test
                 internal/with_span_test.cc
