@@ -87,6 +87,7 @@ void Handler::ExportViewData(
         break;
     }
   }
+  stream_->flush();
 }
 
 template <typename DataValueT>
