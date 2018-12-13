@@ -28,9 +28,6 @@ namespace {
 MATCHER(IsValid, "is a valid SpanContext") { return arg.IsValid(); }
 MATCHER(IsInvalid, "is an invalid SpanContext") { return !arg.IsValid(); }
 
-constexpr uint8_t trace_id[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6};
-constexpr uint8_t span_id[] = {10, 2, 3, 4, 5, 6, 7, 8};
-
 TEST(CloudTraceContextTest, ParseFull) {
   constexpr char header[] = "01020304050607081112131415161718/123;o=1";
   SpanContext ctx = FromCloudTraceContextHeader(header);
