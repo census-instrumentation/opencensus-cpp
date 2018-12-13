@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "opencensus/trace/propagation/cloud_trace_context.h"
+
 #include "benchmark/benchmark.h"
-#include "opencensus/trace/span_context.h"
 
 namespace opencensus {
 namespace trace {
+namespace propagation {
 namespace {
 
 constexpr char kXCTCFull[] =
@@ -28,34 +30,35 @@ constexpr char kXCTCInvalidTraceId[] =
 
 void BM_FromCloudTraceContext_Full(benchmark::State& state) {
   while (state.KeepRunning()) {
-    SpanContext::FromCloudTraceContextHeader(kXCTCFull);
+    FromCloudTraceContextHeader(kXCTCFull);
   }
 }
 BENCHMARK(BM_FromCloudTraceContext_Full);
 
 void BM_FromCloudTraceContext_NoOptions(benchmark::State& state) {
   while (state.KeepRunning()) {
-    SpanContext::FromCloudTraceContextHeader(kXCTCNoOptions);
+    FromCloudTraceContextHeader(kXCTCNoOptions);
   }
 }
 BENCHMARK(BM_FromCloudTraceContext_NoOptions);
 
 void BM_FromCloudTraceContext_InvalidTraceId(benchmark::State& state) {
   while (state.KeepRunning()) {
-    SpanContext::FromCloudTraceContextHeader(kXCTCInvalidTraceId);
+    FromCloudTraceContextHeader(kXCTCInvalidTraceId);
   }
 }
 BENCHMARK(BM_FromCloudTraceContext_InvalidTraceId);
 
 void BM_ToCloudTraceContext(benchmark::State& state) {
-  auto ctx = SpanContext::FromCloudTraceContextHeader(kXCTCFull);
+  auto ctx = FromCloudTraceContextHeader(kXCTCFull);
   while (state.KeepRunning()) {
-    ctx.ToCloudTraceContextHeader();
+    ToCloudTraceContextHeader(ctx);
   }
 }
 BENCHMARK(BM_ToCloudTraceContext);
 
 }  // namespace
+}  // namespace propagation
 }  // namespace trace
 }  // namespace opencensus
 
