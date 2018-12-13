@@ -188,6 +188,7 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":cloud_trace_context",
+        ":span_context",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -210,6 +211,7 @@ cc_test(
     srcs = ["internal/link_test.cc"],
     copts = TEST_COPTS,
     deps = [
+        ":span_context",
         ":trace",
         "@com_google_googletest//:gtest_main",
     ],
@@ -230,6 +232,7 @@ cc_test(
     srcs = ["internal/running_span_store_test.cc"],
     copts = TEST_COPTS,
     deps = [
+        ":span_context",
         ":trace",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
@@ -254,6 +257,7 @@ cc_test(
     srcs = ["internal/span_test.cc"],
     copts = TEST_COPTS,
     deps = [
+        ":span_context",
         ":trace",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
@@ -265,7 +269,7 @@ cc_test(
     srcs = ["internal/span_id_test.cc"],
     copts = TEST_COPTS,
     deps = [
-        ":trace",
+        ":span_context",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -275,7 +279,7 @@ cc_test(
     srcs = ["internal/span_options_test.cc"],
     copts = TEST_COPTS,
     deps = [
-        ":trace",
+        ":span_context",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
         "@com_google_googletest//:gtest_main",
@@ -331,7 +335,7 @@ cc_test(
     srcs = ["internal/trace_options_test.cc"],
     copts = TEST_COPTS,
     deps = [
-        ":trace",
+        ":span_context",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -341,6 +345,7 @@ cc_test(
     srcs = ["internal/with_span_test.cc"],
     copts = TEST_COPTS,
     deps = [
+        ":span_context",
         ":trace",
         ":with_span",
         "//opencensus/context",
@@ -356,7 +361,6 @@ cc_binary(
     testonly = 1,
     srcs = ["internal/attribute_value_ref_benchmark.cc"],
     copts = TEST_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
         ":trace",
@@ -369,7 +373,6 @@ cc_binary(
     testonly = 1,
     srcs = ["internal/cloud_trace_context_benchmark.cc"],
     copts = TEST_COPTS,
-    #linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
         ":cloud_trace_context",
@@ -382,9 +385,9 @@ cc_binary(
     testonly = 1,
     srcs = ["internal/span_benchmark.cc"],
     copts = TEST_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
+        ":span_context",
         ":trace",
         "@com_github_google_benchmark//:benchmark",
     ],
@@ -395,10 +398,9 @@ cc_binary(
     testonly = 1,
     srcs = ["internal/span_id_benchmark.cc"],
     copts = TEST_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
-        ":trace",
+        ":span_context",
         "@com_github_google_benchmark//:benchmark",
     ],
 )
@@ -408,7 +410,6 @@ cc_binary(
     testonly = 1,
     srcs = ["internal/with_span_benchmark.cc"],
     copts = TEST_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
         ":trace",
