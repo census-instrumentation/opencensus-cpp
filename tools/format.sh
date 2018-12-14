@@ -23,6 +23,8 @@ set -e
 FIND="find . -name .git -prune -o -name .build -prune -o"
 sed -i 's/Open[c]ensus/OpenCensus/g' $($FIND -type f -print)
 sed -i 's/Stack[D]river/Stackdriver/g' $($FIND -type f -print)
+# No CRLF line endings.
+sed -i 's/\r$//' $($FIND -type f -print)
 # No trailing spaces.
 sed -i 's/ \+$//' $($FIND -type f -print)
 # For easier debugging: print the version because it affects the formatting.
