@@ -31,6 +31,17 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "with_user_agent",
+    srcs = ["with_user_agent.cc"],
+    hdrs = ["with_user_agent.h"],
+    copts = DEFAULT_COPTS,
+    deps = [
+        "//opencensus/common:version",
+        "@com_github_grpc_grpc//:grpc++",
+    ],
+)
+
 # Tests
 # ========================================================================= #
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Copyright 2018, OpenCensus Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,9 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+set -e
+set -x
 
-add_subdirectory(prometheus)
-
-# add_subdirectory(stackdriver) TODO
-
-add_subdirectory(stdout)
+# Install buildifier if it's not present. It needs at least go 1.8.
+if ! which buildifier >/dev/null; then
+  eval "$(gimme 1.11)"
+  go get -v github.com/bazelbuild/buildtools/buildifier
+fi
+# Install cmake-format.
+pip install --user cmake_format
+# Check format.
+tools/format.sh

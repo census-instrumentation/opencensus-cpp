@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Copyright 2018, OpenCensus Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,9 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+set -e
+set -x
 
-add_subdirectory(prometheus)
-
-# add_subdirectory(stackdriver) TODO
-
-add_subdirectory(stdout)
+ccache -s
+ccache -z
+cmake -H. -B.build
+cmake --build .build
+(cd .build && ctest --output-on-failure)
+ccache -s

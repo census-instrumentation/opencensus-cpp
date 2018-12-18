@@ -20,26 +20,30 @@ if [[ ! -e tools/format.sh ]]; then
 fi
 set -e
 # Correct common miscapitalizations.
-FIND="find . -name .git -prune -o -name build -prune -o"
+FIND="find . -name .git -prune -o -name .build -prune -o"
 sed -i 's/Open[c]ensus/OpenCensus/g' $($FIND -type f -print)
 sed -i 's/Stack[D]river/Stackdriver/g' $($FIND -type f -print)
+# No CRLF line endings.
+sed -i 's/\r$//' $($FIND -type f -print)
 # No trailing spaces.
 sed -i 's/ \+$//' $($FIND -type f -print)
 # For easier debugging: print the version because it affects the formatting.
 CMD=clang-format
 $CMD -version
 $CMD -i -style=Google \
-  $($FIND -name '*.cc' -o -name '*.h' -print)
+  $($FIND -name '*.cc' -print -o -name '*.h' -print)
 if which buildifier >/dev/null; then
   echo "Running buildifier."
-  buildifier $($FIND -name WORKSPACE -o -name BUILD -o -name '*.bzl' -print)
+  buildifier $($FIND -name WORKSPACE -print -o -name BUILD -print -o \
+    -name '*.bzl' -print)
 else
   echo "Can't find buildifier. It can be installed with:"
   echo "  go get github.com/bazelbuild/buildtools/buildifier"
 fi
 if which cmake-format >/dev/null; then
   echo "Running cmake-format $(cmake-format --version 2>&1)."
-  cmake-format -i $($FIND -name '*CMakeLists.txt' -o -name '*.cmake' -print)
+  cmake-format -i $($FIND -name '*CMakeLists.txt' -print -o \
+    -name '*.cmake' -print)
 else
   echo "Can't find cmake-format. It can be installed with:"
   echo "  pip install --user cmake_format"

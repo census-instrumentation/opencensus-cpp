@@ -22,7 +22,7 @@ We use the same flags as absl, plus turn some warnings into errors.
 """
 
 load(
-    "@com_google_absl//absl:copts.bzl",
+    "@com_google_absl//absl:copts/configure_copts.bzl",
     "GCC_FLAGS",
     "GCC_TEST_FLAGS",
     "LLVM_FLAGS",

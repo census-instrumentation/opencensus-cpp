@@ -1,46 +1,35 @@
 language: cpp
+compiler: clang
+
 matrix:
   include:
     - os: linux
       dist: trusty
       sudo: false
+      name: "check format"
+      script: tools/travis/check_format.sh
+    - os: linux
+      dist: trusty
+      sudo: false
       env: BAZEL_OS=linux
+      script: tools/travis/build_bazel.sh
+    - os: linux
+      dist: trusty
+      sudo: false
+      compiler: gcc
+      env: BAZEL_OS=linux
+      script: tools/travis/build_bazel.sh
+    - os: linux
+      dist: trusty
+      sudo: false
+      env: CMAKE_OS=linux
+      script: tools/travis/build_cmake.sh
     - os: osx
       env: BAZEL_OS=darwin
-
-compiler: clang
-
-# - Limit memory.
-# - Enable thread safety analysis (only works with clang).
-env: BAZEL_OPTIONS="--local_resources=4096,2,1.0 --copt=-Werror=thread-safety"
+      script: tools/travis/build_bazel.sh
 
 cache:
   directories:
+    - $HOME/.ccache
     - $HOME/bazel-cache
     - $HOME/gopath/bin
-
-before_install:
-  # Install buildifier if it's not present. It needs at least go 1.8.
-  # Skip format on OS X: it doesn't have clang-format by default, and has a different sed.
-  - if \[ "$TRAVIS_OS_NAME" == "linux" \]; then
-      if ! which buildifier >/dev/null; then
-        eval "$(gimme 1.11)";
-        go get -v github.com/bazelbuild/buildtools/buildifier;
-      fi;
-      tools/format.sh;
-    fi
-  - wget https://github.com/bazelbuild/bazel/releases/download/0.19.2/bazel-0.19.2-installer-${BAZEL_OS}-x86_64.sh
-  - chmod +x bazel-0.19.2-installer-${BAZEL_OS}-x86_64.sh
-  - ./bazel-0.19.2-installer-${BAZEL_OS}-x86_64.sh --user
-  - echo "build --disk_cache=$HOME/bazel-cache" > ~/.bazelrc
-  - echo "build --experimental_strict_action_env" >> ~/.bazelrc
-
-script:
-  # Limit the amount of progress output. We can't use --noshow_progress because
-  # Travis terminates the build after 10 mins without output.
-  - bazel build $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(rule, //...)" | grep -v :_)
-  - bazel test $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)" | grep -v :_)
-
-before_cache:
-  # Before uploading cache, report its size.
-  - du -sk $HOME/bazel-cache

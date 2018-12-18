@@ -343,7 +343,7 @@ void ZipkinExportHandler::SendMessage(const std::string& msg,
   struct curl_slist* headers = nullptr;
 
   if (!curl) {
-    std::cerr << "Failed to create curl handle.\n";
+    std::cerr << "ZipkinExporter: failed to create curl handle.\n";
     return;
   }
 
@@ -353,7 +353,8 @@ void ZipkinExportHandler::SendMessage(const std::string& msg,
   CURLcode res = CurlSendMessage(reinterpret_cast<const uint8_t*>(msg.data()),
                                  options_, size, headers, curl, err_msg);
   if (res != CURLE_OK) {
-    std::cerr << "curl error: " << curl_easy_strerror(res) << "\n";
+    std::cerr << "ZipkinExporter: curl error: " << curl_easy_strerror(res)
+              << " (sending to \"" << options_.url << "\")\n";
   }
 
   curl_slist_free_all(headers);

@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(prometheus)
+# @com_github_madler_zlib comes from grpc_deps in the outer workspace.
 
-# add_subdirectory(stackdriver) TODO
-
-add_subdirectory(stdout)
+cc_library(
+    name = "z",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_madler_zlib//:z"],
+)

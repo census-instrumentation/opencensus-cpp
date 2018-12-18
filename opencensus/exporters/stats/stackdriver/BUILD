@@ -28,6 +28,7 @@ cc_library(
         ":stackdriver_utils",
         "//google/monitoring/v3:metric_service",
         "//opencensus/common/internal/grpc:status",
+        "//opencensus/common/internal/grpc:with_user_agent",
         "//opencensus/stats",
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/base",

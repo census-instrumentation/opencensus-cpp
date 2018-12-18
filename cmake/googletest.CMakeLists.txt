@@ -17,16 +17,15 @@ cmake_minimum_required(VERSION 3.5)
 project(googletest-download NONE)
 
 include(ExternalProject)
-ExternalProject_Add(googletest_project
-	GIT_REPOSITORY https://github.com/abseil/googletest
-	GIT_TAG "master"
-	SOURCE_DIR "${CMAKE_BINARY_DIR}/googletest-src"
-	BINARY_DIR "${CMAKE_BINARY_DIR}/googletest-build"
-	UPDATE_COMMAND ""
-	PATCH_COMMAND ""
-	CONFIGURE_COMMAND ""
-	BUILD_COMMAND ""
-	INSTALL_COMMAND ""
-	TEST_COMMAND ""
-	LOG_DOWNLOAD ON
-)
+externalproject_add(googletest_project
+                    GIT_REPOSITORY https://github.com/abseil/googletest
+                    GIT_TAG "master"
+                    SOURCE_DIR "${CMAKE_BINARY_DIR}/googletest-src"
+                    BINARY_DIR "${CMAKE_BINARY_DIR}/googletest-build"
+                    UPDATE_COMMAND ""
+                    PATCH_COMMAND ""
+                    CONFIGURE_COMMAND ""
+                    BUILD_COMMAND ""
+                    INSTALL_COMMAND ""
+                    TEST_COMMAND ""
+                    LOG_DOWNLOAD ON)
