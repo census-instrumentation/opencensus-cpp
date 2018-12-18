@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef OPENCENSUS_TRACE_PROPAGATION_TRACEPARENT_H_
-#define OPENCENSUS_TRACE_PROPAGATION_TRACEPARENT_H_
+#ifndef OPENCENSUS_TRACE_PROPAGATION_TRACE_CONTEXT_H_
+#define OPENCENSUS_TRACE_PROPAGATION_TRACE_CONTEXT_H_
 
 #include <string>
 
@@ -23,6 +23,9 @@
 namespace opencensus {
 namespace trace {
 namespace propagation {
+
+// Implementation of the TraceContext propagation protocol:
+// https://github.com/w3c/distributed-tracing
 
 // Parses the value of the "traceparent: ..." header, returning a
 // SpanContext. If parsing fails, IsValid will be false.
@@ -36,7 +39,6 @@ namespace propagation {
 // Example: "00-404142434445464748494a4b4c4d4e4f-6162636465666768-01"
 //           v  trace_id                         span_id          options
 //
-// See also: https://github.com/w3c/distributed-tracing
 SpanContext FromTraceParentHeader(absl::string_view header);
 
 // Returns a value for the traceparent header.
@@ -46,4 +48,4 @@ std::string ToTraceParentHeader(const SpanContext& ctx);
 }  // namespace trace
 }  // namespace opencensus
 
-#endif  // OPENCENSUS_TRACE_PROPAGATION_TRACEPARENT_H_
+#endif  // OPENCENSUS_TRACE_PROPAGATION_TRACE_CONTEXT_H_

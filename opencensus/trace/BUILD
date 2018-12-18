@@ -75,7 +75,7 @@ cc_library(
     deps = [
         ":cloud_trace_context",
         ":span_context",
-        ":traceparent",
+        ":trace_context",
         "//opencensus/common/internal:random_lib",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/base:endian",
@@ -137,12 +137,12 @@ cc_library(
 )
 
 cc_library(
-    name = "traceparent",
+    name = "trace_context",
     srcs = [
-        "internal/traceparent.cc",
+        "internal/trace_context.cc",
     ],
     hdrs = [
-        "propagation/traceparent.h",
+        "propagation/trace_context.h",
     ],
     copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
@@ -350,22 +350,22 @@ cc_test(
 )
 
 cc_test(
-    name = "trace_options_test",
-    srcs = ["internal/trace_options_test.cc"],
+    name = "trace_context_test",
+    srcs = ["internal/trace_context_test.cc"],
     copts = TEST_COPTS,
     deps = [
         ":span_context",
+        ":trace_context",
         "@com_google_googletest//:gtest_main",
     ],
 )
 
 cc_test(
-    name = "traceparent_test",
-    srcs = ["internal/traceparent_test.cc"],
+    name = "trace_options_test",
+    srcs = ["internal/trace_options_test.cc"],
     copts = TEST_COPTS,
     deps = [
         ":span_context",
-        ":traceparent",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -436,13 +436,13 @@ cc_binary(
 )
 
 cc_binary(
-    name = "traceparent_benchmark",
+    name = "trace_context_benchmark",
     testonly = 1,
-    srcs = ["internal/traceparent_benchmark.cc"],
+    srcs = ["internal/trace_context_benchmark.cc"],
     copts = TEST_COPTS,
     linkstatic = 1,
     deps = [
-        ":traceparent",
+        ":trace_context",
         "@com_github_google_benchmark//:benchmark",
     ],
 )
