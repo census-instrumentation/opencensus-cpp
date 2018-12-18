@@ -25,13 +25,13 @@ project(opencensus-cpp VERSION 0.3.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(OPENCENSUS_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 include(CTest) # Defines option BUILD_TESTING.
 enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(OpenCensusDeps)
+
 include(OpenCensusHelpers)
 
 # OpenCensus code.
