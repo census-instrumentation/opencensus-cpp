@@ -3,7 +3,7 @@
 This directory tree contains the C++ API and implementation of OpenCensus
 tracing.
 
-The main entry point to tracing is the `[span.h]` file.
+The main entry point to tracing is the `[span.h](span.h)` file.
 It's a relatively short file and the comments are a reference guide
 to the tracing API.
 
