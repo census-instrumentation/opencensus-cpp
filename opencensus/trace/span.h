@@ -69,12 +69,23 @@ struct StartSpanOptions {
   const std::vector<Span*> parent_links;
 };
 
-// Span represents a sub-operation in a larger Trace.
+// Span represents an operation. A Trace consists of one or more Spans.
 //
-// A Span is uniquely identified by a SpanContext. The Span object is just a
-// handle to add Annotations and Attributes in an implementation-defined data
-// structure, hence all these operations are marked const. The Span must be
-// explicitly End()ed when the suboperation is complete. Span is thread-safe.
+// A Span is uniquely identified by a SpanContext.
+//
+// A Span must be explicitly End()ed when the operation is complete.
+//
+// The Span object is just a handle to e.g. add Annotations in an
+// implementation-defined data structure, hence all operations on it are marked
+// const.
+//
+// Span is thread-compatible. If swap() and operator= are avoided, everything
+// else is thread-safe. Avoid mutating Span objects in-place; treat them like
+// read-only handles. When using multiple threads, give each thread a copy of
+// the Span.
+//
+// As an alternative to explicitly passing Span objects between functions,
+// consider using Context. (see the ../context/ directory).
 class Span final {
  public:
   // Constructs a no-op Span with an invalid context. Attempts to add
@@ -170,12 +181,13 @@ class Span final {
   friend void swap(Span& a, Span& b);
 
   // Spans that aren't sampled still have a valid SpanContext that propagates,
-  // but no span_impl_.
+  // but no span_impl_. The SpanContext should be treated as read-only but we
+  // can't mark it const because we need to swap() Spans.
   SpanContext context_;
 
   // Shared pointer to the underlying Span representation. This is nullptr for
   // Spans which are not recording events. This is an implementation detail, not
-  // part of the public API.
+  // part of the public API. We don't mark it const so that we can swap() Spans.
   std::shared_ptr<SpanImpl> span_impl_;
 
   friend class ::opencensus::context::Context;
