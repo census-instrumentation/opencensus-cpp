@@ -111,7 +111,7 @@ void Handler::ExportViewData(
                                    (rpc_index + 1) * kTimeSeriesBatchSize);
     for (int i = rpc_index * kTimeSeriesBatchSize; i < batch_end; ++i) {
       *request.add_time_series() = time_series[i];
-    };
+    }
     ctx[rpc_index].set_deadline(
         absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
     auto rpc(stub_->AsyncCreateTimeSeries(&ctx[rpc_index], request, &cq));
