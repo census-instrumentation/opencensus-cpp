@@ -122,7 +122,7 @@ cc_library(
 
 # Rapidjson library - used by zipkin exporter.
 http_archive(
-    name = "com_github_rapidjson",
+    name = "com_github_tencent_rapidjson",
     build_file_content =
         """
 cc_library(

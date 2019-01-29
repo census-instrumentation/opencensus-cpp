@@ -116,6 +116,21 @@ cc_library(
 )
 
 cc_library(
+    name = "grpc_trace_bin",
+    srcs = [
+        "internal/grpc_trace_bin.cc",
+    ],
+    hdrs = [
+        "propagation/grpc_trace_bin.h",
+    ],
+    copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":span_context",
+    ],
+)
+
+cc_library(
     name = "span_context",
     srcs = [
         "internal/span_context.cc",
@@ -221,6 +236,17 @@ cc_test(
         ":trace",
         ":with_span",
         "//opencensus/context",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "grpc_trace_bin_test",
+    srcs = ["internal/grpc_trace_bin_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":grpc_trace_bin",
+        ":span_context",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -407,6 +433,18 @@ cc_binary(
     linkstatic = 1,
     deps = [
         ":cloud_trace_context",
+        "@com_github_google_benchmark//:benchmark",
+    ],
+)
+
+cc_binary(
+    name = "grpc_trace_bin_benchmark",
+    testonly = 1,
+    srcs = ["internal/grpc_trace_bin_benchmark.cc"],
+    copts = TEST_COPTS,
+    linkstatic = 1,
+    deps = [
+        ":grpc_trace_bin",
         "@com_github_google_benchmark//:benchmark",
     ],
 )
