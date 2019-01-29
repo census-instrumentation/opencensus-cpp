@@ -28,7 +28,7 @@ namespace {
 MATCHER(IsValid, "is a valid SpanContext") { return arg.IsValid(); }
 MATCHER(IsInvalid, "is an invalid SpanContext") { return !arg.IsValid(); }
 
-TEST(GRPCTraceBinTest, ParseFull) {
+TEST(GrpcTraceBinTest, ParseFull) {
   constexpr unsigned char header_data[] = {
       0,                                               // version_id
       0,                                               // trace_id field
@@ -41,14 +41,14 @@ TEST(GRPCTraceBinTest, ParseFull) {
   };
   absl::string_view header(reinterpret_cast<const char*>(header_data),
                            sizeof(header_data));
-  SpanContext ctx = FromGRPCTraceBinHeader(header);
+  SpanContext ctx = FromGrpcTraceBinHeader(header);
   EXPECT_THAT(ctx, IsValid());
   EXPECT_EQ("64656667686970717273747576777879-8182838485868788-01",
             ctx.ToString());
-  EXPECT_EQ(header, ToGRPCTraceBinHeader(ctx));
+  EXPECT_EQ(header, ToGrpcTraceBinHeader(ctx));
 }
 
-TEST(GRPCTraceBinTest, ParseNotSampled) {
+TEST(GrpcTraceBinTest, ParseNotSampled) {
   constexpr unsigned char header_data[] = {
       0,                                               // version_id
       0,                                               // trace_id field
@@ -61,18 +61,18 @@ TEST(GRPCTraceBinTest, ParseNotSampled) {
   };
   absl::string_view header(reinterpret_cast<const char*>(header_data),
                            sizeof(header_data));
-  SpanContext ctx = FromGRPCTraceBinHeader(header);
+  SpanContext ctx = FromGrpcTraceBinHeader(header);
   EXPECT_THAT(ctx, IsValid());
   EXPECT_FALSE(ctx.trace_options().IsSampled())
       << "Expecting to not be sampled.";
   EXPECT_EQ("64656667686970717273747576777879-8182838485868788-00",
             ctx.ToString());
-  EXPECT_EQ(header, ToGRPCTraceBinHeader(ctx));
+  EXPECT_EQ(header, ToGrpcTraceBinHeader(ctx));
 }
 
-TEST(GRPCTraceBinTest, ExpectedFailures) {
+TEST(GrpcTraceBinTest, ExpectedFailures) {
 #define INVALID(hdr)                                                 \
-  EXPECT_THAT(FromGRPCTraceBinHeader(absl::string_view(              \
+  EXPECT_THAT(FromGrpcTraceBinHeader(absl::string_view(              \
                   reinterpret_cast<const char*>(hdr), sizeof(hdr))), \
               IsInvalid())
   INVALID("");

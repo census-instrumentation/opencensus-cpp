@@ -43,13 +43,13 @@ constexpr int kSpanIdOfs = kTraceIdOfs + 1 + kTraceIdLen;
 constexpr int kTraceOptionsOfs = kSpanIdOfs + 1 + kSpanIdLen;
 
 static_assert(1 + 1 + kTraceIdLen + 1 + kSpanIdLen + 1 + kTraceOptionsLen ==
-                  kGRPCTraceBinHeaderLen,
+                  kGrpcTraceBinHeaderLen,
               "header length is wrong");
 
 }  // namespace
 
-SpanContext FromGRPCTraceBinHeader(absl::string_view header) {
-  if (header.size() < kGRPCTraceBinHeaderLen ||
+SpanContext FromGrpcTraceBinHeader(absl::string_view header) {
+  if (header.size() < kGrpcTraceBinHeaderLen ||
       header[kVersionOfs] != kVersionId ||
       header[kTraceIdOfs] != kTraceIdField ||
       header[kSpanIdOfs] != kSpanIdField ||
@@ -65,13 +65,13 @@ SpanContext FromGRPCTraceBinHeader(absl::string_view header) {
       TraceOptions(&options));
 }
 
-std::string ToGRPCTraceBinHeader(const SpanContext& ctx) {
-  std::string out(kGRPCTraceBinHeaderLen, '\0');
-  ToGRPCTraceBinHeader(ctx, reinterpret_cast<uint8_t*>(&out[0]));
+std::string ToGrpcTraceBinHeader(const SpanContext& ctx) {
+  std::string out(kGrpcTraceBinHeaderLen, '\0');
+  ToGrpcTraceBinHeader(ctx, reinterpret_cast<uint8_t*>(&out[0]));
   return out;
 }
 
-void ToGRPCTraceBinHeader(const SpanContext& ctx, uint8_t* out) {
+void ToGrpcTraceBinHeader(const SpanContext& ctx, uint8_t* out) {
   out[kVersionOfs] = kVersionId;
   out[kTraceIdOfs] = kTraceIdField;
   ctx.trace_id().CopyTo(reinterpret_cast<uint8_t*>(&out[kTraceIdOfs + 1]));

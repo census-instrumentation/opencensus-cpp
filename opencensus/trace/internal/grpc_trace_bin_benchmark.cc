@@ -35,36 +35,36 @@ constexpr unsigned char header_data[] = {
 ABSL_CONST_INIT const absl::string_view header = absl::string_view(
     reinterpret_cast<const char*>(header_data), sizeof(header_data));
 
-void BM_FromGRPCTraceBin(benchmark::State& state) {
+void BM_FromGrpcTraceBin(benchmark::State& state) {
   while (state.KeepRunning()) {
-    FromGRPCTraceBinHeader(header);
+    FromGrpcTraceBinHeader(header);
   }
 }
-BENCHMARK(BM_FromGRPCTraceBin);
+BENCHMARK(BM_FromGrpcTraceBin);
 
-void BM_FromGRPCTraceBin_Invalid(benchmark::State& state) {
+void BM_FromGrpcTraceBin_Invalid(benchmark::State& state) {
   while (state.KeepRunning()) {
-    FromGRPCTraceBinHeader("");
+    FromGrpcTraceBinHeader("");
   }
 }
-BENCHMARK(BM_FromGRPCTraceBin_Invalid);
+BENCHMARK(BM_FromGrpcTraceBin_Invalid);
 
-void BM_ToGRPCTraceBin(benchmark::State& state) {
-  auto ctx = FromGRPCTraceBinHeader(header);
+void BM_ToGrpcTraceBin(benchmark::State& state) {
+  auto ctx = FromGrpcTraceBinHeader(header);
   while (state.KeepRunning()) {
-    ToGRPCTraceBinHeader(ctx);
+    ToGrpcTraceBinHeader(ctx);
   }
 }
-BENCHMARK(BM_ToGRPCTraceBin);
+BENCHMARK(BM_ToGrpcTraceBin);
 
-void BM_ToGRPCTraceBin_InPlace(benchmark::State& state) {
-  auto ctx = FromGRPCTraceBinHeader(header);
-  uint8_t out[kGRPCTraceBinHeaderLen];
+void BM_ToGrpcTraceBin_InPlace(benchmark::State& state) {
+  auto ctx = FromGrpcTraceBinHeader(header);
+  uint8_t out[kGrpcTraceBinHeaderLen];
   while (state.KeepRunning()) {
-    ToGRPCTraceBinHeader(ctx, out);
+    ToGrpcTraceBinHeader(ctx, out);
   }
 }
-BENCHMARK(BM_ToGRPCTraceBin_InPlace);
+BENCHMARK(BM_ToGrpcTraceBin_InPlace);
 
 }  // namespace
 }  // namespace propagation

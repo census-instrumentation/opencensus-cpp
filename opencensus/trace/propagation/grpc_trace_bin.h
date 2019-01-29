@@ -39,10 +39,10 @@ namespace propagation {
 //
 // See also:
 // https://github.com/census-instrumentation/opencensus-specs/blob/master/encodings/BinaryEncoding.md
-SpanContext FromGRPCTraceBinHeader(absl::string_view header);
+SpanContext FromGrpcTraceBinHeader(absl::string_view header);
 
 // Returns a value for the grpc-trace-bin header.
-std::string ToGRPCTraceBinHeader(const SpanContext& ctx);
+std::string ToGrpcTraceBinHeader(const SpanContext& ctx);
 
 // The length of the grpc-trace-bin value:
 //      1 (version)
@@ -54,11 +54,11 @@ std::string ToGRPCTraceBinHeader(const SpanContext& ctx);
 //   +  1 (trace_options length)
 //   ----
 //     29
-constexpr int kGRPCTraceBinHeaderLen = 29;
+constexpr int kGrpcTraceBinHeaderLen = 29;
 
 // Fills a pre-allocated buffer with the value for the grpc-trace-bin header.
-// The buffer must be at least kGRPCTraceBinHeaderLen bytes long.
-void ToGRPCTraceBinHeader(const SpanContext& ctx, uint8_t* out);
+// The buffer must be at least kGrpcTraceBinHeaderLen bytes long.
+void ToGrpcTraceBinHeader(const SpanContext& ctx, uint8_t* out);
 
 }  // namespace propagation
 }  // namespace trace
