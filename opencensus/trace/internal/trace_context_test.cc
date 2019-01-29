@@ -38,16 +38,6 @@ TEST(TraceParentTest, ParseFull) {
   EXPECT_EQ(header, ToTraceParentHeader(ctx));
 }
 
-TEST(TraceParentTest, ParseUppercase) {
-  SpanContext ctx = FromTraceParentHeader(
-      "00-404142434445464748494A4B4C4D4E4F-6162636465666768-01");
-  EXPECT_THAT(ctx, IsValid());
-  EXPECT_EQ("404142434445464748494a4b4c4d4e4f-6162636465666768-01",
-            ctx.ToString());
-  EXPECT_EQ("00-404142434445464748494a4b4c4d4e4f-6162636465666768-01",
-            ToTraceParentHeader(ctx));
-}
-
 TEST(TraceParentTest, ParseTraceDisabled) {
   constexpr char header[] =
       "00-404142434445464748494a4b4c4d4e4f-6162636465666768-00";
@@ -85,6 +75,8 @@ TEST(TraceParentTest, ExpectedFailures) {
       << "invalid delimiter.";
   INVALID("00-404142434445464748494A4B4C4D4E4F-6162636465666768_01")
       << "invalid delimiter.";
+  INVALID("00-404142434445464748494A4B4C4D4E4F-6162636465666768-01")
+      << "uppercase is invalid.";
 #undef INVALID
 }
 

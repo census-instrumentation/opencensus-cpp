@@ -29,17 +29,19 @@ namespace propagation {
 
 namespace {
 
-// Returns true if the string only contains valid hex digits.
-bool IsHexDigits(absl::string_view s) {
+// Returns true if the string only contains valid lowercase hex digits.
+bool IsLowercaseHexDigits(absl::string_view s) {
   for (int i = 0; i < s.length(); ++i) {
-    if (!absl::ascii_isxdigit(s[i])) return false;
+    if (!((s[i] >= '0' && s[i] <= '9') || (s[i] >= 'a' && s[i] <= 'f'))) {
+      return false;
+    }
   }
   return true;
 }
 
 // Returns true if the converted string was valid hex.
 bool FromHex(absl::string_view hex, std::string* bin) {
-  if (!IsHexDigits(hex)) return false;
+  if (!IsLowercaseHexDigits(hex)) return false;
   *bin = absl::HexStringToBytes(hex);
   return true;
 }
