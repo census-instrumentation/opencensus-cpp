@@ -30,7 +30,7 @@ namespace propagation {
 // Parses the value of the "traceparent: ..." header, returning a
 // SpanContext. If parsing fails, IsValid will be false.
 //
-// The input format is an uppercase hex string:
+// The input format is a lowercase hex string:
 //   - version_id: 1 byte, currently must be zero - hex encoded (2 characters)
 //   - trace_id: 16 bytes (opaque blob) - hex encoded (32 characters)
 //   - span_id: 8 bytes (opaque blob) - hex encoded (16 characters)
