@@ -44,6 +44,7 @@ constexpr int kTraceOptionsOfs = kSpanIdOfs + 1 + kSpanIdLen;
 
 constexpr int kTotalLen =
     1 + 1 + kTraceIdLen + 1 + kSpanIdLen + 1 + kTraceOptionsLen;
+static_assert(kTotalLen == kGRPCTraceBinHeaderLen, "header length is wrong");
 
 }  // namespace
 
@@ -65,6 +66,11 @@ SpanContext FromGRPCTraceBinHeader(absl::string_view header) {
 
 std::string ToGRPCTraceBinHeader(const SpanContext& ctx) {
   std::string out(kTotalLen, '\0');
+  ToGRPCTraceBinHeader(ctx, reinterpret_cast<uint8_t*>(&out[0]));
+  return out;
+}
+
+void ToGRPCTraceBinHeader(const SpanContext& ctx, uint8_t* out) {
   out[kVersionOfs] = kVersionId;
   out[kTraceIdOfs] = kTraceIdField;
   ctx.trace_id().CopyTo(reinterpret_cast<uint8_t*>(&out[kTraceIdOfs + 1]));
@@ -73,7 +79,6 @@ std::string ToGRPCTraceBinHeader(const SpanContext& ctx) {
   out[kTraceOptionsOfs] = kTraceOptionsField;
   ctx.trace_options().CopyTo(
       reinterpret_cast<uint8_t*>(&out[kTraceOptionsOfs + 1]));
-  return out;
 }
 
 }  // namespace propagation

@@ -15,6 +15,7 @@
 #ifndef OPENCENSUS_TRACE_PROPAGATION_GRPC_TRACE_BIN_H_
 #define OPENCENSUS_TRACE_PROPAGATION_GRPC_TRACE_BIN_H_
 
+#include <cstdint>
 #include <string>
 
 #include "absl/strings/string_view.h"
@@ -42,6 +43,12 @@ SpanContext FromGRPCTraceBinHeader(absl::string_view header);
 
 // Returns a value for the grpc-trace-bin header.
 std::string ToGRPCTraceBinHeader(const SpanContext& ctx);
+
+constexpr int kGRPCTraceBinHeaderLen = 29;
+
+// Fills a pre-allocated buffer with the value for the grpc-trace-bin header.
+// The buffer must be at least kGRPCTraceBinHeaderLen bytes long.
+void ToGRPCTraceBinHeader(const SpanContext& ctx, uint8_t* out);
 
 }  // namespace propagation
 }  // namespace trace

@@ -57,6 +57,15 @@ void BM_ToGRPCTraceBin(benchmark::State& state) {
 }
 BENCHMARK(BM_ToGRPCTraceBin);
 
+void BM_ToGRPCTraceBin_InPlace(benchmark::State& state) {
+  auto ctx = FromGRPCTraceBinHeader(header);
+  uint8_t out[kGRPCTraceBinHeaderLen];
+  while (state.KeepRunning()) {
+    ToGRPCTraceBinHeader(ctx, out);
+  }
+}
+BENCHMARK(BM_ToGRPCTraceBin_InPlace);
+
 }  // namespace
 }  // namespace propagation
 }  // namespace trace
