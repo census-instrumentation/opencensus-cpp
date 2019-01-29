@@ -42,14 +42,15 @@ constexpr int kTraceIdOfs = 1;
 constexpr int kSpanIdOfs = kTraceIdOfs + 1 + kTraceIdLen;
 constexpr int kTraceOptionsOfs = kSpanIdOfs + 1 + kSpanIdLen;
 
-constexpr int kTotalLen =
-    1 + 1 + kTraceIdLen + 1 + kSpanIdLen + 1 + kTraceOptionsLen;
-static_assert(kTotalLen == kGRPCTraceBinHeaderLen, "header length is wrong");
+static_assert(1 + 1 + kTraceIdLen + 1 + kSpanIdLen + 1 + kTraceOptionsLen ==
+                  kGRPCTraceBinHeaderLen,
+              "header length is wrong");
 
 }  // namespace
 
 SpanContext FromGRPCTraceBinHeader(absl::string_view header) {
-  if (header.size() < kTotalLen || header[kVersionOfs] != kVersionId ||
+  if (header.size() < kGRPCTraceBinHeaderLen ||
+      header[kVersionOfs] != kVersionId ||
       header[kTraceIdOfs] != kTraceIdField ||
       header[kSpanIdOfs] != kSpanIdField ||
       header[kTraceOptionsOfs] != kTraceOptionsField) {
@@ -65,7 +66,7 @@ SpanContext FromGRPCTraceBinHeader(absl::string_view header) {
 }
 
 std::string ToGRPCTraceBinHeader(const SpanContext& ctx) {
-  std::string out(kTotalLen, '\0');
+  std::string out(kGRPCTraceBinHeaderLen, '\0');
   ToGRPCTraceBinHeader(ctx, reinterpret_cast<uint8_t*>(&out[0]));
   return out;
 }

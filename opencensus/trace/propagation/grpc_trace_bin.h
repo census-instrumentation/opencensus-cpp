@@ -44,6 +44,16 @@ SpanContext FromGRPCTraceBinHeader(absl::string_view header);
 // Returns a value for the grpc-trace-bin header.
 std::string ToGRPCTraceBinHeader(const SpanContext& ctx);
 
+// The length of the grpc-trace-bin value:
+//      1 (version)
+//   +  1 (trace_id field)
+//   + 16 (length of trace_id)
+//   +  1 (span_id field)
+//   +  8 (span_id length)
+//   +  1 (trace_options field)
+//   +  1 (trace_options length)
+//   ----
+//     29
 constexpr int kGRPCTraceBinHeaderLen = 29;
 
 // Fills a pre-allocated buffer with the value for the grpc-trace-bin header.
