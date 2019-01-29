@@ -32,10 +32,9 @@ constexpr unsigned char header_data[] = {
     1,                                               // tracing enabled
 };
 
-ABSL_CONST_INIT const absl::string_view header = absl::string_view(
-    reinterpret_cast<const char*>(header_data), sizeof(header_data));
-
 void BM_FromGrpcTraceBin(benchmark::State& state) {
+  absl::string_view header(reinterpret_cast<const char*>(header_data),
+                           sizeof(header_data));
   while (state.KeepRunning()) {
     FromGrpcTraceBinHeader(header);
   }
@@ -50,6 +49,8 @@ void BM_FromGrpcTraceBin_Invalid(benchmark::State& state) {
 BENCHMARK(BM_FromGrpcTraceBin_Invalid);
 
 void BM_ToGrpcTraceBin(benchmark::State& state) {
+  absl::string_view header(reinterpret_cast<const char*>(header_data),
+                           sizeof(header_data));
   auto ctx = FromGrpcTraceBinHeader(header);
   while (state.KeepRunning()) {
     ToGrpcTraceBinHeader(ctx);
@@ -58,6 +59,8 @@ void BM_ToGrpcTraceBin(benchmark::State& state) {
 BENCHMARK(BM_ToGrpcTraceBin);
 
 void BM_ToGrpcTraceBin_InPlace(benchmark::State& state) {
+  absl::string_view header(reinterpret_cast<const char*>(header_data),
+                           sizeof(header_data));
   auto ctx = FromGrpcTraceBinHeader(header);
   uint8_t out[kGrpcTraceBinHeaderLen];
   while (state.KeepRunning()) {
