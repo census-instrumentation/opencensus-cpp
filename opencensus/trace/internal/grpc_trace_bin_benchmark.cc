@@ -32,8 +32,8 @@ constexpr unsigned char header_data[] = {
     1,                                               // tracing enabled
 };
 
-constexpr absl::string_view header(reinterpret_cast<const char*>(header_data),
-                                   sizeof(header_data));
+ABSL_CONST_INIT const absl::string_view header = absl::string_view(
+    reinterpret_cast<const char*>(header_data), sizeof(header_data));
 
 void BM_FromGRPCTraceBin(benchmark::State& state) {
   while (state.KeepRunning()) {
