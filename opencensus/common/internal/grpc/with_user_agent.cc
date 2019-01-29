@@ -14,8 +14,6 @@
 
 #include "opencensus/common/internal/grpc/with_user_agent.h"
 
-#include <string>
-
 #include <grpcpp/support/channel_arguments.h>
 #include "opencensus/common/version.h"
 

@@ -217,6 +217,7 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":context_util",
+        ":span_context",
         ":trace",
         ":with_span",
         "//opencensus/context",
