@@ -65,6 +65,15 @@ opencensus_lib(trace_context_util
                trace
                context)
 
+opencensus_lib(trace_grpc_trace_bin
+               PUBLIC
+               SRCS
+               internal/grpc_trace_bin.cc
+               DEPS
+               trace_span_context
+               absl::base
+               absl::strings)
+
 opencensus_lib(trace_span_context
                PUBLIC
                SRCS
@@ -113,6 +122,9 @@ opencensus_test(trace_context_util_test
                 trace_context_util
                 trace_with_span
                 context)
+
+opencensus_test(trace_grpc_trace_bin_test
+                internal/grpc_trace_bin_test.cc trace_grpc_trace_bin)
 
 opencensus_test(trace_link_test internal/link_test.cc trace)
 
