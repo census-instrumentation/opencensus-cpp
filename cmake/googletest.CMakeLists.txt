@@ -19,7 +19,7 @@ project(googletest-download NONE)
 include(ExternalProject)
 externalproject_add(googletest_project
                     GIT_REPOSITORY https://github.com/abseil/googletest
-                    GIT_TAG "master"
+                    GIT_TAG "e04254989d262ad453ebd4f5cf07474014d81d52"
                     SOURCE_DIR "${CMAKE_BINARY_DIR}/googletest-src"
                     BINARY_DIR "${CMAKE_BINARY_DIR}/googletest-build"
                     UPDATE_COMMAND ""
