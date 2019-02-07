@@ -1,17 +1,36 @@
 # How to Create a Release of OpenCensus C++ (for Maintainers Only)
 
-## Tagging the Release
+In this example, pretend branch `master` currently has
+[`OPENCENSUS_VERSION`](opencensus/common/version.h) set to "0.1.0-dev" -- which
+means we are creating release `v0.1.0`.
 
-The first step in the release process is to create a release branch, bump
-versions, and create a tag for the release. Our release branches follow the
+1. Create a new branch `v0.1.x`.
+1. Bump branch `master` to the next minor: `"0.2.0-dev"`.
+   ([example](https://github.com/census-instrumentation/opencensus-cpp/pull/271))
+1. On branch `v0.1.x`: pin build dependencies.
+   ([example](https://github.com/census-instrumentation/opencensus-cpp/pull/273))
+1. On branch `v0.1.x`: bump version to `"0.1.0"` (i.e. not `-dev` anymore)
+   ([example](https://github.com/census-instrumentation/opencensus-cpp/pull/274))
+1. Create a release with tag `v0.1.0`.
+   ([example](https://github.com/census-instrumentation/opencensus-cpp/releases/tag/v0.3.0))
+1. On branch `v0.1.x`: bump version to `"0.1.1-dev"` (i.e. the next `-dev`)
+   ([example](https://github.com/census-instrumentation/opencensus-cpp/pull/275))
+
+## Detailed instructions
+
+Our release branches follow the
 naming convention of `v<major>.<minor>.x`, while the tags include the patch
 version `v<major>.<minor>.<patch>`. For example, the same branch `v0.1.x` would
 be used to create all `v0.1` tags (e.g. `v0.1.0`, `v0.1.1`).
 
-In this section upstream repository refers to the main opencensus-cpp github
-repository.
+In this section, the remote called `upstream` refers to the official opencensus-cpp repository:
+`git@github.com:census-instrumentation/opencensus-cpp.git`
 
-Before any push to the upstream repository you need to create a [personal access
+The remote called `origin` refers to your fork, which you use to send PRs, e.g.:
+`git@github.com:$USER/opencensus-cpp.git`
+
+If you are using `https` instead of `ssh` as above,
+before any push to the upstream repository you need to create a [personal access
 token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/).
 
 1.  Create the release branch and push it to GitHub:
@@ -21,73 +40,109 @@ token](https://help.github.com/articles/creating-a-personal-access-token-for-the
     $ VERSION_FILES=(
         opencensus/common/version.h
       )
-    $ git checkout -b v$MAJOR.$MINOR.x master
+    $ git checkout -b v$MAJOR.$MINOR.x remotes/upstream/master
     $ git push upstream v$MAJOR.$MINOR.x
     ```
 
-    The branch will be automatically protected by the GitHub branch protection rule for release
-    branches.
+    The branch will be automatically protected by the GitHub branch protection
+    rule for release branches.
 
-2.  For `master` branch:
-
-    -   Change version files to the next minor snapshot (e.g. `0.2.0-dev`).
+1.  Bump branch `master` to the next minor version: `0.2.0-dev`
 
     ```bash
-    $ git checkout -b bump-version master
+    $ git checkout -b bump-version remotes/upstream/master
     # Change version to next minor (and keep -dev)
     $ sed -i 's/\(.*OPENCENSUS_VERSION.*\)[0-9]\+\.[0-9]\+\.[0-9]\+/\1'$MAJOR.$((MINOR+1)).0'/' \
       "${VERSION_FILES[@]}"
     $ tools/presubmit.sh
-    $ git commit -a -m "Start $MAJOR.$((MINOR+1)).0 development cycle"
+    $ git commit -a -m "Start $MAJOR.$((MINOR+1)).0 development cycle."
     ```
+    Also bump the version in `CMakeLists.txt`. Leave out the `-dev` suffix
+    because CMake doesn't support it.
 
-    -   Go through PR review and push the master branch to GitHub:
+    Push, then make a PR against the **`master`** branch:
 
     ```bash
-    $ git checkout master
-    $ git merge --ff-only bump-version
-    $ git push upstream master
+    $ git push origin bump-version
     ```
 
-3.  For `vMajor.Minor.x` branch:
-
-    -   Change version files to remove "-dev" for the next release
-        version (e.g. `0.4.0`). Commit the result and make a tag:
+1. Switch to the release branch and pin BUILD dependencies.
 
     ```bash
-    $ git checkout -b release v$MAJOR.$MINOR.x
+    $ git checkout -b deps remotes/upstream/v$MAJOR.$MINOR.x
+    ```
+
+    One day, this will be automated. In the meantime, edit the `WORKSPACE` file
+    and for every `http_archive`:
+    * Use `git ls-remote https://github.com/abc/def master` to determine the
+      commit.
+    * Download the archive and `sha256sum` it.
+    * Change `urls = ".../archive/master.zip"` to
+    `urls = ".../archive/$COMMIT.zip`.
+    * Change `strip_prefix` from `-master` to `-$COMMIT`.
+    * Add `sha256 = "$SHASUM"`.
+
+    Likewise update the `cmake/*.CMakeLists.txt` files.
+
+    Run `tools/presubmit.sh` to test building with bazel, and follow the
+    [CMake README](cmake/README.md) for CMake.
+
+    Push, then make a PR against the **`release`** branch, not the `master`
+    branch: (important!)
+
+    ```bash
+    $ git push origin deps
+    ```
+
+1. Bump the release branch to the release version. (remove `-dev`)
+
+    ```bash
+    $ git checkout -b release remotes/upstream/v$MAJOR.$MINOR.x
     # Change version to remove -dev
     $ sed -i 's/\(.*OPENCENSUS_VERSION.*[0-9]\+\.[0-9]\+\.[0-9]\+\)-dev/\1/' \
       "${VERSION_FILES[@]}"
     $ tools/presubmit.sh
-    $ git commit -a -m "Bump version to $MAJOR.$MINOR.$PATCH"
-    $ git tag -a v$MAJOR.$MINOR.$PATCH -m "Version $MAJOR.$MINOR.$PATCH"
+    $ git commit -a -m "Bump version to $MAJOR.$MINOR.$PATCH."
     ```
 
-    -   Change root build files to the next snapshot version (e.g.
-        `0.4.1-dev`). Commit the result:
+    Push, then make a PR against the **`release`** branch, not the `master`
+    branch: (important!)
 
     ```bash
+    $ git push origin release
+    ```
+
+1. Create the release with tag `v0.1.0` using the branch `v0.1.x`
+
+    * Go to the [releases][RELEASE_LINK] page on GitHub.
+    * Click "Draft a new release."
+    * Set the "Tag version" to `v0.1.0`.
+    * Set the "Target" to `v0.1.x`. (important!)
+    * Set the "Release title" to "v0.1.0 Release."
+    * Fill out the description with highlights.
+    * Click "Publish release."
+
+1. Bump the release branch to the next `-dev` version.
+
+    ```bash
+    $ git checkout -b release remotes/upstream/v$MAJOR.$MINOR.x
     # Change version to next patch and add -dev
-    $ sed -i 's/\(.*OPENCENSUS_VERSION.*\)[0-9]\+\.[0-9]\+\.[0-9]\+/\1'$MAJOR.$((MINOR+1)).$((PATCH+1))-dev'/' \
+    $ sed -i 's/\(.*OPENCENSUS_VERSION.*\)[0-9]\+\.[0-9]\+\.[0-9]\+/\1'$MAJOR.$MINOR.$((PATCH+1))-dev'/' \
       "${VERSION_FILES[@]}"
     $ tools/presubmit.sh
-    $ git commit -a -m "Bump version to $MAJOR.$MINOR.$((PATCH+1))-dev"
+    $ git commit -a -m "Bump version to $MAJOR.$MINOR.$((PATCH+1))-dev."
     ```
 
-    -   Go through PR review and push the release tag and updated release branch
-        to GitHub:
+    Also bump the version in `CMakeLists.txt`. Leave out the `-dev` suffix
+    because CMake doesn't support it.
+
+    Push, then make a PR against the **`release`** branch, not the `master`
+    branch: (important!)
 
     ```bash
-    $ git checkout v$MAJOR.$MINOR.x
-    $ git merge --ff-only release
-    $ git push upstream v$MAJOR.$MINOR.$PATCH
-    $ git push upstream v$MAJOR.$MINOR.x
+    $ git push origin release
     ```
 
-4. Write release notes
-   -   Go to the [release page][RELEASE_LINK], draft a new release and publish
-       it after review.
-
+1. You're done! `\o/`
 
 [RELEASE_LINK]: https://github.com/census-instrumentation/opencensus-cpp/releases
