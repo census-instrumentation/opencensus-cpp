@@ -42,7 +42,8 @@ constexpr int kTraceIdOfs = 1;
 constexpr int kSpanIdOfs = kTraceIdOfs + 1 + kTraceIdLen;
 constexpr int kTraceOptionsOfs = kSpanIdOfs + 1 + kSpanIdLen;
 
-static_assert(1 + 1 + kTraceIdLen + 1 + kSpanIdLen + 1 + kTraceOptionsLen ==
+static_assert(kVersionLen + 1 + kTraceIdLen + 1 + kSpanIdLen + 1 +
+                      kTraceOptionsLen ==
                   kGrpcTraceBinHeaderLen,
               "header length is wrong");
 

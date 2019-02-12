@@ -127,6 +127,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":span_context",
+        "@com_google_absl//absl/strings",
     ],
 )
 
