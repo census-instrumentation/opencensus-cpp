@@ -42,6 +42,10 @@ class TraceOptions final {
   // the process, e.g. to Stackdriver/Zipkin.
   bool IsSampled() const;
 
+  // Set IsSampled for the TraceOptions. Normally, this is invoked
+  // implicitly by StartSpan
+  void SetSampled(bool is_sampled);
+
   bool operator==(const TraceOptions& that) const;
 
   // Returns a 2-char hex string of the TraceOptions value.
@@ -53,9 +57,6 @@ class TraceOptions final {
  private:
   friend class SpanGenerator;
   friend class SpanTestPeer;
-
-  // Only StartSpan should be calling this.
-  void SetSampled(bool is_sampled);
 
   uint8_t rep_[kSize];
 };
