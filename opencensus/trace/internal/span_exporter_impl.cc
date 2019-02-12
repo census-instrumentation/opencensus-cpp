@@ -32,7 +32,6 @@ SpanExporterImpl* SpanExporterImpl::Get() {
   return global_span_exporter_impl;
 }
 
-// Create detached worker thread
 SpanExporterImpl::SpanExporterImpl(uint32_t buffer_size,
                                    absl::Duration interval)
     : buffer_size_(buffer_size), interval_(interval) {}
@@ -49,12 +48,15 @@ void SpanExporterImpl::RegisterHandler(
 void SpanExporterImpl::AddSpan(
     const std::shared_ptr<opencensus::trace::SpanImpl>& span_impl) {
   absl::MutexLock l(&span_mu_);
+  if (!collect_spans_) return;
   spans_.emplace_back(span_impl);
 }
 
 void SpanExporterImpl::StartExportThread() {
   t_ = std::thread(&SpanExporterImpl::RunWorkerLoop, this);
   thread_started_ = true;
+  absl::MutexLock l(&span_mu_);
+  collect_spans_ = true;
 }
 
 bool SpanExporterImpl::IsBufferFull() const {

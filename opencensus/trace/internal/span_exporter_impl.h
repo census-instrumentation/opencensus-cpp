@@ -88,6 +88,8 @@ class SpanExporterImpl {
   std::vector<std::unique_ptr<SpanExporter::Handler>> handlers_
       GUARDED_BY(handler_mu_);
   bool thread_started_ GUARDED_BY(handler_mu_) = false;
+  // Don't collect spans until an exporter has been registered.
+  bool collect_spans_ GUARDED_BY(span_mu_) = false;
   std::thread t_ GUARDED_BY(handler_mu_);
 };
 
