@@ -6,8 +6,27 @@ matrix:
     - os: linux
       dist: trusty
       sudo: false
+      name: "check format"
+      script: tools/travis/check_format.sh
+    - os: linux
+      dist: trusty
+      sudo: false
+      env: BAZEL_OS=linux
+      script: tools/travis/build_bazel.sh
+    - os: linux
+      dist: trusty
+      sudo: false
+      compiler: gcc
+      env: BAZEL_OS=linux
+      script: tools/travis/build_bazel.sh
+    - os: linux
+      dist: trusty
+      sudo: false
       env: CMAKE_OS=linux
       script: tools/travis/build_cmake.sh
+    - os: osx
+      env: BAZEL_OS=darwin
+      script: tools/travis/build_bazel.sh
 
 cache:
   directories:
