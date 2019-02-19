@@ -51,7 +51,7 @@ class TraceOptions final {
   void CopyTo(uint8_t* buf) const;
 
   // Creates a new copy of a TraceOptions with sampled bit set by is_sampled
-  static TraceOptions SetSampled(TraceOptions parent, bool is_sampled);
+  static TraceOptions SetSampled(const TraceOptions& parent, bool is_sampled);
 
  private:
   friend class SpanGenerator;
