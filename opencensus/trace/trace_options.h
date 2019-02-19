@@ -42,10 +42,6 @@ class TraceOptions final {
   // the process, e.g. to Stackdriver/Zipkin.
   bool IsSampled() const;
 
-  // Set IsSampled for the TraceOptions. Normally, this is invoked
-  // implicitly by StartSpan
-  void SetSampled(bool is_sampled);
-
   bool operator==(const TraceOptions& that) const;
 
   // Returns a 2-char hex string of the TraceOptions value.
@@ -54,9 +50,15 @@ class TraceOptions final {
   // Copies the TraceOptions data to a buffer, which must hold kSize bytes.
   void CopyTo(uint8_t* buf) const;
 
+  // Creates a new copy of a TraceOptions with sampled bit set by is_sampled
+  static TraceOptions SetSampled(TraceOptions parent, bool is_sampled);
+
  private:
   friend class SpanGenerator;
   friend class SpanTestPeer;
+
+  // Only StartSpan should be calling this.
+  void SetSampled(bool is_sampled);
 
   uint8_t rep_[kSize];
 };
