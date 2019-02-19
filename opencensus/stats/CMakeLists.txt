@@ -54,6 +54,8 @@ opencensus_lib(stats_core
                absl::optional
                absl::span)
 
+target_compile_definitions(opencensus_stats_core PUBLIC $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>)
+
 opencensus_lib(stats_recording
                SRCS
                internal/recording.cc
