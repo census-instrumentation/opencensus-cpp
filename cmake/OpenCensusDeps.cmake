@@ -17,6 +17,8 @@ if(BUILD_TESTING)
     message(STATUS "Dependency: googletest (BUILD_TESTING=${BUILD_TESTING})")
     
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+      # All the libraries in the build must use either /MD or /MT (runtime library to link)
+      #
       # force this option to ON so that Google Test will use /MD instead of /MT
       # /MD is now the default for Visual Studio, so it should be our default, too
       option(gtest_force_shared_crt
