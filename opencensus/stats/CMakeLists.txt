@@ -54,6 +54,7 @@ opencensus_lib(stats_core
                absl::optional
                absl::span)
 
+# Defines NOMINMAX when compiling with MSVC to fix build errors
 target_compile_definitions(opencensus_stats_core PUBLIC $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>)
 
 opencensus_lib(stats_recording
