@@ -50,8 +50,8 @@ class TraceOptions final {
   // Copies the TraceOptions data to a buffer, which must hold kSize bytes.
   void CopyTo(uint8_t* buf) const;
 
-  // Creates a new copy of a TraceOptions with sampled bit set by is_sampled
-  static TraceOptions SetSampled(const TraceOptions& parent, bool is_sampled);
+  // Returns a new copy of this TraceOptions with sampled bit set by is_sampled
+  TraceOptions WithSampling(bool is_sampled) const;
 
  private:
   friend class SpanGenerator;

@@ -46,9 +46,8 @@ void TraceOptions::SetSampled(bool is_sampled) {
   rep_[0] = (rep_[0] & ~kIsSampled) | (is_sampled ? kIsSampled : 0);
 }
 
-TraceOptions TraceOptions::SetSampled(const TraceOptions& parent,
-                                      bool is_sampled) {
-  TraceOptions child = TraceOptions(parent);
+TraceOptions TraceOptions::WithSampling(bool is_sampled) const {
+  TraceOptions child = *this;
   child.SetSampled(is_sampled);
   return child;
 }

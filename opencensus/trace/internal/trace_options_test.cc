@@ -51,7 +51,7 @@ TEST(TraceOptionsTest, Comparison) {
 TEST(TraceOptionsTest, CopyAndSetSampled) {
   TraceOptions a;
   SpanTestPeer::SetSampled(&a, true);
-  TraceOptions b = TraceOptions::SetSampled(a, false);
+  TraceOptions b = a.WithSampling(false);
   EXPECT_TRUE(a.IsSampled());
   EXPECT_FALSE(b.IsSampled());
 }
