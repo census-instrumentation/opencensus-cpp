@@ -24,7 +24,7 @@ opencensus_lib(common_random
 
 opencensus_lib(common_stats_object DEPS absl::time)
 
-# Defines NOMINMAX when compiling with MSVC to fix build errors
+# Define NOMINMAX to fix build errors when compiling with MSVC.
 target_compile_definitions(opencensus_common_stats_object INTERFACE $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>)
 
 opencensus_lib(common_string_vector_hash)
