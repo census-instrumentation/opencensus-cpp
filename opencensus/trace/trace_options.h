@@ -55,12 +55,6 @@ class TraceOptions final {
   TraceOptions WithSampling(bool is_sampled) const;
 
  private:
-  friend class SpanGenerator;
-  friend class SpanTestPeer;
-
-  // Only StartSpan should be calling this.
-  void SetSampled(bool is_sampled);
-
   uint8_t rep_[kSize];
 };
 
