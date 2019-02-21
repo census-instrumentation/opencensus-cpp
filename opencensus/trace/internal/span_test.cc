@@ -35,10 +35,6 @@ class SpanTestPeer {
     return span->span_impl_for_test()->parent_span_id();
   }
 
-  static void SetSampled(TraceOptions* opts, bool is_sampled) {
-    opts->SetSampled(is_sampled);
-  }
-
   static exporter::SpanData ToSpanData(Span* span) {
     return span->span_impl_for_test()->ToSpanData();
   }
@@ -291,10 +287,8 @@ TEST(SpanTest, ChildInheritsTraceOption) {
                                   9, 10, 11, 12, 13, 14, 15, 16};
   constexpr uint8_t span_id[] = {1, 0, 0, 0, 0, 0, 0, 11};
   // Create a parent context with TraceOptions set to sampled.
-  TraceOptions trace_options;
-  SpanTestPeer::SetSampled(&trace_options, true);
-  SpanContext parent_ctx1{TraceId(trace_id), SpanId(span_id),
-                          TraceOptions(trace_options)};
+  TraceOptions trace_options = TraceOptions().WithSampling(true);
+  SpanContext parent_ctx1{TraceId(trace_id), SpanId(span_id), trace_options};
 
   // Create a child Span with default sampling.
   auto span1 = Span::StartSpanWithRemoteParent("Span1", parent_ctx1);

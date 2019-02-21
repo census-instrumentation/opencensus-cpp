@@ -89,7 +89,7 @@ class SpanGenerator {
                 parent_ctx, has_remote_parent, trace_id, span_id, name,
                 options.parent_links);
       }
-      trace_options.SetSampled(should_sample);
+      trace_options = trace_options.WithSampling(should_sample);
     }
     SpanContext context(trace_id, span_id, trace_options);
     SpanImpl* impl = nullptr;

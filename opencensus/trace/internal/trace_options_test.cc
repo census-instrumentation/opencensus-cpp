@@ -19,13 +19,6 @@
 namespace opencensus {
 namespace trace {
 
-class SpanTestPeer {
- public:
-  static void SetSampled(TraceOptions* opts, bool is_sampled) {
-    opts->SetSampled(is_sampled);
-  }
-};
-
 namespace {
 
 TEST(TraceOptionsTest, SetSampled) {
@@ -33,10 +26,11 @@ TEST(TraceOptionsTest, SetSampled) {
 
   EXPECT_EQ("00", opts.ToHex());
   EXPECT_FALSE(opts.IsSampled());
-  SpanTestPeer::SetSampled(&opts, true);
+  opts = opts.WithSampling(true);
   EXPECT_EQ("01", opts.ToHex());
   EXPECT_TRUE(opts.IsSampled());
-  SpanTestPeer::SetSampled(&opts, false);
+  opts = opts.WithSampling(false);
+  EXPECT_EQ("00", opts.ToHex());
   EXPECT_FALSE(opts.IsSampled());
 }
 
@@ -44,8 +38,15 @@ TEST(TraceOptionsTest, Comparison) {
   TraceOptions a;
   TraceOptions b;
   EXPECT_EQ(a, b);
-  SpanTestPeer::SetSampled(&a, true);
+  b = b.WithSampling(true);
   EXPECT_FALSE(a == b);
+}
+
+TEST(TraceOptionsTest, CopyAndSetSampled) {
+  TraceOptions a = TraceOptions().WithSampling(true);
+  TraceOptions b = a.WithSampling(false);
+  EXPECT_TRUE(a.IsSampled());
+  EXPECT_FALSE(b.IsSampled());
 }
 
 }  // namespace
