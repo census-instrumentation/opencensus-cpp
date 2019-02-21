@@ -48,6 +48,14 @@ TEST(TraceOptionsTest, Comparison) {
   EXPECT_FALSE(a == b);
 }
 
+TEST(TraceOptionsTest, CopyAndSetSampled) {
+  TraceOptions a;
+  SpanTestPeer::SetSampled(&a, true);
+  TraceOptions b = a.WithSampling(false);
+  EXPECT_TRUE(a.IsSampled());
+  EXPECT_FALSE(b.IsSampled());
+}
+
 }  // namespace
 }  // namespace trace
 }  // namespace opencensus
