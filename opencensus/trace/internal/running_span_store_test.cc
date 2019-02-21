@@ -38,13 +38,6 @@
 namespace opencensus {
 namespace trace {
 
-class SpanTestPeer {
- public:
-  static void SetSampled(TraceOptions* opts, bool is_sampled) {
-    opts->SetSampled(is_sampled);
-  }
-};
-
 namespace exporter {
 class RunningSpanStoreImplTestPeer {
  public:
