@@ -42,8 +42,11 @@ std::string TraceOptions::ToHex() const {
 
 void TraceOptions::CopyTo(uint8_t* buf) const { memcpy(buf, rep_, kSize); }
 
-void TraceOptions::SetSampled(bool is_sampled) {
-  rep_[0] = (rep_[0] & ~kIsSampled) | (is_sampled ? kIsSampled : 0);
+TraceOptions TraceOptions::WithSampling(bool is_sampled) const {
+  uint8_t buf[kSize];
+  CopyTo(buf);
+  buf[0] = (buf[0] & ~kIsSampled) | (is_sampled ? kIsSampled : 0);
+  return TraceOptions(buf);
 }
 
 }  // namespace trace
