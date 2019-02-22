@@ -42,11 +42,8 @@ http_archive(
 # gRPC
 http_archive(
     name = "com_github_grpc_grpc",
-    # TODO: Unpin grpc and go back to master when
-    # https://github.com/grpc/grpc/pull/18082 is resolved.
-    # (build is broken on darwin)
-    strip_prefix = "grpc-b03e014ad82c39b7c91d794bc775c0d4ec187e1b",
-    urls = ["https://github.com/grpc/grpc/archive/b03e014ad82c39b7c91d794bc775c0d4ec187e1b.tar.gz"],
+    strip_prefix = "grpc-master",
+    urls = ["https://github.com/grpc/grpc/archive/master.tar.gz"],
 )
 
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
