@@ -53,17 +53,6 @@ load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
 grpc_deps()
 
-# These bind()s are needed for the cc_grpc_library() rule to work.
-bind(
-    name = "grpc++_codegen_proto",
-    actual = "@com_github_grpc_grpc//:grpc++_codegen_proto",
-)
-
-bind(
-    name = "grpc_cpp_plugin",
-    actual = "@com_github_grpc_grpc//:grpc_cpp_plugin",
-)
-
 # Used by prometheus-cpp.
 local_repository(
     name = "net_zlib_zlib",
