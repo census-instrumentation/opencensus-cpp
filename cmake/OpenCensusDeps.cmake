@@ -14,26 +14,26 @@
 
 include(FetchContent)
 
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/abseil/googletest
-  GIT_TAG        ed2fe122f8dc9aca844d724986d1d5cf5b65ea4e
-)
-FetchContent_Declare(
-  abseil
-  GIT_REPOSITORY https://github.com/abseil/abseil-cpp
-  GIT_TAG        master
-)
-FetchContent_Declare(
-  prometheus
-  GIT_REPOSITORY https://github.com/jupp0r/prometheus-cpp
-  GIT_TAG        master
-)
+fetchcontent_declare(googletest
+                     GIT_REPOSITORY
+                     https://github.com/abseil/googletest
+                     GIT_TAG
+                     ed2fe122f8dc9aca844d724986d1d5cf5b65ea4e)
+fetchcontent_declare(abseil
+                     GIT_REPOSITORY
+                     https://github.com/abseil/abseil-cpp
+                     GIT_TAG
+                     master)
+fetchcontent_declare(prometheus
+                     GIT_REPOSITORY
+                     https://github.com/jupp0r/prometheus-cpp
+                     GIT_TAG
+                     master)
 
-FetchContent_GetProperties(googletest)
+fetchcontent_getproperties(googletest)
 if(BUILD_TESTING)
   message(STATUS "Dependency: googletest (BUILD_TESTING=${BUILD_TESTING})")
-  
+
   if(NOT googletest_POPULATED)
     if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
       # All the libraries in the build must use either /MD or /MT (runtime
@@ -47,19 +47,20 @@ if(BUILD_TESTING)
         "Use shared (DLL) run-time lib even when Google Test is built as static lib."
         ON)
     endif()
-    
-    FetchContent_Populate(googletest)
-    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
+
+    fetchcontent_populate(googletest)
+    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR}
+                     EXCLUDE_FROM_ALL)
   endif()
 endif()
 
-FetchContent_GetProperties(abseil)
+fetchcontent_getproperties(abseil)
 if(NOT abseil_POPULATED)
-  FetchContent_Populate(abseil)
+  fetchcontent_populate(abseil)
   add_subdirectory(${abseil_SOURCE_DIR} ${abseil_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-FetchContent_GetProperties(prometheus)
+fetchcontent_getproperties(prometheus)
 if(NOT prometheus_POPULATED)
   set(ENABLE_PUSH OFF CACHE BOOL "Build prometheus-cpp push library" FORCE)
   set(ENABLE_PULL OFF CACHE BOOL "Build prometheus-cpp pull library" FORCE)
@@ -67,6 +68,7 @@ if(NOT prometheus_POPULATED)
       CACHE BOOL "Enable gzip compression for prometheus-cpp"
       FORCE)
   set(ENABLE_TESTING OFF CACHE BOOL "Build test for prometheus-cpp" FORCE)
-  FetchContent_Populate(prometheus)
-  add_subdirectory(${prometheus_SOURCE_DIR} ${prometheus_BINARY_DIR} EXCLUDE_FROM_ALL)
+  fetchcontent_populate(prometheus)
+  add_subdirectory(${prometheus_SOURCE_DIR} ${prometheus_BINARY_DIR}
+                   EXCLUDE_FROM_ALL)
 endif()
