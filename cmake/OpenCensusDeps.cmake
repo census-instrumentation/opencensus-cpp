@@ -12,10 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if(BUILD_TESTING)
-  if(NOT TARGET gtest_main)
-    message(STATUS "Dependency: googletest (BUILD_TESTING=${BUILD_TESTING})")
+include(FetchContent)
 
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/abseil/googletest
+  GIT_TAG        ed2fe122f8dc9aca844d724986d1d5cf5b65ea4e
+)
+FetchContent_Declare(
+  abseil
+  GIT_REPOSITORY https://github.com/abseil/abseil-cpp
+  GIT_TAG        master
+)
+FetchContent_Declare(
+  prometheus
+  GIT_REPOSITORY https://github.com/jupp0r/prometheus-cpp
+  GIT_TAG        master
+)
+
+FetchContent_GetProperties(googletest)
+if(BUILD_TESTING)
+  message(STATUS "Dependency: googletest (BUILD_TESTING=${BUILD_TESTING})")
+  
+  if(NOT googletest_POPULATED)
     if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
       # All the libraries in the build must use either /MD or /MT (runtime
       # library to link)
@@ -28,74 +47,26 @@ if(BUILD_TESTING)
         "Use shared (DLL) run-time lib even when Google Test is built as static lib."
         ON)
     endif()
-
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/googletest.CMakeLists.txt
-                   ${CMAKE_BINARY_DIR}/googletest-download/CMakeLists.txt)
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
-    if(result)
-      message(FATAL_ERROR "CMake step failed: ${result}")
-    endif()
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
-    if(result)
-      message(FATAL_ERROR "Build step failed: ${result}")
-    endif()
-
-    add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
-                     ${CMAKE_BINARY_DIR}/googletest-build EXCLUDE_FROM_ALL)
+    
+    FetchContent_Populate(googletest)
+    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR} EXCLUDE_FROM_ALL)
   endif()
 endif()
 
-# Load abseil second, it depends on googletest.
-if(NOT TARGET absl::base)
-  message(STATUS "Dependency: abseil")
-
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/abseil.CMakeLists.txt
-                 ${CMAKE_BINARY_DIR}/abseil-download/CMakeLists.txt)
-  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                  RESULT_VARIABLE result
-                  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/abseil-download)
-  if(result)
-    message(FATAL_ERROR "CMake step failed: ${result}")
-  endif()
-  execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                  RESULT_VARIABLE result
-                  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/abseil-download)
-  if(result)
-    message(FATAL_ERROR "Build step failed: ${result}")
-  endif()
-
-  add_subdirectory(${CMAKE_BINARY_DIR}/abseil-src
-                   ${CMAKE_BINARY_DIR}/abseil-build EXCLUDE_FROM_ALL)
+FetchContent_GetProperties(abseil)
+if(NOT abseil_POPULATED)
+  FetchContent_Populate(abseil)
+  add_subdirectory(${abseil_SOURCE_DIR} ${abseil_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-if(NOT TARGET prometheus-cpp::core)
-  message(STATUS "Dependency: prometheus-cpp")
-
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/prometheus-cpp.CMakeLists.txt
-                 ${CMAKE_BINARY_DIR}/prometheus-download/CMakeLists.txt)
-  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                  RESULT_VARIABLE result
-                  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/prometheus-download)
-  if(result)
-    message(FATAL_ERROR "CMake step failed: ${result}")
-  endif()
-  execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                  RESULT_VARIABLE result
-                  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/prometheus-download)
-  if(result)
-    message(FATAL_ERROR "Build step failed: ${result}")
-  endif()
-
+FetchContent_GetProperties(prometheus)
+if(NOT prometheus_POPULATED)
   set(ENABLE_PUSH OFF CACHE BOOL "Build prometheus-cpp push library" FORCE)
   set(ENABLE_PULL OFF CACHE BOOL "Build prometheus-cpp pull library" FORCE)
   set(ENABLE_COMPRESSION OFF
       CACHE BOOL "Enable gzip compression for prometheus-cpp"
       FORCE)
   set(ENABLE_TESTING OFF CACHE BOOL "Build test for prometheus-cpp" FORCE)
-  add_subdirectory(${CMAKE_BINARY_DIR}/prometheus-src
-                   ${CMAKE_BINARY_DIR}/prometheus-build EXCLUDE_FROM_ALL)
+  FetchContent_Populate(prometheus)
+  add_subdirectory(${prometheus_SOURCE_DIR} ${prometheus_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
