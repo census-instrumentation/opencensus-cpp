@@ -15,3 +15,9 @@ before_build:
 
 build:
   project: $(APPVEYOR_BUILD_FOLDER)\$(APPVEYOR_PROJECT_NAME).sln
+
+test_script:
+- cmd: $(APPVEYOR_BUILD_FOLDER)\opencensus_trace_local_span_store_test.exe --gtest_output=xml:tests.xml
+
+on_finish:
+- ps: (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\tests.xml))
