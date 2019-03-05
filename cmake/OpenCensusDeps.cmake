@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include(FetchContent.cmake)
+include(FetchContent)
 
 fetchcontent_declare(googletest
                      GIT_REPOSITORY
