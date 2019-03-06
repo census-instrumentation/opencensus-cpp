@@ -19,7 +19,15 @@ build:
 test_script:
 - ps: |
     Write-Output "Compiler: $env:APPVEYOR_BUILD_FOLDER"
-    Get-ChildItem -Recurse -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*_test.exe" | ForEach-Object { Write-Output $_.FullName }
+    
+    Get-ChildItem -Recurse -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*_test.exe" | ForEach-Object { 
+      Write-Output $_.FullName
+      & $_.FullName --gtest_output=xml:"$($_.Name)_report.xml"
+    }
 
 on_finish:
-- ps: (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\tests.xml))
+- ps: |
+    Get-ChildItem -Recurse -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*_test_report.xml" | ForEach-Object { 
+      Write-Output $_.FullName
+      (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", $_.FullName)
+    }
