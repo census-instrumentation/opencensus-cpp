@@ -18,13 +18,18 @@ build:
 
 test_script:
 - ps: |
-    Write-Output "Compiler: $env:APPVEYOR_BUILD_FOLDER"
-    
     Get-ChildItem -Recurse -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*_test.exe" | ForEach-Object { 
       Write-Output $_.FullName
       $report_name = "--gtest_output=xml:" + $_.BaseName + "_report.xml"
-      Write-Output $report_name
-      Start-Process -FilePath $_.FullName -ArgumentList $report_name -Verbose
+      
+      #Write-Output $report_name
+      #Start-Process -FilePath $_.FullName -ArgumentList $report_name -Verbose
+      
+      $cmdArgList = @(
+          ('"{0}"' -f $report_name)
+      )
+
+      & $_.FullName $cmdArgList
     }
 
 on_finish:
