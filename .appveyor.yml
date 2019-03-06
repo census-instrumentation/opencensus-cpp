@@ -22,7 +22,8 @@ test_script:
     
     Get-ChildItem -Recurse -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*_test.exe" | ForEach-Object { 
       Write-Output $_.FullName
-      & $_.FullName --gtest_output=xml:"$($_.Name)_report.xml"
+      $report_name = $_.Name + "_report.xml"
+      Start-Process -FilePath $_.FullName -ArgumentList "--gtest_output=xml:$report_name"
     }
 
 on_finish:
