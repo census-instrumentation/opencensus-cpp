@@ -5,7 +5,7 @@ image: Visual Studio 2017
 
 platform:
   - x64
- 
+
 configuration:
   - Release
   - Debug
@@ -18,13 +18,13 @@ build:
 
 test_script:
 - ps: |
-    Get-ChildItem -Recurse -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*_test.exe" | ForEach-Object { 
+    Get-ChildItem -Recurse -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*_test.exe" | ForEach-Object {
       Write-Output $_.FullName
       $report_name = "--gtest_output=xml:" + $_.BaseName + "_report.xml"
-      
+
       #Write-Output $report_name
       #Start-Process -FilePath $_.FullName -ArgumentList $report_name -Verbose
-      
+
       $cmdArgList = @(
           ('"{0}"' -f $report_name)
       )
@@ -34,7 +34,7 @@ test_script:
 
 on_finish:
 - ps: |
-    Get-ChildItem -Recurse -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*_test_report.xml" | ForEach-Object { 
+    Get-ChildItem -Recurse -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*_test_report.xml" | ForEach-Object {
       Write-Output $_.FullName
       (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", $_.FullName)
     }
