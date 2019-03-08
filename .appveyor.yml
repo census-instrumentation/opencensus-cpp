@@ -1,20 +1,40 @@
 # Without this "Update next build number or change version format."
 version: "{build}"
 
-environment:
-  global:
-    BAZEL_ROOT: c:\bazel_root\
-    INSTALL_CACHE: c:\install_cache\
-    APPVEYOR_SAVE_CACHE_ON_ERROR: true
-  matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+image: Visual Studio 2017
 
-install:
-  - set PATH=%PATH%;%INSTALL_CACHE%
-  - cmd: tools\appveyor\install.bat
+platform:
+  - x64
 
-build_script:
-  - cmd: tools\appveyor\build.bat
+configuration:
+  - Release
+  - Debug
+
+before_build:
+    - cmake -G "Visual Studio 15 2017 Win64" .
+
+build:
+  project: $(APPVEYOR_BUILD_FOLDER)\$(APPVEYOR_PROJECT_NAME).sln
 
 test_script:
-  - cmd: tools\appveyor\test.bat
+- ps: |
+    Get-ChildItem -Recurse -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*_test.exe" | ForEach-Object {
+      Write-Output $_.FullName
+      $report_name = "--gtest_output=xml:" + $_.BaseName + "_report.xml"
+
+      #Write-Output $report_name
+      #Start-Process -FilePath $_.FullName -ArgumentList $report_name -Verbose
+
+      $cmdArgList = @(
+          ('"{0}"' -f $report_name)
+      )
+
+      & $_.FullName $cmdArgList
+    }
+
+on_finish:
+- ps: |
+    Get-ChildItem -Recurse -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*_test_report.xml" | ForEach-Object {
+      Write-Output $_.FullName
+      (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", $_.FullName)
+    }
