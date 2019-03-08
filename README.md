@@ -59,7 +59,7 @@ We are targeting the following compilers:
 
 * gcc 4.8.1
 * clang 3.4
-* MSVC 19
+* Microsoft Visual Studio 2017 15.9 (see [the appveyor documentation](https://www.appveyor.com/docs/windows-images-software/#visual-studio-2017) for the exact version)
 
 [gitter-image]: https://badges.gitter.im/census-instrumentation/lobby.svg
 [gitter-url]: https://gitter.im/census-instrumentation/lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
