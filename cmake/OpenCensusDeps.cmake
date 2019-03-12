@@ -29,6 +29,11 @@ fetchcontent_declare(prometheus
                      https://github.com/jupp0r/prometheus-cpp
                      GIT_TAG
                      master)
+fetchcontent_declare(benchmark
+					 GIT_REPOSITORY 
+					 https://github.com/google/benchmark
+					 GIT_TAG 
+					 master)
 
 fetchcontent_getproperties(googletest)
 if(BUILD_TESTING)
@@ -71,4 +76,11 @@ if(NOT prometheus_POPULATED)
   fetchcontent_populate(prometheus)
   add_subdirectory(${prometheus_SOURCE_DIR} ${prometheus_BINARY_DIR}
                    EXCLUDE_FROM_ALL)
+endif()
+
+fetchcontent_getproperties(benchmark)
+if(NOT benchmark_POPULATED)
+  set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "Enable building the unit tests which depend on gtest" FORCE)
+  fetchcontent_populate(benchmark)
+  add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
