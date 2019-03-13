@@ -31,6 +31,11 @@ test_script:
 
       & $_.FullName $cmdArgList
     }
+    Get-ChildItem -Recurse -Path $env:APPVEYOR_BUILD_FOLDER -Filter "*_benchmark.exe" | ForEach-Object {
+      Write-Output $_.FullName
+      
+      & $_.FullName
+    }
 
 on_finish:
 - ps: |
