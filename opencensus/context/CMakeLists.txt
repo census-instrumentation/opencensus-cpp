@@ -31,4 +31,4 @@ opencensus_test(context_context_test
 
 opencensus_test(context_with_context_test internal/with_context_test.cc context)
 
-# TODO: context_benchmark
+opencensus_benchmark(context_context_benchmark internal/context_benchmark.cc context)

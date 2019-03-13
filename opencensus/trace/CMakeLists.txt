@@ -190,4 +190,16 @@ opencensus_test(trace_with_span_test
                 trace_with_span
                 context)
 
-# TODO: benchmarks
+opencensus_benchmark(trace_attribute_value_ref_benchmark internal/attribute_value_ref_benchmark.cc trace)
+
+opencensus_benchmark(trace_cloud_trace_context_benchmark internal/cloud_trace_context_benchmark.cc trace_cloud_trace_context)
+
+opencensus_benchmark(trace_grpc_trace_bin_benchmark internal/grpc_trace_bin_benchmark.cc trace_grpc_trace_bin)
+
+opencensus_benchmark(trace_span_benchmark internal/span_benchmark.cc trace_span_context trace)
+
+opencensus_benchmark(trace_span_id_benchmark internal/span_id_benchmark.cc trace_span_context)
+
+opencensus_benchmark(trace_context_benchmark internal/trace_context_benchmark.cc trace_trace_context)
+
+opencensus_benchmark(trace_with_span_benchmark internal/with_span_benchmark.cc trace trace_with_span)
