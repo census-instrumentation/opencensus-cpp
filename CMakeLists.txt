@@ -30,6 +30,7 @@ include(CTest) # Defines option BUILD_TESTING.
 enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
 include(OpenCensusDeps)
 
 include(OpenCensusHelpers)
