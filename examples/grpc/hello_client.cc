@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
   }
 
   // Register the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
-  grpc::RegisterOpenCensusPlugin();
+  grpc_impl::RegisterOpenCensusPlugin();
 
   // Register exporters for Stackdriver.
   RegisterStackdriverExporters();
