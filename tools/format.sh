@@ -42,7 +42,8 @@ else
 fi
 if which cmake-format >/dev/null; then
   echo "Running cmake-format $(cmake-format --version 2>&1)."
-  cmake-format -i $($FIND -name '*CMakeLists.txt' -print -o \
+  cmake-format -i $($FIND -name FetchContent.cmake -prune -o \
+    -name '*CMakeLists.txt' -print -o \
     -name '*.cmake' -print)
 else
   echo "Can't find cmake-format. It can be installed with:"
