@@ -118,7 +118,7 @@ class Span final {
   // Spans can be move-constructed, but this is mostly for convenient syntax,
   // not performance reasons.
   Span(Span&&) = default;
-  Span& operator=(Span&&) = delete;
+  Span& operator=(Span&&) = default;
 
   // Attempts to insert an attribute into the Span, unless it already exists in
   // which case it will update the value of that attribute. If the max number of

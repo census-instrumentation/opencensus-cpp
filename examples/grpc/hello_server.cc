@@ -78,7 +78,7 @@ class HelloServiceImpl final : public HelloService::Service {
   grpc::Status SayHello(grpc::ServerContext *context,
                         const HelloRequest *request,
                         HelloReply *reply) override {
-    opencensus::trace::Span span = grpc_impl::GetSpanFromServerContext(context);
+    opencensus::trace::Span span = grpc::GetSpanFromServerContext(context);
     span.AddAttribute("my_attribute", "red");
     span.AddAnnotation(
         "Constructing greeting.",
@@ -119,10 +119,10 @@ int main(int argc, char **argv) {
   }
 
   // Register the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
-  grpc_impl::RegisterOpenCensusPlugin();
+  grpc::RegisterOpenCensusPlugin();
 
   // Register the gRPC views (latency, error count, etc).
-  grpc_impl::RegisterOpenCensusViewsForExport();
+  grpc::RegisterOpenCensusViewsForExport();
 
   // Register exporters for Stackdriver.
   RegisterStackdriverExporters();
