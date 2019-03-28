@@ -42,6 +42,10 @@ class TraceOptions final {
   // the process, e.g. to Stackdriver/Zipkin.
   bool IsSampled() const;
 
+  // HasStrictSpans means that a parent span cannot end until all of its
+  // children end.
+  bool HasStrictSpans() const;
+
   bool operator==(const TraceOptions& that) const;
 
   // Returns a 2-char hex string of the TraceOptions value.
@@ -53,6 +57,10 @@ class TraceOptions final {
   // Returns a copy of these TraceOptions with the sampled bit set to
   // is_sampled.
   TraceOptions WithSampling(bool is_sampled) const;
+
+  // Returns a copy of these TraceOptions with the strict_spans bit set to
+  // strict_spans.
+  TraceOptions WithStrictSpans(bool strict_spans) const;
 
  private:
   uint8_t rep_[kSize];

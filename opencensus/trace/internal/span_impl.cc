@@ -73,8 +73,6 @@ std::unordered_map<std::string, exporter::AttributeValue> CopyAttributes(
 }
 }  // namespace
 
-// SpanImpl::SpanImpl() : has_ended_(false), remote_parent_(false) {}
-
 SpanImpl::SpanImpl(const SpanContext& context, const TraceParams& trace_params,
                    absl::string_view name, const SpanId& parent_span_id,
                    bool remote_parent)
@@ -87,7 +85,9 @@ SpanImpl::SpanImpl(const SpanContext& context, const TraceParams& trace_params,
       links_(trace_params.max_links),
       attributes_(trace_params.max_attributes),
       has_ended_(false),
-      remote_parent_(remote_parent) {}
+      remote_parent_(remote_parent),
+      active_child_count_(0),
+      end_requested_(false) {}
 
 void SpanImpl::AddAttributes(AttributesRef attributes) {
   absl::MutexLock l(&mu_);
@@ -139,6 +139,10 @@ void SpanImpl::SetStatus(exporter::Status&& status) {
 
 bool SpanImpl::End() {
   absl::MutexLock l(&mu_);
+  if (context_.trace_options().HasStrictSpans() && active_child_count_ > 0) {
+    end_requested_ = true;
+    return false;
+  }
   if (has_ended_) {
     assert(false && "Invalid attempt to End() the same Span more than once.");
     // In non-debug builds, just ignore the second End().
@@ -152,6 +156,25 @@ bool SpanImpl::End() {
 bool SpanImpl::HasEnded() const {
   absl::MutexLock l(&mu_);
   return has_ended_;
+}
+
+void SpanImpl::IncrementChildCount() const {
+  absl::MutexLock l(&mu_);
+  active_child_count_++;
+}
+
+void SpanImpl::DecrementChildCount() {
+  bool shouldEnd = false;
+  {
+    absl::MutexLock l(&mu_);
+    assert(active_child_count_ > 0);
+    active_child_count_--;
+    shouldEnd = (active_child_count_ == 0 && end_requested_);
+  }
+
+  if (shouldEnd) {
+    Span::EndSpanById(context_.span_id());
+  }
 }
 
 exporter::SpanData SpanImpl::ToSpanData() const {

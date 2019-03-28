@@ -69,13 +69,23 @@ class SpanGenerator {
     SpanId span_id = GenerateRandomSpanId();
     TraceId trace_id;
     SpanId parent_span_id;
-    TraceOptions trace_options;
+    TraceOptions trace_options = options.trace_options;
     if (parent_ctx == nullptr) {
       trace_id = GenerateRandomTraceId();
     } else {
       trace_id = parent_ctx->trace_id();
       parent_span_id = parent_ctx->span_id();
       trace_options = parent_ctx->trace_options();
+      if (trace_options.HasStrictSpans() && trace_options.IsSampled() &&
+          !has_remote_parent) {
+        std::shared_ptr<SpanImpl> span;
+        if (exporter::RunningSpanStoreImpl::Get()->FindSpan(parent_span_id,
+                                                            &span)) {
+          span->IncrementChildCount();
+        } else {
+          assert(false);
+        }
+      }
     }
     if (!trace_options.IsSampled()) {
       bool should_sample = false;
@@ -135,9 +145,12 @@ Span Span::StartSpanWithRemoteParent(absl::string_view name,
 Span::Span(const SpanContext& context, SpanImpl* impl)
     : context_(context), span_impl_(impl) {
   if (IsRecording()) {
-    exporter::RunningSpanStoreImpl::Get()->AddSpan(span_impl_);
+    exporter::RunningSpanStoreImpl::Get()->AddSpan(context.span_id(),
+                                                   span_impl_);
   }
 }
+
+void Span::IncrementChildCount() const { span_impl_->IncrementChildCount(); }
 
 void Span::AddAttribute(absl::string_view key,
                         AttributeValueRef attribute) const {
@@ -204,13 +217,37 @@ void Span::SetStatus(StatusCode canonical_code,
 
 void Span::End() const {
   if (IsRecording()) {
-    if (!span_impl_->End()) {
-      // The Span already ended, ignore this call.
+    EndSpanById(context_.span_id());
+  }
+}
+
+void Span::EndSpanById(const SpanId& id) {
+  std::shared_ptr<SpanImpl> span;
+  auto found = exporter::RunningSpanStoreImpl::Get()->FindSpan(id, &span);
+  assert(found && "Cannot call end span on an invalid ID");
+  if (!found) {
+    return;
+  }
+
+  if (!span->End()) {
+    return;
+  }
+  exporter::RunningSpanStoreImpl::Get()->RemoveSpan(id);
+  exporter::LocalSpanStoreImpl::Get()->AddSpan(span);
+  exporter::SpanExporterImpl::Get()->AddSpan(span);
+
+  if (span->context().trace_options().HasStrictSpans() &&
+      (!span->remote_parent() && span->parent_span_id().IsValid())) {
+    std::shared_ptr<SpanImpl> parent_span;
+
+    found = exporter::RunningSpanStoreImpl::Get()->FindSpan(
+        span->parent_span_id(), &parent_span);
+    assert(found && "Parent Span Id Not Found in Strict Spans Mode");
+
+    if (!found) {
       return;
     }
-    exporter::RunningSpanStoreImpl::Get()->RemoveSpan(span_impl_);
-    exporter::LocalSpanStoreImpl::Get()->AddSpan(span_impl_);
-    exporter::SpanExporterImpl::Get()->AddSpan(span_impl_);
+    parent_span->DecrementChildCount();
   }
 }
 

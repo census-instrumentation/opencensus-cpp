@@ -42,6 +42,9 @@ class SpanId final {
   // Returns false if the SpanId is all zeros.
   bool IsValid() const;
 
+  static_assert(kSize == 8, "Hash Function assumes 64 bit spanIds");
+  std::size_t hash() const;
+
   // Copies the opaque SpanId data to a buffer, which must hold kSize bytes.
   void CopyTo(uint8_t* buf) const;
 

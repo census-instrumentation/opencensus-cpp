@@ -54,8 +54,11 @@ using AttributesRef =
 // Options for Starting a Span.
 struct StartSpanOptions {
   StartSpanOptions(Sampler* sampler = nullptr,  // Default Sampler.
-                   const std::vector<Span*>& parent_links = {})
-      : sampler(sampler), parent_links(parent_links) {}
+                   const std::vector<Span*>& parent_links = {},
+                   TraceOptions trace_options = {})
+      : sampler(sampler),
+        parent_links(parent_links),
+        trace_options(trace_options) {}
 
   // The Sampler to use. It must remain valid for the duration of the
   // StartSpan() call. If nullptr, use the default Sampler from TraceConfig.
@@ -67,6 +70,10 @@ struct StartSpanOptions {
   // Pointers to Spans in *other Traces* that are parents of this Span. They
   // must remain valid for the duration of the StartSpan() call.
   const std::vector<Span*> parent_links;
+
+  // Any additional trace options for this span, mostly useful if this is a
+  // new root span.
+  const TraceOptions trace_options;
 };
 
 // Span represents an operation. A Trace consists of one or more Spans.
@@ -150,6 +157,10 @@ class Span final {
   void AddChildLink(const SpanContext& child_ctx,
                     AttributesRef attributes = {}) const;
 
+  // Increments an internal counter of open child spans of this span, only
+  // used if StrictSpans is enabled on this trace
+  void IncrementChildCount() const;
+
   // Sets the status of the Span. See status_code.h for canonical codes.
   void SetStatus(StatusCode canonical_code,
                  absl::string_view message = "") const;
@@ -157,6 +168,11 @@ class Span final {
   // Marks the end of a Span. No further changes can be made to the Span after
   // End is called.
   void End() const;
+
+  // Called to end a Span with given id. No further changes can be made to the
+  // Span after calling this. This is called in StrictSpans mode because a
+  // child span ends and needs to End() its parent and move it around the maps.
+  static void EndSpanById(const SpanId& id);
 
   // Returns the SpanContext associated with this Span.
   const SpanContext& context() const;

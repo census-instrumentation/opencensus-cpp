@@ -282,6 +282,71 @@ TEST(SpanTest, FullSpanTest) {
   expect_message_event(3, 4, 5, data.message_events().events()[1].event());
 }
 
+TEST(SpanTest, StrictSpanTest) {
+  AlwaysSampler sampler;
+  TraceOptions t = TraceOptions().WithStrictSpans(true);
+  StartSpanOptions opts = {&sampler, {}, t};
+  auto span = ::opencensus::trace::Span::StartSpan("MyRootSpan", nullptr, opts);
+  auto child = Span::StartSpan("child", &span);
+  EXPECT_TRUE(span.context().IsValid());
+
+  // Calling end on the parent span with an open child should fail/not cause it
+  // to end
+  span.End();
+  const exporter::SpanData data = SpanTestPeer::ToSpanData(&span);
+  EXPECT_EQ("MyRootSpan", data.name());
+  EXPECT_EQ(false, data.has_ended());
+
+  // Now end the child and see that the parent span is ended as well
+  child.End();
+  const exporter::SpanData data2 = SpanTestPeer::ToSpanData(&span);
+  EXPECT_EQ("MyRootSpan", data2.name());
+  EXPECT_EQ(true, data2.has_ended());
+
+  // Now, try ending child first and verify that that doesn't end the parent
+  // span
+  auto span2 = ::opencensus::trace::Span::StartSpan("root2", nullptr, opts);
+  auto child2 = Span::StartSpan("child2", &span2);
+  EXPECT_TRUE(span2.context().IsValid());
+
+  // Now end the child and see that the parent span is ended as well
+  child2.End();
+  const exporter::SpanData root2_pre = SpanTestPeer::ToSpanData(&span2);
+  EXPECT_EQ("root2", root2_pre.name());
+  EXPECT_EQ(false, root2_pre.has_ended());
+
+  // Calling end on the parent span with an open child should fail/not cause it
+  // to end
+  span2.End();
+  const exporter::SpanData root2_post = SpanTestPeer::ToSpanData(&span2);
+  EXPECT_EQ("root2", root2_post.name());
+  EXPECT_EQ(true, root2_post.has_ended());
+
+  // Now try with 3 tiers
+  auto grandparent =
+      ::opencensus::trace::Span::StartSpan("grandpa", nullptr, opts);
+  auto parent =
+      ::opencensus::trace::Span::StartSpan("parent", &grandparent, opts);
+  auto kid = Span::StartSpan("kid", &parent);
+
+  // End both grandparent and parent, neither should have ended
+  grandparent.End();
+  parent.End();
+  const exporter::SpanData grandparent_open_data =
+      SpanTestPeer::ToSpanData(&grandparent);
+  EXPECT_EQ(false, grandparent_open_data.has_ended());
+  const exporter::SpanData parent_open_data = SpanTestPeer::ToSpanData(&parent);
+  EXPECT_EQ(false, parent_open_data.has_ended());
+
+  kid.End();
+  const exporter::SpanData grandparent_closed_data =
+      SpanTestPeer::ToSpanData(&grandparent);
+  EXPECT_EQ(true, grandparent_closed_data.has_ended());
+  const exporter::SpanData parent_closed_data =
+      SpanTestPeer::ToSpanData(&parent);
+  EXPECT_EQ(true, parent_closed_data.has_ended());
+}
+
 TEST(SpanTest, ChildInheritsTraceOption) {
   constexpr uint8_t trace_id[] = {1, 2,  3,  4,  5,  6,  7,  8,
                                   9, 10, 11, 12, 13, 14, 15, 16};

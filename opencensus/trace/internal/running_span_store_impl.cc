@@ -34,33 +34,38 @@ namespace opencensus {
 namespace trace {
 namespace exporter {
 
-namespace {
-// Returns the memory address of the SpanImpl object, to be used as a key into
-// the map of spans.
-uintptr_t GetKey(const SpanImpl* span) {
-  return reinterpret_cast<uintptr_t>(span);
-}
-}  // namespace
-
 RunningSpanStoreImpl* RunningSpanStoreImpl::Get() {
   static RunningSpanStoreImpl* global_running_span_store =
       new RunningSpanStoreImpl;
   return global_running_span_store;
 }
 
-void RunningSpanStoreImpl::AddSpan(const std::shared_ptr<SpanImpl>& span) {
+void RunningSpanStoreImpl::AddSpan(const SpanId& id,
+                                   const std::shared_ptr<SpanImpl>& span) {
   absl::MutexLock l(&mu_);
-  spans_.insert({GetKey(span.get()), span});
+  spans_.insert({id, span});
 }
 
-bool RunningSpanStoreImpl::RemoveSpan(const std::shared_ptr<SpanImpl>& span) {
+bool RunningSpanStoreImpl::RemoveSpan(const SpanId& id) {
   absl::MutexLock l(&mu_);
-  auto iter = spans_.find(GetKey(span.get()));
+  auto iter = spans_.find(id);
   if (iter == spans_.end()) {
     return false;  // Not tracked.
   }
   spans_.erase(iter);
   return true;
+}
+
+bool RunningSpanStoreImpl::FindSpan(const SpanId& id,
+                                    std::shared_ptr<SpanImpl>* span) {
+  absl::MutexLock l(&mu_);
+  auto iter = spans_.find(id);
+  if (iter != spans_.end()) {
+    *span = iter->second;
+    return true;
+  } else {
+    return false;
+  }
 }
 
 RunningSpanStore::Summary RunningSpanStoreImpl::GetSummary() const {

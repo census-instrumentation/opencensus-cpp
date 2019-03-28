@@ -102,6 +102,15 @@ class SpanImpl final {
 
   SpanId parent_span_id() const { return parent_span_id_; }
 
+  bool remote_parent() const { return remote_parent_; }
+
+  // Increments the counter of open child spans below this span.
+  void IncrementChildCount() const;
+
+  // Decrements the open child counter AND if the counter becomes
+  // zero then End() is called on the span.
+  void DecrementChildCount();
+
  private:
   friend class ::opencensus::trace::exporter::RunningSpanStoreImpl;
   friend class ::opencensus::trace::exporter::LocalSpanStoreImpl;
@@ -138,6 +147,11 @@ class SpanImpl final {
   bool has_ended_ GUARDED_BY(mu_);
   // True if the parent Span is in a different process.
   const bool remote_parent_;
+  // Counts the number of open children linked to this span.
+  mutable uint32_t active_child_count_ GUARDED_BY(mu_);
+  // Keeps track if End() was called on this span while it had open child
+  // spans and is waiting on them.
+  mutable bool end_requested_ GUARDED_BY(mu_);
 };
 
 }  // namespace trace
