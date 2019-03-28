@@ -20,7 +20,7 @@ if [[ ! -e tools/format.sh ]]; then
 fi
 set -e
 # Correct common miscapitalizations.
-FIND="find . -name .git -prune -o -name .build -prune -o"
+FIND="find . -name .git -prune -o -name _deps -prune -o -name .build -prune -o"
 sed -i 's/Open[c]ensus/OpenCensus/g' $($FIND -type f -print)
 sed -i 's/Stack[D]river/Stackdriver/g' $($FIND -type f -print)
 # No CRLF line endings.
