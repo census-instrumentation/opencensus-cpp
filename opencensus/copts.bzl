@@ -23,24 +23,24 @@ We use the same flags as absl, plus turn some warnings into errors.
 
 load(
     "@com_google_absl//absl:copts/configure_copts.bzl",
-    "GCC_FLAGS",
-    "GCC_TEST_FLAGS",
-    "LLVM_FLAGS",
-    "LLVM_TEST_FLAGS",
-    "MSVC_FLAGS",
-    "MSVC_TEST_FLAGS",
+    "ABSL_GCC_FLAGS",
+    "ABSL_GCC_TEST_FLAGS",
+    "ABSL_LLVM_FLAGS",
+    "ABSL_LLVM_TEST_FLAGS",
+    "ABSL_MSVC_FLAGS",
+    "ABSL_MSVC_TEST_FLAGS",
 )
 
 WERROR = ["-Werror=return-type", "-Werror=switch"]
 
 DEFAULT_COPTS = select({
-    "//opencensus:llvm_compiler": LLVM_FLAGS + WERROR,
-    "//opencensus:windows": MSVC_FLAGS,
-    "//conditions:default": GCC_FLAGS + WERROR,
+    "//opencensus:llvm_compiler": ABSL_LLVM_FLAGS + WERROR,
+    "//opencensus:windows": ABSL_MSVC_FLAGS,
+    "//conditions:default": ABSL_GCC_FLAGS + WERROR,
 })
 
 TEST_COPTS = DEFAULT_COPTS + select({
-    "//opencensus:llvm_compiler": LLVM_TEST_FLAGS + WERROR,
-    "//opencensus:windows": MSVC_TEST_FLAGS,
-    "//conditions:default": GCC_TEST_FLAGS + WERROR,
+    "//opencensus:llvm_compiler": ABSL_LLVM_TEST_FLAGS + WERROR,
+    "//opencensus:windows": ABSL_MSVC_TEST_FLAGS,
+    "//conditions:default": ABSL_GCC_TEST_FLAGS + WERROR,
 })
