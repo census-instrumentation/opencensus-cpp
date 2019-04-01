@@ -350,6 +350,47 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
                                                   distribution2)));
 }
 
+TEST(StackdriverUtilsTest, MakeTimeSeriesLastValueInt) {
+  const auto measure = opencensus::stats::MeasureInt64::Register(
+      "measure_last_value_int", "", "");
+  const std::string task = "test_task";
+  const std::string view_name = "test_descriptor";
+  const auto tag_key_1 = opencensus::tags::TagKey::Register("foo");
+  const auto tag_key_2 = opencensus::tags::TagKey::Register("bar");
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor()
+          .set_name(view_name)
+          .set_measure(measure.GetDescriptor().name())
+          .set_aggregation(opencensus::stats::Aggregation::LastValue())
+          .add_column(tag_key_1)
+          .add_column(tag_key_2);
+  const opencensus::stats::ViewData data = TestUtils::MakeViewData(
+      view_descriptor, {{{"v1", "v1"}, 1.0}, {{"v1", "v2"}, 2.0}});
+  const std::vector<google::monitoring::v3::TimeSeries> time_series =
+      MakeTimeSeries(view_descriptor, data, task);
+
+  for (const auto& ts : time_series) {
+    EXPECT_EQ(absl::StrCat("custom.googleapis.com/opencensus/", view_name),
+              ts.metric().type());
+    EXPECT_EQ("global", ts.resource().type());
+    ASSERT_EQ(1, ts.points_size());
+    EXPECT_FALSE(ts.points(0).interval().has_start_time());
+    EXPECT_EQ(absl::ToUnixSeconds(data.end_time()),
+              ts.points(0).interval().end_time().seconds());
+  }
+
+  EXPECT_THAT(time_series,
+              ::testing::UnorderedElementsAre(
+                  testing::TimeSeriesInt({{"opencensus_task", task},
+                                          {tag_key_1.name(), "v1"},
+                                          {tag_key_2.name(), "v1"}},
+                                         1),
+                  testing::TimeSeriesInt({{"opencensus_task", task},
+                                          {tag_key_1.name(), "v1"},
+                                          {tag_key_2.name(), "v2"}},
+                                         2)));
+}
+
 }  // namespace
 }  // namespace stats
 }  // namespace exporters
