@@ -80,6 +80,9 @@ endif()
 
 fetchcontent_getproperties(benchmark)
 if(NOT benchmark_POPULATED)
+  set(BENCHMARK_ENABLE_TESTING OFF
+      CACHE BOOL "Enable testing of the benchmark library."
+      FORCE)
   set(BENCHMARK_ENABLE_GTEST_TESTS OFF
       CACHE BOOL "Enable building the unit tests which depend on gtest"
       FORCE)
