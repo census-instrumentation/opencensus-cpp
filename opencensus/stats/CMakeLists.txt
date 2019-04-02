@@ -116,4 +116,10 @@ opencensus_test(stats_view_data_impl_test
                 stats_core
                 absl::time)
 
-opencensus_benchmark(stats_stats_manager_benchmark internal/stats_manager_benchmark.cc stats_core stats_recording absl::memory absl::strings absl::time)
+opencensus_benchmark(stats_stats_manager_benchmark
+                     internal/stats_manager_benchmark.cc
+                     stats_core
+                     stats_recording
+                     absl::memory
+                     absl::strings
+                     absl::time)
