@@ -38,16 +38,17 @@ function(opencensus_test NAME SRC)
   endif()
 endfunction()
 
-# Helper function like bazel's cc_test. Usage:
+# Helper function like bazel's cc_benchmark. Usage:
 #
-# opencensus_benchmark(trace_some_test internal/some_test.cc dep1 dep2...)
+# opencensus_benchmark(trace_some_benchmark internal/some_benchmark.cc dep1 dep2...)
 function(opencensus_benchmark NAME SRC)
-  # if(BUILD_TESTING)
-  set(_NAME "opencensus_${NAME}")
-  add_executable(${_NAME} ${SRC})
-  prepend_opencensus(DEPS "${ARGN}")
-  target_link_libraries(${_NAME} "${DEPS}" benchmark)
-  # add_test(NAME ${_NAME} COMMAND ${_NAME}) endif()
+  if(BUILD_TESTING)
+	  set(_NAME "opencensus_${NAME}")
+	  add_executable(${_NAME} ${SRC})
+	  prepend_opencensus(DEPS "${ARGN}")
+	  target_link_libraries(${_NAME} "${DEPS}" benchmark)
+	  add_test(NAME ${_NAME} COMMAND ${_NAME}) 
+  endif()
 endfunction()
 
 # Helper function like bazel's cc_library.  Libraries are namespaced as
