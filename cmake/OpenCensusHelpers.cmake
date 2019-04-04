@@ -48,7 +48,6 @@ function(opencensus_benchmark NAME SRC)
     add_executable(${_NAME} ${SRC})
     prepend_opencensus(DEPS "${ARGN}")
     target_link_libraries(${_NAME} "${DEPS}" benchmark)
-    add_test(NAME ${_NAME} COMMAND ${_NAME})
   endif()
 endfunction()
 
