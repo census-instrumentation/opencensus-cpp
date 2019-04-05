@@ -29,7 +29,7 @@ usage()
 sed_check=y
 tools_check=y
 
-while [ "$1" != "" ]; do
+while [[ "$1" != "" ]]; do
     case $1 in
         --disable-sed-check )   sed_check=n
                                 ;;
@@ -46,7 +46,7 @@ done
 
 FIND="find . -name .git -prune -o -name .build -prune -o"
 
-if [ "$sed_check" == "y" ]; then
+if [[ "$sed_check" == "y" ]]; then
   # Correct common miscapitalizations.
   sed -i 's/Open[c]ensus/OpenCensus/g' $($FIND -type f -print)
   sed -i 's/Stack[D]river/Stackdriver/g' $($FIND -type f -print)
@@ -56,7 +56,7 @@ if [ "$sed_check" == "y" ]; then
   sed -i 's/ \+$//' $($FIND -type f -print)
 fi
 
-if [ "$tools_check" == "y" ]; then
+if [[ "$tools_check" == "y" ]]; then
   # For easier debugging: print the version because it affects the formatting.
   CMD=clang-format
   $CMD -version
@@ -90,8 +90,7 @@ else
   echo "No changes."
 fi
 
-if [ "$tools_check" == "$tools_check" ]; then
-  echo "All checks must run to succeed"
+if [[ "$sed_check" != "y" || "$tools_check" != "y" ]; then
+  echo "All checks must run to succeed."
   exit 1
 fi
-
