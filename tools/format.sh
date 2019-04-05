@@ -90,7 +90,7 @@ else
   echo "No changes."
 fi
 
-if [[ "$sed_check" != "y" || "$tools_check" != "y" ]; then
+if [[ "$sed_check" != "y" || "$tools_check" != "y" ]]; then
   echo "All checks must run to succeed."
   exit 1
 fi
