@@ -183,7 +183,12 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
   base_time_series.mutable_metric()->set_type(MakeType(view_descriptor.name()));
   base_time_series.mutable_resource()->set_type(kDefaultResourceType);
   auto* interval = base_time_series.add_points()->mutable_interval();
-  SetTimestamp(data.start_time(), interval->mutable_start_time());
+  // Stackdriver doesn't like start_time and end_time being different for GAUGE
+  // metrics.
+  if (view_descriptor.aggregation().type() !=
+      opencensus::stats::Aggregation::Type::kLastValue) {
+    SetTimestamp(data.start_time(), interval->mutable_start_time());
+  }
   SetTimestamp(data.end_time(), interval->mutable_end_time());
   (*base_time_series.mutable_metric()->mutable_labels())[kOpenCensusTaskKey] =
       std::string(opencensus_task);
