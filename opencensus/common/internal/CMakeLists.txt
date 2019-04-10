@@ -32,10 +32,10 @@ opencensus_lib(common_string_vector_hash)
 
 opencensus_test(common_random_test random_test.cc common_random)
 
+opencensus_benchmark(common_random_benchmark random_benchmark.cc common_random)
+
 opencensus_test(common_stats_object_test
                 stats_object_test.cc
                 common_stats_object
                 absl::strings
                 absl::span)
-
-# TODO: random_benchmark

@@ -84,8 +84,8 @@ that, for example, a view named `"example.com/client/latency"` would translate
 to a Stackdriver metric named
 `"custom.googleapis.com/opencensus/example.com/client/latency"`.
 
-Only Cumulative views may be registered for export in OpenCensus, and created
-Stackdriver metrics have the `CUMULATIVE` type.
+Views with `LastValue` aggregation will be registered as `GAUGE` Stackdriver
+metrics, and other aggregations will be registered as `CUMULATIVE` metrics.
 
 View columns translate to Stackdriver's labels. OpenCensus adds a label
 `"opencensus_task"` to all exported views so that exports from different
