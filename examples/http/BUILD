@@ -30,7 +30,8 @@ cc_binary(
         "//opencensus/exporters/trace/stdout:stdout_exporter",
         "//opencensus/exporters/trace/zipkin:zipkin_exporter",
         "//opencensus/trace",
-        "@com_google_absl//absl/strings",
         "@civetweb",
+        "@com_github_jupp0r_prometheus_cpp//pull",
+        "@com_google_absl//absl/strings",
     ],
 )

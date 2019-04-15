@@ -31,15 +31,24 @@
 #include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
 #include "opencensus/exporters/trace/stdout/stdout_exporter.h"
 #include "opencensus/exporters/trace/zipkin/zipkin_exporter.h"
+#include "opencensus/stats/stats.h"
 #include "opencensus/trace/propagation/trace_context.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/trace_config.h"
+#include "prometheus/exposer.h"
 
 namespace {
 
 using opencensus::exporters::trace::ZipkinExporter;
 using opencensus::exporters::trace::ZipkinExporterOptions;
+
+opencensus::stats::MeasureInt64 HitsMeasure() {
+  static const opencensus::stats::MeasureInt64 measure =
+      opencensus::stats::MeasureInt64::Register(
+          "hits", "Number of hits to the webserver.", "1");
+  return measure;
+}
 
 class CounterHandler : public CivetHandler {
  public:
@@ -74,6 +83,7 @@ class CounterHandler : public CivetHandler {
     mg_printf(conn, "<html><body>There have been %d hits.</body></html>\n",
               counter_);
     span.AddAnnotation("Built response.");
+    opencensus::stats::Record({{HitsMeasure(), 1}});
     span.End();
     return true;
   }
@@ -98,15 +108,34 @@ int main(int argc, char **argv) {
   opencensus::exporters::stats::StdoutExporter::Register();
   opencensus::exporters::trace::StdoutExporter::Register();
 
+  // Use the Prometheus exporter for stats.
+  auto exporter =
+      std::make_shared<opencensus::exporters::stats::PrometheusExporter>();
+  prometheus::Exposer exposer("127.0.0.1:8080");
+  exposer.RegisterCollectable(exporter);
+
+  // Use the Zipkin exporter for tracing.
   ZipkinExporterOptions options("http://127.0.0.1:9411/api/v2/spans");
   options.service_name = "counter_server";
   ZipkinExporter::Register(options);
 
+  // Add a View for hits.
+  HitsMeasure();
+  const auto hits_view =
+      opencensus::stats::ViewDescriptor()
+          .set_name("hits_view")
+          .set_description("number of hits to the server over time")
+          .set_measure("hits")
+          .set_aggregation(opencensus::stats::Aggregation::Sum());
+  opencensus::stats::View view(hits_view);
+  assert(view.IsValid());
+  hits_view.RegisterForExport();
+
+  // Start the webserver.
   CivetServer server{
       {"listening_ports", absl::StrCat(port), "num_threads", "2"}};
   CounterHandler handler;
   server.addHandler("/", handler);
-
   std::cout << "Server listening on port " << port << "\n";
   for (;;) {
     absl::SleepFor(absl::Seconds(1));
