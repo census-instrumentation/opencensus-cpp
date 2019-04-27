@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 '''
-This script uses GitHub API to construct http_archive element to be inserted
-into a federation client projects bazel WORKSPACE
+This script uses the GitHub API to construct http_archive elements to be
+inserted into the WORKSPACE file.
+
+It is a fork of:
+https://github.com/abseil/federation-hello/blob/0c1ef91b9cc5aabf15a3ff15761837d1c8da93a6/head_sync.py
 '''
 import hashlib
 import json
@@ -47,13 +50,14 @@ class GitHubProject(ExternalDependency):
 
 
 PROJECTS = [
-    GitHubProject('com_google_absl_oss_federation',
-      'abseil', 'federation-head'),
+    GitHubProject('com_google_absl', 'abseil', 'abseil-cpp'),
+    GitHubProject('com_google_googletest', 'google', 'googletest'),
+    GitHubProject('com_github_google_benchmark', 'google', 'benchmark'),
+    GitHubProject('com_github_grpc_grpc', 'grpc', 'grpc'),
+    GitHubProject('com_github_jupp0r_prometheus_cpp', 'jupp0r', 'prometheus-cpp'),
+    GitHubProject('com_github_curl', 'curl', 'curl'),
+    GitHubProject('com_github_tencent_rapidjson', 'Tencent', 'rapidjson'),
 ]
 
 for project in PROJECTS:
-  retVal=project.workspace_rule()
-  print ("********** INSERT THIS INTO YOUR WORKSPACE: *****************")
-  print (retVal)
-  print ("*********************************")
-
+  print(project.workspace_rule())
