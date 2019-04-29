@@ -72,17 +72,10 @@ token](https://help.github.com/articles/creating-a-personal-access-token-for-the
     $ git checkout -b deps remotes/upstream/v$MAJOR.$MINOR.x
     ```
 
-    One day, this will be automated. In the meantime, edit the `WORKSPACE` file
-    and for every `http_archive`:
-    * Use `git ls-remote https://github.com/abc/def master` to determine the
-      commit.
-    * Download the archive and `sha256sum` it.
-    * Change `urls = ".../archive/master.zip"` to
-    `urls = ".../archive/$COMMIT.zip`.
-    * Change `strip_prefix` from `-master` to `-$COMMIT`.
-    * Add `sha256 = "$SHASUM"`.
+    One day, this will be more automated. In the meantime,
+    run `tools/pin_deps.py` and edit the `WORKSPACE` file accordingly.
 
-    Likewise update the `cmake/*.CMakeLists.txt` files.
+    Likewise update the `cmake/OpenCensusDeps.cmake` file.
 
     Run `tools/presubmit.sh` to test building with bazel, and follow the
     [CMake README](cmake/README.md) for CMake.
