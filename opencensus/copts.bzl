@@ -32,3 +32,15 @@ load(
 )
 
 WERROR = ["-Werror=return-type", "-Werror=switch"]
+
+DEFAULT_COPTS = select({
+    "//opencensus:llvm_compiler": ABSL_LLVM_FLAGS + WERROR,
+    "//opencensus:windows": ABSL_MSVC_FLAGS,
+    "//conditions:default": ABSL_GCC_FLAGS + WERROR,
+})
+
+TEST_COPTS = DEFAULT_COPTS + select({
+    "//opencensus:llvm_compiler": ABSL_LLVM_TEST_FLAGS + WERROR,
+    "//opencensus:windows": ABSL_MSVC_TEST_FLAGS,
+    "//conditions:default": ABSL_GCC_TEST_FLAGS + WERROR,
+})
