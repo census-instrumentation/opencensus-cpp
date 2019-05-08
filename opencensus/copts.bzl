@@ -23,11 +23,11 @@ We use the same flags as absl, plus turn some warnings into errors.
 
 load(
     "@com_google_absl//absl:copts/configure_copts.bzl",
-    _ABSL_DEFAULT_COPTS = "ABSL_DEFAULT_COPTS",
-    _ABSL_TEST_COPTS = "ABSL_TEST_COPTS",
+    "ABSL_DEFAULT_COPTS",
+    "ABSL_TEST_COPTS",
 )
 
 WERROR = ["-Werror=return-type", "-Werror=switch"]
 
-DEFAULT_COPTS = _ABSL_DEFAULT_COPTS
-TEST_COPTS = _ABSL_TEST_COPTS
+DEFAULT_COPTS = ABSL_DEFAULT_COPTS
+TEST_COPTS = ABSL_TEST_COPTS
