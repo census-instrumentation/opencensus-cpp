@@ -22,7 +22,7 @@ We use the same flags as absl, plus turn some warnings into errors.
 """
 
 load(
-    "@com_google_absl//absl:copts/configure_copts.bzl",
+    "@com_google_absl//absl:copts/GENERATED_copts.bzl",
     ABSL_GCC_FLAGS = "ABSL_GCC_FLAGS",
     ABSL_GCC_TEST_FLAGS = "ABSL_GCC_TEST_FLAGS",
     ABSL_LLVM_FLAGS = "ABSL_LLVM_FLAGS",
@@ -34,11 +34,15 @@ load(
 )
 
 WERROR = ["-Werror=return-type", "-Werror=switch"]
-WARN_OPTS = select({
-    "//opencensus:llvm_compiler": WERROR,
-    "//opencensus:windows": [],
-    "//opencensus:default": WERROR,
+
+DEFAULT_COPTS = select({
+    "//opencensus:llvm_compiler": ABSL_LLVM_FLAGS + WERROR,
+    "//opencensus:windows": ABSL_MSVC_FLAGS,
+    "//conditions:default": ABSL_GCC_FLAGS + WERROR,
 })
 
-DEFAULT_COPTS = ABSL_DEFAULT_COPTS + WARN_OPTS
-TEST_COPTS = ABSL_TEST_COPTS + WARN_OPTS
+TEST_COPTS = DEFAULT_COPTS + select({
+    "//opencensus:llvm_compiler": ABSL_LLVM_TEST_FLAGS + WERROR,
+    "//opencensus:windows": ABSL_MSVC_TEST_FLAGS,
+    "//conditions:default": ABSL_GCC_TEST_FLAGS + WERROR,
+})
