@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("//opencensus:copts.bzl", "DEFAULT_COPTS")
+load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
 
 licenses(["notice"])  # Apache License 2.0
 
@@ -21,6 +22,18 @@ package(default_visibility = ["//visibility:private"])
 # Libraries
 # ========================================================================= #
 
+cc_proto_library(
+    name = "trace_cc_proto",
+    deps = ["@com_google_googleapis//google/devtools/cloudtrace/v2:trace_proto"],
+)
+
+cc_grpc_library(
+    name = "trace_cc_grpc",
+    srcs = ["@com_google_googleapis//google/devtools/cloudtrace/v2:trace_proto"],
+    deps = [":trace_cc_proto"],
+    grpc_only = True,
+)
+
 cc_library(
     name = "stackdriver_exporter",
     srcs = ["internal/stackdriver_exporter.cc"],
@@ -28,7 +41,8 @@ cc_library(
     copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
     deps = [
-        "//google/devtools/cloudtrace/v2:tracing_proto",
+        ":trace_cc_proto",
+        ":trace_cc_grpc",
         "//opencensus/common:version",
         "//opencensus/common/internal/grpc:status",
         "//opencensus/common/internal/grpc:with_user_agent",
