@@ -215,3 +215,7 @@ opencensus_benchmark(trace_with_span_benchmark
                      internal/with_span_benchmark.cc
                      trace
                      trace_with_span)
+
+opencensus_fuzzer(trace_cloud_trace_context_fuzzer
+                  internal/cloud_trace_context_fuzzer.cc
+                  trace_cloud_trace_context)
