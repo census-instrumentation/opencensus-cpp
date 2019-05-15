@@ -38,7 +38,6 @@ fetchcontent_declare(benchmark
 fetchcontent_getproperties(googletest)
 if(BUILD_TESTING)
   message(STATUS "Dependency: googletest (BUILD_TESTING=${BUILD_TESTING})")
-
   if(NOT googletest_POPULATED)
     if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
       # All the libraries in the build must use either /MD or /MT (runtime
@@ -61,12 +60,14 @@ endif()
 
 fetchcontent_getproperties(abseil)
 if(NOT abseil_POPULATED)
+  message(STATUS "Dependency: abseil")
   fetchcontent_populate(abseil)
   add_subdirectory(${abseil_SOURCE_DIR} ${abseil_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
 fetchcontent_getproperties(prometheus)
 if(NOT prometheus_POPULATED)
+  message(STATUS "Dependency: prometheus")
   set(ENABLE_PUSH OFF CACHE BOOL "Build prometheus-cpp push library" FORCE)
   set(ENABLE_PULL OFF CACHE BOOL "Build prometheus-cpp pull library" FORCE)
   set(ENABLE_COMPRESSION OFF
@@ -79,14 +80,17 @@ if(NOT prometheus_POPULATED)
 endif()
 
 fetchcontent_getproperties(benchmark)
-if(NOT benchmark_POPULATED)
-  set(BENCHMARK_ENABLE_TESTING OFF
-      CACHE BOOL "Enable testing of the benchmark library."
-      FORCE)
-  set(BENCHMARK_ENABLE_GTEST_TESTS OFF
-      CACHE BOOL "Enable building the unit tests which depend on gtest"
-      FORCE)
-  fetchcontent_populate(benchmark)
-  add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR}
-                   EXCLUDE_FROM_ALL)
+if(BUILD_TESTING)
+  message(STATUS "Dependency: benchmark (BUILD_TESTING=${BUILD_TESTING})")
+  if(NOT benchmark_POPULATED)
+    set(BENCHMARK_ENABLE_TESTING OFF
+        CACHE BOOL "Enable testing of the benchmark library."
+        FORCE)
+    set(BENCHMARK_ENABLE_GTEST_TESTS OFF
+        CACHE BOOL "Enable building the unit tests which depend on gtest"
+        FORCE)
+    fetchcontent_populate(benchmark)
+    add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR}
+                     EXCLUDE_FROM_ALL)
+  endif()
 endif()
