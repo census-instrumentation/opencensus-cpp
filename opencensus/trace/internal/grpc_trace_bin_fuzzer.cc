@@ -13,18 +13,20 @@
 // limitations under the License.
 
 #include "absl/strings/string_view.h"
-#include "opencensus/trace/propagation/cloud_trace_context.h"
+#include "opencensus/trace/propagation/grpc_trace_bin.h"
 #include "opencensus/trace/span_context.h"
 
 using ::opencensus::trace::SpanContext;
-using ::opencensus::trace::propagation::FromCloudTraceContextHeader;
-using ::opencensus::trace::propagation::ToCloudTraceContextHeader;
+using ::opencensus::trace::propagation::FromGrpcTraceBinHeader;
+using ::opencensus::trace::propagation::ToGrpcTraceBinHeader;
+using ::opencensus::trace::propagation::kGrpcTraceBinHeaderLen;
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
   absl::string_view header(reinterpret_cast<const char *>(Data), Size);
-  SpanContext ctx = FromCloudTraceContextHeader(header);
+  uint8_t outbuf[kGrpcTraceBinHeaderLen];
+  SpanContext ctx = FromGrpcTraceBinHeader(header);
   if (ctx.IsValid()) {
-    ToCloudTraceContextHeader(ctx);
+    ToGrpcTraceBinHeader(ctx, outbuf);
   }
   return 0;
 }
