@@ -219,14 +219,14 @@ opencensus_benchmark(trace_with_span_benchmark
 opencensus_fuzzer(trace_cloud_trace_context_fuzzer
                   internal/cloud_trace_context_fuzzer.cc
                   trace_cloud_trace_context
-		  absl::strings)
+                  absl::strings)
 
 opencensus_fuzzer(trace_grpc_trace_bin_fuzzer
                   internal/grpc_trace_bin_fuzzer.cc
                   trace_grpc_trace_bin
-		  absl::strings)
-	
+                  absl::strings)
+
 opencensus_fuzzer(trace_trace_context_fuzzer
                   internal/trace_context_fuzzer.cc
                   trace_trace_context
-		  absl::strings)
+                  absl::strings)
