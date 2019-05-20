@@ -22,8 +22,11 @@ set -e
 set -x
 cmake -H. -B.build -DBUILD_TESTING=OFF -DCMAKE_CXX_COMPILER=clang-6.0 \
   -DFUZZER=-fsanitize=fuzzer \
-  -DCMAKE_CXX_FLAGS="-fsanitize=fuzzer-no-link,address -O2 -fno-exceptions"
+  -DCMAKE_CXX_FLAGS="-fsanitize=fuzzer-no-link,address -g -O2 -fno-exceptions"
 cmake --build .build
-./.build/opencensus/trace/opencensus_trace_cloud_trace_context_fuzzer -max_total_time=1 opencensus/trace/internal/cloud_trace_context_corpus
-./.build/opencensus/trace/opencensus_trace_grpc_trace_bin_fuzzer -max_total_time=1 opencensus/trace/internal/grpc_trace_bin_corpus
-./.build/opencensus/trace/opencensus_trace_trace_context_fuzzer -max_total_time=1 opencensus/trace/internal/trace_context_corpus
+./.build/opencensus/trace/opencensus_trace_cloud_trace_context_fuzzer \
+  opencensus/trace/internal/cloud_trace_context_corpus -runs=0
+./.build/opencensus/trace/opencensus_trace_grpc_trace_bin_fuzzer \
+  opencensus/trace/internal/grpc_trace_bin_corpus -runs=0
+./.build/opencensus/trace/opencensus_trace_trace_context_fuzzer \
+  opencensus/trace/internal/trace_context_corpus -runs=0
