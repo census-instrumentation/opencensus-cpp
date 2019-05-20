@@ -70,3 +70,16 @@ function(opencensus_lib NAME)
     add_library(${PROJECT_NAME}::${NAME} ALIAS ${_NAME})
   endif()
 endfunction()
+
+# Helper function for fuzzing. Usage:
+#
+# opencensus_fuzzer(trace_some_fuzzer internal/some_fuzzer.cc dep1 dep2...)
+function(opencensus_fuzzer NAME SRC)
+  if(FUZZER)
+    set(_NAME "opencensus_${NAME}")
+    add_executable(${_NAME} ${SRC})
+    prepend_opencensus(DEPS "${ARGN}")
+    target_link_libraries(${_NAME} "${DEPS}" ${FUZZER})
+    target_compile_options(${_NAME} PRIVATE ${FUZZER})
+  endif()
+endfunction()

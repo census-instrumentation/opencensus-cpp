@@ -23,6 +23,8 @@ endif()
 
 project(opencensus-cpp VERSION 0.4.0 LANGUAGES CXX)
 
+option(FUZZER "Either OFF or e.g. -fsanitize=fuzzer,address" OFF)
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
