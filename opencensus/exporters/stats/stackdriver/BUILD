@@ -29,14 +29,14 @@ cc_library(
         "//opencensus/common/internal/grpc:status",
         "//opencensus/common/internal/grpc:with_user_agent",
         "//opencensus/stats",
-        "@com_google_googleapis//google/monitoring/v3:monitoring_cc_proto",
-        "@com_google_googleapis//google/monitoring/v3:monitoring_cc_grpc",
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/time",
+        "@com_google_googleapis//google/monitoring/v3:monitoring_cc_grpc",
+        "@com_google_googleapis//google/monitoring/v3:monitoring_cc_proto",
     ],
 )
 
@@ -49,12 +49,12 @@ cc_library(
     hdrs = ["internal/stackdriver_utils.h"],
     copts = DEFAULT_COPTS,
     deps = [
-        "@com_google_googleapis//google/monitoring/v3:monitoring_cc_proto",
         "//opencensus/stats",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
+        "@com_google_googleapis//google/monitoring/v3:monitoring_cc_proto",
     ],
 )
 
@@ -64,8 +64,8 @@ cc_library(
     srcs = ["internal/time_series_matcher.cc"],
     hdrs = ["internal/time_series_matcher.h"],
     deps = [
-        "@com_google_googleapis//google/monitoring/v3:monitoring_cc_proto",
         "//opencensus/stats",
+        "@com_google_googleapis//google/monitoring/v3:monitoring_cc_proto",
         "@com_google_googletest//:gtest",
     ],
 )
@@ -80,10 +80,10 @@ cc_test(
     deps = [
         ":stackdriver_utils",
         ":time_series_matcher",
-        "@com_google_googleapis//google/monitoring/v3:monitoring_cc_proto",
         "//opencensus/stats",
         "//opencensus/stats:test_utils",
         "@com_google_absl//absl/strings",
+        "@com_google_googleapis//google/monitoring/v3:monitoring_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -96,11 +96,11 @@ cc_test(
         ":stackdriver_exporter",
         ":stackdriver_utils",
         ":time_series_matcher",
-        "@com_google_googleapis//google/monitoring/v3:monitoring_cc_proto",
         "//opencensus/stats",
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
+        "@com_google_googleapis//google/monitoring/v3:monitoring_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
