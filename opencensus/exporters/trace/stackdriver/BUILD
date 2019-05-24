@@ -28,7 +28,6 @@ cc_library(
     copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
     deps = [
-        "//google/devtools/cloudtrace/v2:tracing_proto",
         "//opencensus/common:version",
         "//opencensus/common/internal/grpc:status",
         "//opencensus/common/internal/grpc:with_user_agent",
@@ -38,5 +37,7 @@ cc_library(
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
+        "@com_google_googleapis//google/devtools/cloudtrace/v2:trace_cc_grpc",
+        "@com_google_googleapis//google/devtools/cloudtrace/v2:trace_cc_proto",
     ],
 )

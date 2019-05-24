@@ -130,3 +130,18 @@ cc_library(
     strip_prefix = "rapidjson-master",
     urls = ["https://github.com/Tencent/rapidjson/archive/master.zip"],
 )
+
+# Google APIs - used by Stackdriver exporter.
+http_archive(
+    name = "com_google_googleapis",
+    strip_prefix = "googleapis-master",
+    urls = ["https://github.com/googleapis/googleapis/archive/master.zip"],
+)
+
+load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
+
+switched_rules_by_language(
+    name = "com_google_googleapis_imports",
+    cc = True,
+    grpc = True,
+)
