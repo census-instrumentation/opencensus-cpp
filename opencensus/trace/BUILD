@@ -16,6 +16,7 @@
 # limitations under the License.
 
 load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
+load("//bazel:cc_fuzz_target.bzl", "cc_fuzz_target")
 
 licenses(["notice"])  # Apache 2.0
 
@@ -497,5 +498,41 @@ cc_binary(
         ":trace",
         ":with_span",
         "@com_github_google_benchmark//:benchmark",
+    ],
+)
+
+# Fuzzers
+# ========================================================================= #
+
+cc_fuzz_target(
+    name = "cloud_trace_context_fuzzer",
+    srcs = ["internal/cloud_trace_context_fuzzer.cc"],
+    corpus = glob(["internal/cloud_trace_context_corpus/*"]),
+    deps = [
+        ":cloud_trace_context",
+        ":span_context",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_fuzz_target(
+    name = "grpc_trace_bin_fuzzer",
+    srcs = ["internal/grpc_trace_bin_fuzzer.cc"],
+    corpus = glob(["internal/grpc_trace_bin_corpus/*"]),
+    deps = [
+        ":grpc_trace_bin",
+        ":span_context",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_fuzz_target(
+    name = "trace_context_fuzzer",
+    srcs = ["internal/trace_context_fuzzer.cc"],
+    corpus = glob(["internal/trace_context_corpus/*"]),
+    deps = [
+        ":span_context",
+        ":trace_context",
+        "@com_google_absl//absl/strings",
     ],
 )
