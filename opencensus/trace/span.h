@@ -170,7 +170,7 @@ class Span final {
   // are sampled.
   bool IsRecording() const;
 
-  // Returns a human-redable string for debugging.
+  // Returns a human-readable string for debugging.
   std::string DebugString() const;
 
  private:
