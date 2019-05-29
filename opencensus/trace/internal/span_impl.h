@@ -106,6 +106,7 @@ class SpanImpl final {
   friend class ::opencensus::trace::exporter::RunningSpanStoreImpl;
   friend class ::opencensus::trace::exporter::LocalSpanStoreImpl;
   friend class ::opencensus::trace::exporter::SpanExporterImpl;
+  friend class ::opencensus::trace::Span;
   friend class ::opencensus::trace::SpanTestPeer;
 
   // Makes a deep copy of span contents and returns copied data in SpanData.

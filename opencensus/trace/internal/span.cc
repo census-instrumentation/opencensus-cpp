@@ -220,6 +220,10 @@ bool Span::IsSampled() const { return context_.trace_options().IsSampled(); }
 
 bool Span::IsRecording() const { return span_impl_ != nullptr; }
 
+std::string Span::DebugString() const {
+  return span_impl_->ToSpanData().DebugString();
+}
+
 void swap(Span& a, Span& b) {
   using std::swap;
   swap(a.context_, b.context_);

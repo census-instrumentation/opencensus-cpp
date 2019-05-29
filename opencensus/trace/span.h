@@ -170,6 +170,9 @@ class Span final {
   // are sampled.
   bool IsRecording() const;
 
+  // Returns a human-redable string for debugging.
+  std::string DebugString() const;
+
  private:
   Span() = delete;
   Span(const SpanContext& context, SpanImpl* impl);
