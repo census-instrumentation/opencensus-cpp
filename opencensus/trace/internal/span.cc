@@ -221,7 +221,10 @@ bool Span::IsSampled() const { return context_.trace_options().IsSampled(); }
 bool Span::IsRecording() const { return span_impl_ != nullptr; }
 
 std::string Span::DebugString() const {
-  return span_impl_->ToSpanData().DebugString();
+  if (IsRecording()) {
+    return span_impl_->ToSpanData().DebugString();
+  }
+  return "Span has not started.";
 }
 
 void swap(Span& a, Span& b) {

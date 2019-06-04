@@ -171,6 +171,7 @@ class Span final {
   bool IsRecording() const;
 
   // Returns a human-readable string for debugging.
+  // Do not rely on its format or contents or try to parse it.
   std::string DebugString() const;
 
  private:
