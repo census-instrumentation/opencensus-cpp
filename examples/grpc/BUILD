@@ -19,13 +19,21 @@ licenses(["notice"])  # Apache License 2.0
 
 package(default_visibility = ["//visibility:private"])
 
-cc_grpc_library(
+proto_library(
     name = "hello_proto",
     srcs = ["hello.proto"],
-    proto_only = False,
-    use_external = True,
-    well_known_protos = False,
-    deps = [],
+)
+
+cc_proto_library(
+    name = "hello_cc_proto",
+    deps = [":hello_proto"],
+)
+
+cc_grpc_library(
+    name = "hello_cc_grpc",
+    srcs = [":hello_proto"],
+    deps = [":hello_cc_proto"],
+    grpc_only = True,
 )
 
 cc_library(
@@ -45,7 +53,8 @@ cc_binary(
     srcs = ["hello_client.cc"],
     copts = DEFAULT_COPTS,
     deps = [
-        ":hello_proto",
+        ":hello_cc_proto",
+        ":hello_cc_grpc",
         ":stackdriver",
         "//opencensus/exporters/stats/stackdriver:stackdriver_exporter",
         "//opencensus/exporters/stats/stdout:stdout_exporter",
@@ -64,7 +73,8 @@ cc_binary(
     srcs = ["hello_server.cc"],
     copts = DEFAULT_COPTS,
     deps = [
-        ":hello_proto",
+        ":hello_cc_proto",
+        ":hello_cc_grpc",
         ":stackdriver",
         "//opencensus/exporters/stats/prometheus:prometheus_exporter",
         "//opencensus/exporters/stats/stackdriver:stackdriver_exporter",
