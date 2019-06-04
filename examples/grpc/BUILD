@@ -32,8 +32,8 @@ cc_proto_library(
 cc_grpc_library(
     name = "hello_cc_grpc",
     srcs = [":hello_proto"],
-    deps = [":hello_cc_proto"],
     grpc_only = True,
+    deps = [":hello_cc_proto"],
 )
 
 cc_library(
@@ -53,8 +53,8 @@ cc_binary(
     srcs = ["hello_client.cc"],
     copts = DEFAULT_COPTS,
     deps = [
-        ":hello_cc_proto",
         ":hello_cc_grpc",
+        ":hello_cc_proto",
         ":stackdriver",
         "//opencensus/exporters/stats/stackdriver:stackdriver_exporter",
         "//opencensus/exporters/stats/stdout:stdout_exporter",
@@ -73,8 +73,8 @@ cc_binary(
     srcs = ["hello_server.cc"],
     copts = DEFAULT_COPTS,
     deps = [
-        ":hello_cc_proto",
         ":hello_cc_grpc",
+        ":hello_cc_proto",
         ":stackdriver",
         "//opencensus/exporters/stats/prometheus:prometheus_exporter",
         "//opencensus/exporters/stats/stackdriver:stackdriver_exporter",
