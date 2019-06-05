@@ -44,21 +44,15 @@ function run() {
 
 t0="$(date +%s)"
 
-buildables="-- $(bazel query -k --noshow_progress "kind('^cc', //...)")"
+run bazel build //...
+run bazel test //...
 
-tests="-- $(bazel query -k --noshow_progress \
-  "kind(test, //...) \
-   except attr('tags', 'manual', //...)")"
-
-run bazel build $buildables
-run bazel test $tests
-
-run bazel build -c opt $buildables
-run bazel test -c opt $tests
+run bazel build -c opt //...
+run bazel test -c opt //...
 
 for config in asan ubsan; do
-  run bazel test --config=$config $tests
-  run bazel test --config=$config -c opt $tests
+  run bazel test --config=$config //...
+  run bazel test --config=$config -c opt //...
 done
 
 t1="$(date +%s)"

@@ -34,7 +34,7 @@ echo "build --disk_cache=$HOME/bazel-cache" > ~/.bazelrc
 echo "build --experimental_strict_action_env" >> ~/.bazelrc
 du -sk $HOME/bazel-cache || true
 
-bazel build $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(rule, //...)" | grep -v :_)
-bazel test $BAZEL_OPTIONS --experimental_ui_actions_shown=1 -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)" | grep -v :_)
+bazel build $BAZEL_OPTIONS -k //...
+bazel test $BAZEL_OPTIONS -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)")
 
 du -sk $HOME/bazel-cache || true
