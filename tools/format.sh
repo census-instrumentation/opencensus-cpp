@@ -77,7 +77,7 @@ if [[ "$tools_check" == "y" ]]; then
       -name '*.cmake' -print)
   else
     echo "Can't find cmake-format. It can be installed with:"
-    echo "  pip install --user cmake_format"
+    echo "  pip install --user 'cmake_format>=0.5.2'"
   fi
 fi
 

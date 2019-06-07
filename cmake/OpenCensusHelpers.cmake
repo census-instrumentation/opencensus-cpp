@@ -33,7 +33,10 @@ function(opencensus_test NAME SRC)
     set(_NAME "opencensus_${NAME}")
     add_executable(${_NAME} ${SRC})
     prepend_opencensus(DEPS "${ARGN}")
-    target_link_libraries(${_NAME} "${DEPS}" gmock gtest_main)
+    target_link_libraries(${_NAME}
+                          "${DEPS}"
+                          gmock
+                          gtest_main)
     add_test(NAME ${_NAME} COMMAND ${_NAME})
   endif()
 endfunction()
@@ -54,7 +57,11 @@ endfunction()
 # Helper function like bazel's cc_library.  Libraries are namespaced as
 # opencensus_* and public libraries are also aliased as opencensus-cpp::*.
 function(opencensus_lib NAME)
-  cmake_parse_arguments(ARG "PUBLIC" "" "SRCS;DEPS" ${ARGN})
+  cmake_parse_arguments(ARG
+                        "PUBLIC"
+                        ""
+                        "SRCS;DEPS"
+                        ${ARGN})
   set(_NAME "opencensus_${NAME}")
   prepend_opencensus(ARG_DEPS "${ARG_DEPS}")
   if(ARG_SRCS)
