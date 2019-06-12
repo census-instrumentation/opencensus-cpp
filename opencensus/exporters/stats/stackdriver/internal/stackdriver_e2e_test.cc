@@ -58,7 +58,7 @@ opencensus::stats::MeasureDouble TestMeasure() {
 
 class StackdriverE2eTest : public ::testing::Test {
  protected:
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     TestMeasure();
 
     if (project_id_.empty() || credentials_.empty()) {
