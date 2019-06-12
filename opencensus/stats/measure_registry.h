@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// IWYU pragma: private, include "opencensus/stats/stats.h"
+// IWYU pragma: friend opencensus/stats/.*
+
 #ifndef OPENCENSUS_STATS_MEASURE_REGISTRY_H_
 #define OPENCENSUS_STATS_MEASURE_REGISTRY_H_
 
