@@ -123,7 +123,6 @@ cc_library(
         "include/rapidjson/error/*.h",
     ]),
     includes = ["include/"],
-    defines = ["RAPIDJSON_HAS_STDSTRING=1",],
     visibility = ["//visibility:public"],
 )
 """,
