@@ -62,7 +62,7 @@ class MyExporter : public exporter::SpanExporter::Handler {
 
 class SpanExporterTest : public ::testing::Test {
  protected:
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     // Only register once.
     MyExporter::Register();
   }

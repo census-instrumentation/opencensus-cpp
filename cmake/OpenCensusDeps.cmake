@@ -14,28 +14,20 @@
 
 include(FetchContent)
 
-fetchcontent_declare(googletest
-                     GIT_REPOSITORY
-                     https://github.com/abseil/googletest
-                     GIT_TAG
-                     ed2fe122f8dc9aca844d724986d1d5cf5b65ea4e)
-fetchcontent_declare(abseil
-                     GIT_REPOSITORY
-                     https://github.com/abseil/abseil-cpp
-                     GIT_TAG
-                     2c8421e1c6cef0da9e8a20b01c15256ec9ec116d)
-fetchcontent_declare(prometheus
-                     GIT_REPOSITORY
-                     https://github.com/jupp0r/prometheus-cpp
-                     GIT_TAG
-                     master)
-fetchcontent_declare(benchmark
-                     GIT_REPOSITORY
-                     https://github.com/google/benchmark
-                     GIT_TAG
-                     master)
+FetchContent_Declare(googletest
+                     GIT_REPOSITORY https://github.com/abseil/googletest
+                     GIT_TAG ed2fe122f8dc9aca844d724986d1d5cf5b65ea4e)
+FetchContent_Declare(abseil
+                     GIT_REPOSITORY https://github.com/abseil/abseil-cpp
+                     GIT_TAG 2c8421e1c6cef0da9e8a20b01c15256ec9ec116d)
+FetchContent_Declare(prometheus
+                     GIT_REPOSITORY https://github.com/jupp0r/prometheus-cpp
+                     GIT_TAG master)
+FetchContent_Declare(benchmark
+                     GIT_REPOSITORY https://github.com/google/benchmark
+                     GIT_TAG master)
 
-fetchcontent_getproperties(googletest)
+FetchContent_GetProperties(googletest)
 if(BUILD_TESTING)
   message(STATUS "Dependency: googletest (BUILD_TESTING=${BUILD_TESTING})")
   if(NOT googletest_POPULATED)
@@ -52,44 +44,44 @@ if(BUILD_TESTING)
         ON)
     endif()
 
-    fetchcontent_populate(googletest)
+    FetchContent_Populate(googletest)
     add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR}
                      EXCLUDE_FROM_ALL)
   endif()
 endif()
 
-fetchcontent_getproperties(abseil)
+FetchContent_GetProperties(abseil)
 if(NOT abseil_POPULATED)
   message(STATUS "Dependency: abseil")
-  fetchcontent_populate(abseil)
+  FetchContent_Populate(abseil)
   add_subdirectory(${abseil_SOURCE_DIR} ${abseil_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-fetchcontent_getproperties(prometheus)
+FetchContent_GetProperties(prometheus)
 if(NOT prometheus_POPULATED)
   message(STATUS "Dependency: prometheus")
   set(ENABLE_PUSH OFF CACHE BOOL "Build prometheus-cpp push library" FORCE)
   set(ENABLE_PULL OFF CACHE BOOL "Build prometheus-cpp pull library" FORCE)
-  set(ENABLE_COMPRESSION OFF
-      CACHE BOOL "Enable gzip compression for prometheus-cpp"
-      FORCE)
+  set(ENABLE_COMPRESSION
+      OFF
+      CACHE BOOL "Enable gzip compression for prometheus-cpp" FORCE)
   set(ENABLE_TESTING OFF CACHE BOOL "Build test for prometheus-cpp" FORCE)
-  fetchcontent_populate(prometheus)
+  FetchContent_Populate(prometheus)
   add_subdirectory(${prometheus_SOURCE_DIR} ${prometheus_BINARY_DIR}
                    EXCLUDE_FROM_ALL)
 endif()
 
-fetchcontent_getproperties(benchmark)
+FetchContent_GetProperties(benchmark)
 if(BUILD_TESTING)
   message(STATUS "Dependency: benchmark (BUILD_TESTING=${BUILD_TESTING})")
   if(NOT benchmark_POPULATED)
-    set(BENCHMARK_ENABLE_TESTING OFF
-        CACHE BOOL "Enable testing of the benchmark library."
-        FORCE)
-    set(BENCHMARK_ENABLE_GTEST_TESTS OFF
-        CACHE BOOL "Enable building the unit tests which depend on gtest"
-        FORCE)
-    fetchcontent_populate(benchmark)
+    set(BENCHMARK_ENABLE_TESTING
+        OFF
+        CACHE BOOL "Enable testing of the benchmark library." FORCE)
+    set(BENCHMARK_ENABLE_GTEST_TESTS
+        OFF
+        CACHE BOOL "Enable building the unit tests which depend on gtest" FORCE)
+    FetchContent_Populate(benchmark)
     add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR}
                      EXCLUDE_FROM_ALL)
   endif()

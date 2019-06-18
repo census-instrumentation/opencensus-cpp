@@ -19,6 +19,7 @@
 // a long include list.
 #include "opencensus/stats/aggregation.h"         // IWYU pragma: export
 #include "opencensus/stats/bucket_boundaries.h"   // IWYU pragma: export
+#include "opencensus/stats/distribution.h"        // IWYU pragma: export
 #include "opencensus/stats/measure.h"             // IWYU pragma: export
 #include "opencensus/stats/measure_descriptor.h"  // IWYU pragma: export
 #include "opencensus/stats/measure_registry.h"    // IWYU pragma: export

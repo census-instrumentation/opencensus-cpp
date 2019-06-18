@@ -21,6 +21,6 @@ if ! which buildifier >/dev/null; then
   go get -v github.com/bazelbuild/buildtools/buildifier
 fi
 # Install cmake-format.
-pip install --user cmake_format==0.4.5
+pip install --user 'cmake_format>=0.5.2'
 # Check format.
 tools/format.sh

@@ -19,6 +19,8 @@
 #include <iostream>
 
 #include <curl/curl.h>
+#undef RAPIDJSON_HAS_STDSTRING
+#define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 #include "absl/memory/memory.h"

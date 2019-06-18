@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-opencensus_lib(stats PUBLIC DEPS stats_core stats_recording)
+opencensus_lib(stats
+               PUBLIC
+               DEPS
+               stats_core
+               stats_recording)
 
 opencensus_lib(stats_test_utils
                PUBLIC

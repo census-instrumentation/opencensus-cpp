@@ -148,7 +148,10 @@ opencensus_test(trace_sampler_test
                 absl::synchronization
                 absl::time)
 
-opencensus_test(trace_span_test internal/span_test.cc trace absl::strings)
+opencensus_test(trace_span_test
+                internal/span_test.cc
+                trace
+                absl::strings)
 
 opencensus_test(trace_span_id_test internal/span_id_test.cc trace)
 
@@ -172,7 +175,10 @@ opencensus_test(trace_span_exporter_test
                 absl::synchronization
                 absl::time)
 
-opencensus_test(trace_status_test internal/status_test.cc trace absl::strings)
+opencensus_test(trace_status_test
+                internal/status_test.cc
+                trace
+                absl::strings)
 
 opencensus_test(trace_trace_config_test
                 internal/trace_config_test.cc
