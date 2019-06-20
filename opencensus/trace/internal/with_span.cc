@@ -26,14 +26,15 @@ using ::opencensus::trace::Span;
 namespace opencensus {
 namespace trace {
 
-WithSpan::WithSpan(const Span& span, bool cond)
+WithSpan::WithSpan(const Span& span, bool cond, bool end_span)
     : swapped_span_(span)
 #ifndef NDEBUG
       ,
       original_context_(Context::InternalMutableCurrent())
 #endif
       ,
-      cond_(cond) {
+      cond_(cond),
+      end_span_(end_span) {
   ConditionalSwap();
 }
 
@@ -43,6 +44,9 @@ WithSpan::~WithSpan() {
          "WithSpan must be destructed on the same thread as it was "
          "constructed.");
 #endif
+  if (cond_ && end_span_) {
+    Context::InternalMutableCurrent()->span_.End();
+  }
   ConditionalSwap();
 }
 

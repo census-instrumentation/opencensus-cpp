@@ -107,6 +107,17 @@ TEST(WithSpanTest, DisabledViaConditional) {
   span1.End();
 }
 
+TEST(WithSpanTest, EndSpan) {
+  auto span = opencensus::trace::Span::StartSpan("MySpan");
+  ExpectNoSpan();
+  {
+    opencensus::trace::WithSpan ws(span, /*cond=*/true, /*end_span=*/true);
+    EXPECT_EQ(span.context(), ContextTestPeer::CurrentCtx());
+  }
+  ExpectNoSpan();
+  // TODO: Check End() was called.
+}
+
 #ifndef NDEBUG
 TEST(WithSpanDeathTest, DestructorOnWrongThread) {
   auto span = opencensus::trace::Span::StartSpan("MySpan");

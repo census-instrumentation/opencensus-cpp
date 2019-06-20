@@ -23,7 +23,8 @@ namespace trace {
 
 // WithSpan is a scoped object that sets the current Span to the given one,
 // until the WithSpan object is destroyed. If the condition is false, it doesn't
-// do anything.
+// do anything. If the condition is true and end_span is true, it calls End() on
+// the Span when it falls out of scope.
 //
 // Because WithSpan changes the current (thread local) context, NEVER allocate a
 // WithSpan in one thread and deallocate in another. A simple way to ensure this
@@ -36,7 +37,7 @@ namespace trace {
 // }
 class WithSpan {
  public:
-  explicit WithSpan(const Span& span, bool cond = true);
+  explicit WithSpan(const Span& span, bool cond = true, bool end_span = false);
   ~WithSpan();
 
   // No Span&& constructor because it encourages "consuming" the Span with a
@@ -57,6 +58,7 @@ class WithSpan {
   const ::opencensus::context::Context* original_context_;
 #endif
   const bool cond_;
+  const bool end_span_;
 };
 
 }  // namespace trace
