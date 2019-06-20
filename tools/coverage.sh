@@ -1,4 +1,5 @@
-# Copyright 2018, OpenCensus Authors
+#!/usr/bin/env bash
+# Copyright 2019, OpenCensus Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,11 +12,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# Builds a coverage report.
 
-# @zlib comes from grpc_deps in the outer workspace.
+if [[ ! -e tools/coverage.sh ]]; then
+  echo "This tool must be run from the topmost OpenCensus directory." >&2
+  exit 1
+fi
 
-cc_library(
-    name = "z",
-    visibility = ["//visibility:public"],
-    deps = ["@zlib"],
-)
+if ! which genhtml >/dev/null; then
+  echo "Install lcov to get the genhtml program."
+  exit 1
+fi
+
+set -e
+OUTDIR=/tmp/opencensus-coverage
+
+bazel coverage ...
+genhtml --show-details --legend --output-directory $OUTDIR \
+  $(find bazel-out/ -name coverage.dat)
+ls -l $OUTDIR/index.html
