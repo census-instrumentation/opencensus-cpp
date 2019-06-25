@@ -121,7 +121,7 @@ class SpanImpl final {
   // The status of the span. Only set if start_options_.record_events is true.
   exporter::Status status_ GUARDED_BY(mu_);
   // The displayed name of the span.
-  std::string name_;
+  std::string name_ GUARDED_BY(mu_);
   // The parent SpanId of this span. Parent SpanId will be not valid if this is
   // a root span.
   const SpanId parent_span_id_;
