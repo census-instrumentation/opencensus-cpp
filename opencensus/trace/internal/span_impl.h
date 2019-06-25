@@ -85,6 +85,8 @@ class SpanImpl final {
 
   void SetStatus(exporter::Status&& status) LOCKS_EXCLUDED(mu_);
 
+  void SetName(absl::string_view name);
+
   // Returns true on success (if this is the first time the Span has ended) and
   // also marks the end of the Span and sets its end_time_.
   bool End() LOCKS_EXCLUDED(mu_);
@@ -119,7 +121,7 @@ class SpanImpl final {
   // The status of the span. Only set if start_options_.record_events is true.
   exporter::Status status_ GUARDED_BY(mu_);
   // The displayed name of the span.
-  const std::string name_;
+  std::string name_;
   // The parent SpanId of this span. Parent SpanId will be not valid if this is
   // a root span.
   const SpanId parent_span_id_;

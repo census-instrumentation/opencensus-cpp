@@ -154,6 +154,9 @@ class Span final {
   void SetStatus(StatusCode canonical_code,
                  absl::string_view message = "") const;
 
+  // Set the span name.
+  void SetName(absl::string_view name) const;
+
   // Marks the end of a Span. No further changes can be made to the Span after
   // End is called.
   void End() const;

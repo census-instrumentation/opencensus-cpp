@@ -202,6 +202,12 @@ void Span::SetStatus(StatusCode canonical_code,
   }
 }
 
+void Span::SetName(absl::string_view message) const {
+  if (IsRecording()) {
+    span_impl_->SetName(message);
+  }
+}
+
 void Span::End() const {
   if (IsRecording()) {
     if (!span_impl_->End()) {
