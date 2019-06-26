@@ -85,7 +85,7 @@ class SpanImpl final {
 
   void SetStatus(exporter::Status&& status) LOCKS_EXCLUDED(mu_);
 
-  void SetName(absl::string_view name);
+  void SetName(absl::string_view name) LOCKS_EXCLUDED(mu_);
 
   // Returns true on success (if this is the first time the Span has ended) and
   // also marks the end of the Span and sets its end_time_.
