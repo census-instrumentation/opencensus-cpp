@@ -36,6 +36,12 @@ struct StackdriverOptions {
 
   // The RPC deadline to use when exporting to Stackdriver.
   absl::Duration rpc_deadline = absl::Seconds(5);
+
+  // If empty, the exporter will use "custom.googleapis.com/opencensus"
+  std::string metric_domain;
+
+  // If empty, the exporter will use "global"
+  std::string resource_type;
 };
 
 // Exports stats for registered views (see opencensus/stats/stats_exporter.h) to

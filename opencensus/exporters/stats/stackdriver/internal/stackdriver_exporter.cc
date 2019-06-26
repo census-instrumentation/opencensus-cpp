@@ -14,13 +14,14 @@
 
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 
+#include <grpcpp/grpcpp.h>
+
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <memory>
 #include <vector>
 
-#include <grpcpp/grpcpp.h>
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
@@ -43,6 +44,8 @@ constexpr char kGoogleStackdriverStatsAddress[] = "monitoring.googleapis.com";
 constexpr char kProjectIdPrefix[] = "projects/";
 // Stackdriver limits a single CreateTimeSeries request to 200 series.
 constexpr int kTimeSeriesBatchSize = 200;
+constexpr char kDefaultMetricDomain[] = "custom.googleapis.com/opencensus/";
+constexpr char kDefaultResourceType[] = "global";
 
 class Handler : public ::opencensus::stats::StatsExporter::Handler {
  public:
@@ -64,6 +67,8 @@ class Handler : public ::opencensus::stats::StatsExporter::Handler {
 
   const StackdriverOptions opts_;
   const std::string project_id_;
+  const std::string metric_domain_;
+  const std::string resource_type_;
   const std::unique_ptr<google::monitoring::v3::MetricService::Stub> stub_;
   mutable absl::Mutex mu_;
   std::unordered_map<std::string, opencensus::stats::ViewDescriptor>
@@ -73,6 +78,10 @@ class Handler : public ::opencensus::stats::StatsExporter::Handler {
 Handler::Handler(const StackdriverOptions& opts)
     : opts_(opts),
       project_id_(absl::StrCat(kProjectIdPrefix, opts.project_id)),
+      metric_domain_(opts.metric_domain.empty() ? kDefaultMetricDomain
+                                                : opts.metric_domain),
+      resource_type_(opts.resource_type.empty() ? kDefaultResourceType
+                                                : opts.resource_type),
       stub_(google::monitoring::v3::MetricService::NewStub(
           ::grpc::CreateCustomChannel(kGoogleStackdriverStatsAddress,
                                       ::grpc::GoogleDefaultCredentials(),
@@ -90,7 +99,8 @@ void Handler::ExportViewData(
       continue;
     }
     const auto view_time_series =
-        MakeTimeSeries(datum.first, datum.second, opts_.opencensus_task);
+        MakeTimeSeries(metric_domain_, resource_type_, datum.first,
+                       datum.second, opts_.opencensus_task);
     time_series.insert(time_series.end(), view_time_series.begin(),
                        view_time_series.end());
   }
@@ -147,7 +157,7 @@ bool Handler::MaybeRegisterView(
 
   auto request = google::monitoring::v3::CreateMetricDescriptorRequest();
   request.set_name(project_id_);
-  SetMetricDescriptor(project_id_, descriptor,
+  SetMetricDescriptor(project_id_, metric_domain_, descriptor,
                       request.mutable_metric_descriptor());
   ::grpc::ClientContext context;
   context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));

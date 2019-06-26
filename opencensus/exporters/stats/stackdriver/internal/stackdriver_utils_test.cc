@@ -39,13 +39,15 @@ namespace {
 
 TEST(StackdriverUtilsTest, SetMetricDescriptorNameAndType) {
   const std::string project_id = "projects/test-id";
+  const std::string metric_domain = "custom.googleapis.com/test";
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor().set_name("example.com/metric_name");
   google::api::MetricDescriptor metric_descriptor;
-  SetMetricDescriptor(project_id, view_descriptor, &metric_descriptor);
+  SetMetricDescriptor(project_id, metric_domain, view_descriptor,
+                      &metric_descriptor);
 
   const std::string expected_type =
-      "custom.googleapis.com/opencensus/example.com/metric_name";
+      "custom.googleapis.com/test/example.com/metric_name";
   const std::string expected_name =
       absl::StrCat("projects/test-id/metricDescriptors/", expected_type);
   EXPECT_EQ(expected_name, metric_descriptor.name());
@@ -59,7 +61,7 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorLabels) {
       opencensus::stats::ViewDescriptor().add_column(tag_key_1).add_column(
           tag_key_2);
   google::api::MetricDescriptor metric_descriptor;
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
 
   ASSERT_EQ(3, metric_descriptor.labels_size());
   EXPECT_EQ("opencensus_task", metric_descriptor.labels(0).key());
@@ -78,23 +80,23 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorMetricKind) {
   google::api::MetricDescriptor metric_descriptor;
 
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::Count());
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::CUMULATIVE,
             metric_descriptor.metric_kind());
 
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::Sum());
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::CUMULATIVE,
             metric_descriptor.metric_kind());
 
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::LastValue());
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::GAUGE,
             metric_descriptor.metric_kind());
 
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::Distribution(
       opencensus::stats::BucketBoundaries::Explicit({})));
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::CUMULATIVE,
             metric_descriptor.metric_kind());
 }
@@ -108,33 +110,33 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorValueType) {
   // Sum depends on measure type.
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::Sum());
   view_descriptor.set_measure("double_measure");
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::DOUBLE,
             metric_descriptor.value_type());
 
   view_descriptor.set_measure("int_measure");
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::INT64,
             metric_descriptor.value_type());
 
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::Count());
   view_descriptor.set_measure("double_measure");
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::INT64,
             metric_descriptor.value_type());
   view_descriptor.set_measure("int_measure");
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::INT64,
             metric_descriptor.value_type());
 
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::Distribution(
       opencensus::stats::BucketBoundaries::Explicit({0})));
   view_descriptor.set_measure("double_measure");
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::DISTRIBUTION,
             metric_descriptor.value_type());
   view_descriptor.set_measure("int_measure");
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::DISTRIBUTION,
             metric_descriptor.value_type());
 }
@@ -145,7 +147,7 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorUnits) {
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor().set_measure("measure");
   google::api::MetricDescriptor metric_descriptor;
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
 
   EXPECT_EQ(units, metric_descriptor.unit());
 }
@@ -157,7 +159,7 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorUnitsCount) {
           .set_measure("measure")
           .set_aggregation(opencensus::stats::Aggregation::Count());
   google::api::MetricDescriptor metric_descriptor;
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
 
   EXPECT_EQ("1", metric_descriptor.unit());
 }
@@ -167,12 +169,14 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorDescription) {
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor().set_description(description);
   google::api::MetricDescriptor metric_descriptor;
-  SetMetricDescriptor("", view_descriptor, &metric_descriptor);
+  SetMetricDescriptor("", "", view_descriptor, &metric_descriptor);
 
   EXPECT_EQ(description, metric_descriptor.description());
 }
 
-TEST(StackdriverUtilsTest, MakeTimeSeriesSumDouble) {
+TEST(StackdriverUtilsTest, MakeTimeSeriesSumDoubleAndTypes) {
+  const std::string metric_domain = "custom.googleapis.com/test";
+  const std::string resource_type = "my_resource";
   const auto measure =
       opencensus::stats::MeasureDouble::Register("measure_sum_double", "", "");
   const std::string task = "test_task";
@@ -189,11 +193,11 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumDouble) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor, {{{"v1", "v1"}, 1.0}, {{"v1", "v2"}, 2.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(view_descriptor, data, task);
+      MakeTimeSeries(metric_domain, resource_type, view_descriptor, data, task);
 
   for (const auto& ts : time_series) {
-    EXPECT_EQ("custom.googleapis.com/opencensus/test_view", ts.metric().type());
-    EXPECT_EQ("global", ts.resource().type());
+    EXPECT_EQ("custom.googleapis.com/test/test_view", ts.metric().type());
+    EXPECT_EQ("my_resource", ts.resource().type());
     ASSERT_EQ(1, ts.points_size());
     EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
               ts.points(0).interval().start_time().seconds());
@@ -230,12 +234,9 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumInt) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor, {{{"v1", "v1"}, 1.0}, {{"v1", "v2"}, 2.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(view_descriptor, data, task);
+      MakeTimeSeries("", "", view_descriptor, data, task);
 
   for (const auto& ts : time_series) {
-    EXPECT_EQ(absl::StrCat("custom.googleapis.com/opencensus/", view_name),
-              ts.metric().type());
-    EXPECT_EQ("global", ts.resource().type());
     ASSERT_EQ(1, ts.points_size());
     EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
               ts.points(0).interval().start_time().seconds());
@@ -273,12 +274,9 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesCountDouble) {
       view_descriptor,
       {{{"v1", "v1"}, 1.0}, {{"v1", "v1"}, 3.0}, {{"v1", "v2"}, 2.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(view_descriptor, data, task);
+      MakeTimeSeries("", "", view_descriptor, data, task);
 
   for (const auto& ts : time_series) {
-    EXPECT_EQ(absl::StrCat("custom.googleapis.com/opencensus/", view_name),
-              ts.metric().type());
-    EXPECT_EQ("global", ts.resource().type());
     ASSERT_EQ(1, ts.points_size());
     EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
               ts.points(0).interval().start_time().seconds());
@@ -319,11 +317,9 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
       view_descriptor,
       {{{"v1", "v1"}, -1.0}, {{"v1", "v1"}, 7.0}, {{"v1", "v2"}, 1.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(view_descriptor, data, task);
+      MakeTimeSeries("", "", view_descriptor, data, task);
 
   for (const auto& ts : time_series) {
-    EXPECT_EQ("custom.googleapis.com/opencensus/test_view", ts.metric().type());
-    EXPECT_EQ("global", ts.resource().type());
     ASSERT_EQ(1, ts.points_size());
     EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
               ts.points(0).interval().start_time().seconds());
@@ -367,12 +363,9 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesLastValueInt) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor, {{{"v1", "v1"}, 1.0}, {{"v1", "v2"}, 2.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(view_descriptor, data, task);
+      MakeTimeSeries("", "", view_descriptor, data, task);
 
   for (const auto& ts : time_series) {
-    EXPECT_EQ(absl::StrCat("custom.googleapis.com/opencensus/", view_name),
-              ts.metric().type());
-    EXPECT_EQ("global", ts.resource().type());
     ASSERT_EQ(1, ts.points_size());
     EXPECT_FALSE(ts.points(0).interval().has_start_time());
     EXPECT_EQ(absl::ToUnixSeconds(data.end_time()),
