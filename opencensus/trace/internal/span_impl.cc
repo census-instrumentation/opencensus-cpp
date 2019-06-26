@@ -137,6 +137,13 @@ void SpanImpl::SetStatus(exporter::Status&& status) {
   }
 }
 
+void SpanImpl::SetName(absl::string_view name) {
+  absl::MutexLock l(&mu_);
+  if (!has_ended_) {
+    name_ = std::string(name);
+  }
+}
+
 bool SpanImpl::End() {
   absl::MutexLock l(&mu_);
   if (has_ended_) {

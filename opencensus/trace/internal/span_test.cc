@@ -203,6 +203,9 @@ TEST(SpanTest, FullSpanTest) {
 
   span.SetStatus(StatusCode::DEADLINE_EXCEEDED, "desc");
 
+  // Change span name
+  span.SetName("NewSpanName");
+
   EXPECT_TRUE(span.context().IsValid());
   span.End();
   // Add a few extra things and make sure they are NOT included since the span
@@ -213,7 +216,7 @@ TEST(SpanTest, FullSpanTest) {
 
   const exporter::SpanData data = SpanTestPeer::ToSpanData(&span);
 
-  EXPECT_EQ("MyRootSpan", data.name());
+  EXPECT_EQ("NewSpanName", data.name());
   EXPECT_EQ(parent.context().span_id(), data.parent_span_id());
   EXPECT_EQ(0, data.annotations().dropped_events_count());
   EXPECT_EQ(0, data.message_events().dropped_events_count());
