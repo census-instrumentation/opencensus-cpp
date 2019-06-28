@@ -168,6 +168,11 @@ class Span final {
   // Sampled spans always record events.
   bool IsSampled() const;
 
+  // Stops recording the span and overrides the sampling decision to false.
+  // This should be used by the client to force disable sampling in support of
+  // delayed sampling decisions (e.g. health check URI blacklist).
+  void StopRecording();
+
   // Returns true if the Span is recording events (will appear in Span stores).
   // Sampled spans always record events, but not all Spans that are recording
   // are sampled.

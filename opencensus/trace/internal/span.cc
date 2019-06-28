@@ -224,6 +224,8 @@ const SpanContext& Span::context() const { return context_; }
 
 bool Span::IsSampled() const { return context_.trace_options().IsSampled(); }
 
+void Span::StopRecording() { span_impl_ = nullptr; }
+
 bool Span::IsRecording() const { return span_impl_ != nullptr; }
 
 void swap(Span& a, Span& b) {
