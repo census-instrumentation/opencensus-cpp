@@ -162,8 +162,14 @@ class Span final {
   // End is called.
   void End() const;
 
-  // If the Span was sampled, un-samples it and End()s it. Note that other
-  // copies of this Span, and child spans, do not become unsampled.
+  // Mark this Span as not sampled and End() it. Note that other copies of this
+  // Span object will still think they're sampled, and any child spans that have
+  // already been created will not be affected. The underlying data for just
+  // this Span will not be exported.
+  //
+  // Use of Abandon() is discouraged. Prefer to make the sampling decision at
+  // Start time.
+  //
   // TODO(opencensus-specs): Should Abandon() not call End()?
   void Abandon();
 
