@@ -365,6 +365,16 @@ TEST(SpanTest, BlankSpan) {
   span.End();
 }
 
+TEST(SpanTest, Abandon) {
+  AlwaysSampler sampler;
+  auto span = Span::StartSpan("SpanName", /*parent=*/nullptr, {&sampler});
+  EXPECT_TRUE(span.IsSampled());
+  span.Abandon();
+  EXPECT_FALSE(span.IsSampled());
+  auto data = SpanTestPeer::ToSpanData(&span);
+  EXPECT_FALSE(data.context().trace_options().IsSampled());
+}
+
 }  // namespace
 }  // namespace trace
 }  // namespace opencensus

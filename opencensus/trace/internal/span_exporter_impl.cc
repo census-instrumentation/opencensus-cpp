@@ -49,6 +49,7 @@ void SpanExporterImpl::AddSpan(
     const std::shared_ptr<opencensus::trace::SpanImpl>& span_impl) {
   absl::MutexLock l(&span_mu_);
   if (!collect_spans_) return;
+  if (!span_impl->IsSampled()) return;
   spans_.emplace_back(span_impl);
 }
 

@@ -144,6 +144,12 @@ void SpanImpl::SetName(absl::string_view name) {
   }
 }
 
+void SpanImpl::MarkAbandoned() {
+  absl::MutexLock l(&mu_);
+  context_ = SpanContext(context_.trace_id(), context_.span_id(),
+                         context_.trace_options().WithSampling(false));
+}
+
 bool SpanImpl::End() {
   absl::MutexLock l(&mu_);
   if (has_ended_) {
@@ -159,6 +165,15 @@ bool SpanImpl::End() {
 bool SpanImpl::HasEnded() const {
   absl::MutexLock l(&mu_);
   return has_ended_;
+}
+
+bool SpanImpl::IsSampled() const {
+  return context().trace_options().IsSampled();
+}
+
+SpanContext SpanImpl::context() const {
+  absl::MutexLock l(&mu_);
+  return context_;
 }
 
 exporter::SpanData SpanImpl::ToSpanData() const {

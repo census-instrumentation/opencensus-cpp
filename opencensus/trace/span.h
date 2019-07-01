@@ -79,10 +79,11 @@ struct StartSpanOptions {
 // implementation-defined data structure, hence all operations on it are marked
 // const.
 //
-// Span is thread-compatible. If swap() and operator= are avoided, everything
-// else is thread-safe. Avoid mutating Span objects in-place; treat them like
-// read-only handles. When using multiple threads, give each thread a copy of
-// the Span.
+// Span is thread-compatible. Avoid mutating Span objects in-place; treat them
+// like read-only handles. When using multiple threads, give each thread a copy
+// of the Span.
+//
+// Almost everything is thread-safe except: swap(), operator=, Abandon().
 //
 // As an alternative to explicitly passing Span objects between functions,
 // consider using Context. (see the ../context/ directory).
@@ -154,12 +155,17 @@ class Span final {
   void SetStatus(StatusCode canonical_code,
                  absl::string_view message = "") const;
 
-  // Set the span name.
+  // Set the Span name.
   void SetName(absl::string_view name) const;
 
   // Marks the end of a Span. No further changes can be made to the Span after
   // End is called.
   void End() const;
+
+  // If the Span was sampled, un-samples it and End()s it. Note that other
+  // copies of this Span, and child spans, do not become unsampled.
+  // TODO(opencensus-specs): Should Abandon() not call End()?
+  void Abandon();
 
   // Returns the SpanContext associated with this Span.
   const SpanContext& context() const;
