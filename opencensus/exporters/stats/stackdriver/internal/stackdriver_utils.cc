@@ -39,19 +39,20 @@ namespace {
 constexpr char kLabelDescription[] = "OpenCensus TagKey";
 constexpr char kOpenCensusTaskKey[] = "opencensus_task";
 constexpr char kOpenCensusTaskDescription[] = "OpenCensus task identifier";
+constexpr char kDefaultResourceType[] = "global";
 
-std::string MakeType(absl::string_view metric_domain,
+std::string MakeType(absl::string_view metric_name_prefix,
                      absl::string_view view_name) {
-  return absl::StrCat(metric_domain, "/", view_name);
+  return absl::StrCat(metric_name_prefix, view_name);
 }
 
 // Creates a name in the format described in
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors/create
 std::string MakeName(absl::string_view project_name,
-                     absl::string_view metric_domain,
+                     absl::string_view metric_name_prefix,
                      absl::string_view view_name) {
   return absl::StrCat(project_name, "/metricDescriptors/",
-                      MakeType(metric_domain, view_name));
+                      MakeType(metric_name_prefix, view_name));
 }
 
 void SetLabelDescriptor(absl::string_view tag_key,
@@ -153,12 +154,13 @@ std::vector<google::monitoring::v3::TimeSeries> DataToTimeSeries(
 }  // namespace
 
 void SetMetricDescriptor(
-    absl::string_view project_name, absl::string_view metric_domain,
+    absl::string_view project_name, absl::string_view metric_name_prefix,
     const opencensus::stats::ViewDescriptor& view_descriptor,
     google::api::MetricDescriptor* metric_descriptor) {
   metric_descriptor->set_name(
-      MakeName(project_name, metric_domain, view_descriptor.name()));
-  metric_descriptor->set_type(MakeType(metric_domain, view_descriptor.name()));
+      MakeName(project_name, metric_name_prefix, view_descriptor.name()));
+  metric_descriptor->set_type(
+      MakeType(metric_name_prefix, view_descriptor.name()));
   SetOpenCensusTaskLabelDescriptor(metric_descriptor->add_labels());
   for (const auto& tag_key : view_descriptor.columns()) {
     SetLabelDescriptor(tag_key.name(), metric_descriptor->add_labels());
@@ -177,15 +179,15 @@ void SetMetricDescriptor(
 }
 
 std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
-    absl::string_view metric_domain, absl::string_view resource_type,
+    absl::string_view metric_name_prefix,
     const opencensus::stats::ViewDescriptor& view_descriptor,
     const opencensus::stats::ViewData& data,
     absl::string_view opencensus_task) {
   // Set values that are common across all the rows.
   auto base_time_series = google::monitoring::v3::TimeSeries();
   base_time_series.mutable_metric()->set_type(
-      MakeType(metric_domain, view_descriptor.name()));
-  base_time_series.mutable_resource()->set_type(std::string(resource_type));
+      MakeType(metric_name_prefix, view_descriptor.name()));
+  base_time_series.mutable_resource()->set_type(kDefaultResourceType);
   auto* interval = base_time_series.add_points()->mutable_interval();
   // Stackdriver doesn't like start_time and end_time being different for GAUGE
   // metrics.

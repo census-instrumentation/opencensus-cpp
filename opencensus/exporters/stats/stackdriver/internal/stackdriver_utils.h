@@ -28,15 +28,16 @@ namespace exporters {
 namespace stats {
 
 // Populates metric_descriptor. project_name should be in the format
-// "projects/project_id".
+// "projects/project_id". metric_name_prefix should have a trailing slash, e.g.
+// "custom.googleapis.com/opencensus/".
 void SetMetricDescriptor(
-    absl::string_view project_name, absl::string_view metric_domain,
+    absl::string_view project_name, absl::string_view metric_name_prefix,
     const opencensus::stats::ViewDescriptor& view_descriptor,
     google::api::MetricDescriptor* metric_descriptor);
 
 // Converts each row of 'data' into TimeSeries.
 std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
-    absl::string_view metric_domain, absl::string_view resource_type,
+    absl::string_view metric_name_prefix,
     const opencensus::stats::ViewDescriptor& view_descriptor,
     const opencensus::stats::ViewData& data, absl::string_view opencensus_task);
 
