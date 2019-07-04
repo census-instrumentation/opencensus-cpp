@@ -239,18 +239,13 @@ void ConvertSpans(
 
 class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
  public:
-  Handler(const StackdriverOptions& opts,
-          const std::shared_ptr<grpc::Channel>& channel)
-      : opts_(opts),
-        stub_(::google::devtools::cloudtrace::v2::TraceService::NewStub(
-            channel)) {}
+  Handler(StackdriverOptions&& opts) : opts_(std::move(opts)) {}
 
   void Export(const std::vector<::opencensus::trace::exporter::SpanData>& spans)
       override;
 
  private:
   const StackdriverOptions opts_;
-  std::unique_ptr<google::devtools::cloudtrace::v2::TraceService::Stub> stub_;
 };
 
 void Handler::Export(
@@ -261,7 +256,8 @@ void Handler::Export(
   ::google::protobuf::Empty response;
   grpc::ClientContext context;
   context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
-  grpc::Status status = stub_->BatchWriteSpans(&context, request, &response);
+  grpc::Status status =
+      opts_.trace_service_stub->BatchWriteSpans(&context, request, &response);
   if (!status.ok()) {
     std::cerr << "BatchWriteSpans failed: "
               << opencensus::common::ToString(status) << "\n";
@@ -271,19 +267,23 @@ void Handler::Export(
 }  // namespace
 
 // static
-void StackdriverExporter::Register(const StackdriverOptions& opts) {
-  auto channel = ::grpc::CreateCustomChannel(
-      kGoogleStackdriverTraceAddress, ::grpc::GoogleDefaultCredentials(),
-      ::opencensus::common::WithUserAgent());
+void StackdriverExporter::Register(StackdriverOptions&& opts) {
+  if (opts.trace_service_stub == nullptr) {
+    auto channel = ::grpc::CreateCustomChannel(
+        kGoogleStackdriverTraceAddress, ::grpc::GoogleDefaultCredentials(),
+        ::opencensus::common::WithUserAgent());
+    opts.trace_service_stub =
+        ::google::devtools::cloudtrace::v2::TraceService::NewStub(channel);
+  }
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
-      absl::make_unique<Handler>(opts, channel));
+      absl::make_unique<Handler>(std::move(opts)));
 }
 
 // static, DEPRECATED
 void StackdriverExporter::Register(absl::string_view project_id) {
   StackdriverOptions opts;
   opts.project_id = std::string(project_id);
-  Register(opts);
+  Register(std::move(opts));
 }
 
 }  // namespace trace
