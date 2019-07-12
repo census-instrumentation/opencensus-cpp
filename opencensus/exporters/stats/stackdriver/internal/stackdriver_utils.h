@@ -19,6 +19,7 @@
 
 #include "absl/strings/string_view.h"
 #include "google/api/metric.pb.h"
+#include "google/api/monitored_resource.pb.h"
 #include "google/monitoring/v3/metric.pb.h"
 #include "google/protobuf/timestamp.pb.h"
 #include "opencensus/stats/stats.h"
@@ -38,6 +39,7 @@ void SetMetricDescriptor(
 // Converts each row of 'data' into TimeSeries.
 std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
     absl::string_view metric_name_prefix,
+    const google::api::MonitoredResource& monitored_resource,
     const opencensus::stats::ViewDescriptor& view_descriptor,
     const opencensus::stats::ViewData& data, absl::string_view opencensus_task);
 

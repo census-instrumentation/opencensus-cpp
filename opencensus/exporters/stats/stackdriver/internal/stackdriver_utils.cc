@@ -180,6 +180,7 @@ void SetMetricDescriptor(
 
 std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
     absl::string_view metric_name_prefix,
+    const google::api::MonitoredResource& monitored_resource,
     const opencensus::stats::ViewDescriptor& view_descriptor,
     const opencensus::stats::ViewData& data,
     absl::string_view opencensus_task) {
@@ -187,7 +188,11 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
   auto base_time_series = google::monitoring::v3::TimeSeries();
   base_time_series.mutable_metric()->set_type(
       MakeType(metric_name_prefix, view_descriptor.name()));
-  base_time_series.mutable_resource()->set_type(kDefaultResourceType);
+  if (monitored_resource.type().empty()) {
+    base_time_series.mutable_resource()->set_type(kDefaultResourceType);
+  } else {
+    *base_time_series.mutable_resource() = monitored_resource;
+  }
   auto* interval = base_time_series.add_points()->mutable_interval();
   // Stackdriver doesn't like start_time and end_time being different for GAUGE
   // metrics.
