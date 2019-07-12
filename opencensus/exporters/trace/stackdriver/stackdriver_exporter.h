@@ -43,8 +43,9 @@ struct StackdriverOptions {
 
 class StackdriverExporter {
  public:
-  // Registers the exporter.
-  static void Register(StackdriverOptions&& opts);
+  // Registers the exporter. Takes ownership of the contents of opts and resets
+  // the opts object to defaults.
+  static void Register(StackdriverOptions& opts);
 
   // TODO: Retire this:
   ABSL_DEPRECATED(

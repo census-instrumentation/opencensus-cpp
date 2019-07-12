@@ -267,7 +267,7 @@ void Handler::Export(
 }  // namespace
 
 // static
-void StackdriverExporter::Register(StackdriverOptions&& opts) {
+void StackdriverExporter::Register(StackdriverOptions& opts) {
   if (opts.trace_service_stub == nullptr) {
     auto channel = ::grpc::CreateCustomChannel(
         kGoogleStackdriverTraceAddress, ::grpc::GoogleDefaultCredentials(),
@@ -275,15 +275,19 @@ void StackdriverExporter::Register(StackdriverOptions&& opts) {
     opts.trace_service_stub =
         ::google::devtools::cloudtrace::v2::TraceService::NewStub(channel);
   }
+  // Swap opts to take ownership of the trace_service_stub.
+  StackdriverOptions swapped;
+  using std::swap;
+  swap(opts, swapped);
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
-      absl::make_unique<Handler>(std::move(opts)));
+      absl::make_unique<Handler>(std::move(swapped)));
 }
 
 // static, DEPRECATED
 void StackdriverExporter::Register(absl::string_view project_id) {
   StackdriverOptions opts;
   opts.project_id = std::string(project_id);
-  Register(std::move(opts));
+  Register(opts);
 }
 
 }  // namespace trace
