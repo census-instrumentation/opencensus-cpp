@@ -37,6 +37,10 @@ namespace exporters {
 namespace stats {
 namespace {
 
+google::api::MonitoredResource DefaultResource() {
+  return google::api::MonitoredResource();
+}
+
 TEST(StackdriverUtilsTest, SetMetricDescriptorNameAndType) {
   const std::string project_id = "projects/test-id";
   const std::string metric_name_prefix = "custom.googleapis.com/test/";
@@ -174,6 +178,58 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorDescription) {
   EXPECT_EQ(description, metric_descriptor.description());
 }
 
+TEST(StackdriverUtilsTest, MakeTimeSeriesDefaultResource) {
+  const auto measure =
+      opencensus::stats::MeasureDouble::Register("my_measure", "", "");
+  const std::string task = "test_task";
+  const std::string view_name = "test_view";
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor()
+          .set_name(view_name)
+          .set_measure(measure.GetDescriptor().name())
+          .set_aggregation(opencensus::stats::Aggregation::Sum());
+  const opencensus::stats::ViewData data =
+      TestUtils::MakeViewData(view_descriptor, {{{}, 1.0}});
+  const std::vector<google::monitoring::v3::TimeSeries> time_series =
+      MakeTimeSeries("", DefaultResource(), view_descriptor, data, task);
+  ASSERT_EQ(1, time_series.size());
+  const auto& ts = time_series.front();
+  EXPECT_EQ("global", ts.resource().type());
+  EXPECT_EQ(0, ts.resource().labels_size());
+}
+
+TEST(StackdriverUtilsTest, MakeTimeSeriesCustomResource) {
+  const auto measure =
+      opencensus::stats::MeasureDouble::Register("my_measure", "", "");
+  const std::string task = "test_task";
+  const std::string view_name = "test_view";
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor()
+          .set_name(view_name)
+          .set_measure(measure.GetDescriptor().name())
+          .set_aggregation(opencensus::stats::Aggregation::Sum());
+  const opencensus::stats::ViewData data =
+      TestUtils::MakeViewData(view_descriptor, {{{}, 1.0}});
+  google::api::MonitoredResource resource;
+  resource.set_type("gce_instance");
+  (*resource.mutable_labels())["project_id"] = "my_project";
+  (*resource.mutable_labels())["instance_id"] = "1234";
+  (*resource.mutable_labels())["zone"] = "my_zone";
+  const std::vector<google::monitoring::v3::TimeSeries> time_series =
+      MakeTimeSeries("", resource, view_descriptor, data, task);
+  ASSERT_EQ(1, time_series.size());
+  const auto& ts = time_series.front();
+  EXPECT_EQ("gce_instance", ts.resource().type());
+  // EXPECT_EQ(0, ts.resource().labels_size());
+  using ::testing::Pair;
+  EXPECT_THAT(ts.resource().labels(),
+              ::testing::UnorderedElementsAre(Pair("project_id", "my_project"),
+                                              Pair("instance_id", "1234"),
+                                              Pair("zone", "my_zone")))
+      << "  resource() is:\n"
+      << ts.resource().DebugString();
+}
+
 TEST(StackdriverUtilsTest, MakeTimeSeriesSumDoubleAndTypes) {
   const std::string metric_name_prefix = "custom.googleapis.com/test/";
   const auto measure =
@@ -192,11 +248,11 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumDoubleAndTypes) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor, {{{"v1", "v1"}, 1.0}, {{"v1", "v2"}, 2.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(metric_name_prefix, view_descriptor, data, task);
+      MakeTimeSeries(metric_name_prefix, DefaultResource(), view_descriptor,
+                     data, task);
 
   for (const auto& ts : time_series) {
     EXPECT_EQ("custom.googleapis.com/test/test_view", ts.metric().type());
-    EXPECT_EQ("global", ts.resource().type());
     ASSERT_EQ(1, ts.points_size());
     EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
               ts.points(0).interval().start_time().seconds());
@@ -233,7 +289,7 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumInt) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor, {{{"v1", "v1"}, 1.0}, {{"v1", "v2"}, 2.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries("", view_descriptor, data, task);
+      MakeTimeSeries("", DefaultResource(), view_descriptor, data, task);
 
   for (const auto& ts : time_series) {
     ASSERT_EQ(1, ts.points_size());
@@ -273,7 +329,7 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesCountDouble) {
       view_descriptor,
       {{{"v1", "v1"}, 1.0}, {{"v1", "v1"}, 3.0}, {{"v1", "v2"}, 2.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries("", view_descriptor, data, task);
+      MakeTimeSeries("", DefaultResource(), view_descriptor, data, task);
 
   for (const auto& ts : time_series) {
     ASSERT_EQ(1, ts.points_size());
@@ -316,7 +372,7 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
       view_descriptor,
       {{{"v1", "v1"}, -1.0}, {{"v1", "v1"}, 7.0}, {{"v1", "v2"}, 1.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries("", view_descriptor, data, task);
+      MakeTimeSeries("", DefaultResource(), view_descriptor, data, task);
 
   for (const auto& ts : time_series) {
     ASSERT_EQ(1, ts.points_size());
@@ -362,7 +418,7 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesLastValueInt) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor, {{{"v1", "v1"}, 1.0}, {{"v1", "v2"}, 2.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries("", view_descriptor, data, task);
+      MakeTimeSeries("", DefaultResource(), view_descriptor, data, task);
 
   for (const auto& ts : time_series) {
     ASSERT_EQ(1, ts.points_size());
