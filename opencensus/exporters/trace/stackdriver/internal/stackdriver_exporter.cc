@@ -271,12 +271,14 @@ void Handler::Export(
 }  // namespace
 
 // static
-void StackdriverExporter::Register(const StackdriverOptions& opts) {
+grpc::Status StackdriverExporter::Register(const StackdriverOptions& opts) {
   auto channel = ::grpc::CreateCustomChannel(
       kGoogleStackdriverTraceAddress, ::grpc::GoogleDefaultCredentials(),
       ::opencensus::common::WithUserAgent());
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
       absl::make_unique<Handler>(opts, channel));
+  // TODO: Propagate errors to caller. For now we just return OK.
+  return grpc::Status::OK;
 }
 
 // static, DEPRECATED

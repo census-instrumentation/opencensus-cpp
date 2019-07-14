@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include <grpcpp/support/status.h>
 #include "absl/base/macros.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
@@ -35,8 +36,9 @@ struct StackdriverOptions {
 
 class StackdriverExporter {
  public:
-  // Registers the exporter.
-  static void Register(const StackdriverOptions& opts);
+  // Registers the exporter and returns OK on success or another Status code
+  // otherwise.
+  static grpc::Status Register(const StackdriverOptions& opts);
 
   // TODO: Retire this:
   ABSL_DEPRECATED(
