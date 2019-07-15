@@ -48,7 +48,7 @@ struct StackdriverOptions {
   // https://cloud.google.com/monitoring/api/resources
   google::api::MonitoredResource monitored_resource;
 
-  // Optional: per view Stackdriver MonitoredResource to use. Key is the view
+  // Optional: per metric Stackdriver MonitoredResource to use. Key is the view
   // descriptor name, value is the monitored resource to use for that view.
   //
   // If the view name cannot be found in the map, the exporter will use the
@@ -59,7 +59,7 @@ struct StackdriverOptions {
   // https://cloud.google.com/monitoring/api/ref_v3/rpc/google.api#google.api.MonitoredResource
   // https://cloud.google.com/monitoring/api/resources
   std::unordered_map<std::string, google::api::MonitoredResource>
-      per_view_monitored_resource;
+      per_metric_monitored_resource;
 
   // Optional: the name prefix for Stackdriver metrics.
   //

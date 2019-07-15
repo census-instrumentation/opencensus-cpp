@@ -96,7 +96,7 @@ void Handler::ExportViewData(
     }
     const auto view_time_series =
         MakeTimeSeries(metric_name_prefix_, opts_.monitored_resource,
-                       opts_.per_view_monitored_resource, datum.first,
+                       opts_.per_metric_monitored_resource, datum.first,
                        datum.second, opts_.opencensus_task);
     time_series.insert(time_series.end(), view_time_series.begin(),
                        view_time_series.end());

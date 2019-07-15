@@ -255,10 +255,10 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesPerViewCustomResource) {
   (*resource.mutable_labels())["instance_id"] = "1234";
   (*resource.mutable_labels())["zone"] = "my_zone";
   std::unordered_map<std::string, google::api::MonitoredResource>
-      per_view_resources;
-  per_view_resources[view_name] = resource;
+      per_metric_resources;
+  per_metric_resources[view_name] = resource;
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries("", DefaultResource(), per_view_resources, view_descriptor,
+      MakeTimeSeries("", DefaultResource(), per_metric_resources, view_descriptor,
                      data, task);
   ASSERT_EQ(1, time_series.size());
   const auto& ts = time_series.front();
@@ -290,10 +290,10 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesPerViewCustomResourceNotMatch) {
   (*resource.mutable_labels())["instance_id"] = "1234";
   (*resource.mutable_labels())["zone"] = "my_zone";
   std::unordered_map<std::string, google::api::MonitoredResource>
-      per_view_resources;
-  per_view_resources["some_other_view"] = resource;
+      per_metric_resources;
+  per_metric_resources["some_other_view"] = resource;
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries("", DefaultResource(), per_view_resources, view_descriptor,
+      MakeTimeSeries("", DefaultResource(), per_metric_resources, view_descriptor,
                      data, task);
   ASSERT_EQ(1, time_series.size());
   const auto& ts = time_series.front();
