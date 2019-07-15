@@ -258,8 +258,8 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesPerMetricCustomResource) {
       per_metric_resources;
   per_metric_resources[view_name] = resource;
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries("", DefaultResource(), per_metric_resources, view_descriptor,
-                     data, task);
+      MakeTimeSeries("", DefaultResource(), per_metric_resources,
+                     view_descriptor, data, task);
   ASSERT_EQ(1, time_series.size());
   const auto& ts = time_series.front();
   EXPECT_EQ("gce_instance", ts.resource().type());
@@ -293,8 +293,8 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesPerMetricCustomResourceNotMatch) {
       per_metric_resources;
   per_metric_resources["some_other_view"] = resource;
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries("", DefaultResource(), per_metric_resources, view_descriptor,
-                     data, task);
+      MakeTimeSeries("", DefaultResource(), per_metric_resources,
+                     view_descriptor, data, task);
   ASSERT_EQ(1, time_series.size());
   const auto& ts = time_series.front();
   EXPECT_EQ("global", ts.resource().type());
