@@ -190,10 +190,9 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
   auto base_time_series = google::monitoring::v3::TimeSeries();
   base_time_series.mutable_metric()->set_type(
       MakeType(metric_name_prefix, view_descriptor.name()));
-  if (per_view_monitored_resource.find(view_descriptor.name()) !=
-      per_view_monitored_resource.end()) {
-    *base_time_series.mutable_resource() =
-        per_view_monitored_resource.at(view_descriptor.name());
+  auto iter = per_view_monitored_resource.find(view_descriptor.name());
+  if (iter != per_view_monitored_resource.end()) {
+    *base_time_series.mutable_resource() = iter->second;
   } else if (monitored_resource.type().empty()) {
     base_time_series.mutable_resource()->set_type(kDefaultResourceType);
   } else {

@@ -263,7 +263,6 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesPerViewCustomResource) {
   ASSERT_EQ(1, time_series.size());
   const auto& ts = time_series.front();
   EXPECT_EQ("gce_instance", ts.resource().type());
-  // EXPECT_EQ(0, ts.resource().labels_size());
   using ::testing::Pair;
   EXPECT_THAT(ts.resource().labels(),
               ::testing::UnorderedElementsAre(Pair("project_id", "my_project"),
@@ -271,6 +270,35 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesPerViewCustomResource) {
                                               Pair("zone", "my_zone")))
       << "  resource() is:\n"
       << ts.resource().DebugString();
+}
+
+TEST(StackdriverUtilsTest, MakeTimeSeriesPerViewCustomResourceNotMatch) {
+  const auto measure =
+      opencensus::stats::MeasureDouble::Register("my_measure", "", "");
+  const std::string task = "test_task";
+  const std::string view_name = "test_view";
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor()
+          .set_name(view_name)
+          .set_measure(measure.GetDescriptor().name())
+          .set_aggregation(opencensus::stats::Aggregation::Sum());
+  const opencensus::stats::ViewData data =
+      TestUtils::MakeViewData(view_descriptor, {{{}, 1.0}});
+  google::api::MonitoredResource resource;
+  resource.set_type("gce_instance");
+  (*resource.mutable_labels())["project_id"] = "my_project";
+  (*resource.mutable_labels())["instance_id"] = "1234";
+  (*resource.mutable_labels())["zone"] = "my_zone";
+  std::unordered_map<std::string, google::api::MonitoredResource>
+      per_view_resources;
+  per_view_resources["some_other_view"] = resource;
+  const std::vector<google::monitoring::v3::TimeSeries> time_series =
+      MakeTimeSeries("", DefaultResource(), per_view_resources, view_descriptor,
+                     data, task);
+  ASSERT_EQ(1, time_series.size());
+  const auto& ts = time_series.front();
+  EXPECT_EQ("global", ts.resource().type());
+  EXPECT_EQ(0, ts.resource().labels_size());
 }
 
 TEST(StackdriverUtilsTest, MakeTimeSeriesSumDoubleAndTypes) {
