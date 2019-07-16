@@ -52,8 +52,8 @@ struct StackdriverOptions {
   // descriptor name, value is the monitored resource to use for that view.
   //
   // If the view name cannot be found in the map, the exporter will use the
-  // "monitored_resource" set in option, or "global" resource if that is not
-  // specified.
+  // monitored_resource set above, or the "global" resource if that is not
+  // set.
   //
   // See also:
   // https://cloud.google.com/monitoring/api/ref_v3/rpc/google.api#google.api.MonitoredResource
