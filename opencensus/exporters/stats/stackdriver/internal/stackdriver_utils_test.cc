@@ -227,7 +227,6 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesCustomResource) {
   ASSERT_EQ(1, time_series.size());
   const auto& ts = time_series.front();
   EXPECT_EQ("gce_instance", ts.resource().type());
-  // EXPECT_EQ(0, ts.resource().labels_size());
   using ::testing::Pair;
   EXPECT_THAT(ts.resource().labels(),
               ::testing::UnorderedElementsAre(Pair("project_id", "my_project"),
