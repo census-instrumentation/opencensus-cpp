@@ -189,7 +189,7 @@ std::string GetIpAddressHelper(ZipkinExporterOptions::AddressFamily af_type,
                       ->sin_addr),
                 address, INET_ADDRSTRLEN);
       std::string ipv4_address(address);
-      if (ipv4_address.compare(ipv4_loopback) == 0) continue;
+      if (ipv4_address == ipv4_loopback) continue;
       return ipv4_address;
     } else if (if_address->ifa_addr->sa_family == AF_INET6) {
       if (af_type != ZipkinExporterOptions::AddressFamily::kIpv6) continue;
@@ -199,7 +199,7 @@ std::string GetIpAddressHelper(ZipkinExporterOptions::AddressFamily af_type,
                       ->sin6_addr),
                 address, INET6_ADDRSTRLEN);
       std::string ipv6_address(address);
-      if (ipv6_address.compare(ipv6_loopback) == 0) continue;
+      if (ipv6_address == ipv6_loopback) continue;
       return ipv6_address;
     }
   }

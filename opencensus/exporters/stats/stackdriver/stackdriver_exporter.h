@@ -20,6 +20,7 @@
 #include "absl/base/macros.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
+#include "google/api/monitored_resource.pb.h"
 
 namespace opencensus {
 namespace exporters {
@@ -36,6 +37,29 @@ struct StackdriverOptions {
 
   // The RPC deadline to use when exporting to Stackdriver.
   absl::Duration rpc_deadline = absl::Seconds(5);
+
+  // Optional: the Stackdriver MonitoredResource to use.
+  //
+  // If not set (i.e. if monitored_resource.type is empty), the exporter will
+  // use the "global" resource.
+  //
+  // See also:
+  // https://cloud.google.com/monitoring/api/ref_v3/rpc/google.api#google.api.MonitoredResource
+  // https://cloud.google.com/monitoring/api/resources
+  google::api::MonitoredResource monitored_resource;
+
+  // Optional: per metric Stackdriver MonitoredResource to use. Key is the view
+  // descriptor name, value is the monitored resource to use for that view.
+  //
+  // If the view name cannot be found in the map, the exporter will use the
+  // monitored_resource set above, or the "global" resource if that is not
+  // set.
+  //
+  // See also:
+  // https://cloud.google.com/monitoring/api/ref_v3/rpc/google.api#google.api.MonitoredResource
+  // https://cloud.google.com/monitoring/api/resources
+  std::unordered_map<std::string, google::api::MonitoredResource>
+      per_metric_monitored_resource;
 
   // Optional: the name prefix for Stackdriver metrics.
   //
