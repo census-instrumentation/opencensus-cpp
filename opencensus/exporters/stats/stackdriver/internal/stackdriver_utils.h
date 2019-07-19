@@ -40,6 +40,8 @@ void SetMetricDescriptor(
 std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
     absl::string_view metric_name_prefix,
     const google::api::MonitoredResource& monitored_resource,
+    const std::unordered_map<std::string, google::api::MonitoredResource>&
+        per_metric_monitored_resource,
     const opencensus::stats::ViewDescriptor& view_descriptor,
     const opencensus::stats::ViewData& data, absl::string_view opencensus_task);
 
