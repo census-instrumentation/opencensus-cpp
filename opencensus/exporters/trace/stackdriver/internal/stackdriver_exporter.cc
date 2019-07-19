@@ -264,30 +264,44 @@ void Handler::Export(
   }
 }
 
+std::unique_ptr<google::devtools::cloudtrace::v2::TraceService::Stub>
+MakeStackdriverStub() {
+  auto channel = ::grpc::CreateCustomChannel(
+      kGoogleStackdriverTraceAddress, ::grpc::GoogleDefaultCredentials(),
+      ::opencensus::common::WithUserAgent());
+  return ::google::devtools::cloudtrace::v2::TraceService::NewStub(channel);
+}
+
 }  // namespace
 
 // static
+void StackdriverExporter::Register(StackdriverOptions&& opts) {
+  if (opts.trace_service_stub == nullptr) {
+    opts.trace_service_stub = MakeStackdriverStub();
+  }
+  ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
+      absl::make_unique<Handler>(std::move(opts)));
+}
+
+// static, DEPRECATED
 void StackdriverExporter::Register(StackdriverOptions& opts) {
   if (opts.trace_service_stub == nullptr) {
-    auto channel = ::grpc::CreateCustomChannel(
-        kGoogleStackdriverTraceAddress, ::grpc::GoogleDefaultCredentials(),
-        ::opencensus::common::WithUserAgent());
-    opts.trace_service_stub =
-        ::google::devtools::cloudtrace::v2::TraceService::NewStub(channel);
+    opts.trace_service_stub = MakeStackdriverStub();
   }
-  // Swap opts to take ownership of the trace_service_stub.
-  StackdriverOptions swapped;
-  using std::swap;
-  swap(opts, swapped);
+  // Copy opts but take ownership of trace_service_stub.
+  StackdriverOptions copied_opts;
+  copied_opts.project_id = opts.project_id;
+  copied_opts.rpc_deadline = opts.rpc_deadline;
+  copied_opts.trace_service_stub = std::move(opts.trace_service_stub);
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
-      absl::make_unique<Handler>(std::move(swapped)));
+      absl::make_unique<Handler>(std::move(copied_opts)));
 }
 
 // static, DEPRECATED
 void StackdriverExporter::Register(absl::string_view project_id) {
   StackdriverOptions opts;
   opts.project_id = std::string(project_id);
-  Register(opts);
+  Register(std::move(opts));
 }
 
 }  // namespace trace

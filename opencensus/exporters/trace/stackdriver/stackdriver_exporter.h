@@ -43,8 +43,14 @@ struct StackdriverOptions {
 
 class StackdriverExporter {
  public:
-  // Registers the exporter. Takes ownership of the contents of opts and resets
-  // the opts object to defaults.
+  // Registers the exporter.
+  static void Register(StackdriverOptions&& opts);
+
+  // Registers the exporter. Takes ownership of opts.trace_service_stub
+  // and resets it to nullptr.
+  ABSL_DEPRECATED(
+      "Register() without rvalue StackdriverOptions is deprecated and "
+      "will be removed on or after 2020-01-18")
   static void Register(StackdriverOptions& opts);
 
   // TODO: Retire this:
