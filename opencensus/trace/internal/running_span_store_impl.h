@@ -38,11 +38,16 @@ class RunningSpanStoreImpl {
   static RunningSpanStoreImpl* Get();
 
   // Adds a new running Span.
-  void AddSpan(const std::shared_ptr<SpanImpl>& span) LOCKS_EXCLUDED(mu_);
+  void AddSpan(const SpanId& id, const std::shared_ptr<SpanImpl>& span)
+      LOCKS_EXCLUDED(mu_);
+
+  // Finds a Span with id SpanId, returns false if not found.
+  bool FindSpan(const SpanId& id, std::shared_ptr<SpanImpl>* span)
+      LOCKS_EXCLUDED(mu_);
 
   // Removes a Span that's no longer running. Returns true on success, false if
   // that Span was not being tracked.
-  bool RemoveSpan(const std::shared_ptr<SpanImpl>& span) LOCKS_EXCLUDED(mu_);
+  bool RemoveSpan(const SpanId& id) LOCKS_EXCLUDED(mu_);
 
   // Returns a summary of the data available in the RunningSpanStore.
   RunningSpanStore::Summary GetSummary() const LOCKS_EXCLUDED(mu_);
@@ -61,8 +66,12 @@ class RunningSpanStoreImpl {
 
   mutable absl::Mutex mu_;
 
-  // The key is the memory address of the underlying SpanImpl object.
-  std::unordered_map<uintptr_t, std::shared_ptr<SpanImpl>> spans_
+  // Necessary for using SpanId as the key in the map.
+  struct SpanIdHash {
+    std::size_t operator()(SpanId const& s) const noexcept { return s.hash(); }
+  };
+
+  std::unordered_map<SpanId, std::shared_ptr<SpanImpl>, SpanIdHash> spans_
       GUARDED_BY(mu_);
 };
 

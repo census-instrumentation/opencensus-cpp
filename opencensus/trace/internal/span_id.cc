@@ -15,6 +15,7 @@
 #include "opencensus/trace/span_id.h"
 
 #include <cstring>
+#include <functional>
 #include <string>
 
 #include "absl/strings/escaping.h"
@@ -40,6 +41,15 @@ bool SpanId::IsValid() const {
   uint64_t tmp;
   memcpy(&tmp, rep_, kSize);
   return tmp != 0;
+}
+
+std::size_t SpanId::hash() const {
+  // SpanIds are currently 64 bits. this hash function is only ever used
+  // internally within a given process, so this can be easily changed if we
+  // ever increase the size.
+  std::hash<uint64_t> hash_fn;
+  uint64_t val = *(reinterpret_cast<const uint64_t *>(rep_));
+  return hash_fn(val);
 }
 
 void SpanId::CopyTo(uint8_t *buf) const { memcpy(buf, rep_, kSize); }

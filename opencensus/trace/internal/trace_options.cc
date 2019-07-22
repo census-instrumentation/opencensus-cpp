@@ -25,11 +25,14 @@ namespace trace {
 namespace {
 // One bit per option.
 constexpr uint8_t kIsSampled = 1;
+constexpr uint8_t kStrictSpans = 2;
 }  // namespace
 
 TraceOptions::TraceOptions(const uint8_t* buf) { memcpy(rep_, buf, kSize); }
 
 bool TraceOptions::IsSampled() const { return rep_[0] & kIsSampled; }
+
+bool TraceOptions::HasStrictSpans() const { return rep_[0] & kStrictSpans; }
 
 bool TraceOptions::operator==(const TraceOptions& that) const {
   return memcmp(rep_, that.rep_, kSize) == 0;
@@ -46,6 +49,13 @@ TraceOptions TraceOptions::WithSampling(bool is_sampled) const {
   uint8_t buf[kSize];
   CopyTo(buf);
   buf[0] = (buf[0] & ~kIsSampled) | (is_sampled ? kIsSampled : 0);
+  return TraceOptions(buf);
+}
+
+TraceOptions TraceOptions::WithStrictSpans(bool strict_spans) const {
+  uint8_t buf[kSize];
+  CopyTo(buf);
+  buf[0] = (buf[0] & ~kStrictSpans) | (strict_spans ? kStrictSpans : 0);
   return TraceOptions(buf);
 }
 

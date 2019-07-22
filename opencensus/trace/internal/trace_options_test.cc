@@ -32,6 +32,10 @@ TEST(TraceOptionsTest, SetSampled) {
   opts = opts.WithSampling(false);
   EXPECT_EQ("00", opts.ToHex());
   EXPECT_FALSE(opts.IsSampled());
+  EXPECT_FALSE(opts.HasStrictSpans());
+  opts = opts.WithStrictSpans(true);
+  EXPECT_EQ("02", opts.ToHex());
+  EXPECT_TRUE(opts.HasStrictSpans());
 }
 
 TEST(TraceOptionsTest, Comparison) {
