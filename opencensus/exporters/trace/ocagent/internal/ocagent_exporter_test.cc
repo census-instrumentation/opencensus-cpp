@@ -38,9 +38,11 @@ TEST_F(OcagentExporterTestPeer, ExportTrace) {
 
   auto span1 = ::opencensus::trace::Span::StartSpan("Span1", nullptr, opts);
   span1.AddAnnotation("Annotation1", {{"TestBool", true}});
+
   auto span2 = ::opencensus::trace::Span::StartSpan("Span2", &span1, opts);
   span2.AddAnnotation("Annotation2",
                       {{"TestString", "Test"}, {"TestInt", 123}});
+
   auto span3 = ::opencensus::trace::Span::StartSpan("Span3", &span2, opts);
   span3.AddAttributes({{"key1", "value1"},
                        {"int_key", 123},
@@ -49,6 +51,12 @@ TEST_F(OcagentExporterTestPeer, ExportTrace) {
   span3.AddAnnotation("Annotation3", {{"TestString", "Test"}});
   span3.AddSentMessageEvent(2, 3, 4);
   span3.AddReceivedMessageEvent(3, 4, 5);
+
+  auto span4 = ::opencensus::trace::Span::StartSpan("Span4", nullptr, opts);
+  span2.AddChildLink(span4.context(), ::opencensus::trace::AttributesRef(
+                                          {{"reason", "span4 is a child"}}));
+
+  span4.End();
   span3.End();
   span2.End();
   span1.End();
