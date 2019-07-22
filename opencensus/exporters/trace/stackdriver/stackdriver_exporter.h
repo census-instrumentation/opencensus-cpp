@@ -15,11 +15,13 @@
 #ifndef OPENCENSUS_EXPORTERS_TRACE_STACKDRIVER_STACKDRIVER_EXPORTER_H_
 #define OPENCENSUS_EXPORTERS_TRACE_STACKDRIVER_STACKDRIVER_EXPORTER_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/base/macros.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
+#include "google/devtools/cloudtrace/v2/tracing.grpc.pb.h"
 
 namespace opencensus {
 namespace exporters {
@@ -31,12 +33,25 @@ struct StackdriverOptions {
 
   // The RPC deadline to use when exporting to Stackdriver.
   absl::Duration rpc_deadline = absl::Seconds(5);
+
+  // (optional) By default, the exporter connects to Stackdriver using gRPC. If
+  // this stub is non-null, the exporter will use this stub to send gRPC calls
+  // instead. Useful for testing.
+  std::unique_ptr<google::devtools::cloudtrace::v2::TraceService::Stub>
+      trace_service_stub;
 };
 
 class StackdriverExporter {
  public:
   // Registers the exporter.
-  static void Register(const StackdriverOptions& opts);
+  static void Register(StackdriverOptions&& opts);
+
+  // Registers the exporter. Takes ownership of opts.trace_service_stub
+  // and resets it to nullptr.
+  ABSL_DEPRECATED(
+      "Register() without rvalue StackdriverOptions is deprecated and "
+      "will be removed on or after 2020-01-18")
+  static void Register(StackdriverOptions& opts);
 
   // TODO: Retire this:
   ABSL_DEPRECATED(
