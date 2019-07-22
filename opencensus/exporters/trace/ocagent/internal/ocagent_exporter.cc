@@ -321,13 +321,21 @@ void Handler::ConnectAgent() {
             << std::endl;
   stream->Write(request);
 
-  /*
-  ::opencensus::proto::agent::trace::v1::ExportTraceServiceResponse response;
-  while (stream->Read(&response)) {
-    std::cout << "response of node info debug string: "
-              << response.DebugString() << std::endl;
-  }
-  */
+  //   ::opencensus::proto::agent::trace::v1::ExportTraceServiceResponse
+  //   response; while (stream->Read(&response)) {
+  //     std::cout << "response of node info debug string: "
+  //               << response.DebugString() << std::endl;
+  //   }
+
+  ::opencensus::proto::agent::trace::v1::CurrentLibraryConfig cur_lib_cfg;
+  cur_lib_cfg.mutable_node()->CopyFrom(request.node());
+
+  grpc::ClientContext context1;
+  auto cfg_stream = stub_->Config(&context1);
+  cfg_stream->Write(cur_lib_cfg);
+
+  // cur_lib_cfg.set_allocated_node(
+  // ::opencensus::proto::agent::common::v1::Node());
 }
 
 } // namespace
