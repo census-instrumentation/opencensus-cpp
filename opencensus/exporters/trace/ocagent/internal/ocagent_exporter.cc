@@ -199,7 +199,9 @@ private:
   const OcagentOptions opts_;
   std::unique_ptr<::opencensus::proto::agent::trace::v1::TraceService::Stub>
       stub_;
+  ::opencensus::proto::agent::common::v1::Node nodeInfo_;
   void ConnectAgent();
+  void InitNode();
 };
 
 void ConvertSpans(
@@ -259,6 +261,8 @@ Handler::Handler(const OcagentOptions &opts,
     : opts_(opts),
       stub_(::opencensus::proto::agent::trace::v1::TraceService::NewStub(
           channel)) {
+  std::cout << "Create stub_" << std::endl;
+  InitNode();
   ConnectAgent();
 }
 
@@ -267,6 +271,7 @@ void Handler::Export(
 
   ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest request;
   ConvertSpans(spans, &request);
+  request.mutable_node()->CopyFrom(nodeInfo_);
 
   grpc::ClientContext context;
   context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
@@ -274,21 +279,20 @@ void Handler::Export(
   auto stream = stub_->Export(&context);
   bool ok = stream->Write(request);
 
-  std::cout << "request of common span debug string: " << request.DebugString()
-            << std::endl;
-
-  ::opencensus::proto::agent::trace::v1::ExportTraceServiceResponse response;
-  while (stream->Read(&response)) {
-    std::cout << "response of common span debug string: "
-              << response.DebugString() << std::endl;
-  }
+  //   std::cout << "request of common span debug string: " <<
+  //   request.DebugString()
+  //             << std::endl;
+  //
+  //   ::opencensus::proto::agent::trace::v1::ExportTraceServiceResponse
+  //   response; while (stream->Read(&response)) {
+  //     std::cout << "response of common span debug string: "
+  //               << response.DebugString() << std::endl;
+  //   }
 }
 
-void Handler::ConnectAgent() {
-
-  ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest request;
-  auto node = request.mutable_node();
-  auto identifier = node->mutable_identifier();
+void Handler::InitNode() {
+  nodeInfo_.New();
+  auto identifier = nodeInfo_.mutable_identifier();
 
   char host[100] = {0};
   if (gethostname(host, sizeof(host)) < 0) {
@@ -305,37 +309,47 @@ void Handler::ConnectAgent() {
     ts_ptr->set_nanos((t - absl::FromUnixSeconds(s)) / absl::Nanoseconds(1));
   }
 
-  auto library_info = node->mutable_library_info();
+  auto library_info = nodeInfo_.mutable_library_info();
   library_info->set_language(
       ::opencensus::proto::agent::common::v1::LibraryInfo_Language_CPP);
   library_info->set_exporter_version("0.0.1");
   library_info->set_core_library_version("0.0.1");
 
-  auto service_info = node->mutable_service_info();
+  auto service_info = nodeInfo_.mutable_service_info();
   service_info->set_name(host);
+}
+
+void Handler::ConnectAgent() {
+
+  ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest request;
+  request.mutable_node()->CopyFrom(nodeInfo_);
 
   grpc::ClientContext context;
   auto stream = stub_->Export(&context);
 
-  std::cout << "request of node info debug string: " << request.DebugString()
-            << std::endl;
+  // std::cout << "request of node info debug string: " << request.DebugString()
+  //           << std::endl;
   stream->Write(request);
 
-  //   ::opencensus::proto::agent::trace::v1::ExportTraceServiceResponse
-  //   response; while (stream->Read(&response)) {
-  //     std::cout << "response of node info debug string: "
-  //               << response.DebugString() << std::endl;
-  //   }
+  // ::opencensus::proto::agent::trace::v1::ExportTraceServiceResponse response;
+  // while (stream->Read(&response)) {
+  //   std::cout << "response of node info debug string: "
+  //             << response.DebugString() << std::endl;
+  // }
 
   ::opencensus::proto::agent::trace::v1::CurrentLibraryConfig cur_lib_cfg;
   cur_lib_cfg.mutable_node()->CopyFrom(request.node());
 
+  auto config = cur_lib_cfg.mutable_config();
+  auto sampler = config->mutable_constant_sampler();
+  sampler->set_decision(::opencensus::proto::trace::v1::
+                            ConstantSampler_ConstantDecision_ALWAYS_ON);
+
   grpc::ClientContext context1;
   auto cfg_stream = stub_->Config(&context1);
   cfg_stream->Write(cur_lib_cfg);
-
-  // cur_lib_cfg.set_allocated_node(
-  // ::opencensus::proto::agent::common::v1::Node());
+  std::cout << "request of node info debug string: " << request.DebugString()
+            << std::endl;
 }
 
 } // namespace
