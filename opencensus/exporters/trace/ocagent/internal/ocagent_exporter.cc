@@ -252,7 +252,7 @@ void ConvertSpans(
     // 15. tracestate
 
     // 16. resource
-    // Add agent attribute.
+    // (TODO) Add FULL support.
   }
 }
 
@@ -261,7 +261,6 @@ Handler::Handler(const OcagentOptions &opts,
     : opts_(opts),
       stub_(::opencensus::proto::agent::trace::v1::TraceService::NewStub(
           channel)) {
-  std::cout << "Create stub_" << std::endl;
   InitNode();
   ConnectAgent();
 }
@@ -278,16 +277,6 @@ void Handler::Export(
 
   auto stream = stub_->Export(&context);
   bool ok = stream->Write(request);
-
-  //   std::cout << "request of common span debug string: " <<
-  //   request.DebugString()
-  //             << std::endl;
-  //
-  //   ::opencensus::proto::agent::trace::v1::ExportTraceServiceResponse
-  //   response; while (stream->Read(&response)) {
-  //     std::cout << "response of common span debug string: "
-  //               << response.DebugString() << std::endl;
-  //   }
 }
 
 void Handler::InitNode() {
@@ -327,15 +316,7 @@ void Handler::ConnectAgent() {
   grpc::ClientContext context;
   auto stream = stub_->Export(&context);
 
-  // std::cout << "request of node info debug string: " << request.DebugString()
-  //           << std::endl;
   stream->Write(request);
-
-  // ::opencensus::proto::agent::trace::v1::ExportTraceServiceResponse response;
-  // while (stream->Read(&response)) {
-  //   std::cout << "response of node info debug string: "
-  //             << response.DebugString() << std::endl;
-  // }
 
   ::opencensus::proto::agent::trace::v1::CurrentLibraryConfig cur_lib_cfg;
   cur_lib_cfg.mutable_node()->CopyFrom(request.node());
@@ -348,8 +329,6 @@ void Handler::ConnectAgent() {
   grpc::ClientContext context1;
   auto cfg_stream = stub_->Config(&context1);
   cfg_stream->Write(cur_lib_cfg);
-  std::cout << "request of node info debug string: " << request.DebugString()
-            << std::endl;
 }
 
 } // namespace
