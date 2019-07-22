@@ -58,6 +58,8 @@ void RegisterStackdriverExporters() {
   opencensus::exporters::trace::StackdriverOptions trace_opts;
   trace_opts.project_id = project_id;
 
-  opencensus::exporters::stats::StackdriverExporter::Register(stats_opts);
-  opencensus::exporters::trace::StackdriverExporter::Register(trace_opts);
+  opencensus::exporters::stats::StackdriverExporter::Register(
+      std::move(stats_opts));
+  opencensus::exporters::trace::StackdriverExporter::Register(
+      std::move(trace_opts));
 }

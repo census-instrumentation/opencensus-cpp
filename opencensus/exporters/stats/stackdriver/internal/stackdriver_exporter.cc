@@ -47,7 +47,7 @@ constexpr char kDefaultMetricNamePrefix[] = "custom.googleapis.com/opencensus/";
 
 class Handler : public ::opencensus::stats::StatsExporter::Handler {
  public:
-  explicit Handler(const StackdriverOptions& opts);
+  explicit Handler(StackdriverOptions&& opts);
 
   void ExportViewData(
       const std::vector<std::pair<opencensus::stats::ViewDescriptor,
@@ -64,25 +64,32 @@ class Handler : public ::opencensus::stats::StatsExporter::Handler {
       EXCLUSIVE_LOCKS_REQUIRED(mu_);
 
   const StackdriverOptions opts_;
-  const std::string project_id_;
-  const std::string metric_name_prefix_;
-  const std::unique_ptr<google::monitoring::v3::MetricService::Stub> stub_;
   mutable absl::Mutex mu_;
   std::unordered_map<std::string, opencensus::stats::ViewDescriptor>
       registered_descriptors_ GUARDED_BY(mu_);
 };
 
-Handler::Handler(const StackdriverOptions& opts)
-    : opts_(opts),
-      project_id_(absl::StrCat(kProjectIdPrefix, opts.project_id)),
-      metric_name_prefix_(opts.metric_name_prefix.empty()
-                              ? kDefaultMetricNamePrefix
-                              : opts.metric_name_prefix),
-      stub_(google::monitoring::v3::MetricService::NewStub(
-          ::grpc::CreateCustomChannel(kGoogleStackdriverStatsAddress,
-                                      ::grpc::GoogleDefaultCredentials(),
-                                      ::opencensus::common::WithUserAgent()))) {
+StackdriverOptions SetOptionDefaults(StackdriverOptions&& o) {
+  StackdriverOptions opts(std::move(o));
+
+  // Prepend prefix because we always use this with a prefix.
+  opts.project_id = absl::StrCat(kProjectIdPrefix, opts.project_id);
+
+  if (opts.metric_name_prefix.empty()) {
+    opts.metric_name_prefix = kDefaultMetricNamePrefix;
+  }
+
+  if (opts.metric_service_stub == nullptr) {
+    opts.metric_service_stub = google::monitoring::v3::MetricService::NewStub(
+        ::grpc::CreateCustomChannel(kGoogleStackdriverStatsAddress,
+                                    ::grpc::GoogleDefaultCredentials(),
+                                    ::opencensus::common::WithUserAgent()));
+  }
+  return opts;
 }
+
+Handler::Handler(StackdriverOptions&& opts)
+    : opts_(SetOptionDefaults(std::move(opts))) {}
 
 void Handler::ExportViewData(
     const std::vector<std::pair<opencensus::stats::ViewDescriptor,
@@ -95,7 +102,7 @@ void Handler::ExportViewData(
       continue;
     }
     const auto view_time_series =
-        MakeTimeSeries(metric_name_prefix_, opts_.monitored_resource,
+        MakeTimeSeries(opts_.metric_name_prefix, opts_.monitored_resource,
                        opts_.per_metric_monitored_resource, datum.first,
                        datum.second, opts_.opencensus_task);
     time_series.insert(time_series.end(), view_time_series.begin(),
@@ -113,7 +120,7 @@ void Handler::ExportViewData(
 
   for (int rpc_index = 0; rpc_index < num_rpcs; ++rpc_index) {
     auto request = google::monitoring::v3::CreateTimeSeriesRequest();
-    request.set_name(project_id_);
+    request.set_name(opts_.project_id);
     const int batch_end = std::min(static_cast<int>(time_series.size()),
                                    (rpc_index + 1) * kTimeSeriesBatchSize);
     for (int i = rpc_index * kTimeSeriesBatchSize; i < batch_end; ++i) {
@@ -121,7 +128,8 @@ void Handler::ExportViewData(
     }
     ctx[rpc_index].set_deadline(
         absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
-    auto rpc(stub_->AsyncCreateTimeSeries(&ctx[rpc_index], request, &cq));
+    auto rpc(opts_.metric_service_stub->AsyncCreateTimeSeries(&ctx[rpc_index],
+                                                              request, &cq));
     rpc->Finish(&response, &status[rpc_index], (void*)(uintptr_t)rpc_index);
   }
 
@@ -153,14 +161,14 @@ bool Handler::MaybeRegisterView(
   }
 
   auto request = google::monitoring::v3::CreateMetricDescriptorRequest();
-  request.set_name(project_id_);
-  SetMetricDescriptor(project_id_, metric_name_prefix_, descriptor,
+  request.set_name(opts_.project_id);
+  SetMetricDescriptor(opts_.project_id, opts_.metric_name_prefix, descriptor,
                       request.mutable_metric_descriptor());
   ::grpc::ClientContext context;
   context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
   google::api::MetricDescriptor response;
-  ::grpc::Status status =
-      stub_->CreateMetricDescriptor(&context, request, &response);
+  ::grpc::Status status = opts_.metric_service_stub->CreateMetricDescriptor(
+      &context, request, &response);
   if (!status.ok()) {
     std::cerr << "CreateMetricDescriptor request failed: "
               << opencensus::common::ToString(status) << "\n";
@@ -173,9 +181,25 @@ bool Handler::MaybeRegisterView(
 }  // namespace
 
 // static
-void StackdriverExporter::Register(const StackdriverOptions& opts) {
+void StackdriverExporter::Register(StackdriverOptions&& opts) {
   opencensus::stats::StatsExporter::RegisterPushHandler(
-      absl::WrapUnique(new Handler(opts)));
+      absl::WrapUnique(new Handler(std::move(opts))));
+}
+
+// static, DEPRECATED
+void StackdriverExporter::Register(StackdriverOptions& opts) {
+  // Copy opts but take ownership of metric_service_stub.
+  StackdriverOptions copied_opts;
+  copied_opts.project_id = opts.project_id;
+  copied_opts.opencensus_task = opts.opencensus_task;
+  copied_opts.rpc_deadline = opts.rpc_deadline;
+  copied_opts.monitored_resource = opts.monitored_resource;
+  copied_opts.per_metric_monitored_resource =
+      opts.per_metric_monitored_resource;
+  copied_opts.metric_name_prefix = opts.metric_name_prefix;
+  copied_opts.metric_service_stub = std::move(opts.metric_service_stub);
+  opencensus::stats::StatsExporter::RegisterPushHandler(
+      absl::WrapUnique(new Handler(std::move(opts))));
 }
 
 // static, DEPRECATED
@@ -184,7 +208,7 @@ void StackdriverExporter::Register(absl::string_view project_id,
   StackdriverOptions opts;
   opts.project_id = std::string(project_id);
   opts.opencensus_task = std::string(opencensus_task);
-  Register(opts);
+  Register(std::move(opts));
 }
 
 }  // namespace stats
