@@ -15,12 +15,14 @@
 #ifndef OPENCENSUS_EXPORTERS_STATS_STACKDRIVER_STACKDRIVER_EXPORTER_H_
 #define OPENCENSUS_EXPORTERS_STATS_STACKDRIVER_STACKDRIVER_EXPORTER_H_
 
+#include <memory>
 #include <string>
 
 #include "absl/base/macros.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
 #include "google/api/monitored_resource.pb.h"
+#include "google/monitoring/v3/metric_service.grpc.pb.h"
 
 namespace opencensus {
 namespace exporters {
@@ -71,6 +73,12 @@ struct StackdriverOptions {
   // If empty, the exporter will use "custom.googleapis.com/opencensus/" by
   // default.
   std::string metric_name_prefix;
+
+  // Optional: by default, the exporter connects to Stackdriver using gRPC. If
+  // this stub is non-null, the exporter will use this stub to send gRPC calls
+  // instead. Useful for testing.
+  std::unique_ptr<google::monitoring::v3::MetricService::Stub>
+      metric_service_stub;
 };
 
 // Exports stats for registered views (see opencensus/stats/stats_exporter.h) to
@@ -78,7 +86,14 @@ struct StackdriverOptions {
 class StackdriverExporter {
  public:
   // Registers the exporter.
-  static void Register(const StackdriverOptions& opts);
+  static void Register(StackdriverOptions&& opts);
+
+  // Registers the exporter. Takes ownership of opts.metric_service_stub
+  // and resets it to nullptr.
+  ABSL_DEPRECATED(
+      "Register() without rvalue StackdriverOptions is deprecated and "
+      "will be removed on or after 2020-01-18")
+  static void Register(StackdriverOptions& opts);
 
   // TODO: Retire this:
   ABSL_DEPRECATED(
