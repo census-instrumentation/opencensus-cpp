@@ -16,16 +16,16 @@ include(FetchContent)
 
 FetchContent_Declare(googletest
                      GIT_REPOSITORY https://github.com/abseil/googletest
-                     GIT_TAG ed2fe122f8dc9aca844d724986d1d5cf5b65ea4e)
+                     GIT_TAG b77e5c76252bac322bb82c5b444f050bd0d92451)
 FetchContent_Declare(abseil
                      GIT_REPOSITORY https://github.com/abseil/abseil-cpp
-                     GIT_TAG 2c8421e1c6cef0da9e8a20b01c15256ec9ec116d)
+                     GIT_TAG f3840bc5e33ce4932e35986cf3718450c6f02af2)
 FetchContent_Declare(prometheus
                      GIT_REPOSITORY https://github.com/jupp0r/prometheus-cpp
-                     GIT_TAG master)
+                     GIT_TAG d83dd68e496e024ae0f1f0c19ac2ab0d27330330)
 FetchContent_Declare(benchmark
                      GIT_REPOSITORY https://github.com/google/benchmark
-                     GIT_TAG master)
+                     GIT_TAG 8e48105d465c586068dd8e248fe75a8971c6ba3a)
 
 FetchContent_GetProperties(googletest)
 if(BUILD_TESTING)
