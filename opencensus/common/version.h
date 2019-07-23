@@ -17,6 +17,6 @@
 
 // The current version of the opencensus core library. Macro to allow literal
 // string concatenation in constexpr statements.
-#define OPENCENSUS_VERSION "0.4.0"
+#define OPENCENSUS_VERSION "0.4.1-dev"
 
 #endif  // OPENCENSUS_COMMON_VERSION_H_
