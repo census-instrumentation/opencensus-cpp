@@ -57,6 +57,7 @@ PROJECTS = [
     GitHubProject('com_github_jupp0r_prometheus_cpp', 'jupp0r', 'prometheus-cpp'),
     GitHubProject('com_github_curl', 'curl', 'curl'),
     GitHubProject('com_github_tencent_rapidjson', 'Tencent', 'rapidjson'),
+    GitHubProject('com_google_googleapis', 'googleapis', 'googleapis'),
 ]
 
 for project in PROJECTS:

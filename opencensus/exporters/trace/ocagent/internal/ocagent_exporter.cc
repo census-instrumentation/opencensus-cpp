@@ -1,4 +1,4 @@
-// Copyright 2018, OpenCensus Authors
+// Copyright 2019, OpenCensus Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
+#include "opencensus/exporters/trace/ocagent/ocagent_exporter.h"
 
+#include <unistd.h>
 #include <cstdint>
 #include <iostream>
 
-#include <grpcpp/grpcpp.h>
 #include "absl/base/macros.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/time/clock.h"
-#include "google/devtools/cloudtrace/v2/tracing.grpc.pb.h"
 #include "opencensus/common/internal/grpc/status.h"
 #include "opencensus/common/internal/grpc/with_user_agent.h"
 #include "opencensus/common/version.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/exporter/span_exporter.h"
+
+#include <grpcpp/grpcpp.h>
 
 namespace opencensus {
 namespace exporters {
@@ -37,12 +38,8 @@ namespace {
 constexpr size_t kAttributeStringLen = 256;
 constexpr size_t kAnnotationStringLen = 256;
 constexpr size_t kDisplayNameStringLen = 128;
-constexpr char kGoogleStackdriverTraceAddress[] = "cloudtrace.googleapis.com";
 
-constexpr char kAgentKey[] = "g.co/agent";
-constexpr char kAgentValue[] = "opencensus-cpp [" OPENCENSUS_VERSION "]";
-
-bool Validate(const google::protobuf::Timestamp& t) {
+bool Validate(const google::protobuf::Timestamp &t) {
   const auto sec = t.seconds();
   const auto ns = t.nanos();
   // sec must be [0001-01-01T00:00:00Z, 9999-12-31T23:59:59.999999999Z]
@@ -55,7 +52,7 @@ bool Validate(const google::protobuf::Timestamp& t) {
   return true;
 }
 
-bool EncodeTimestampProto(absl::Time t, google::protobuf::Timestamp* proto) {
+bool EncodeTimestampProto(absl::Time t, google::protobuf::Timestamp *proto) {
   const int64_t s = absl::ToUnixSeconds(t);
   proto->set_seconds(s);
   proto->set_nanos((t - absl::FromUnixSeconds(s)) / absl::Nanoseconds(1));
@@ -64,7 +61,7 @@ bool EncodeTimestampProto(absl::Time t, google::protobuf::Timestamp* proto) {
 
 void SetTruncatableString(
     absl::string_view str, size_t max_len,
-    ::google::devtools::cloudtrace::v2::TruncatableString* t_str) {
+    ::opencensus::proto::trace::v1::TruncatableString *t_str) {
   if (str.size() > max_len) {
     t_str->set_value(std::string(str.substr(0, max_len)));
     t_str->set_truncated_byte_count(str.size() - max_len);
@@ -74,42 +71,41 @@ void SetTruncatableString(
   }
 }
 
-::google::devtools::cloudtrace::v2::Span_Link_Type ConvertLinkType(
+::opencensus::proto::trace::v1::Span_Link_Type ConvertLinkType(
     ::opencensus::trace::exporter::Link::Type type) {
   switch (type) {
     case ::opencensus::trace::exporter::Link::Type::kChildLinkedSpan:
-      return ::google::devtools::cloudtrace::v2::
-          Span_Link_Type_CHILD_LINKED_SPAN;
+      return ::opencensus::proto::trace::v1::Span_Link_Type_CHILD_LINKED_SPAN;
     case ::opencensus::trace::exporter::Link::Type::kParentLinkedSpan:
-      return ::google::devtools::cloudtrace::v2::
-          Span_Link_Type_PARENT_LINKED_SPAN;
+      return ::opencensus::proto::trace::v1::Span_Link_Type_PARENT_LINKED_SPAN;
   }
-  return ::google::devtools::cloudtrace::v2::Span_Link_Type_TYPE_UNSPECIFIED;
+  return ::opencensus::proto::trace::v1::Span_Link_Type_TYPE_UNSPECIFIED;
 }
 
-::google::devtools::cloudtrace::v2::Span_TimeEvent_MessageEvent_Type
+::opencensus::proto::trace::v1::Span_TimeEvent_MessageEvent_Type
 ConvertMessageType(::opencensus::trace::exporter::MessageEvent::Type type) {
   using Type = ::opencensus::trace::exporter::MessageEvent::Type;
   switch (type) {
     case Type::SENT:
-      return ::google::devtools::cloudtrace::v2::
+      return ::opencensus::proto::trace::v1::
           Span_TimeEvent_MessageEvent_Type_SENT;
     case Type::RECEIVED:
-      return ::google::devtools::cloudtrace::v2::
+      return ::opencensus::proto::trace::v1::
           Span_TimeEvent_MessageEvent_Type_RECEIVED;
   }
-  return ::google::devtools::cloudtrace::v2::
+  return ::opencensus::proto::trace::v1::
       Span_TimeEvent_MessageEvent_Type_TYPE_UNSPECIFIED;
 }
 
 using AttributeMap =
     ::google::protobuf::Map<std::string,
-                            ::google::devtools::cloudtrace::v2::AttributeValue>;
+                            ::opencensus::proto::trace::v1::AttributeValue>;
+
 void PopulateAttributes(
     const std::unordered_map<
-        std::string, ::opencensus::trace::exporter::AttributeValue>& attributes,
-    AttributeMap* attribute_map) {
-  for (const auto& attr : attributes) {
+        std::string, ::opencensus::trace::exporter::AttributeValue> &attributes,
+    AttributeMap *attribute_map) {
+  for (const auto &attr : attributes) {
     using Type = ::opencensus::trace::exporter::AttributeValue::Type;
     switch (attr.second.type()) {
       case Type::kString:
@@ -127,18 +123,17 @@ void PopulateAttributes(
   }
 }
 
-void ConvertAttributes(const ::opencensus::trace::exporter::SpanData& span,
-                       ::google::devtools::cloudtrace::v2::Span* proto_span) {
-  ::google::devtools::cloudtrace::v2::Span::Attributes attributes;
+void ConvertAttributes(const ::opencensus::trace::exporter::SpanData &span,
+                       ::opencensus::proto::trace::v1::Span *proto_span) {
   PopulateAttributes(span.attributes(),
                      proto_span->mutable_attributes()->mutable_attribute_map());
   proto_span->mutable_attributes()->set_dropped_attributes_count(
       span.num_attributes_dropped());
 }
 
-void ConvertTimeEvents(const ::opencensus::trace::exporter::SpanData& span,
-                       ::google::devtools::cloudtrace::v2::Span* proto_span) {
-  for (const auto& annotation : span.annotations().events()) {
+void ConvertTimeEvents(const ::opencensus::trace::exporter::SpanData &span,
+                       ::opencensus::proto::trace::v1::Span *proto_span) {
+  for (const auto &annotation : span.annotations().events()) {
     auto event = proto_span->mutable_time_events()->add_time_event();
 
     // Encode Timestamp
@@ -153,7 +148,7 @@ void ConvertTimeEvents(const ::opencensus::trace::exporter::SpanData& span,
                            ->mutable_attribute_map());
   }
 
-  for (const auto& message : span.message_events().events()) {
+  for (const auto &message : span.message_events().events()) {
     auto event = proto_span->mutable_time_events()->add_time_event();
 
     // Encode Timestamp
@@ -163,9 +158,9 @@ void ConvertTimeEvents(const ::opencensus::trace::exporter::SpanData& span,
     event->mutable_message_event()->set_type(
         ConvertMessageType(message.event().type()));
     event->mutable_message_event()->set_id(message.event().id());
-    event->mutable_message_event()->set_uncompressed_size_bytes(
+    event->mutable_message_event()->set_uncompressed_size(
         message.event().uncompressed_size());
-    event->mutable_message_event()->set_compressed_size_bytes(
+    event->mutable_message_event()->set_compressed_size(
         message.event().compressed_size());
   }
 
@@ -175,11 +170,11 @@ void ConvertTimeEvents(const ::opencensus::trace::exporter::SpanData& span,
       span.message_events().dropped_events_count());
 }
 
-void ConvertLinks(const ::opencensus::trace::exporter::SpanData& span,
-                  ::google::devtools::cloudtrace::v2::Span* proto_span) {
+void ConvertLinks(const ::opencensus::trace::exporter::SpanData &span,
+                  ::opencensus::proto::trace::v1::Span *proto_span) {
   proto_span->mutable_links()->set_dropped_links_count(
       span.num_links_dropped());
-  for (const auto& span_link : span.links()) {
+  for (const auto &span_link : span.links()) {
     auto link = proto_span->mutable_links()->add_link();
     link->set_trace_id(span_link.trace_id().ToHex());
     link->set_span_id(span_link.span_id().ToHex());
@@ -190,118 +185,152 @@ void ConvertLinks(const ::opencensus::trace::exporter::SpanData& span,
   }
 }
 
+class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
+ public:
+  Handler(OcAgentOptions &&opts);
+
+  void Export(const std::vector<::opencensus::trace::exporter::SpanData> &spans)
+      override;
+
+ private:
+  const OcAgentOptions opts_;
+  ::opencensus::proto::agent::common::v1::Node nodeInfo_;
+  void ConnectAgent();
+  void InitNode();
+};
+
 void ConvertSpans(
-    const std::vector<::opencensus::trace::exporter::SpanData>& spans,
-    absl::string_view project_id,
-    ::google::devtools::cloudtrace::v2::BatchWriteSpansRequest* request) {
-  for (const auto& from_span : spans) {
+    const std::vector<::opencensus::trace::exporter::SpanData> &spans,
+    ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest *request) {
+  for (const auto &from_span : spans) {
     auto to_span = request->add_spans();
-    SetTruncatableString(from_span.name(), kDisplayNameStringLen,
-                         to_span->mutable_display_name());
-    to_span->set_name(absl::StrCat("projects/", project_id, "/traces/",
-                                   from_span.context().trace_id().ToHex(),
-                                   "/spans/",
-                                   from_span.context().span_id().ToHex()));
+
+    // 1. trace_id
+    to_span->set_trace_id(from_span.context().trace_id().ToHex());
+    // 2. span_id
     to_span->set_span_id(from_span.context().span_id().ToHex());
+    // 3. parent_span_id
     to_span->set_parent_span_id(from_span.parent_span_id().ToHex());
-
-    // The start time of the span.
+    // 4. name
+    SetTruncatableString(from_span.name(), kDisplayNameStringLen,
+                         to_span->mutable_name());
+    // 5. The start time of the span.
     EncodeTimestampProto(from_span.start_time(), to_span->mutable_start_time());
-
-    // The end time of the span.
+    // 6. The end time of the span.
     EncodeTimestampProto(from_span.end_time(), to_span->mutable_end_time());
 
-    // Export Attributes
+    // 7. Export Attributes
     ConvertAttributes(from_span, to_span);
 
-    // Export Time Events.
+    // 8. stack_trace
+
+    // 9. Export Time Events.
     ConvertTimeEvents(from_span, to_span);
 
-    // Export Links.
+    // 10. Export Links.
     ConvertLinks(from_span, to_span);
 
-    // True if the parent is on a different process.
-    to_span->mutable_same_process_as_parent_span()->set_value(
-        !from_span.has_remote_parent());
-
-    // The status of the span.
+    // 11. The status of the span.
     to_span->mutable_status()->set_code(
         static_cast<int32_t>(from_span.status().CanonicalCode()));
     to_span->mutable_status()->set_message(from_span.status().error_message());
 
-    // Add agent attribute.
-    SetTruncatableString(
-        kAgentValue, kAttributeStringLen,
-        (*to_span->mutable_attributes()->mutable_attribute_map())[kAgentKey]
-            .mutable_string_value());
+    // 12. True if the parent is on a different process.
+    to_span->mutable_same_process_as_parent_span()->set_value(
+        !from_span.has_remote_parent());
+
+    // 13. child_span_count
+
+    // 14. span kind
+
+    // 15. tracestate
+
+    // 16. resource
+    // (TODO) Add FULL support.
   }
 }
 
-class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
- public:
-  Handler(StackdriverOptions&& opts) : opts_(std::move(opts)) {}
-
-  void Export(const std::vector<::opencensus::trace::exporter::SpanData>& spans)
-      override;
-
- private:
-  const StackdriverOptions opts_;
-};
+Handler::Handler(OcAgentOptions &&opts) : opts_(std::move(opts)) {
+  InitNode();
+  ConnectAgent();
+}
 
 void Handler::Export(
-    const std::vector<::opencensus::trace::exporter::SpanData>& spans) {
-  ::google::devtools::cloudtrace::v2::BatchWriteSpansRequest request;
-  request.set_name(absl::StrCat("projects/", opts_.project_id));
-  ConvertSpans(spans, opts_.project_id, &request);
-  ::google::protobuf::Empty response;
+    const std::vector<::opencensus::trace::exporter::SpanData> &spans) {
+  ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest request;
+  ConvertSpans(spans, &request);
+  request.mutable_node()->CopyFrom(nodeInfo_);
+
   grpc::ClientContext context;
   context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
-  grpc::Status status =
-      opts_.trace_service_stub->BatchWriteSpans(&context, request, &response);
-  if (!status.ok()) {
-    std::cerr << "BatchWriteSpans failed: "
-              << opencensus::common::ToString(status) << "\n";
-  }
+
+  auto stream = opts_.trace_service_stub->Export(&context);
+  bool ok = stream->Write(request);
 }
 
-std::unique_ptr<google::devtools::cloudtrace::v2::TraceService::Stub>
-MakeStackdriverStub() {
-  auto channel = ::grpc::CreateCustomChannel(
-      kGoogleStackdriverTraceAddress, ::grpc::GoogleDefaultCredentials(),
-      ::opencensus::common::WithUserAgent());
-  return ::google::devtools::cloudtrace::v2::TraceService::NewStub(channel);
+void Handler::InitNode() {
+  nodeInfo_.New();
+  auto identifier = nodeInfo_.mutable_identifier();
+
+  char host[100] = {0};
+  if (gethostname(host, sizeof(host)) < 0) {
+    snprintf(host, sizeof(host), "____default_host_name");
+  }
+  identifier->set_host_name(host);
+  identifier->set_pid(getpid());
+
+  {
+    auto ts_ptr = identifier->mutable_start_timestamp();
+    auto t = absl::Now();
+    const int64_t s = absl::ToUnixSeconds(t);
+    ts_ptr->set_seconds(s);
+    ts_ptr->set_nanos((t - absl::FromUnixSeconds(s)) / absl::Nanoseconds(1));
+  }
+
+  auto library_info = nodeInfo_.mutable_library_info();
+  library_info->set_language(
+      ::opencensus::proto::agent::common::v1::LibraryInfo_Language_CPP);
+  library_info->set_exporter_version("0.0.1");
+  library_info->set_core_library_version("0.0.1");
+
+  auto service_info = nodeInfo_.mutable_service_info();
+  service_info->set_name(host);
+}
+
+void Handler::ConnectAgent() {
+  ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest request;
+  request.mutable_node()->CopyFrom(nodeInfo_);
+
+  grpc::ClientContext context;
+  auto stream = opts_.trace_service_stub->Export(&context);
+
+  stream->Write(request);
+
+  ::opencensus::proto::agent::trace::v1::CurrentLibraryConfig cur_lib_cfg;
+  cur_lib_cfg.mutable_node()->CopyFrom(request.node());
+
+  auto config = cur_lib_cfg.mutable_config();
+  auto sampler = config->mutable_constant_sampler();
+  sampler->set_decision(::opencensus::proto::trace::v1::
+                            ConstantSampler_ConstantDecision_ALWAYS_ON);
+
+  grpc::ClientContext context1;
+  auto cfg_stream = opts_.trace_service_stub->Config(&context1);
+  cfg_stream->Write(cur_lib_cfg);
 }
 
 }  // namespace
 
 // static
-void StackdriverExporter::Register(StackdriverOptions&& opts) {
+void OcAgentExporter::Register(OcAgentOptions &&opts) {
   if (opts.trace_service_stub == nullptr) {
-    opts.trace_service_stub = MakeStackdriverStub();
+    auto channel =
+        grpc::CreateChannel(opts.address, grpc::InsecureChannelCredentials());
+    opts.trace_service_stub =
+        ::opencensus::proto::agent::trace::v1::TraceService::NewStub(channel);
   }
   ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
       absl::make_unique<Handler>(std::move(opts)));
-}
-
-// static, DEPRECATED
-void StackdriverExporter::Register(StackdriverOptions& opts) {
-  if (opts.trace_service_stub == nullptr) {
-    opts.trace_service_stub = MakeStackdriverStub();
-  }
-  // Copy opts but take ownership of trace_service_stub.
-  StackdriverOptions copied_opts;
-  copied_opts.project_id = opts.project_id;
-  copied_opts.rpc_deadline = opts.rpc_deadline;
-  copied_opts.trace_service_stub = std::move(opts.trace_service_stub);
-  ::opencensus::trace::exporter::SpanExporter::RegisterHandler(
-      absl::make_unique<Handler>(std::move(copied_opts)));
-}
-
-// static, DEPRECATED
-void StackdriverExporter::Register(absl::string_view project_id) {
-  StackdriverOptions opts;
-  opts.project_id = std::string(project_id);
-  Register(std::move(opts));
 }
 
 }  // namespace trace
