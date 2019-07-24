@@ -69,6 +69,16 @@ cc_library(
 # ========================================================================= #
 
 cc_test(
+    name = "hostname_test",
+    srcs = ["hostname_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":hostname",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "random_test",
     srcs = ["random_test.cc"],
     copts = TEST_COPTS,

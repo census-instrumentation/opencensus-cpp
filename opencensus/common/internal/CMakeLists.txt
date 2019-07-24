@@ -36,6 +36,8 @@ target_compile_definitions(opencensus_common_stats_object INTERFACE
 
 opencensus_lib(common_string_vector_hash)
 
+opencensus_test(common_hostname_test hostname_test.cc common_hostname)
+
 opencensus_test(common_random_test random_test.cc common_random)
 
 opencensus_benchmark(common_random_benchmark random_benchmark.cc common_random)
