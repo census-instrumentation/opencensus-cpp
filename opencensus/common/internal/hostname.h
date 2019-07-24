@@ -24,7 +24,7 @@ namespace common {
 std::string Hostname();
 
 // Returns a default opencensus_task value for stats exporters, in
-// the format "cpp-${PID}@{HOSTNAME}"
+// the format "cpp-{PID}@{HOSTNAME}"
 std::string OpenCensusTask();
 
 }  // namespace common
