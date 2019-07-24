@@ -180,5 +180,5 @@ grpc_java_repositories(
 http_archive(
     name = "io_opencensus_proto",
     strip_prefix = "opencensus-proto-master/src",
-    urls = ["https://github.com/panzhongxian/opencensus-proto/archive/master.zip"],
+    urls = ["https://github.com/census-instrumentation/opencensus-proto/archive/master.zip"],
 )
