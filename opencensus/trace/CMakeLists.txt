@@ -48,6 +48,15 @@ opencensus_lib(trace
                absl::time
                absl::span)
 
+opencensus_lib(trace_b3
+               PUBLIC
+               SRCS
+               internal/b3.cc
+               DEPS
+               trace_span_context
+               absl::base
+               absl::strings)
+
 opencensus_lib(trace_cloud_trace_context
                PUBLIC
                SRCS
@@ -112,6 +121,8 @@ opencensus_test(trace_attribute_value_ref_test
 
 opencensus_test(trace_attribute_value_test internal/attribute_value_test.cc
                 trace)
+
+opencensus_test(trace_b3_test internal/b3_test.cc trace_b3)
 
 opencensus_test(trace_cloud_trace_context_test
                 internal/cloud_trace_context_test.cc trace_cloud_trace_context)
@@ -199,6 +210,8 @@ opencensus_test(trace_with_span_test
 opencensus_benchmark(trace_attribute_value_ref_benchmark
                      internal/attribute_value_ref_benchmark.cc trace)
 
+opencensus_benchmark(trace_b3_benchmark internal/b3_benchmark.cc trace_b3)
+
 opencensus_benchmark(trace_cloud_trace_context_benchmark
                      internal/cloud_trace_context_benchmark.cc
                      trace_cloud_trace_context)
@@ -221,6 +234,11 @@ opencensus_benchmark(trace_with_span_benchmark
                      internal/with_span_benchmark.cc
                      trace
                      trace_with_span)
+
+opencensus_fuzzer(trace_b3_fuzzer
+                  internal/b3_fuzzer.cc
+                  trace_b3
+                  absl::strings)
 
 opencensus_fuzzer(trace_cloud_trace_context_fuzzer
                   internal/cloud_trace_context_fuzzer.cc
