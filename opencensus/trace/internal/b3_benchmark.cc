@@ -22,21 +22,23 @@ namespace {
 
 void BM_FromB3Headers_128bitTraceId(benchmark::State& state) {
   while (state.KeepRunning()) {
-    FromB3Headers("463ac35c9f6413ad48485a3953bb6124", "0020000000000001", "1");
+    FromB3Headers("463ac35c9f6413ad48485a3953bb6124", "0020000000000001", "1",
+                  "");
   }
 }
 BENCHMARK(BM_FromB3Headers_128bitTraceId);
 
 void BM_FromB3Headers_64bitTraceId(benchmark::State& state) {
   while (state.KeepRunning()) {
-    FromB3Headers("1234567812345678", "0020000000000001", "1");
+    FromB3Headers("1234567812345678", "0020000000000001", "1", "");
   }
 }
 BENCHMARK(BM_FromB3Headers_64bitTraceId);
 
 void BM_FromB3Headers_InvalidTraceId(benchmark::State& state) {
   while (state.KeepRunning()) {
-    FromB3Headers("463ac35c9f6413ad48485a3953bb612X", "0020000000000001", "1");
+    FromB3Headers("463ac35c9f6413ad48485a3953bb612X", "0020000000000001", "1",
+                  "");
   }
 }
 BENCHMARK(BM_FromB3Headers_InvalidTraceId);

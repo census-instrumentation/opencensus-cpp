@@ -42,14 +42,22 @@ bool IsHexDigits(absl::string_view s) {
 
 SpanContext FromB3Headers(absl::string_view b3_trace_id,
                           absl::string_view b3_span_id,
-                          absl::string_view b3_sampled) {
+                          absl::string_view b3_sampled,
+                          absl::string_view b3_flags) {
   static SpanContext invalid;
   uint8_t sampled;
+
   if (b3_sampled == "1") {
     sampled = 1;
   } else if (b3_sampled == "0" || b3_sampled.empty()) {
     sampled = 0;
   } else {
+    return invalid;
+  }
+
+  if (b3_flags == "1") {
+    sampled = 1;
+  } else if (!b3_flags.empty()) {
     return invalid;
   }
 

@@ -30,7 +30,7 @@ MATCHER(IsInvalid, "is an invalid SpanContext") { return !arg.IsValid(); }
 
 TEST(B3Test, Trace128Span64Valid) {
   SpanContext ctx = FromB3Headers("463ac35c9f6413ad48485a3953bb6124",
-                                  "0020000000000001", "1");
+                                  "0020000000000001", "1", "");
   EXPECT_THAT(ctx, IsValid());
   EXPECT_EQ("463ac35c9f6413ad48485a3953bb6124-0020000000000001-01",
             ctx.ToString());
@@ -41,7 +41,8 @@ TEST(B3Test, Trace128Span64Valid) {
 }
 
 TEST(B3Test, Trace64Span64Valid) {
-  SpanContext ctx = FromB3Headers("1234567812345678", "0020000000000001", "1");
+  SpanContext ctx =
+      FromB3Headers("1234567812345678", "0020000000000001", "1", "");
   EXPECT_THAT(ctx, IsValid());
   EXPECT_EQ("00000000000000001234567812345678-0020000000000001-01",
             ctx.ToString());
@@ -53,7 +54,7 @@ TEST(B3Test, Trace64Span64Valid) {
 
 TEST(B3Test, NotSampled) {
   SpanContext ctx = FromB3Headers("463ac35c9f6413ad48485a3953bb6124",
-                                  "0020000000000001", "0");
+                                  "0020000000000001", "0", "");
   EXPECT_THAT(ctx, IsValid());
   EXPECT_EQ("463ac35c9f6413ad48485a3953bb6124-0020000000000001-00",
             ctx.ToString());
@@ -63,32 +64,50 @@ TEST(B3Test, NotSampled) {
   EXPECT_EQ("0", ToB3SampledHeader(ctx));
 }
 
+TEST(B3Test, DebugOverridesNotSampled) {
+  SpanContext ctx = FromB3Headers("463ac35c9f6413ad48485a3953bb6124",
+                                  "0020000000000001", "0", "1");
+  EXPECT_THAT(ctx, IsValid());
+  EXPECT_EQ("463ac35c9f6413ad48485a3953bb6124-0020000000000001-01",
+            ctx.ToString());
+  // Round-trip.
+  EXPECT_EQ("463ac35c9f6413ad48485a3953bb6124", ToB3TraceIdHeader(ctx));
+  EXPECT_EQ("0020000000000001", ToB3SpanIdHeader(ctx));
+  EXPECT_EQ("1", ToB3SampledHeader(ctx));
+}
+
 TEST(B3Test, ExpectedFailures) {
-#define INVALID(a, b, c) EXPECT_THAT(FromB3Headers(a, b, c), IsInvalid())
-  INVALID("", "", "");
-  INVALID("463ac35c9f6413ad48485a3953bb612", "0020000000000001", "1")
+#define INVALID(a, b, c, d) EXPECT_THAT(FromB3Headers(a, b, c, d), IsInvalid())
+  INVALID("", "", "", "");
+  INVALID("463ac35c9f6413ad48485a3953bb612", "0020000000000001", "1", "")
       << "trace_id too short for 128-bit";
-  INVALID("463ac35c9f6413ad48485a3953bb61245", "0020000000000001", "1")
+  INVALID("463ac35c9f6413ad48485a3953bb61245", "0020000000000001", "1", "")
       << "trace_id too long for 128-bit";
-  INVALID("463ac35c9f6413ad48485a3953bb612X", "0020000000000001", "1")
+  INVALID("463ac35c9f6413ad48485a3953bb612X", "0020000000000001", "1", "")
       << "trace_id not hex";
 
-  INVALID("48485a3953bb612", "0020000000000001", "1")
+  INVALID("48485a3953bb612", "0020000000000001", "1", "")
       << "trace_id too short for 64-bit";
-  INVALID("48485a3953bb61245", "0020000000000001", "1")
+  INVALID("48485a3953bb61245", "0020000000000001", "1", "")
       << "trace_id too long for 64-bit";
-  INVALID("48485a3953bb612X", "0020000000000001", "1") << "trace_id not hex";
+  INVALID("48485a3953bb612X", "0020000000000001", "1", "")
+      << "trace_id not hex";
 
-  INVALID("48485a3953bb6124", "002000000000000", "1") << "span_id too short";
-  INVALID("48485a3953bb6124", "00200000000000013", "1") << "span_id too long";
-  INVALID("48485a3953bb6124", "002000000000000X", "1") << "span_id not hex";
+  INVALID("48485a3953bb6124", "002000000000000", "1", "")
+      << "span_id too short";
+  INVALID("48485a3953bb6124", "00200000000000013", "1", "")
+      << "span_id too long";
+  INVALID("48485a3953bb6124", "002000000000000X", "1", "") << "span_id not hex";
 
-  INVALID("48485a3953bb6124", "0020000000000001", "hello")
+  INVALID("48485a3953bb6124", "0020000000000001", "hello", "")
       << "sampled set to bad value";
 
-  INVALID("00000000000000000000000000000000", "0020000000000001", "1")
+  INVALID("48485a3953bb6124", "0020000000000001", "", "hello")
+      << "flags set to bad value";
+
+  INVALID("00000000000000000000000000000000", "0020000000000001", "1", "")
       << "zero is an invalid trace_id";
-  INVALID("463ac35c9f6413ad48485a3953bb6124", "0000000000000000", "1")
+  INVALID("463ac35c9f6413ad48485a3953bb6124", "0000000000000000", "1", "")
       << "zero is an invalid span_id";
 #undef INVALID
 }

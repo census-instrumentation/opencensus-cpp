@@ -20,12 +20,14 @@ using ::opencensus::trace::propagation::FromB3Headers;
 static constexpr char valid_trace_id[] = "463ac35c9f6413ad48485a3953bb612";
 static constexpr char valid_span_id[] = "0020000000000001";
 static constexpr char valid_sampled[] = "1";
+static constexpr char valid_flags[] = "";
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
   absl::string_view input(reinterpret_cast<const char *>(Data), Size);
-  FromB3Headers(input, input, input);
-  FromB3Headers(input, valid_span_id, valid_sampled);
-  FromB3Headers(valid_trace_id, input, valid_sampled);
-  FromB3Headers(valid_trace_id, valid_span_id, input);
+  FromB3Headers(input, input, input, input);
+  FromB3Headers(input, valid_span_id, valid_sampled, valid_flags);
+  FromB3Headers(valid_trace_id, input, valid_sampled, valid_flags);
+  FromB3Headers(valid_trace_id, valid_span_id, input, valid_flags);
+  FromB3Headers(valid_trace_id, valid_span_id, valid_sampled, input);
   return 0;
 }

@@ -31,6 +31,7 @@ namespace propagation {
 //   X-B3-TraceId
 //   X-B3-SpanId
 //   X-B3-Sampled
+//   X-B3-Flags
 //
 // But not:
 //   X-B3-ParentSpanId
@@ -42,10 +43,14 @@ namespace propagation {
 // b3_trace_id: 32 or 16 lowercase hex chars.
 // b3_span_id: 16 lowercase hex chars.
 // b3_sampled: "1" or "0" or empty string.
+// b3_flags: "1" or empty string.
+//
+// The X-B3-ParentSpanId header is not used.
 //
 SpanContext FromB3Headers(absl::string_view b3_trace_id,
                           absl::string_view b3_span_id,
-                          absl::string_view b3_sampled);
+                          absl::string_view b3_sampled,
+                          absl::string_view b3_flags);
 
 // Returns a value for the X-B3-TraceId header.
 std::string ToB3TraceIdHeader(const SpanContext& ctx);
