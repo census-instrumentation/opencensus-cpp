@@ -49,8 +49,9 @@ SpanContext FromB3Headers(absl::string_view b3_trace_id,
     sampled = 1;
   } else if (b3_sampled == "0" || b3_sampled.empty()) {
     sampled = 0;
-  } else
+  } else {
     return invalid;
+  }
 
   if (b3_trace_id.length() != 32 && b3_trace_id.length() != 16) return invalid;
   if (b3_span_id.length() != 16) return invalid;
