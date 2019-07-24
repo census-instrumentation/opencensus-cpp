@@ -14,7 +14,11 @@
 
 #include "opencensus/common/internal/hostname.h"
 
+#if defined(_MSC_VER)
+#include <process.h>
+#else
 #include <unistd.h>
+#endif
 
 #include "absl/strings/str_cat.h"
 
