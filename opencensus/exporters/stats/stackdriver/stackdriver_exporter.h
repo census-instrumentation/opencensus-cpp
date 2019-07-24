@@ -32,9 +32,9 @@ struct StackdriverOptions {
   // The Stackdriver project ID to use.
   std::string project_id;
 
-  // The opencensus_task is used to uniquely identify the task in Stackdriver.
-  // The recommended format is "{LANGUAGE}-{PID}@{HOSTNAME}". If PID is not
-  // available, a random number may be used.
+  // Optional: The opencensus_task is used to uniquely identify the task in
+  // Stackdriver. If empty, the exporter will use "{LANGUAGE}-{PID}@{HOSTNAME}"
+  // by default.
   std::string opencensus_task;
 
   // The RPC deadline to use when exporting to Stackdriver.

@@ -26,6 +26,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":stackdriver_utils",
+        "//opencensus/common/internal:hostname",
         "//opencensus/common/internal/grpc:status",
         "//opencensus/common/internal/grpc:with_user_agent",
         "//opencensus/stats",

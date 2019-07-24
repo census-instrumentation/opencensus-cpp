@@ -27,6 +27,14 @@ cc_library(
 )
 
 cc_library(
+    name = "hostname",
+    srcs = ["hostname.cc"],
+    hdrs = ["hostname.h"],
+    copts = DEFAULT_COPTS,
+    deps = ["@com_google_absl//absl/strings"],
+)
+
+cc_library(
     name = "random_lib",
     srcs = ["random.cc"],
     hdrs = ["random.h"],

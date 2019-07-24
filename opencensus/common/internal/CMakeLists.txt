@@ -14,6 +14,12 @@
 
 opencensus_lib(common_hash_mix)
 
+opencensus_lib(common_hostname
+               SRCS
+               hostname.cc
+               DEPS
+               absl::strings)
+
 opencensus_lib(common_random
                SRCS
                random.cc
