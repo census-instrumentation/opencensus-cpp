@@ -19,6 +19,7 @@
 
 #include "absl/strings/ascii.h"
 #include "absl/strings/escaping.h"
+#include "absl/strings/str_cat.h"
 #include "opencensus/trace/span_context.h"
 #include "opencensus/trace/span_id.h"
 #include "opencensus/trace/trace_id.h"
@@ -76,7 +77,9 @@ SpanContext FromB3Headers(absl::string_view b3_trace_id,
 
   // Extend 64-bit trace_id to 128-bit.
   if (b3_trace_id.length() == 16) {
-    trace_id_binary = std::string(8, '\0') + trace_id_binary;
+    constexpr char eight_nuls_str[] = "\0\0\0\0\0\0\0\0";
+    ABSL_CONST_INIT const absl::string_view eight_nuls(eight_nuls_str, 8);
+    trace_id_binary = absl::StrCat(eight_nuls, trace_id_binary);
   }
 
   return SpanContext(
