@@ -24,6 +24,7 @@
 #include "absl/time/clock.h"
 #include "opencensus/common/internal/grpc/status.h"
 #include "opencensus/common/internal/grpc/with_user_agent.h"
+#include "opencensus/common/internal/hostname.h"
 #include "opencensus/common/version.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/exporter/span_exporter.h"
@@ -197,6 +198,10 @@ class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
   ::opencensus::proto::agent::common::v1::Node nodeInfo_;
   void ConnectAgent();
   void InitNode();
+  void Export(
+      const ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest &);
+  void Config(
+      const ::opencensus::proto::agent::trace::v1::CurrentLibraryConfig &);
 };
 
 void ConvertSpans(
@@ -259,64 +264,75 @@ void Handler::Export(
     const std::vector<::opencensus::trace::exporter::SpanData> &spans) {
   ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest request;
   ConvertSpans(spans, &request);
-  request.mutable_node()->CopyFrom(nodeInfo_);
+  *request.mutable_node() = nodeInfo_;
+  Export(request);
+}
 
+void Handler::Export(
+    const ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest
+        &request) {
   grpc::ClientContext context;
   context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
 
   auto stream = opts_.trace_service_stub->Export(&context);
-  bool ok = stream->Write(request);
+  if (stream == nullptr) {
+    std::cerr << "Export() got an NULL stream." << std::endl;
+    return;
+  }
+
+  if (!stream->Write(request)) {
+    std::cerr << "Export stream Write() failed." << std::endl;
+  }
+}
+void Handler::Config(
+    const ::opencensus::proto::agent::trace::v1::CurrentLibraryConfig
+        &cur_lib_cfg) {
+  grpc::ClientContext context;
+  context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
+
+  auto stream = opts_.trace_service_stub->Config(&context);
+  if (stream == nullptr) {
+    std::cerr << "Config() got an NULL stream." << std::endl;
+    return;
+  }
+
+  if (!stream->Write(cur_lib_cfg)) {
+    std::cerr << "Config stream Write() failed." << std::endl;
+  }
 }
 
 void Handler::InitNode() {
-  nodeInfo_.New();
   auto identifier = nodeInfo_.mutable_identifier();
 
-  char host[100] = {0};
-  if (gethostname(host, sizeof(host)) < 0) {
-    snprintf(host, sizeof(host), "____default_host_name");
-  }
-  identifier->set_host_name(host);
+  identifier->set_host_name(::opencensus::common::Hostname());
   identifier->set_pid(getpid());
 
-  {
-    auto ts_ptr = identifier->mutable_start_timestamp();
-    auto t = absl::Now();
-    const int64_t s = absl::ToUnixSeconds(t);
-    ts_ptr->set_seconds(s);
-    ts_ptr->set_nanos((t - absl::FromUnixSeconds(s)) / absl::Nanoseconds(1));
-  }
+  EncodeTimestampProto(absl::Now(), identifier->mutable_start_timestamp());
 
   auto library_info = nodeInfo_.mutable_library_info();
   library_info->set_language(
       ::opencensus::proto::agent::common::v1::LibraryInfo_Language_CPP);
-  library_info->set_exporter_version("0.0.1");
-  library_info->set_core_library_version("0.0.1");
+  library_info->set_exporter_version(OPENCENSUS_VERSION);
+  library_info->set_core_library_version(OPENCENSUS_VERSION);
 
   auto service_info = nodeInfo_.mutable_service_info();
-  service_info->set_name(host);
+  service_info->set_name(::opencensus::common::Hostname());
 }
 
 void Handler::ConnectAgent() {
   ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest request;
-  request.mutable_node()->CopyFrom(nodeInfo_);
-
-  grpc::ClientContext context;
-  auto stream = opts_.trace_service_stub->Export(&context);
-
-  stream->Write(request);
+  *request.mutable_node() = nodeInfo_;
+  Export(request);
 
   ::opencensus::proto::agent::trace::v1::CurrentLibraryConfig cur_lib_cfg;
-  cur_lib_cfg.mutable_node()->CopyFrom(request.node());
+  *cur_lib_cfg.mutable_node() = nodeInfo_;
 
   auto config = cur_lib_cfg.mutable_config();
   auto sampler = config->mutable_constant_sampler();
   sampler->set_decision(::opencensus::proto::trace::v1::
                             ConstantSampler_ConstantDecision_ALWAYS_ON);
 
-  grpc::ClientContext context1;
-  auto cfg_stream = opts_.trace_service_stub->Config(&context1);
-  cfg_stream->Write(cur_lib_cfg);
+  Config(cur_lib_cfg);
 }
 
 }  // namespace
@@ -324,8 +340,9 @@ void Handler::ConnectAgent() {
 // static
 void OcAgentExporter::Register(OcAgentOptions &&opts) {
   if (opts.trace_service_stub == nullptr) {
-    auto channel =
-        grpc::CreateChannel(opts.address, grpc::InsecureChannelCredentials());
+    auto channel = grpc::CreateCustomChannel(
+        opts.address, grpc::InsecureChannelCredentials(),
+        ::opencensus::common::WithUserAgent());
     opts.trace_service_stub =
         ::opencensus::proto::agent::trace::v1::TraceService::NewStub(channel);
   }
