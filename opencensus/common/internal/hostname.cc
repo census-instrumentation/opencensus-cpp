@@ -16,6 +16,7 @@
 
 #if defined(_MSC_VER)
 #include <process.h>
+#include <winsock.h>
 #else
 #include <unistd.h>
 #endif
