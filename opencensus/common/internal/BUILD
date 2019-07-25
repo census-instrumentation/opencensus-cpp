@@ -27,6 +27,14 @@ cc_library(
 )
 
 cc_library(
+    name = "hostname",
+    srcs = ["hostname.cc"],
+    hdrs = ["hostname.h"],
+    copts = DEFAULT_COPTS,
+    deps = ["@com_google_absl//absl/strings"],
+)
+
+cc_library(
     name = "random_lib",
     srcs = ["random.cc"],
     hdrs = ["random.h"],
@@ -59,6 +67,16 @@ cc_library(
 
 # Tests
 # ========================================================================= #
+
+cc_test(
+    name = "hostname_test",
+    srcs = ["hostname_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":hostname",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
 
 cc_test(
     name = "random_test",
