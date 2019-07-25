@@ -264,7 +264,8 @@ void Handler::Export(
     const std::vector<::opencensus::trace::exporter::SpanData> &spans) {
   ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest request;
   ConvertSpans(spans, &request);
-  *request.mutable_node() = nodeInfo_;
+  // *request.mutable_node() = nodeInfo_;
+  request.mutable_node()->CopyFrom(nodeInfo_);
   Export(request);
 }
 
@@ -321,11 +322,13 @@ void Handler::InitNode() {
 
 void Handler::ConnectAgent() {
   ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest request;
-  *request.mutable_node() = nodeInfo_;
+  //*request.mutable_node() = nodeInfo_;
+  request.mutable_node()->CopyFrom(nodeInfo_);
   Export(request);
 
   ::opencensus::proto::agent::trace::v1::CurrentLibraryConfig cur_lib_cfg;
-  *cur_lib_cfg.mutable_node() = nodeInfo_;
+  // *cur_lib_cfg.mutable_node() = nodeInfo_;
+  cur_lib_cfg.mutable_node()->CopyFrom(nodeInfo_);
 
   auto config = cur_lib_cfg.mutable_config();
   auto sampler = config->mutable_constant_sampler();
