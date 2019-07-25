@@ -14,6 +14,12 @@
 
 opencensus_lib(common_hash_mix)
 
+opencensus_lib(common_hostname
+               SRCS
+               hostname.cc
+               DEPS
+               absl::strings)
+
 opencensus_lib(common_random
                SRCS
                random.cc
@@ -29,6 +35,8 @@ target_compile_definitions(opencensus_common_stats_object INTERFACE
                            $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>)
 
 opencensus_lib(common_string_vector_hash)
+
+opencensus_test(common_hostname_test hostname_test.cc common_hostname)
 
 opencensus_test(common_random_test random_test.cc common_random)
 
