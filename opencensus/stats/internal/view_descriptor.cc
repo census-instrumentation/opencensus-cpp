@@ -75,10 +75,12 @@ ViewDescriptor& ViewDescriptor::set_description(absl::string_view description) {
 }
 
 void ViewDescriptor::RegisterForExport() const {
-  if (aggregation_window_.type() == AggregationWindow::Type::kCumulative) {
+  if (aggregation_window_.type() == AggregationWindow::Type::kCumulative ||
+      aggregation_window_.type() == AggregationWindow::Type::kDelta) {
     StatsExporterImpl::Get()->AddView(*this);
   } else {
-    std::cerr << "Only cumulative views may be registered for export.\n";
+    std::cerr
+        << "Only cumulative and delta views may be registered for export.\n";
   }
 }
 

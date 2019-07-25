@@ -293,6 +293,36 @@ TEST(ViewDataImplTest, StatsObjectToDistribution) {
   EXPECT_THAT(distribution_2_2.bucket_counts(), ::testing::ElementsAre(0, 0));
 }
 
+TEST(ViewDataImplTest, AggregationWindowDelta) {
+  const absl::Time start_time = absl::UnixEpoch();
+  const absl::Time delta1_end_time = absl::UnixEpoch() + absl::Seconds(1);
+  auto descriptor = ViewDescriptor().set_aggregation(Aggregation::Count());
+  SetAggregationWindow(AggregationWindow::Delta(), &descriptor);
+  ViewDataImpl data(start_time, descriptor);
+  const std::vector<std::string> tag({"value1", "value2a"});
+
+  AddToViewDataImpl(1, tag, start_time, {}, &data);
+  AddToViewDataImpl(1, tag, delta1_end_time, {}, &data);
+
+  // Get current delta.
+  auto delta1 = data.GetDeltaAndReset(delta1_end_time);
+  EXPECT_EQ(start_time + absl::Nanoseconds(1), delta1->start_time());
+  EXPECT_EQ(delta1_end_time, delta1->end_time());
+  EXPECT_THAT(delta1->int_data(),
+              ::testing::UnorderedElementsAre(::testing::Pair(tag, 2)));
+
+  const absl::Time delta2_end_time = delta1_end_time + absl::Seconds(1);
+  AddToViewDataImpl(1, tag, delta2_end_time, {}, &data);
+
+  // Get delta again and its start time should be one nanosecond after end time
+  // of last delta.
+  auto delta2 = data.GetDeltaAndReset(delta2_end_time);
+  EXPECT_EQ(delta1_end_time + absl::Nanoseconds(1), delta2->start_time());
+  EXPECT_EQ(delta2_end_time, delta2->end_time());
+  EXPECT_THAT(delta2->int_data(),
+              ::testing::UnorderedElementsAre(::testing::Pair(tag, 1)));
+}
+
 }  // namespace
 }  // namespace stats
 }  // namespace opencensus

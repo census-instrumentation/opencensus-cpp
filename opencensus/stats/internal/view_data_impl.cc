@@ -278,6 +278,9 @@ ViewDataImpl::ViewDataImpl(ViewDataImpl* source, absl::Time now)
       break;
     }
   }
+  // Add one nanosecond to start time to preventing overlapping the end time of
+  // last interval.
+  start_time_ += absl::Nanoseconds(1);
   source->start_time_ = now;
   source->end_time_ = now;
 }
