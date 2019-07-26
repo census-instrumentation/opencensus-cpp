@@ -14,8 +14,8 @@
 
 #include "opencensus/trace/propagation/b3.h"
 
-#include <strings.h>
 #include <cstdint>
+#include <cstring>
 #include <string>
 
 #include "absl/strings/ascii.h"
@@ -78,7 +78,7 @@ SpanContext FromB3Headers(absl::string_view b3_trace_id,
   // Extend 64-bit trace_id to 128-bit.
   uint8_t extended_trace_id[16];
   if (b3_trace_id.length() == 16) {
-    bzero(extended_trace_id, 8);
+    memset(extended_trace_id, 0, 8);
     memcpy(extended_trace_id + 8, trace_id_binary.data(), 8);
   }
 
