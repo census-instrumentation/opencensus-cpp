@@ -37,7 +37,7 @@ struct StackdriverOptions {
   // (optional) By default, the exporter connects to Stackdriver using gRPC. If
   // this stub is non-null, the exporter will use this stub to send gRPC calls
   // instead. Useful for testing.
-  std::unique_ptr<google::devtools::cloudtrace::v2::TraceService::Stub>
+  std::unique_ptr<google::devtools::cloudtrace::v2::TraceService::StubInterface>
       trace_service_stub;
 };
 
