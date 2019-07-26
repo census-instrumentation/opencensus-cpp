@@ -50,6 +50,12 @@ load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
 grpc_deps()
 
+# gRPC depends on upb, which depends on a @bazel_version repo
+# which it provides but has to be instantiated explicitly.
+load("@upb//bazel:repository_defs.bzl", "bazel_version_repository")
+
+bazel_version_repository(name = "bazel_version")
+
 # Used by prometheus-cpp.
 local_repository(
     name = "net_zlib_zlib",
