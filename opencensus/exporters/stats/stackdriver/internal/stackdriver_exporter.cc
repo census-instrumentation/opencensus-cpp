@@ -30,6 +30,7 @@
 #include "google/protobuf/empty.pb.h"
 #include "opencensus/common/internal/grpc/status.h"
 #include "opencensus/common/internal/grpc/with_user_agent.h"
+#include "opencensus/common/internal/hostname.h"
 #include "opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
 #include "opencensus/stats/stats.h"
 
@@ -74,6 +75,10 @@ StackdriverOptions SetOptionDefaults(StackdriverOptions&& o) {
 
   // Prepend prefix because we always use this with a prefix.
   opts.project_id = absl::StrCat(kProjectIdPrefix, opts.project_id);
+
+  if (opts.opencensus_task.empty()) {
+    opts.opencensus_task = opencensus::common::OpenCensusTask();
+  }
 
   if (opts.metric_name_prefix.empty()) {
     opts.metric_name_prefix = kDefaultMetricNamePrefix;
