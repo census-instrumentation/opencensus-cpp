@@ -14,11 +14,10 @@
 
 #include "opencensus/exporters/trace/ocagent/ocagent_exporter.h"
 
-#include <unistd.h>
 #include <cstdint>
 #include <iostream>
+#include <unistd.h>
 
-#include "absl/base/macros.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/time/clock.h"
@@ -72,13 +71,13 @@ void SetTruncatableString(
   }
 }
 
-::opencensus::proto::trace::v1::Span_Link_Type ConvertLinkType(
-    ::opencensus::trace::exporter::Link::Type type) {
+::opencensus::proto::trace::v1::Span_Link_Type
+ConvertLinkType(::opencensus::trace::exporter::Link::Type type) {
   switch (type) {
-    case ::opencensus::trace::exporter::Link::Type::kChildLinkedSpan:
-      return ::opencensus::proto::trace::v1::Span_Link_Type_CHILD_LINKED_SPAN;
-    case ::opencensus::trace::exporter::Link::Type::kParentLinkedSpan:
-      return ::opencensus::proto::trace::v1::Span_Link_Type_PARENT_LINKED_SPAN;
+  case ::opencensus::trace::exporter::Link::Type::kChildLinkedSpan:
+    return ::opencensus::proto::trace::v1::Span_Link_Type_CHILD_LINKED_SPAN;
+  case ::opencensus::trace::exporter::Link::Type::kParentLinkedSpan:
+    return ::opencensus::proto::trace::v1::Span_Link_Type_PARENT_LINKED_SPAN;
   }
   return ::opencensus::proto::trace::v1::Span_Link_Type_TYPE_UNSPECIFIED;
 }
@@ -87,12 +86,12 @@ void SetTruncatableString(
 ConvertMessageType(::opencensus::trace::exporter::MessageEvent::Type type) {
   using Type = ::opencensus::trace::exporter::MessageEvent::Type;
   switch (type) {
-    case Type::SENT:
-      return ::opencensus::proto::trace::v1::
-          Span_TimeEvent_MessageEvent_Type_SENT;
-    case Type::RECEIVED:
-      return ::opencensus::proto::trace::v1::
-          Span_TimeEvent_MessageEvent_Type_RECEIVED;
+  case Type::SENT:
+    return ::opencensus::proto::trace::v1::
+        Span_TimeEvent_MessageEvent_Type_SENT;
+  case Type::RECEIVED:
+    return ::opencensus::proto::trace::v1::
+        Span_TimeEvent_MessageEvent_Type_RECEIVED;
   }
   return ::opencensus::proto::trace::v1::
       Span_TimeEvent_MessageEvent_Type_TYPE_UNSPECIFIED;
@@ -109,17 +108,16 @@ void PopulateAttributes(
   for (const auto &attr : attributes) {
     using Type = ::opencensus::trace::exporter::AttributeValue::Type;
     switch (attr.second.type()) {
-      case Type::kString:
-        SetTruncatableString(
-            attr.second.string_value(), kAttributeStringLen,
-            (*attribute_map)[attr.first].mutable_string_value());
-        break;
-      case Type::kBool:
-        (*attribute_map)[attr.first].set_bool_value(attr.second.bool_value());
-        break;
-      case Type::kInt:
-        (*attribute_map)[attr.first].set_int_value(attr.second.int_value());
-        break;
+    case Type::kString:
+      SetTruncatableString(attr.second.string_value(), kAttributeStringLen,
+                           (*attribute_map)[attr.first].mutable_string_value());
+      break;
+    case Type::kBool:
+      (*attribute_map)[attr.first].set_bool_value(attr.second.bool_value());
+      break;
+    case Type::kInt:
+      (*attribute_map)[attr.first].set_int_value(attr.second.int_value());
+      break;
     }
   }
 }
@@ -187,21 +185,19 @@ void ConvertLinks(const ::opencensus::trace::exporter::SpanData &span,
 }
 
 class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
- public:
+public:
   Handler(OcAgentOptions &&opts);
 
   void Export(const std::vector<::opencensus::trace::exporter::SpanData> &spans)
       override;
 
- private:
+private:
   const OcAgentOptions opts_;
   ::opencensus::proto::agent::common::v1::Node nodeInfo_;
   void ConnectAgent();
   void InitNode();
-  void Export(
+  void ExportRpcRequest(
       const ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest &);
-  void Config(
-      const ::opencensus::proto::agent::trace::v1::CurrentLibraryConfig &);
 };
 
 void ConvertSpans(
@@ -265,10 +261,10 @@ void Handler::Export(
   ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest request;
   ConvertSpans(spans, &request);
   *request.mutable_node() = nodeInfo_;
-  Export(request);
+  ExportRpcRequest(request);
 }
 
-void Handler::Export(
+void Handler::ExportRpcRequest(
     const ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest
         &request) {
   grpc::ClientContext context;
@@ -276,28 +272,12 @@ void Handler::Export(
 
   auto stream = opts_.trace_service_stub->Export(&context);
   if (stream == nullptr) {
-    std::cerr << "Export() got an NULL stream." << std::endl;
+    std::cerr << "Export() got an NULL stream.\n";
     return;
   }
 
   if (!stream->Write(request)) {
-    std::cerr << "Export stream Write() failed." << std::endl;
-  }
-}
-void Handler::Config(
-    const ::opencensus::proto::agent::trace::v1::CurrentLibraryConfig
-        &cur_lib_cfg) {
-  grpc::ClientContext context;
-  context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
-
-  auto stream = opts_.trace_service_stub->Config(&context);
-  if (stream == nullptr) {
-    std::cerr << "Config() got an NULL stream." << std::endl;
-    return;
-  }
-
-  if (!stream->Write(cur_lib_cfg)) {
-    std::cerr << "Config stream Write() failed." << std::endl;
+    std::cerr << "Export stream Write() failed.\n";
   }
 }
 
@@ -322,20 +302,32 @@ void Handler::InitNode() {
 void Handler::ConnectAgent() {
   ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest request;
   *request.mutable_node() = nodeInfo_;
-  Export(request);
+  ExportRpcRequest(request);
 
   ::opencensus::proto::agent::trace::v1::CurrentLibraryConfig cur_lib_cfg;
   *cur_lib_cfg.mutable_node() = nodeInfo_;
 
+  // Config
   auto config = cur_lib_cfg.mutable_config();
   auto sampler = config->mutable_constant_sampler();
   sampler->set_decision(::opencensus::proto::trace::v1::
                             ConstantSampler_ConstantDecision_ALWAYS_ON);
 
-  Config(cur_lib_cfg);
+  grpc::ClientContext context;
+  context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
+
+  auto stream = opts_.trace_service_stub->Config(&context);
+  if (stream == nullptr) {
+    std::cerr << "Config() got an NULL stream.\n";
+    return;
+  }
+
+  if (!stream->Write(cur_lib_cfg)) {
+    std::cerr << "Config stream Write() failed.\n";
+  }
 }
 
-}  // namespace
+} // namespace
 
 // static
 void OcAgentExporter::Register(OcAgentOptions &&opts) {
@@ -350,6 +342,6 @@ void OcAgentExporter::Register(OcAgentOptions &&opts) {
       absl::make_unique<Handler>(std::move(opts)));
 }
 
-}  // namespace trace
-}  // namespace exporters
-}  // namespace opencensus
+} // namespace trace
+} // namespace exporters
+} // namespace opencensus

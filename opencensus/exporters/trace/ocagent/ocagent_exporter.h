@@ -17,7 +17,6 @@
 
 #include <string>
 
-#include "absl/base/macros.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
 
@@ -43,16 +42,16 @@ struct OcAgentOptions {
 };
 
 class OcAgentExporter {
- public:
+public:
   // Registers the exporter.
   static void Register(OcAgentOptions &&opts);
 
- private:
+private:
   OcAgentExporter() = delete;
 };
 
-}  // namespace trace
-}  // namespace exporters
-}  // namespace opencensus
+} // namespace trace
+} // namespace exporters
+} // namespace opencensus
 
-#endif  // OPENCENSUS_EXPORTERS_TRACE_OCAGENT_OCAGENT_EXPORTER_H_
+#endif // OPENCENSUS_EXPORTERS_TRACE_OCAGENT_OCAGENT_EXPORTER_H_
