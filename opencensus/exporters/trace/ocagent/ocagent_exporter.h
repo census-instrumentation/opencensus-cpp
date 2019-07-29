@@ -34,24 +34,25 @@ struct OcAgentOptions {
   // The RPC deadline to use when exporting to OcAgent.
   absl::Duration rpc_deadline = absl::Seconds(5);
 
-  // (optional) By default, the exporter connects to Stackdriver using gRPC. If
-  // this stub is non-null, the exporter will use this stub to send gRPC calls
-  // instead. Useful for testing.
-  std::unique_ptr<opencensus::proto::agent::trace::v1::TraceService::Stub>
+  // (optional) By default, the exporter connects to OcAgent using address. If
+  // this stub is non-null, the exporter will use this stub to send
+  // gRPC calls instead and ignore the address. Useful for testing.
+  std::unique_ptr<
+      opencensus::proto::agent::trace::v1::TraceService::StubInterface>
       trace_service_stub;
 };
 
 class OcAgentExporter {
-public:
+ public:
   // Registers the exporter.
   static void Register(OcAgentOptions &&opts);
 
-private:
+ private:
   OcAgentExporter() = delete;
 };
 
-} // namespace trace
-} // namespace exporters
-} // namespace opencensus
+}  // namespace trace
+}  // namespace exporters
+}  // namespace opencensus
 
-#endif // OPENCENSUS_EXPORTERS_TRACE_OCAGENT_OCAGENT_EXPORTER_H_
+#endif  // OPENCENSUS_EXPORTERS_TRACE_OCAGENT_OCAGENT_EXPORTER_H_

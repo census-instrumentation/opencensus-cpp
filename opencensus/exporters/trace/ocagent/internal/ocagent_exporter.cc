@@ -14,9 +14,9 @@
 
 #include "opencensus/exporters/trace/ocagent/ocagent_exporter.h"
 
+#include <unistd.h>
 #include <cstdint>
 #include <iostream>
-#include <unistd.h>
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
@@ -71,13 +71,13 @@ void SetTruncatableString(
   }
 }
 
-::opencensus::proto::trace::v1::Span_Link_Type
-ConvertLinkType(::opencensus::trace::exporter::Link::Type type) {
+::opencensus::proto::trace::v1::Span_Link_Type ConvertLinkType(
+    ::opencensus::trace::exporter::Link::Type type) {
   switch (type) {
-  case ::opencensus::trace::exporter::Link::Type::kChildLinkedSpan:
-    return ::opencensus::proto::trace::v1::Span_Link_Type_CHILD_LINKED_SPAN;
-  case ::opencensus::trace::exporter::Link::Type::kParentLinkedSpan:
-    return ::opencensus::proto::trace::v1::Span_Link_Type_PARENT_LINKED_SPAN;
+    case ::opencensus::trace::exporter::Link::Type::kChildLinkedSpan:
+      return ::opencensus::proto::trace::v1::Span_Link_Type_CHILD_LINKED_SPAN;
+    case ::opencensus::trace::exporter::Link::Type::kParentLinkedSpan:
+      return ::opencensus::proto::trace::v1::Span_Link_Type_PARENT_LINKED_SPAN;
   }
   return ::opencensus::proto::trace::v1::Span_Link_Type_TYPE_UNSPECIFIED;
 }
@@ -86,12 +86,12 @@ ConvertLinkType(::opencensus::trace::exporter::Link::Type type) {
 ConvertMessageType(::opencensus::trace::exporter::MessageEvent::Type type) {
   using Type = ::opencensus::trace::exporter::MessageEvent::Type;
   switch (type) {
-  case Type::SENT:
-    return ::opencensus::proto::trace::v1::
-        Span_TimeEvent_MessageEvent_Type_SENT;
-  case Type::RECEIVED:
-    return ::opencensus::proto::trace::v1::
-        Span_TimeEvent_MessageEvent_Type_RECEIVED;
+    case Type::SENT:
+      return ::opencensus::proto::trace::v1::
+          Span_TimeEvent_MessageEvent_Type_SENT;
+    case Type::RECEIVED:
+      return ::opencensus::proto::trace::v1::
+          Span_TimeEvent_MessageEvent_Type_RECEIVED;
   }
   return ::opencensus::proto::trace::v1::
       Span_TimeEvent_MessageEvent_Type_TYPE_UNSPECIFIED;
@@ -108,16 +108,17 @@ void PopulateAttributes(
   for (const auto &attr : attributes) {
     using Type = ::opencensus::trace::exporter::AttributeValue::Type;
     switch (attr.second.type()) {
-    case Type::kString:
-      SetTruncatableString(attr.second.string_value(), kAttributeStringLen,
-                           (*attribute_map)[attr.first].mutable_string_value());
-      break;
-    case Type::kBool:
-      (*attribute_map)[attr.first].set_bool_value(attr.second.bool_value());
-      break;
-    case Type::kInt:
-      (*attribute_map)[attr.first].set_int_value(attr.second.int_value());
-      break;
+      case Type::kString:
+        SetTruncatableString(
+            attr.second.string_value(), kAttributeStringLen,
+            (*attribute_map)[attr.first].mutable_string_value());
+        break;
+      case Type::kBool:
+        (*attribute_map)[attr.first].set_bool_value(attr.second.bool_value());
+        break;
+      case Type::kInt:
+        (*attribute_map)[attr.first].set_int_value(attr.second.int_value());
+        break;
     }
   }
 }
@@ -185,13 +186,13 @@ void ConvertLinks(const ::opencensus::trace::exporter::SpanData &span,
 }
 
 class Handler : public ::opencensus::trace::exporter::SpanExporter::Handler {
-public:
+ public:
   Handler(OcAgentOptions &&opts);
 
   void Export(const std::vector<::opencensus::trace::exporter::SpanData> &spans)
       override;
 
-private:
+ private:
   const OcAgentOptions opts_;
   ::opencensus::proto::agent::common::v1::Node nodeInfo_;
   void ConnectAgent();
@@ -327,7 +328,7 @@ void Handler::ConnectAgent() {
   }
 }
 
-} // namespace
+}  // namespace
 
 // static
 void OcAgentExporter::Register(OcAgentOptions &&opts) {
@@ -342,6 +343,6 @@ void OcAgentExporter::Register(OcAgentOptions &&opts) {
       absl::make_unique<Handler>(std::move(opts)));
 }
 
-} // namespace trace
-} // namespace exporters
-} // namespace opencensus
+}  // namespace trace
+}  // namespace exporters
+}  // namespace opencensus
