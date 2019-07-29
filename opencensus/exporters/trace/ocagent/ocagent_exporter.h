@@ -37,7 +37,8 @@ struct OcAgentOptions {
   // (optional) By default, the exporter connects to Stackdriver using gRPC. If
   // this stub is non-null, the exporter will use this stub to send gRPC calls
   // instead. Useful for testing.
-  std::unique_ptr<opencensus::proto::agent::trace::v1::TraceService::Stub>
+  std::unique_ptr<
+      opencensus::proto::agent::trace::v1::TraceService::StubInterface>
       trace_service_stub;
 };
 
