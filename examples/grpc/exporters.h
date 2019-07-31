@@ -12,5 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Register Stackdriver exporters for stats and trace.
-void RegisterStackdriverExporters();
+void RegisterExporters();

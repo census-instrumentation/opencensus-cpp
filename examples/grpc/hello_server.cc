@@ -27,12 +27,8 @@
 #include "absl/strings/str_cat.h"
 #include "examples/grpc/hello.grpc.pb.h"
 #include "examples/grpc/hello.pb.h"
-#include "examples/grpc/stackdriver.h"
+#include "examples/grpc/exporters.h"
 #include "opencensus/exporters/stats/prometheus/prometheus_exporter.h"
-#include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
-#include "opencensus/exporters/stats/stdout/stdout_exporter.h"
-#include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
-#include "opencensus/exporters/trace/stdout/stdout_exporter.h"
 #include "opencensus/stats/stats.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"
@@ -124,12 +120,7 @@ int main(int argc, char **argv) {
   // Register the gRPC views (latency, error count, etc).
   grpc::RegisterOpenCensusViewsForExport();
 
-  // Register exporters for Stackdriver.
-  RegisterStackdriverExporters();
-
-  // For debugging, register exporters that just write to stdout.
-  opencensus::exporters::stats::StdoutExporter::Register();
-  opencensus::exporters::trace::StdoutExporter::Register();
+  RegisterExporters();
 
   // Keep a shared pointer to the Prometheus exporter.
   auto exporter =

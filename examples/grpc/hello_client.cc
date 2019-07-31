@@ -23,11 +23,7 @@
 #include "absl/time/clock.h"
 #include "examples/grpc/hello.grpc.pb.h"
 #include "examples/grpc/hello.pb.h"
-#include "examples/grpc/stackdriver.h"
-#include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
-#include "opencensus/exporters/stats/stdout/stdout_exporter.h"
-#include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
-#include "opencensus/exporters/trace/stdout/stdout_exporter.h"
+#include "examples/grpc/exporters.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/trace_config.h"
 
@@ -53,16 +49,11 @@ int main(int argc, char **argv) {
   // Register the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
   grpc::RegisterOpenCensusPlugin();
 
-  // Register exporters for Stackdriver.
-  RegisterStackdriverExporters();
+  RegisterExporters();
 
   // Trace all outgoing RPCs.
   opencensus::trace::TraceConfig::SetCurrentTraceParams(
       {128, 128, 128, 128, opencensus::trace::ProbabilitySampler(1.0)});
-
-  // For debugging, register exporters that just write to stdout.
-  opencensus::exporters::stats::StdoutExporter::Register();
-  opencensus::exporters::trace::StdoutExporter::Register();
 
   // Create a Channel to send RPCs over.
   std::shared_ptr<grpc::Channel> channel =
