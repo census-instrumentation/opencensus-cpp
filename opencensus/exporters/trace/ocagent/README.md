@@ -9,6 +9,24 @@ tracing to [OcAgent](https://opencensus.io/service/components/agent/).
 
 Install OcAgent as the [doc](https://opencensus.io/service/components/agent/install). You can deploy an agent in the same Pod with service. Or deploy it on a remote machine.
 
+Make sure the `opencensus` receiver so configured. Example `config.yaml` file:
+
+```yaml
+receivers:
+  opencensus:
+    address: "127.0.0.1:55678"
+
+exporters:
+  zipkin:
+    endpoint: "http://127.0.0.1:9411/api/v2/spans"
+```
+
+Start the agent:
+
+```shell
+ocagent_linux -c config.yaml
+```
+
 ### Register the exporter
 
 Include:
@@ -31,7 +49,7 @@ opts.address = "localhost:55678";
 OcAgentExporter::Register(std::move(opts));
 ```
 
-#### Adding Spans to a Trace
+### Adding Spans to a Trace
 
 A trace consists of a tree of spans. You should build an `::opencensus::trace::StartSpanOptions` and then start an span.
 
