@@ -21,9 +21,9 @@
 #include <grpcpp/opencensus.h>
 
 #include "absl/time/clock.h"
+#include "examples/grpc/exporters.h"
 #include "examples/grpc/hello.grpc.pb.h"
 #include "examples/grpc/hello.pb.h"
-#include "examples/grpc/exporters.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/trace_config.h"
 
