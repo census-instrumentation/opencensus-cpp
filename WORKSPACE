@@ -151,8 +151,7 @@ switched_rules_by_language(
     grpc = True,
 )
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
+# Needed by opencensus-proto.
 http_archive(
     name = "io_bazel_rules_go",
     sha256 = "9fb16af4d4836c8222142e54c9efa0bb5fc562ffc893ce2abeac3e25daead144",
@@ -182,6 +181,7 @@ grpc_java_repositories(
     omit_com_google_protobuf = True,
 )
 
+# OpenCensus proto - used by OcAgent exporter.
 http_archive(
     name = "io_opencensus_proto",
     strip_prefix = "opencensus-proto-master/src",
