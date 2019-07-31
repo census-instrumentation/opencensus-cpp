@@ -77,7 +77,7 @@ struct StackdriverOptions {
   // Optional: by default, the exporter connects to Stackdriver using gRPC. If
   // this stub is non-null, the exporter will use this stub to send gRPC calls
   // instead. Useful for testing.
-  std::unique_ptr<google::monitoring::v3::MetricService::Stub>
+  std::unique_ptr<google::monitoring::v3::MetricService::StubInterface>
       metric_service_stub;
 };
 

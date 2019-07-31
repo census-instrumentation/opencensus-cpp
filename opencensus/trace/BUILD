@@ -88,6 +88,23 @@ cc_library(
 )
 
 cc_library(
+    name = "b3",
+    srcs = [
+        "internal/b3.cc",
+    ],
+    hdrs = [
+        "propagation/b3.h",
+    ],
+    copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":span_context",
+        "@com_google_absl//absl/base:endian",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "cloud_trace_context",
     srcs = [
         "internal/cloud_trace_context.cc",
@@ -213,6 +230,17 @@ cc_test(
     deps = [
         ":trace",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "b3_test",
+    srcs = ["internal/b3_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":b3",
+        ":span_context",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -428,6 +456,18 @@ cc_binary(
 )
 
 cc_binary(
+    name = "b3_benchmark",
+    testonly = 1,
+    srcs = ["internal/b3_benchmark.cc"],
+    copts = TEST_COPTS,
+    linkstatic = 1,
+    deps = [
+        ":b3",
+        "@com_github_google_benchmark//:benchmark",
+    ],
+)
+
+cc_binary(
     name = "cloud_trace_context_benchmark",
     testonly = 1,
     srcs = ["internal/cloud_trace_context_benchmark.cc"],
@@ -503,6 +543,16 @@ cc_binary(
 
 # Fuzzers
 # ========================================================================= #
+
+cc_fuzz_target(
+    name = "b3_fuzzer",
+    srcs = ["internal/b3_fuzzer.cc"],
+    corpus = glob(["internal/b3_corpus/*"]),
+    deps = [
+        ":b3",
+        "@com_google_absl//absl/strings",
+    ],
+)
 
 cc_fuzz_target(
     name = "cloud_trace_context_fuzzer",
