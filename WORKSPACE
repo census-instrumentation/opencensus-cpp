@@ -150,3 +150,40 @@ switched_rules_by_language(
     cc = True,
     grpc = True,
 )
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "io_bazel_rules_go",
+    sha256 = "9fb16af4d4836c8222142e54c9efa0bb5fc562ffc893ce2abeac3e25daead144",
+    urls = [
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/0.19.0/rules_go-0.19.0.tar.gz",
+        "https://github.com/bazelbuild/rules_go/releases/download/0.19.0/rules_go-0.19.0.tar.gz",
+    ],
+)
+
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+
+go_rules_dependencies()
+
+go_register_toolchains()
+
+# Needed by opencensus-proto.
+http_archive(
+    name = "grpc_java",
+    strip_prefix = "grpc-java-master",
+    urls = ["https://github.com/grpc/grpc-java/archive/master.zip"],
+)
+
+load("@grpc_java//:repositories.bzl", "grpc_java_repositories")
+
+grpc_java_repositories(
+    # Omit to avoid conflicts.
+    omit_com_google_protobuf = True,
+)
+
+http_archive(
+    name = "io_opencensus_proto",
+    strip_prefix = "opencensus-proto-master/src",
+    urls = ["https://github.com/census-instrumentation/opencensus-proto/archive/master.zip"],
+)
