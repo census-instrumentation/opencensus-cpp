@@ -24,7 +24,7 @@ export BAZEL_OPTIONS="$BAZEL_OPTIONS --experimental_ui_actions_shown=1"
 
 # Enable thread safety analysis (only works with clang).
 if [[ "$TRAVIS_COMPILER" = "clang" ]]; then
-  export BAZEL_OPTIONS="$BAZEL_OPTIONS --copt=-Werror=thread-safety"
+  export BAZEL_OPTIONS="$BAZEL_OPTIONS --copt=-Werror=thread-safety --copt=-Werror=thread-safety-reference"
 fi
 
 export BAZEL_VERSION="0.24.1"
