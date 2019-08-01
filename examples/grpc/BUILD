@@ -37,13 +37,16 @@ cc_grpc_library(
 )
 
 cc_library(
-    name = "stackdriver",
-    srcs = ["stackdriver.cc"],
-    hdrs = ["stackdriver.h"],
+    name = "exporters",
+    srcs = ["exporters.cc"],
+    hdrs = ["exporters.h"],
     copts = DEFAULT_COPTS,
     deps = [
         "//opencensus/exporters/stats/stackdriver:stackdriver_exporter",
+        "//opencensus/exporters/stats/stdout:stdout_exporter",
+        "//opencensus/exporters/trace/ocagent:ocagent_exporter",
         "//opencensus/exporters/trace/stackdriver:stackdriver_exporter",
+        "//opencensus/exporters/trace/stdout:stdout_exporter",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -53,13 +56,9 @@ cc_binary(
     srcs = ["hello_client.cc"],
     copts = DEFAULT_COPTS,
     deps = [
+        ":exporters",
         ":hello_cc_grpc",
         ":hello_cc_proto",
-        ":stackdriver",
-        "//opencensus/exporters/stats/stackdriver:stackdriver_exporter",
-        "//opencensus/exporters/stats/stdout:stdout_exporter",
-        "//opencensus/exporters/trace/stackdriver:stackdriver_exporter",
-        "//opencensus/exporters/trace/stdout:stdout_exporter",
         "//opencensus/trace",
         "@com_github_grpc_grpc//:grpc++",
         "@com_github_grpc_grpc//:grpc_opencensus_plugin",
@@ -73,14 +72,10 @@ cc_binary(
     srcs = ["hello_server.cc"],
     copts = DEFAULT_COPTS,
     deps = [
+        ":exporters",
         ":hello_cc_grpc",
         ":hello_cc_proto",
-        ":stackdriver",
         "//opencensus/exporters/stats/prometheus:prometheus_exporter",
-        "//opencensus/exporters/stats/stackdriver:stackdriver_exporter",
-        "//opencensus/exporters/stats/stdout:stdout_exporter",
-        "//opencensus/exporters/trace/stackdriver:stackdriver_exporter",
-        "//opencensus/exporters/trace/stdout:stdout_exporter",
         "//opencensus/trace",
         "@com_github_grpc_grpc//:grpc++",
         "@com_github_grpc_grpc//:grpc_opencensus_plugin",

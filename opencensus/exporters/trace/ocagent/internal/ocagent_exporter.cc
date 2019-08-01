@@ -14,7 +14,9 @@
 
 #include "opencensus/exporters/trace/ocagent/ocagent_exporter.h"
 
+#include <grpcpp/grpcpp.h>
 #include <unistd.h>
+
 #include <cstdint>
 #include <iostream>
 
@@ -27,8 +29,6 @@
 #include "opencensus/common/version.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/exporter/span_exporter.h"
-
-#include <grpcpp/grpcpp.h>
 
 namespace opencensus {
 namespace exporters {
@@ -268,17 +268,25 @@ void Handler::Export(
 void Handler::ExportRpcRequest(
     const ::opencensus::proto::agent::trace::v1::ExportTraceServiceRequest
         &request) {
+  // TODO: Re-work this to have a single long-running streaming RPC.
   grpc::ClientContext context;
   context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
 
   auto stream = opts_.trace_service_stub->Export(&context);
   if (stream == nullptr) {
-    std::cerr << "Export() got an NULL stream.\n";
+    std::cerr << "OcAgent trace exporter: Export() got a NULL stream.\n";
     return;
   }
 
   if (!stream->Write(request)) {
-    std::cerr << "Export stream Write() failed.\n";
+    std::cerr << "OcAgent trace exporter: Export() stream broken.\n";
+  }
+
+  stream->WritesDone();
+  grpc::Status status = stream->Finish();
+  if (!status.ok()) {
+    std::cerr << "OcAgent trace exporter: Export() failed: "
+              << opencensus::common::ToString(status) << "\n";
   }
 }
 
@@ -305,6 +313,13 @@ void Handler::ConnectAgent() {
   *request.mutable_node() = nodeInfo_;
   ExportRpcRequest(request);
 
+#if 0
+  // Config is unimplemented as of opencensus-service v0.1.9:
+  //
+  // https://github.com/census-instrumentation/opencensus-service/blob/0747a8305a08390e9eb7f8b6e2baa5143fc18c1d/receiver/opencensusreceiver/octrace/opencensus.go#L85
+  //
+  // Resurrect this code when the service implements the handler.
+
   ::opencensus::proto::agent::trace::v1::CurrentLibraryConfig cur_lib_cfg;
   *cur_lib_cfg.mutable_node() = nodeInfo_;
 
@@ -319,13 +334,21 @@ void Handler::ConnectAgent() {
 
   auto stream = opts_.trace_service_stub->Config(&context);
   if (stream == nullptr) {
-    std::cerr << "Config() got an NULL stream.\n";
+    std::cerr << "OcAgent trace exporter: Config() got a NULL stream.\n";
     return;
   }
 
   if (!stream->Write(cur_lib_cfg)) {
-    std::cerr << "Config stream Write() failed.\n";
+    std::cerr << "OcAgent trace exporter: Config() stream broken.\n";
   }
+
+  stream->WritesDone();
+  grpc::Status status = stream->Finish();
+  if (!status.ok()) {
+    std::cerr << "OcAgent trace exporter: Config() failed: "
+              << opencensus::common::ToString(status) << "\n";
+  }
+#endif
 }
 
 }  // namespace
