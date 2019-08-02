@@ -87,12 +87,18 @@ class SpanImpl final {
 
   void SetName(absl::string_view name) LOCKS_EXCLUDED(mu_);
 
+  void MarkAbandoned() LOCKS_EXCLUDED(mu_);
+
   // Returns true on success (if this is the first time the Span has ended) and
   // also marks the end of the Span and sets its end_time_.
   bool End() LOCKS_EXCLUDED(mu_);
 
-  // Returns true if the span has ended.
+  // Returns true if the Span has ended.
   bool HasEnded() const LOCKS_EXCLUDED(mu_);
+
+  // Returns true if the Span is sampled for export. Returns false if the Span
+  // was abandoned.
+  bool IsSampled() const LOCKS_EXCLUDED(mu_);
 
   absl::string_view name() const { return name_; }
 
@@ -100,7 +106,8 @@ class SpanImpl final {
   const std::string& name_constref() const { return name_; }
 
   // Returns the SpanContext associated with this Span.
-  SpanContext context() const { return context_; }
+  // The trace_options do reflect MarkAbandoned().
+  SpanContext context() const LOCKS_EXCLUDED(mu_);
 
   SpanId parent_span_id() const { return parent_span_id_; }
 
@@ -126,7 +133,7 @@ class SpanImpl final {
   // a root span.
   const SpanId parent_span_id_;
   // TraceId, SpanId, and TraceOptions for the current span.
-  const SpanContext context_;
+  SpanContext context_ GUARDED_BY(mu_);
   // Queue of recorded annotations.
   TraceEvents<EventWithTime<exporter::Annotation>> annotations_ GUARDED_BY(mu_);
   // Queue of recorded network events.

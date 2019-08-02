@@ -94,7 +94,8 @@ class SpanGenerator {
     SpanContext context(trace_id, span_id, trace_options);
     SpanImpl* impl = nullptr;
     if (trace_options.IsSampled()) {
-      // Only Spans that are sampled are backed by a SpanImpl.
+      // Only Spans that started off sampled are backed by a SpanImpl.
+      // They can be abandoned later.
       impl =
           new SpanImpl(context, TraceConfigImpl::Get()->current_trace_params(),
                        name, parent_span_id, has_remote_parent);
@@ -216,7 +217,17 @@ void Span::End() const {
     }
     exporter::RunningSpanStoreImpl::Get()->RemoveSpan(span_impl_);
     exporter::LocalSpanStoreImpl::Get()->AddSpan(span_impl_);
+    // SpanExporterImpl checks if span_impl_ is sampled for export.
     exporter::SpanExporterImpl::Get()->AddSpan(span_impl_);
+  }
+}
+
+void Span::Abandon() {
+  context_ = SpanContext(context_.trace_id(), context_.span_id(),
+                         context_.trace_options().WithSampling(false));
+  if (IsRecording()) {
+    span_impl_->MarkAbandoned();
+    End();
   }
 }
 
