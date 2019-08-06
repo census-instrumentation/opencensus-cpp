@@ -39,6 +39,20 @@ http_archive(
     urls = ["https://github.com/google/benchmark/archive/master.zip"],
 )
 
+# Used by gRPC.
+http_archive(
+    name = "build_bazel_apple_support",
+    strip_prefix = "apple_support-master",
+    urls = ["https://github.com/bazelbuild/apple_support/archive/master.zip"],
+)
+
+load(
+    "@build_bazel_apple_support//lib:repositories.bzl",
+    "apple_support_dependencies",
+)
+
+apple_support_dependencies()
+
 # gRPC
 http_archive(
     name = "com_github_grpc_grpc",
