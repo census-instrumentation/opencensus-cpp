@@ -21,10 +21,10 @@
 #include <utility>
 #include <vector>
 
+#include "absl/hash/hash.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
-#include "opencensus/common/internal/hash_mix.h"
 #include "opencensus/tags/tag_key.h"
 
 namespace opencensus {
@@ -57,13 +57,7 @@ void TagMap::Initialize() {
          "Duplicate keys are not allowed in TagMap.");
 #endif
 
-  std::hash<std::string> hasher;
-  common::HashMix mixer;
-  for (const auto& tag : tags_) {
-    mixer.Mix(tag.first.hash());
-    mixer.Mix(hasher(tag.second));
-  }
-  hash_ = mixer.get();
+  hash_ = absl::Hash<std::vector<std::pair<TagKey, std::string>>>()(tags_);
 }
 
 std::size_t TagMap::Hash::operator()(const TagMap& tags) const {

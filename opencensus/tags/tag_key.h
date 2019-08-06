@@ -19,6 +19,8 @@
 #include <cstdint>
 #include <string>
 
+#include "absl/base/macros.h"
+#include "absl/hash/hash.h"
 #include "absl/strings/string_view.h"
 
 namespace opencensus {
@@ -40,7 +42,15 @@ class TagKey final {
   bool operator<(TagKey other) const { return id_ < other.id_; }
 
   // Returns a suitable hash of the TagKey. The implementation may change.
+  ABSL_DEPRECATED(
+      "Use absl::Hash<TagKey>()(...) instead. "
+      "This method will be removed on or after 2020-02-06")
   std::size_t hash() const { return id_; }
+
+  template <typename H>
+  friend H AbslHashValue(H state, const TagKey& k) {
+    return H::combine(std::move(state), k.id_);
+  }
 
  private:
   friend class TagKeyRegistry;
