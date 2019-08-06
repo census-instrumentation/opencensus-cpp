@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-opencensus_lib(common_hash_mix)
-
 opencensus_lib(common_hostname
                SRCS
                hostname.cc

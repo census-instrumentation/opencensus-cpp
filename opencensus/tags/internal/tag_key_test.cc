@@ -14,6 +14,7 @@
 
 #include "opencensus/tags/tag_key.h"
 
+#include "absl/hash/hash.h"
 #include "gtest/gtest.h"
 
 namespace opencensus {
@@ -29,14 +30,14 @@ TEST(TagKeyTest, DuplicateRegistrationsEqual) {
   TagKey k1 = TagKey::Register("key");
   TagKey k2 = TagKey::Register("key");
   EXPECT_EQ(k1, k2);
-  EXPECT_EQ(k1.hash(), k2.hash());
+  EXPECT_EQ(absl::Hash<TagKey>()(k1), absl::Hash<TagKey>()(k2));
 }
 
 TEST(TagKeyTest, Inequality) {
   TagKey k1 = TagKey::Register("k1");
   TagKey k2 = TagKey::Register("k2");
   EXPECT_NE(k1, k2);
-  EXPECT_NE(k1.hash(), k2.hash());
+  EXPECT_NE(absl::Hash<TagKey>()(k1), absl::Hash<TagKey>()(k2));
 }
 
 }  // namespace
