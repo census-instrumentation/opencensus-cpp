@@ -19,8 +19,8 @@ opencensus_lib(tags
                internal/tag_map.cc
                DEPS
                absl::strings
-               common_hash_mix
                absl::base
+               absl::hash
                absl::synchronization)
 
 opencensus_lib(tags_context_util
