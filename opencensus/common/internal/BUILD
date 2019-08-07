@@ -21,12 +21,6 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//opencensus:__subpackages__"])
 
 cc_library(
-    name = "hash_mix",
-    hdrs = ["hash_mix.h"],
-    copts = DEFAULT_COPTS,
-)
-
-cc_library(
     name = "hostname",
     srcs = ["hostname.cc"],
     hdrs = ["hostname.h"],
@@ -62,7 +56,7 @@ cc_library(
     name = "string_vector_hash",
     hdrs = ["string_vector_hash.h"],
     copts = DEFAULT_COPTS,
-    deps = [":hash_mix"],
+    deps = ["@com_google_absl//absl/hash"],
 )
 
 # Tests

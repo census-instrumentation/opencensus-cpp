@@ -19,19 +19,14 @@
 #include <string>
 #include <vector>
 
-#include "opencensus/common/internal/hash_mix.h"
+#include "absl/hash/hash.h"
 
 namespace opencensus {
 namespace common {
 
 struct StringVectorHash {
   std::size_t operator()(const std::vector<std::string>& container) const {
-    std::hash<std::string> hasher;
-    HashMix mixer;
-    for (const auto& elem : container) {
-      mixer.Mix(hasher(elem));
-    }
-    return mixer.get();
+    return absl::Hash<std::vector<std::string>>()(container);
   }
 };
 
