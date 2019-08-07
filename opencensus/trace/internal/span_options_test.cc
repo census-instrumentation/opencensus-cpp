@@ -41,7 +41,7 @@ class SpanTestPeer {
     return span->span_impl_for_test()->status_;
   }
 
-  static absl::string_view GetName(Span* span) {
+  static std::string GetName(Span* span) {
     return span->span_impl_for_test()->name();
   }
 

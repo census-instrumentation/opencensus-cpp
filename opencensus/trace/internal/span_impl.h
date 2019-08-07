@@ -94,10 +94,9 @@ class SpanImpl final {
   // Returns true if the span has ended.
   bool HasEnded() const LOCKS_EXCLUDED(mu_);
 
-  absl::string_view name() const { return name_; }
-
-  // Returns the name of the span as a constref string.
-  const std::string& name_constref() const { return name_; }
+  // Returns a copy of the current name of the Span, since SetName can be used
+  // to change it.
+  std::string name() const LOCKS_EXCLUDED(mu_);
 
   // Returns the SpanContext associated with this Span.
   SpanContext context() const { return context_; }

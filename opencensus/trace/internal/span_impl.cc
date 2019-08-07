@@ -161,6 +161,11 @@ bool SpanImpl::HasEnded() const {
   return has_ended_;
 }
 
+std::string SpanImpl::name() const {
+  absl::MutexLock l(&mu_);
+  return name_;
+}
+
 exporter::SpanData SpanImpl::ToSpanData() const {
   absl::MutexLock l(&mu_);
   // Make a deep copy of attributes.
