@@ -75,15 +75,19 @@ SpanContext FromB3Headers(absl::string_view b3_trace_id,
   std::string trace_id_binary = absl::HexStringToBytes(b3_trace_id);
   std::string span_id_binary = absl::HexStringToBytes(b3_span_id);
 
-  // trace_id_ptr must point to a 128-bit trace_id.
-  const uint8_t* trace_id_ptr =
-      reinterpret_cast<const uint8_t*>(trace_id_binary.data());
   uint8_t extended_trace_id[16];
-  if (trace_id_binary.length() != 16) {
+
+  // trace_id_ptr must point to a 128-bit trace_id.
+  const uint8_t* trace_id_ptr;
+  if (trace_id_binary.length() == 16) {
+    trace_id_ptr = reinterpret_cast<const uint8_t*>(trace_id_binary.data());
+  } else if (trace_id_binary.length() == 8) {
     // Extend 64-bit trace_id to 128-bit using the buffer.
     memset(extended_trace_id, 0, 8);
     memcpy(extended_trace_id + 8, trace_id_binary.data(), 8);
     trace_id_ptr = extended_trace_id;
+  } else {
+    return invalid;
   }
 
   return SpanContext(
