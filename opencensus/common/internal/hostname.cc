@@ -53,7 +53,7 @@ std::string Hostname() {
   // SUSv2 says 255 is the limit for hostnames.
   char buf[256];
   if (gethostname(buf, sizeof(buf)) == -1) {
-    return "unknown_hostname";
+    return kUnknownHostname;
   }
   // gethostname() doesn't guarantee NUL termination.
   buf[sizeof(buf) - 1] = 0;
