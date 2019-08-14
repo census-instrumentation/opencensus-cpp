@@ -34,8 +34,8 @@ cc_library(
     copts = DEFAULT_COPTS,
     visibility = ["//visibility:public"],
     deps = [
-        "//opencensus/common/internal:hash_mix",
         "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/hash",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
     ],

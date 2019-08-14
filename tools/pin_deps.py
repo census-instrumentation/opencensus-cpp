@@ -49,15 +49,20 @@ class GitHubProject(ExternalDependency):
                                         commit, sha256)
 
 
+# grep -A1 http_archive\( WORKSPACE
 PROJECTS = [
     GitHubProject('com_google_absl', 'abseil', 'abseil-cpp'),
     GitHubProject('com_google_googletest', 'google', 'googletest'),
     GitHubProject('com_github_google_benchmark', 'google', 'benchmark'),
+    GitHubProject('build_bazel_apple_support', 'bazelbuild', 'apple_support'),
     GitHubProject('com_github_grpc_grpc', 'grpc', 'grpc'),
     GitHubProject('com_github_jupp0r_prometheus_cpp', 'jupp0r', 'prometheus-cpp'),
     GitHubProject('com_github_curl', 'curl', 'curl'),
     GitHubProject('com_github_tencent_rapidjson', 'Tencent', 'rapidjson'),
     GitHubProject('com_google_googleapis', 'googleapis', 'googleapis'),
+    # io_bazel_rules_go is pinned.
+    GitHubProject('grpc_java', 'grpc', 'grpc-java'),
+    GitHubProject('io_opencensus_proto', 'census-instrumentation', 'opencensus-proto'),
 ]
 
 for project in PROJECTS:

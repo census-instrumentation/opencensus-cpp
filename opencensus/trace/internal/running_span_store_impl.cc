@@ -67,7 +67,7 @@ RunningSpanStore::Summary RunningSpanStoreImpl::GetSummary() const {
   RunningSpanStore::Summary summary;
   absl::MutexLock l(&mu_);
   for (const auto& addr_span : spans_) {
-    const std::string& name = addr_span.second->name_constref();
+    const std::string name = addr_span.second->name();
     auto it = summary.per_span_name_summary.find(name);
     if (it != summary.per_span_name_summary.end()) {
       it->second.num_running_spans++;

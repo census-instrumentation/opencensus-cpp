@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-opencensus_lib(common_hash_mix)
-
 opencensus_lib(common_hostname
                SRCS
                hostname.cc
@@ -34,7 +32,7 @@ opencensus_lib(common_stats_object DEPS absl::time)
 target_compile_definitions(opencensus_common_stats_object INTERFACE
                            $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>)
 
-opencensus_lib(common_string_vector_hash)
+opencensus_lib(common_string_vector_hash DEPS absl::hash)
 
 opencensus_test(common_hostname_test hostname_test.cc common_hostname)
 
