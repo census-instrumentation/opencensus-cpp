@@ -16,6 +16,13 @@ workspace(name = "io_opencensus_cpp")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+# Build rules for C++ projects.
+http_archive(
+    name = "rules_cc",
+    strip_prefix = "rules_cc-master",
+    urls = ["https://github.com/bazelbuild/rules_cc/archive/master.zip"],
+)
+
 # We depend on Abseil.
 http_archive(
     name = "com_google_absl",
@@ -38,6 +45,20 @@ http_archive(
     strip_prefix = "benchmark-master",
     urls = ["https://github.com/google/benchmark/archive/master.zip"],
 )
+
+# Used by gRPC.
+http_archive(
+    name = "build_bazel_rules_apple",
+    strip_prefix = "rules_apple-master",
+    urls = ["https://github.com/bazelbuild/rules_apple/archive/master.zip"],
+)
+
+load(
+    "@build_bazel_rules_apple//apple:repositories.bzl",
+    "apple_rules_dependencies",
+)
+
+apple_rules_dependencies()
 
 # Used by gRPC.
 http_archive(
