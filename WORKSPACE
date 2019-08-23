@@ -186,7 +186,7 @@ switched_rules_by_language(
     grpc = True,
 )
 
-# Needed by opencensus-proto.
+# Needed by @opencensus_proto.
 http_archive(
     name = "io_bazel_rules_go",
     sha256 = "9fb16af4d4836c8222142e54c9efa0bb5fc562ffc893ce2abeac3e25daead144",
@@ -202,7 +202,7 @@ go_rules_dependencies()
 
 go_register_toolchains()
 
-# Needed by opencensus-proto.
+# Needed by @opencensus_proto.
 http_archive(
     name = "grpc_java",
     strip_prefix = "grpc-java-master",
@@ -216,9 +216,9 @@ grpc_java_repositories(
     omit_com_google_protobuf = True,
 )
 
-# OpenCensus proto - used by OcAgent exporter.
+# OpenCensus protos - used by OcAgent exporter.
 http_archive(
-    name = "io_opencensus_proto",
+    name = "opencensus_proto",
     strip_prefix = "opencensus-proto-master/src",
     urls = ["https://github.com/census-instrumentation/opencensus-proto/archive/master.zip"],
 )
