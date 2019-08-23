@@ -64,7 +64,7 @@ PROJECTS = [
     GitHubProject('com_google_googleapis', 'googleapis', 'googleapis'),
     # io_bazel_rules_go is pinned.
     GitHubProject('grpc_java', 'grpc', 'grpc-java'),
-    GitHubProject('io_opencensus_proto', 'census-instrumentation', 'opencensus-proto'),
+    GitHubProject('opencensus_proto', 'census-instrumentation', 'opencensus-proto'),
 ]
 
 for project in PROJECTS:
