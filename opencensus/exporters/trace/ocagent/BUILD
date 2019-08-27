@@ -38,8 +38,8 @@ cc_library(
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
-        "@io_opencensus_proto//opencensus/proto/agent/trace/v1:trace_service_grpc_cc",
-        "@io_opencensus_proto//opencensus/proto/agent/trace/v1:trace_service_proto_cc",
+        "@opencensus_proto//opencensus/proto/agent/trace/v1:trace_service_grpc_cc",
+        "@opencensus_proto//opencensus/proto/agent/trace/v1:trace_service_proto_cc",
     ],
 )
 
