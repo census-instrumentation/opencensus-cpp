@@ -46,34 +46,6 @@ http_archive(
     urls = ["https://github.com/google/benchmark/archive/master.zip"],
 )
 
-# Used by gRPC.
-http_archive(
-    name = "build_bazel_rules_apple",
-    strip_prefix = "rules_apple-master",
-    urls = ["https://github.com/bazelbuild/rules_apple/archive/master.zip"],
-)
-
-load(
-    "@build_bazel_rules_apple//apple:repositories.bzl",
-    "apple_rules_dependencies",
-)
-
-apple_rules_dependencies()
-
-# Used by gRPC.
-http_archive(
-    name = "build_bazel_apple_support",
-    strip_prefix = "apple_support-master",
-    urls = ["https://github.com/bazelbuild/apple_support/archive/master.zip"],
-)
-
-load(
-    "@build_bazel_apple_support//lib:repositories.bzl",
-    "apple_support_dependencies",
-)
-
-apple_support_dependencies()
-
 # gRPC
 http_archive(
     name = "com_github_grpc_grpc",
@@ -85,8 +57,22 @@ load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
 grpc_deps()
 
-# gRPC depends on upb, which depends on a @bazel_version repo
-# which it provides but has to be instantiated explicitly.
+# grpc_deps() cannot load() its deps, this WORKSPACE has to do it.
+# See also: https://github.com/bazelbuild/bazel/issues/1943
+load(
+    "@build_bazel_rules_apple//apple:repositories.bzl",
+    "apple_rules_dependencies",
+)
+
+apple_rules_dependencies()
+
+load(
+    "@build_bazel_apple_support//lib:repositories.bzl",
+    "apple_support_dependencies",
+)
+
+apple_support_dependencies()
+
 load("@upb//bazel:repository_defs.bzl", "bazel_version_repository")
 
 bazel_version_repository(name = "bazel_version")
