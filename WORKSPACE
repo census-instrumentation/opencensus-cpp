@@ -14,7 +14,8 @@
 
 workspace(name = "io_opencensus_cpp")
 
-load(":deps.bzl", "opencensus_cpp_deps")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("//bazel:deps.bzl", "opencensus_cpp_deps")
 
 opencensus_cpp_deps()
 
@@ -52,9 +53,14 @@ go_rules_dependencies()
 
 go_register_toolchains()
 
-load("@grpc_java//:repositories.bzl", "grpc_java_repositories")
+http_archive(
+    name = "com_google_googletest",
+    strip_prefix = "googletest-master",
+    urls = ["https://github.com/google/googletest/archive/master.zip"],
+)
 
-# Omit to avoid conflicts.
-grpc_java_repositories(
-    omit_com_google_protobuf = True,
+http_archive(
+    name = "com_github_google_benchmark",
+    strip_prefix = "benchmark-master",
+    urls = ["https://github.com/google/benchmark/archive/master.zip"],
 )
