@@ -188,20 +188,6 @@ go_rules_dependencies()
 
 go_register_toolchains()
 
-# Needed by @opencensus_proto.
-http_archive(
-    name = "grpc_java",
-    strip_prefix = "grpc-java-master",
-    urls = ["https://github.com/grpc/grpc-java/archive/master.zip"],
-)
-
-load("@grpc_java//:repositories.bzl", "grpc_java_repositories")
-
-grpc_java_repositories(
-    # Omit to avoid conflicts.
-    omit_com_google_protobuf = True,
-)
-
 # OpenCensus protos - used by OcAgent exporter.
 http_archive(
     name = "opencensus_proto",
