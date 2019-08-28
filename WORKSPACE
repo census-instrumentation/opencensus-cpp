@@ -19,22 +19,53 @@ load("//bazel:deps.bzl", "opencensus_cpp_deps")
 
 opencensus_cpp_deps()
 
-load("@build_bazel_rules_apple//apple:repositories.bzl", "apple_rules_dependencies")
+# GoogleTest framework.
+# Only needed for tests, not to build the OpenCensus library.
+http_archive(
+    name = "com_google_googletest",
+    strip_prefix = "googletest-master",
+    urls = ["https://github.com/google/googletest/archive/master.zip"],
+)
 
-apple_rules_dependencies()
-
-load("@build_bazel_apple_support//lib:repositories.bzl", "apple_support_dependencies")
-
-apple_support_dependencies()
+# Google Benchmark library.
+# Only needed for benchmarks, not to build the OpenCensus library.
+http_archive(
+    name = "com_github_google_benchmark",
+    strip_prefix = "benchmark-master",
+    urls = ["https://github.com/google/benchmark/archive/master.zip"],
+)
 
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
 grpc_deps()
 
+# grpc_deps() cannot load() its deps, this WORKSPACE has to do it.
+# See also: https://github.com/bazelbuild/bazel/issues/1943
+load(
+    "@build_bazel_rules_apple//apple:repositories.bzl",
+    "apple_rules_dependencies",
+)
+
+apple_rules_dependencies()
+
+load(
+    "@build_bazel_apple_support//lib:repositories.bzl",
+    "apple_support_dependencies",
+)
+
+apple_support_dependencies()
+
 load("@upb//bazel:repository_defs.bzl", "bazel_version_repository")
 
 bazel_version_repository(name = "bazel_version")
 
+# Used by prometheus-cpp.
+local_repository(
+    name = "net_zlib_zlib",
+    path = "tools/zlib",
+)
+
+# Load Prometheus dependencies individually since we load some of them above.
 load("@com_github_jupp0r_prometheus_cpp//:repositories.bzl", "load_civetweb")
 
 load_civetweb()
@@ -52,15 +83,3 @@ load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_depe
 go_rules_dependencies()
 
 go_register_toolchains()
-
-http_archive(
-    name = "com_google_googletest",
-    strip_prefix = "googletest-master",
-    urls = ["https://github.com/google/googletest/archive/master.zip"],
-)
-
-http_archive(
-    name = "com_github_google_benchmark",
-    strip_prefix = "benchmark-master",
-    urls = ["https://github.com/google/benchmark/archive/master.zip"],
-)
