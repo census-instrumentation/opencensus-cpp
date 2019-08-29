@@ -1,4 +1,5 @@
 load("@io_opencensus_cpp//opencensus:curl.bzl", "CURL_COPTS")
+
 package(features = ['no_copts_tokenization'])
 
 config_setting(
@@ -24,8 +25,8 @@ cc_library(
     ]),
     includes = ["include/", "lib/"],
     copts = CURL_COPTS + [
-        "-DOS=\\"os\\"",
-        "-DCURL_EXTERN_SYMBOL=__attribute__((__visibility__(\\"default\\")))",
+        "-DOS=\"os\"",
+        "-DCURL_EXTERN_SYMBOL=__attribute__((__visibility__(\"default\")))",
     ],
     visibility = ["//visibility:public"],
 )

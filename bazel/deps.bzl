@@ -63,7 +63,7 @@ def opencensus_cpp_deps():
     maybe(
         http_archive,
         name = "com_github_curl",
-        build_file_content = "//io_opencensus_cpp:bazel/curl.BUILD",
+        build_file = "//:bazel/curl.BUILD",
         strip_prefix = "curl-master",
         urls = ["https://github.com/curl/curl/archive/master.zip"],
     )
@@ -72,7 +72,7 @@ def opencensus_cpp_deps():
     maybe(
         http_archive,
         name = "com_github_tencent_rapidjson",
-        build_file_content = "//io_opencensus_cpp:bazel/rapidjson.BUILD",
+        build_file = "//:bazel/rapidjson.BUILD",
         strip_prefix = "rapidjson-master",
         urls = ["https://github.com/Tencent/rapidjson/archive/master.zip"],
     )
