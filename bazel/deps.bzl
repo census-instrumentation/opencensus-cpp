@@ -27,14 +27,6 @@ def opencensus_cpp_deps():
         urls = ["https://github.com/abseil/abseil-cpp/archive/master.zip"],
     )
 
-    # Used by gRPC.
-    maybe(
-        http_archive,
-        name = "build_bazel_apple_support",
-        strip_prefix = "apple_support-master",
-        urls = ["https://github.com/bazelbuild/apple_support/archive/master.zip"],
-    )
-
     # gRPC
     maybe(
         http_archive,
