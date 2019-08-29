@@ -87,6 +87,7 @@ cc_test(
     copts = TEST_COPTS,
     deps = [
         ":tags",
+        "@com_google_absl//absl/hash",
         "@com_google_googletest//:gtest_main",
     ],
 )
