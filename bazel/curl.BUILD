@@ -24,7 +24,7 @@ cc_library(
         "lib/**/*.h",
     ]),
     copts = CURL_COPTS + [
-        "-DOS=os",
+        "-DOS=\"os\"",
         "-DCURL_EXTERN_SYMBOL=__attribute__((__visibility__(\"default\")))",
     ],
     includes = [
