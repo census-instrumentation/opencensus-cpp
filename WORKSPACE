@@ -70,6 +70,7 @@ load("@com_github_jupp0r_prometheus_cpp//:repositories.bzl", "load_civetweb")
 
 load_civetweb()
 
+# Google APIs - used by Stackdriver exporter.
 load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
 
 switched_rules_by_language(
@@ -78,6 +79,7 @@ switched_rules_by_language(
     grpc = True,
 )
 
+# Needed by @opencensus_proto.
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
 go_rules_dependencies()

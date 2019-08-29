@@ -2,7 +2,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
 def opencensus_cpp_deps():
-    """Loads dependencies need to compile and test the opencensus-cpp library."""
+    """Loads dependencies need to compile the opencensus-cpp library."""
 
     maybe(
         http_archive,
@@ -26,14 +26,6 @@ def opencensus_cpp_deps():
         strip_prefix = "abseil-cpp-master",
         urls = ["https://github.com/abseil/abseil-cpp/archive/master.zip"],
     )
-
-    # # Used by gRPC.
-    # maybe(
-    #     http_archive,
-    #     name = "build_bazel_rules_apple",
-    #     strip_prefix = "rules_apple-master",
-    #     urls = ["https://github.com/bazelbuild/rules_apple/archive/master.zip"],
-    # )
 
     # Used by gRPC.
     maybe(
