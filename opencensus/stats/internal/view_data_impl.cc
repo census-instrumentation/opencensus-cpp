@@ -40,11 +40,17 @@ ViewDataImpl::Type ViewDataImpl::TypeForDescriptor(
               return ViewDataImpl::Type::kDouble;
             case MeasureDescriptor::Type::kInt64:
               return ViewDataImpl::Type::kInt64;
+            default:
+              ABSL_ASSERT(false && "Bad ViewDataImpl type.");
+              break;
           }
         case Aggregation::Type::kCount:
           return ViewDataImpl::Type::kInt64;
         case Aggregation::Type::kDistribution:
           return ViewDataImpl::Type::kDistribution;
+        default:
+          ABSL_ASSERT(false && "Bad ViewDataImpl type.");
+          break;
       }
     case AggregationWindow::Type::kInterval:
       return ViewDataImpl::Type::kStatsObject;
