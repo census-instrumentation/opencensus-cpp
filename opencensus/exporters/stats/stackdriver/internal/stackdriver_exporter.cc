@@ -165,6 +165,12 @@ bool Handler::MaybeRegisterView(
     return true;
   }
 
+  const std::string metric_type =
+      MakeType(opts_.metric_name_prefix, descriptor.name());
+  if (!IsKnownCustomMetric(metric_type)) {
+    // Builtin metrics are already defined, skip the CreateMetricDescriptor RPC.
+    return true;
+  }
   auto request = google::monitoring::v3::CreateMetricDescriptorRequest();
   request.set_name(opts_.project_id);
   SetMetricDescriptor(opts_.project_id, opts_.metric_name_prefix, descriptor,

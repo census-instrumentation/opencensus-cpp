@@ -15,6 +15,7 @@
 #ifndef OPENCENSUS_EXPORTERS_STATS_INTERNAL_STACKDRIVER_UTILS_H_
 #define OPENCENSUS_EXPORTERS_STATS_INTERNAL_STACKDRIVER_UTILS_H_
 
+#include <string>
 #include <vector>
 
 #include "absl/strings/string_view.h"
@@ -28,8 +29,17 @@ namespace opencensus {
 namespace exporters {
 namespace stats {
 
-// Populates metric_descriptor. project_name should be in the format
-// "projects/project_id". metric_name_prefix should have a trailing slash, e.g.
+// Returns a MetricType string. metric_name_prefix must have a trailing slash,
+// e.g. "custom.googleapis.com/opencensus/".
+std::string MakeType(absl::string_view metric_name_prefix,
+                     absl::string_view view_name);
+
+// Returns true if the metric type is a heuristically known
+// custom (i.e not built-in) Stackdriver metric.
+bool IsKnownCustomMetric(absl::string_view metric_type);
+
+// Populates metric_descriptor. project_name must be in the format
+// "projects/project_id". metric_name_prefix must have a trailing slash, e.g.
 // "custom.googleapis.com/opencensus/".
 void SetMetricDescriptor(
     absl::string_view project_name, absl::string_view metric_name_prefix,

@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include "absl/base/macros.h"
 #include "absl/strings/string_view.h"

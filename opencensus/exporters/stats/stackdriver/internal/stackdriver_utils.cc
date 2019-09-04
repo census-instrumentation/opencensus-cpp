@@ -18,6 +18,7 @@
 
 #include "absl/base/internal/sysinfo.h"
 #include "absl/base/macros.h"
+#include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
@@ -40,11 +41,6 @@ constexpr char kLabelDescription[] = "OpenCensus TagKey";
 constexpr char kOpenCensusTaskKey[] = "opencensus_task";
 constexpr char kOpenCensusTaskDescription[] = "OpenCensus task identifier";
 constexpr char kDefaultResourceType[] = "global";
-
-std::string MakeType(absl::string_view metric_name_prefix,
-                     absl::string_view view_name) {
-  return absl::StrCat(metric_name_prefix, view_name);
-}
 
 // Creates a name in the format described in
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors/create
@@ -153,15 +149,28 @@ std::vector<google::monitoring::v3::TimeSeries> DataToTimeSeries(
 
 }  // namespace
 
+std::string MakeType(absl::string_view metric_name_prefix,
+                     absl::string_view view_name) {
+  return absl::StrCat(metric_name_prefix, view_name);
+}
+
+bool IsKnownCustomMetric(absl::string_view metric_type) {
+  return absl::StartsWith(metric_type, "custom.googleapis.com/") ||
+         absl::StartsWith(metric_type, "external.googleapis.com/");
+}
+
 void SetMetricDescriptor(
     absl::string_view project_name, absl::string_view metric_name_prefix,
     const opencensus::stats::ViewDescriptor& view_descriptor,
     google::api::MetricDescriptor* metric_descriptor) {
   metric_descriptor->set_name(
       MakeName(project_name, metric_name_prefix, view_descriptor.name()));
-  metric_descriptor->set_type(
-      MakeType(metric_name_prefix, view_descriptor.name()));
-  SetOpenCensusTaskLabelDescriptor(metric_descriptor->add_labels());
+  const std::string metric_type =
+      MakeType(metric_name_prefix, view_descriptor.name());
+  metric_descriptor->set_type(metric_type);
+  if (IsKnownCustomMetric(metric_type)) {
+    SetOpenCensusTaskLabelDescriptor(metric_descriptor->add_labels());
+  }
   for (const auto& tag_key : view_descriptor.columns()) {
     SetLabelDescriptor(tag_key.name(), metric_descriptor->add_labels());
   }
@@ -188,8 +197,9 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
     absl::string_view opencensus_task) {
   // Set values that are common across all the rows.
   auto base_time_series = google::monitoring::v3::TimeSeries();
-  base_time_series.mutable_metric()->set_type(
-      MakeType(metric_name_prefix, view_descriptor.name()));
+  const std::string metric_type =
+      MakeType(metric_name_prefix, view_descriptor.name());
+  base_time_series.mutable_metric()->set_type(metric_type);
   auto iter = per_metric_monitored_resource.find(view_descriptor.name());
   if (iter != per_metric_monitored_resource.end()) {
     *base_time_series.mutable_resource() = iter->second;
@@ -206,9 +216,10 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
     SetTimestamp(data.start_time(), interval->mutable_start_time());
   }
   SetTimestamp(data.end_time(), interval->mutable_end_time());
-  (*base_time_series.mutable_metric()->mutable_labels())[kOpenCensusTaskKey] =
-      std::string(opencensus_task);
-
+  if (IsKnownCustomMetric(metric_type)) {
+    (*base_time_series.mutable_metric()->mutable_labels())[kOpenCensusTaskKey] =
+        std::string(opencensus_task);
+  }
   switch (data.type()) {
     case opencensus::stats::ViewData::Type::kDouble:
       return DataToTimeSeries(view_descriptor, data.double_data(),
