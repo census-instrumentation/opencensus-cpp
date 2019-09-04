@@ -167,7 +167,7 @@ bool Handler::MaybeRegisterView(
 
   const std::string metric_type =
       MakeType(opts_.metric_name_prefix, descriptor.name());
-  if (IsBuiltinMetric(metric_type)) {
+  if (!IsKnownCustomMetric(metric_type)) {
     // Builtin metrics are already defined, skip the CreateMetricDescriptor RPC.
     return true;
   }

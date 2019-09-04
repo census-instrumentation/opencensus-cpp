@@ -154,9 +154,9 @@ std::string MakeType(absl::string_view metric_name_prefix,
   return absl::StrCat(metric_name_prefix, view_name);
 }
 
-bool IsBuiltinMetric(absl::string_view metric_type) {
-  return !absl::StartsWith(metric_type, "custom.googleapis.com/") &&
-         !absl::StartsWith(metric_type, "external.googleapis.com/");
+bool IsKnownCustomMetric(absl::string_view metric_type) {
+  return absl::StartsWith(metric_type, "custom.googleapis.com/") ||
+         absl::StartsWith(metric_type, "external.googleapis.com/");
 }
 
 void SetMetricDescriptor(
@@ -168,7 +168,7 @@ void SetMetricDescriptor(
   const std::string metric_type =
       MakeType(metric_name_prefix, view_descriptor.name());
   metric_descriptor->set_type(metric_type);
-  if (!IsBuiltinMetric(metric_type)) {
+  if (IsKnownCustomMetric(metric_type)) {
     SetOpenCensusTaskLabelDescriptor(metric_descriptor->add_labels());
   }
   for (const auto& tag_key : view_descriptor.columns()) {
@@ -216,7 +216,7 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
     SetTimestamp(data.start_time(), interval->mutable_start_time());
   }
   SetTimestamp(data.end_time(), interval->mutable_end_time());
-  if (!IsBuiltinMetric(metric_type)) {
+  if (IsKnownCustomMetric(metric_type)) {
     (*base_time_series.mutable_metric()->mutable_labels())[kOpenCensusTaskKey] =
         std::string(opencensus_task);
   }

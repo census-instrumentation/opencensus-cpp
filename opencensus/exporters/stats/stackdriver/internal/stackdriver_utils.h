@@ -35,8 +35,8 @@ std::string MakeType(absl::string_view metric_name_prefix,
                      absl::string_view view_name);
 
 // Returns true if the metric type is a heuristically known
-// built-in Stackdriver metric.
-bool IsBuiltinMetric(absl::string_view metric_type);
+// custom (i.e not built-in) Stackdriver metric.
+bool IsKnownCustomMetric(absl::string_view metric_type);
 
 // Populates metric_descriptor. project_name must be in the format
 // "projects/project_id". metric_name_prefix must have a trailing slash, e.g.
