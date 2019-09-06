@@ -169,6 +169,8 @@ void SetMetricDescriptor(
       MakeType(metric_name_prefix, view_descriptor.name());
   metric_descriptor->set_type(metric_type);
   if (IsKnownCustomMetric(metric_type)) {
+    // Custom metrics use this label so that different processes produce
+    // different timeseries instead of colliding.
     SetOpenCensusTaskLabelDescriptor(metric_descriptor->add_labels());
   }
   for (const auto& tag_key : view_descriptor.columns()) {
@@ -217,6 +219,8 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
   }
   SetTimestamp(data.end_time(), interval->mutable_end_time());
   if (IsKnownCustomMetric(metric_type)) {
+    // Custom metrics use this label so that different processes produce
+    // different timeseries instead of colliding.
     (*base_time_series.mutable_metric()->mutable_labels())[kOpenCensusTaskKey] =
         std::string(opencensus_task);
   }
