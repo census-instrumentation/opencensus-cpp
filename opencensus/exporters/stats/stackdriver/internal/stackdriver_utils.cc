@@ -77,6 +77,9 @@ google::api::MetricDescriptor::ValueType GetValueType(
           return google::api::MetricDescriptor::DOUBLE;
         case opencensus::stats::MeasureDescriptor::Type::kInt64:
           return google::api::MetricDescriptor::INT64;
+        default:
+          ABSL_ASSERT(false && "Unknown measure_descriptor type.");
+          return google::api::MetricDescriptor::DOUBLE;
       }
     case opencensus::stats::Aggregation::Type::kDistribution:
       return google::api::MetricDescriptor::DISTRIBUTION;
