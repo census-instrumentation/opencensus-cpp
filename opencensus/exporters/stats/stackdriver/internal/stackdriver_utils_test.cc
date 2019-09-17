@@ -46,9 +46,19 @@ ABSL_CONST_INIT const absl::string_view kMetricNamePrefix =
 ABSL_CONST_INIT const absl::string_view kBuiltinMetricNamePrefix =
     "bigquery.googleapis.com/query/";
 
-// Helper that returns an empty MonitoredResource proto.
-google::api::MonitoredResource DefaultResource() {
-  return google::api::MonitoredResource();
+constexpr bool kAddTaskLabel = true;
+constexpr bool kDoNotAddTaskLabel = false;
+
+const google::api::MonitoredResource* kDefaultResource = nullptr;
+
+// Helper that returns an example gce_instance resource.
+google::api::MonitoredResource GceResource() {
+  google::api::MonitoredResource resource;
+  resource.set_type("gce_instance");
+  (*resource.mutable_labels())["project_id"] = "my_project";
+  (*resource.mutable_labels())["instance_id"] = "1234";
+  (*resource.mutable_labels())["zone"] = "my_zone";
+  return resource;
 }
 
 // Helper that returns an empty map of per-metric resources.
@@ -57,12 +67,54 @@ DefaultPerMetricResource() {
   return std::unordered_map<std::string, google::api::MonitoredResource>();
 }
 
+// TODO: MonitoredResourceForView
+TEST(StackdriverUtilsTest, MonitoredResourceForViewIsDefault) {
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor().set_name("example.com/metric_name");
+  google::api::MonitoredResource empty;
+  EXPECT_EQ(nullptr, MonitoredResourceForView(view_descriptor, empty,
+                                              DefaultPerMetricResource()));
+}
+
+TEST(StackdriverUtilsTest, MonitoredResourceForViewIsCustomResource) {
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor().set_name("example.com/metric_name");
+  google::api::MonitoredResource monitored_resource = GceResource();
+  EXPECT_EQ(&monitored_resource,
+            MonitoredResourceForView(view_descriptor, monitored_resource,
+                                     DefaultPerMetricResource()));
+}
+
+TEST(StackdriverUtilsTest, MonitoredResourceForViewIsPerViewResource) {
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor().set_name("example.com/metric_name");
+  google::api::MonitoredResource monitored_resource = GceResource();
+  std::unordered_map<std::string, google::api::MonitoredResource> per_metric;
+  per_metric["example.com/metric_name"].set_type("my_per_view_resource");
+  const google::api::MonitoredResource* result =
+      MonitoredResourceForView(view_descriptor, monitored_resource, per_metric);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ("my_per_view_resource", result->type());
+}
+
+TEST(StackdriverUtilsTest, MonitoredResourceForViewNoMatch) {
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor().set_name("example.com/metric_name");
+  google::api::MonitoredResource monitored_resource = GceResource();
+  std::unordered_map<std::string, google::api::MonitoredResource> per_metric;
+  per_metric["example.com/mismatched_metric_name"].set_type(
+      "my_per_view_resource");
+  EXPECT_EQ(&monitored_resource,
+            MonitoredResourceForView(view_descriptor, monitored_resource,
+                                     per_metric));
+}
+
 TEST(StackdriverUtilsTest, SetMetricDescriptorNameAndType) {
   const auto view_descriptor =
       opencensus::stats::ViewDescriptor().set_name("example.com/metric_name");
   google::api::MetricDescriptor metric_descriptor;
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
   EXPECT_EQ(
       "projects/test-project/metricDescriptors/custom.googleapis.com/test/"
       "example.com/metric_name",
@@ -79,7 +131,7 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorLabels) {
           tag_key_2);
   google::api::MetricDescriptor metric_descriptor;
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kAddTaskLabel, &metric_descriptor);
 
   ASSERT_EQ(3, metric_descriptor.labels_size());
   EXPECT_EQ("opencensus_task", metric_descriptor.labels(0).key());
@@ -93,32 +145,47 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorLabels) {
             metric_descriptor.labels(2).value_type());
 }
 
+TEST(StackdriverUtilsTest, SetMetricDescriptorNoTaskLabel) {
+  const auto tag_key = opencensus::tags::TagKey::Register("key");
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor().add_column(tag_key);
+  google::api::MetricDescriptor metric_descriptor;
+  SetMetricDescriptor(kProjectName, kBuiltinMetricNamePrefix, view_descriptor,
+                      kDoNotAddTaskLabel, &metric_descriptor);
+
+  ASSERT_EQ(1, metric_descriptor.labels_size())
+      << "Expect no opencensus_task label.";
+  EXPECT_EQ(tag_key.name(), metric_descriptor.labels(0).key());
+  EXPECT_EQ(google::api::LabelDescriptor::STRING,
+            metric_descriptor.labels(0).value_type());
+}
+
 TEST(StackdriverUtilsTest, SetMetricDescriptorMetricKind) {
   auto view_descriptor = opencensus::stats::ViewDescriptor();
   google::api::MetricDescriptor metric_descriptor;
 
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::Count());
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::CUMULATIVE,
             metric_descriptor.metric_kind());
 
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::Sum());
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::CUMULATIVE,
             metric_descriptor.metric_kind());
 
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::LastValue());
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::GAUGE,
             metric_descriptor.metric_kind());
 
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::Distribution(
       opencensus::stats::BucketBoundaries::Explicit({})));
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::CUMULATIVE,
             metric_descriptor.metric_kind());
 }
@@ -133,25 +200,25 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorValueType) {
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::Sum());
   view_descriptor.set_measure("double_measure");
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::DOUBLE,
             metric_descriptor.value_type());
 
   view_descriptor.set_measure("int_measure");
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::INT64,
             metric_descriptor.value_type());
 
   view_descriptor.set_aggregation(opencensus::stats::Aggregation::Count());
   view_descriptor.set_measure("double_measure");
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::INT64,
             metric_descriptor.value_type());
   view_descriptor.set_measure("int_measure");
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::INT64,
             metric_descriptor.value_type());
 
@@ -159,12 +226,12 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorValueType) {
       opencensus::stats::BucketBoundaries::Explicit({0})));
   view_descriptor.set_measure("double_measure");
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::DISTRIBUTION,
             metric_descriptor.value_type());
   view_descriptor.set_measure("int_measure");
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
   EXPECT_EQ(google::api::MetricDescriptor::DISTRIBUTION,
             metric_descriptor.value_type());
 }
@@ -176,7 +243,7 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorUnits) {
       opencensus::stats::ViewDescriptor().set_measure("measure");
   google::api::MetricDescriptor metric_descriptor;
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
 
   EXPECT_EQ(units, metric_descriptor.unit());
 }
@@ -189,7 +256,7 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorUnitsCount) {
           .set_aggregation(opencensus::stats::Aggregation::Count());
   google::api::MetricDescriptor metric_descriptor;
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
 
   EXPECT_EQ("1", metric_descriptor.unit());
 }
@@ -200,24 +267,9 @@ TEST(StackdriverUtilsTest, SetMetricDescriptorDescription) {
       opencensus::stats::ViewDescriptor().set_description(description);
   google::api::MetricDescriptor metric_descriptor;
   SetMetricDescriptor(kProjectName, kMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
+                      kDoNotAddTaskLabel, &metric_descriptor);
 
   EXPECT_EQ(description, metric_descriptor.description());
-}
-
-TEST(StackdriverUtilsTest, SetMetricDescriptorBuiltinMetric) {
-  const auto tag_key = opencensus::tags::TagKey::Register("key");
-  const auto view_descriptor =
-      opencensus::stats::ViewDescriptor().add_column(tag_key);
-  google::api::MetricDescriptor metric_descriptor;
-  SetMetricDescriptor(kProjectName, kBuiltinMetricNamePrefix, view_descriptor,
-                      &metric_descriptor);
-
-  ASSERT_EQ(1, metric_descriptor.labels_size())
-      << "Expect no opencensus_task label.";
-  EXPECT_EQ(tag_key.name(), metric_descriptor.labels(0).key());
-  EXPECT_EQ(google::api::LabelDescriptor::STRING,
-            metric_descriptor.labels(0).value_type());
 }
 
 TEST(StackdriverUtilsTest, MakeTimeSeriesDefaultResource) {
@@ -233,10 +285,34 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesDefaultResource) {
   const opencensus::stats::ViewData data =
       TestUtils::MakeViewData(view_descriptor, {{{}, 1.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(kMetricNamePrefix, DefaultResource(),
-                     DefaultPerMetricResource(), view_descriptor, data, task);
+      MakeTimeSeries(kMetricNamePrefix, kDefaultResource, view_descriptor, data,
+                     kDoNotAddTaskLabel, task);
   ASSERT_EQ(1, time_series.size());
   const auto& ts = time_series.front();
+  EXPECT_EQ(0, ts.metric().labels_size()) << "There should be no task label.";
+  EXPECT_EQ("global", ts.resource().type());
+  EXPECT_EQ(0, ts.resource().labels_size());
+}
+
+TEST(StackdriverUtilsTest, MakeTimeSeriesDefaultResourceAndTaskLabel) {
+  const auto measure =
+      opencensus::stats::MeasureDouble::Register("my_measure", "", "");
+  const std::string task = "test_task";
+  const std::string view_name = "test_view";
+  const auto view_descriptor =
+      opencensus::stats::ViewDescriptor()
+          .set_name(view_name)
+          .set_measure(measure.GetDescriptor().name())
+          .set_aggregation(opencensus::stats::Aggregation::Sum());
+  const opencensus::stats::ViewData data =
+      TestUtils::MakeViewData(view_descriptor, {{{}, 1.0}});
+  const std::vector<google::monitoring::v3::TimeSeries> time_series =
+      MakeTimeSeries(kMetricNamePrefix, kDefaultResource, view_descriptor, data,
+                     kAddTaskLabel, task);
+  ASSERT_EQ(1, time_series.size());
+  const auto& ts = time_series.front();
+  EXPECT_THAT(ts.metric().labels(),
+              ::testing::Contains(::testing::Key("opencensus_task")));
   EXPECT_EQ("global", ts.resource().type());
   EXPECT_EQ(0, ts.resource().labels_size());
 }
@@ -253,14 +329,10 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesCustomResource) {
           .set_aggregation(opencensus::stats::Aggregation::Sum());
   const opencensus::stats::ViewData data =
       TestUtils::MakeViewData(view_descriptor, {{{}, 1.0}});
-  google::api::MonitoredResource resource;
-  resource.set_type("gce_instance");
-  (*resource.mutable_labels())["project_id"] = "my_project";
-  (*resource.mutable_labels())["instance_id"] = "1234";
-  (*resource.mutable_labels())["zone"] = "my_zone";
+  google::api::MonitoredResource resource = GceResource();
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(kMetricNamePrefix, resource, DefaultPerMetricResource(),
-                     view_descriptor, data, task);
+      MakeTimeSeries(kMetricNamePrefix, &resource, view_descriptor, data,
+                     kDoNotAddTaskLabel, task);
   ASSERT_EQ(1, time_series.size());
   const auto& ts = time_series.front();
   EXPECT_EQ("gce_instance", ts.resource().type());
@@ -271,70 +343,6 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesCustomResource) {
                                               Pair("zone", "my_zone")))
       << "  resource() is:\n"
       << ts.resource().DebugString();
-}
-
-TEST(StackdriverUtilsTest, MakeTimeSeriesPerMetricCustomResource) {
-  const auto measure =
-      opencensus::stats::MeasureDouble::Register("my_measure", "", "");
-  const std::string task = "test_task";
-  const std::string view_name = "test_view";
-  const auto view_descriptor =
-      opencensus::stats::ViewDescriptor()
-          .set_name(view_name)
-          .set_measure(measure.GetDescriptor().name())
-          .set_aggregation(opencensus::stats::Aggregation::Sum());
-  const opencensus::stats::ViewData data =
-      TestUtils::MakeViewData(view_descriptor, {{{}, 1.0}});
-  google::api::MonitoredResource resource;
-  resource.set_type("gce_instance");
-  (*resource.mutable_labels())["project_id"] = "my_project";
-  (*resource.mutable_labels())["instance_id"] = "1234";
-  (*resource.mutable_labels())["zone"] = "my_zone";
-  std::unordered_map<std::string, google::api::MonitoredResource>
-      per_metric_resources;
-  per_metric_resources[view_name] = resource;
-  const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(kMetricNamePrefix, DefaultResource(), per_metric_resources,
-                     view_descriptor, data, task);
-  ASSERT_EQ(1, time_series.size());
-  const auto& ts = time_series.front();
-  EXPECT_EQ("gce_instance", ts.resource().type());
-  using ::testing::Pair;
-  EXPECT_THAT(ts.resource().labels(),
-              ::testing::UnorderedElementsAre(Pair("project_id", "my_project"),
-                                              Pair("instance_id", "1234"),
-                                              Pair("zone", "my_zone")))
-      << "  resource() is:\n"
-      << ts.resource().DebugString();
-}
-
-TEST(StackdriverUtilsTest, MakeTimeSeriesPerMetricCustomResourceNotMatch) {
-  const auto measure =
-      opencensus::stats::MeasureDouble::Register("my_measure", "", "");
-  const std::string task = "test_task";
-  const std::string view_name = "test_view";
-  const auto view_descriptor =
-      opencensus::stats::ViewDescriptor()
-          .set_name(view_name)
-          .set_measure(measure.GetDescriptor().name())
-          .set_aggregation(opencensus::stats::Aggregation::Sum());
-  const opencensus::stats::ViewData data =
-      TestUtils::MakeViewData(view_descriptor, {{{}, 1.0}});
-  google::api::MonitoredResource resource;
-  resource.set_type("gce_instance");
-  (*resource.mutable_labels())["project_id"] = "my_project";
-  (*resource.mutable_labels())["instance_id"] = "1234";
-  (*resource.mutable_labels())["zone"] = "my_zone";
-  std::unordered_map<std::string, google::api::MonitoredResource>
-      per_metric_resources;
-  per_metric_resources["some_other_view"] = resource;
-  const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(kMetricNamePrefix, DefaultResource(), per_metric_resources,
-                     view_descriptor, data, task);
-  ASSERT_EQ(1, time_series.size());
-  const auto& ts = time_series.front();
-  EXPECT_EQ("global", ts.resource().type());
-  EXPECT_EQ(0, ts.resource().labels_size());
 }
 
 TEST(StackdriverUtilsTest, MakeTimeSeriesSumDoubleAndTypes) {
@@ -354,8 +362,8 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumDoubleAndTypes) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor, {{{"v1", "v1"}, 1.0}, {{"v1", "v2"}, 2.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(kMetricNamePrefix, DefaultResource(),
-                     DefaultPerMetricResource(), view_descriptor, data, task);
+      MakeTimeSeries(kMetricNamePrefix, kDefaultResource, view_descriptor, data,
+                     kAddTaskLabel, task);
 
   for (const auto& ts : time_series) {
     EXPECT_EQ("custom.googleapis.com/test/test_view", ts.metric().type());
@@ -395,8 +403,8 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumInt) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor, {{{"v1", "v1"}, 1.0}, {{"v1", "v2"}, 2.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(kMetricNamePrefix, DefaultResource(),
-                     DefaultPerMetricResource(), view_descriptor, data, task);
+      MakeTimeSeries(kMetricNamePrefix, kDefaultResource, view_descriptor, data,
+                     kAddTaskLabel, task);
 
   for (const auto& ts : time_series) {
     ASSERT_EQ(1, ts.points_size());
@@ -436,8 +444,8 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesCountDouble) {
       view_descriptor,
       {{{"v1", "v1"}, 1.0}, {{"v1", "v1"}, 3.0}, {{"v1", "v2"}, 2.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(kMetricNamePrefix, DefaultResource(),
-                     DefaultPerMetricResource(), view_descriptor, data, task);
+      MakeTimeSeries(kMetricNamePrefix, kDefaultResource, view_descriptor, data,
+                     kAddTaskLabel, task);
 
   for (const auto& ts : time_series) {
     ASSERT_EQ(1, ts.points_size());
@@ -480,8 +488,8 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
       view_descriptor,
       {{{"v1", "v1"}, -1.0}, {{"v1", "v1"}, 7.0}, {{"v1", "v2"}, 1.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(kMetricNamePrefix, DefaultResource(),
-                     DefaultPerMetricResource(), view_descriptor, data, task);
+      MakeTimeSeries(kMetricNamePrefix, kDefaultResource, view_descriptor, data,
+                     kAddTaskLabel, task);
 
   for (const auto& ts : time_series) {
     ASSERT_EQ(1, ts.points_size());
@@ -527,8 +535,8 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesLastValueInt) {
   const opencensus::stats::ViewData data = TestUtils::MakeViewData(
       view_descriptor, {{{"v1", "v1"}, 1.0}, {{"v1", "v2"}, 2.0}});
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(kMetricNamePrefix, DefaultResource(),
-                     DefaultPerMetricResource(), view_descriptor, data, task);
+      MakeTimeSeries(kMetricNamePrefix, kDefaultResource, view_descriptor, data,
+                     kAddTaskLabel, task);
 
   for (const auto& ts : time_series) {
     ASSERT_EQ(1, ts.points_size());
@@ -547,32 +555,6 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesLastValueInt) {
                                           {tag_key_1.name(), "v1"},
                                           {tag_key_2.name(), "v2"}},
                                          2)));
-}
-
-TEST(StackdriverUtilsTest, MakeTimeSeriesBuiltinMetric) {
-  const auto measure =
-      opencensus::stats::MeasureDouble::Register("measure_sum_double", "", "");
-  const std::string task = "test_task";
-  const std::string view_name = "test_view";
-  const auto tag_key = opencensus::tags::TagKey::Register("key");
-  const auto view_descriptor =
-      opencensus::stats::ViewDescriptor()
-          .set_name(view_name)
-          .set_measure(measure.GetDescriptor().name())
-          .set_aggregation(opencensus::stats::Aggregation::Sum())
-          .add_column(tag_key);
-  const opencensus::stats::ViewData data =
-      TestUtils::MakeViewData(view_descriptor, {{{"v1"}, 1.0}, {{"v2"}, 2.0}});
-  const std::vector<google::monitoring::v3::TimeSeries> time_series =
-      MakeTimeSeries(kBuiltinMetricNamePrefix, DefaultResource(),
-                     DefaultPerMetricResource(), view_descriptor, data, task);
-
-  EXPECT_THAT(time_series,
-              ::testing::UnorderedElementsAre(
-                  testing::TimeSeriesDouble({{tag_key.name(), "v1"}}, 1.0),
-                  testing::TimeSeriesDouble({{tag_key.name(), "v2"}}, 2.0)))
-      << "Expecting no opencensus_task label. "
-      << time_series[0].ShortDebugString();
 }
 
 }  // namespace

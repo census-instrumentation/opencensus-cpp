@@ -61,8 +61,8 @@ class Handler : public ::opencensus::stats::StatsExporter::Handler {
   // Returns true if the view has already been registered or registration is
   // successful, and false if the registration fails or the name has already
   // been registered with different parameters.
-  bool MaybeRegisterView(const opencensus::stats::ViewDescriptor& descriptor)
-      EXCLUSIVE_LOCKS_REQUIRED(mu_);
+  bool MaybeRegisterView(const opencensus::stats::ViewDescriptor& descriptor,
+                         bool add_task_label) EXCLUSIVE_LOCKS_REQUIRED(mu_);
 
   const StackdriverOptions opts_;
   mutable absl::Mutex mu_;
@@ -103,13 +103,34 @@ void Handler::ExportViewData(
   absl::MutexLock l(&mu_);
   std::vector<google::monitoring::v3::TimeSeries> time_series;
   for (const auto& datum : data) {
-    if (!MaybeRegisterView(datum.first)) {
-      continue;
+    const opencensus::stats::ViewDescriptor& descriptor = datum.first;
+    const std::string metric_type =
+        MakeType(opts_.metric_name_prefix, descriptor.name());
+    const google::api::MonitoredResource* monitored_resource_for_view =
+        MonitoredResourceForView(descriptor, opts_.monitored_resource,
+                                 opts_.per_metric_monitored_resource);
+
+    const bool is_known_custom_metric = IsKnownCustomMetric(metric_type);
+
+    // If there is a non-default MonitoredResource for this view, it must
+    // uniquely identify the timeseries.
+    //
+    // Otherwise, we add the opencensus_task label so that different processes
+    // produce different timeseries instead of colliding.
+    const bool add_task_label =
+        is_known_custom_metric && (monitored_resource_for_view == nullptr);
+
+    // Builtin metrics are already defined, skip registration.
+    if (is_known_custom_metric) {
+      // If the view can't be registered, skip it.
+      if (!MaybeRegisterView(descriptor, add_task_label)) {
+        continue;
+      }
     }
-    const auto view_time_series =
-        MakeTimeSeries(opts_.metric_name_prefix, opts_.monitored_resource,
-                       opts_.per_metric_monitored_resource, datum.first,
-                       datum.second, opts_.opencensus_task);
+
+    const auto view_time_series = MakeTimeSeries(
+        opts_.metric_name_prefix, monitored_resource_for_view, descriptor,
+        /*data=*/datum.second, add_task_label, opts_.opencensus_task);
     time_series.insert(time_series.end(), view_time_series.begin(),
                        view_time_series.end());
   }
@@ -153,7 +174,7 @@ void Handler::ExportViewData(
 }
 
 bool Handler::MaybeRegisterView(
-    const opencensus::stats::ViewDescriptor& descriptor) {
+    const opencensus::stats::ViewDescriptor& descriptor, bool add_task_label) {
   const auto& it = registered_descriptors_.find(descriptor.name());
   if (it != registered_descriptors_.end()) {
     if (it->second != descriptor) {
@@ -165,16 +186,10 @@ bool Handler::MaybeRegisterView(
     return true;
   }
 
-  const std::string metric_type =
-      MakeType(opts_.metric_name_prefix, descriptor.name());
-  if (!IsKnownCustomMetric(metric_type)) {
-    // Builtin metrics are already defined, skip the CreateMetricDescriptor RPC.
-    return true;
-  }
   auto request = google::monitoring::v3::CreateMetricDescriptorRequest();
   request.set_name(opts_.project_id);
   SetMetricDescriptor(opts_.project_id, opts_.metric_name_prefix, descriptor,
-                      request.mutable_metric_descriptor());
+                      add_task_label, request.mutable_metric_descriptor());
   ::grpc::ClientContext context;
   context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
   google::api::MetricDescriptor response;

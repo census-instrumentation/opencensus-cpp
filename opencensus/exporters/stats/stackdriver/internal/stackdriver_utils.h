@@ -38,22 +38,29 @@ std::string MakeType(absl::string_view metric_name_prefix,
 // custom (i.e not built-in) Stackdriver metric.
 bool IsKnownCustomMetric(absl::string_view metric_type);
 
+// Returns a pointer to the MonitoredResource proto for this view, or nullptr if
+// the default resource should be used.
+const google::api::MonitoredResource* MonitoredResourceForView(
+    const opencensus::stats::ViewDescriptor& view_descriptor,
+    const google::api::MonitoredResource& monitored_resource,
+    const std::unordered_map<std::string, google::api::MonitoredResource>&
+        per_metric_monitored_resource);
+
 // Populates metric_descriptor. project_name must be in the format
 // "projects/project_id". metric_name_prefix must have a trailing slash, e.g.
 // "custom.googleapis.com/opencensus/".
 void SetMetricDescriptor(
     absl::string_view project_name, absl::string_view metric_name_prefix,
     const opencensus::stats::ViewDescriptor& view_descriptor,
-    google::api::MetricDescriptor* metric_descriptor);
+    bool add_task_label, google::api::MetricDescriptor* metric_descriptor);
 
-// Converts each row of 'data' into TimeSeries.
+// Converts each row of 'data' into a TimeSeries proto.
 std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
     absl::string_view metric_name_prefix,
-    const google::api::MonitoredResource& monitored_resource,
-    const std::unordered_map<std::string, google::api::MonitoredResource>&
-        per_metric_monitored_resource,
+    const google::api::MonitoredResource* monitored_resource_for_view,
     const opencensus::stats::ViewDescriptor& view_descriptor,
-    const opencensus::stats::ViewData& data, absl::string_view opencensus_task);
+    const opencensus::stats::ViewData& data, bool add_task_label,
+    absl::string_view opencensus_task);
 
 // Populates proto based on the given time.
 void SetTimestamp(absl::Time time, google::protobuf::Timestamp* proto);

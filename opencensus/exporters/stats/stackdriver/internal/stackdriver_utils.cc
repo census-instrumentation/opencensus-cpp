@@ -162,18 +162,31 @@ bool IsKnownCustomMetric(absl::string_view metric_type) {
          absl::StartsWith(metric_type, "external.googleapis.com/");
 }
 
+const google::api::MonitoredResource* MonitoredResourceForView(
+    const opencensus::stats::ViewDescriptor& view_descriptor,
+    const google::api::MonitoredResource& monitored_resource,
+    const std::unordered_map<std::string, google::api::MonitoredResource>&
+        per_metric_monitored_resource) {
+  auto iter = per_metric_monitored_resource.find(view_descriptor.name());
+  if (iter != per_metric_monitored_resource.end()) {
+    return &iter->second;
+  } else if (monitored_resource.type().empty()) {
+    return nullptr;
+  } else {
+    return &monitored_resource;
+  }
+}
+
 void SetMetricDescriptor(
     absl::string_view project_name, absl::string_view metric_name_prefix,
     const opencensus::stats::ViewDescriptor& view_descriptor,
-    google::api::MetricDescriptor* metric_descriptor) {
+    bool add_task_label, google::api::MetricDescriptor* metric_descriptor) {
   metric_descriptor->set_name(
       MakeName(project_name, metric_name_prefix, view_descriptor.name()));
   const std::string metric_type =
       MakeType(metric_name_prefix, view_descriptor.name());
   metric_descriptor->set_type(metric_type);
-  if (IsKnownCustomMetric(metric_type)) {
-    // Custom metrics use this label so that different processes produce
-    // different timeseries instead of colliding.
+  if (add_task_label) {
     SetOpenCensusTaskLabelDescriptor(metric_descriptor->add_labels());
   }
   for (const auto& tag_key : view_descriptor.columns()) {
@@ -194,24 +207,19 @@ void SetMetricDescriptor(
 
 std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
     absl::string_view metric_name_prefix,
-    const google::api::MonitoredResource& monitored_resource,
-    const std::unordered_map<std::string, google::api::MonitoredResource>&
-        per_metric_monitored_resource,
+    const google::api::MonitoredResource* monitored_resource_for_view,
     const opencensus::stats::ViewDescriptor& view_descriptor,
-    const opencensus::stats::ViewData& data,
+    const opencensus::stats::ViewData& data, bool add_task_label,
     absl::string_view opencensus_task) {
   // Set values that are common across all the rows.
   auto base_time_series = google::monitoring::v3::TimeSeries();
   const std::string metric_type =
       MakeType(metric_name_prefix, view_descriptor.name());
   base_time_series.mutable_metric()->set_type(metric_type);
-  auto iter = per_metric_monitored_resource.find(view_descriptor.name());
-  if (iter != per_metric_monitored_resource.end()) {
-    *base_time_series.mutable_resource() = iter->second;
-  } else if (monitored_resource.type().empty()) {
+  if (monitored_resource_for_view == nullptr) {
     base_time_series.mutable_resource()->set_type(kDefaultResourceType);
   } else {
-    *base_time_series.mutable_resource() = monitored_resource;
+    *base_time_series.mutable_resource() = *monitored_resource_for_view;
   }
   auto* interval = base_time_series.add_points()->mutable_interval();
   // Stackdriver doesn't like start_time and end_time being different for GAUGE
@@ -221,9 +229,7 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
     SetTimestamp(data.start_time(), interval->mutable_start_time());
   }
   SetTimestamp(data.end_time(), interval->mutable_end_time());
-  if (IsKnownCustomMetric(metric_type)) {
-    // Custom metrics use this label so that different processes produce
-    // different timeseries instead of colliding.
+  if (add_task_label) {
     (*base_time_series.mutable_metric()->mutable_labels())[kOpenCensusTaskKey] =
         std::string(opencensus_task);
   }
