@@ -259,8 +259,9 @@ void Handler::Export(
   grpc::Status status =
       opts_.trace_service_stub->BatchWriteSpans(&context, request, &response);
   if (!status.ok()) {
-    std::cerr << "BatchWriteSpans failed: "
-              << opencensus::common::ToString(status) << "\n";
+    std::cerr << "BatchWriteSpans failed (" << spans.size() << " spans, "
+              << request.ByteSizeLong()
+              << " bytes): " << opencensus::common::ToString(status) << "\n";
   }
 }
 
