@@ -32,7 +32,7 @@ struct StackdriverOptions {
   std::string project_id;
 
   // The RPC deadline to use when exporting to Stackdriver.
-  absl::Duration rpc_deadline = absl::Seconds(5);
+  absl::Duration rpc_deadline = absl::Seconds(10);
 
   // (optional) By default, the exporter connects to Stackdriver using gRPC. If
   // this stub is non-null, the exporter will use this stub to send gRPC calls

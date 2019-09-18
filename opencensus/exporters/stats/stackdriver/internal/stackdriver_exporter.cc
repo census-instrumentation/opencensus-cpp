@@ -167,8 +167,11 @@ void Handler::ExportViewData(
     if (ok) {
       const auto& s = status[(uintptr_t)tag];
       if (!s.ok()) {
-        std::cerr << "CreateTimeSeries request failed: "
-                  << opencensus::common::ToString(s) << "\n";
+        std::cerr << "CreateTimeSeries request failed (" << num_rpcs
+                  << " RPCs, " << data.size() << " views, "
+                  << time_series.size()
+                  << " timeseries): " << opencensus::common::ToString(s)
+                  << "\n";
       }
     }
   }
@@ -197,8 +200,9 @@ bool Handler::MaybeRegisterView(
   ::grpc::Status status = opts_.metric_service_stub->CreateMetricDescriptor(
       &context, request, &response);
   if (!status.ok()) {
-    std::cerr << "CreateMetricDescriptor request failed: "
-              << opencensus::common::ToString(status) << "\n";
+    std::cerr << "CreateMetricDescriptor(" << request.metric_descriptor().name()
+              << ") request failed: " << opencensus::common::ToString(status)
+              << "\n";
     return false;
   }
   registered_descriptors_.emplace_hint(it, descriptor.name(), descriptor);
