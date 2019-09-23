@@ -37,6 +37,9 @@ class TraceId final {
   // Returns a 32-char hex string of the TraceId value.
   std::string ToHex() const;
 
+  // Returns a pointer to the opaque value.
+  const void* Value() const;
+
   bool operator==(const TraceId& that) const;
 
   // Returns false if the TraceId is all zeros.
