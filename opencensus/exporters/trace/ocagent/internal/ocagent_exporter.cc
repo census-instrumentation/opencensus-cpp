@@ -305,7 +305,11 @@ void Handler::InitNode() {
   library_info->set_core_library_version(OPENCENSUS_VERSION);
 
   auto service_info = nodeInfo_.mutable_service_info();
-  service_info->set_name(::opencensus::common::Hostname());
+  if (!opts_.service_name.empty()) {
+    service_info->set_name(opts_.service_name);
+  } else {
+    service_info->set_name(::opencensus::common::Hostname());
+  }
 }
 
 void Handler::ConnectAgent() {
