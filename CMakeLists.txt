@@ -24,11 +24,10 @@ endif()
 project(opencensus-cpp VERSION 0.5.0 LANGUAGES CXX)
 
 option(FUZZER "Either OFF or e.g. -fsanitize=fuzzer,address" OFF)
-option(OVERRIDE_CXX_STANDARD_FLAGS "Force building with -std=c++11 even if the CXXLFAGS are configured differently" ON)
 
-if(OVERRIDE_CXX_STANDARD_FLAGS)
+if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 11)
-  set(CMAKE_CXX_EXTENSIONS Off)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
 include(CTest) # Defines option BUILD_TESTING.
