@@ -37,6 +37,9 @@ class SpanId final {
   // Returns a 16-char hex string of the SpanId value.
   std::string ToHex() const;
 
+  // Returns a pointer to the opaque value.
+  const void* Value() const;
+
   bool operator==(const SpanId& that) const;
 
   // Returns false if the SpanId is all zeros.

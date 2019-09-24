@@ -208,11 +208,16 @@ void ConvertSpans(
     auto to_span = request->add_spans();
 
     // 1. trace_id
-    to_span->set_trace_id(from_span.context().trace_id().ToHex());
+    to_span->set_trace_id(from_span.context().trace_id().Value(),
+                          ::opencensus::trace::TraceId::kSize);
     // 2. span_id
-    to_span->set_span_id(from_span.context().span_id().ToHex());
+    to_span->set_span_id(from_span.context().span_id().Value(),
+                         ::opencensus::trace::SpanId::kSize);
     // 3. parent_span_id
-    to_span->set_parent_span_id(from_span.parent_span_id().ToHex());
+    if (from_span.parent_span_id().IsValid()) {
+      to_span->set_parent_span_id(from_span.parent_span_id().Value(),
+                                  ::opencensus::trace::SpanId::kSize);
+    }
     // 4. name
     SetTruncatableString(from_span.name(), kDisplayNameStringLen,
                          to_span->mutable_name());
@@ -224,7 +229,7 @@ void ConvertSpans(
     // 7. Export Attributes
     ConvertAttributes(from_span, to_span);
 
-    // 8. stack_trace
+    // 8. stack_trace (unsupported)
 
     // 9. Export Time Events.
     ConvertTimeEvents(from_span, to_span);
@@ -241,7 +246,7 @@ void ConvertSpans(
     to_span->mutable_same_process_as_parent_span()->set_value(
         !from_span.has_remote_parent());
 
-    // 13. child_span_count
+    // 13. child_span_count (optional)
 
     // 14. span kind
 

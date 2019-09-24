@@ -30,6 +30,8 @@ std::string SpanId::ToHex() const {
       absl::string_view(reinterpret_cast<const char *>(rep_), kSize));
 }
 
+const void *SpanId::Value() const { return rep_; }
+
 bool SpanId::operator==(const SpanId &that) const {
   return memcmp(rep_, that.rep_, kSize) == 0;
 }
