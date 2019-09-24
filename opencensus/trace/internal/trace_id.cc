@@ -30,6 +30,8 @@ std::string TraceId::ToHex() const {
       absl::string_view(reinterpret_cast<const char *>(rep_), kSize));
 }
 
+const void *TraceId::Value() const { return rep_; }
+
 bool TraceId::operator==(const TraceId &that) const {
   return memcmp(rep_, that.rep_, kSize) == 0;
 }
