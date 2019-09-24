@@ -312,8 +312,6 @@ void Handler::InitNode() {
   auto service_info = nodeInfo_.mutable_service_info();
   if (!opts_.service_name.empty()) {
     service_info->set_name(opts_.service_name);
-  } else {
-    service_info->set_name(::opencensus::common::Hostname());
   }
 }
 
