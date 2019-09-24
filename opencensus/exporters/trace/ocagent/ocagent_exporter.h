@@ -33,6 +33,9 @@ struct OcAgentOptions {
   // The RPC deadline to use when exporting to OcAgent.
   absl::Duration rpc_deadline = absl::Seconds(5);
 
+  // (optional) If not empty, set the service name to this.
+  std::string service_name;
+
   // (optional) By default, the exporter connects to OcAgent using address. If
   // this stub is non-null, the exporter will use this stub to send
   // gRPC calls instead and ignore the address. Useful for testing.
