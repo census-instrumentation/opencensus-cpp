@@ -59,6 +59,17 @@ cc_library(
     deps = ["@com_google_absl//absl/hash"],
 )
 
+cc_library(
+    name = "timestamp",
+    srcs = ["timestamp.cc"],
+    hdrs = ["timestamp.h"],
+    copts = DEFAULT_COPTS,
+    deps = [
+        "@com_google_absl//absl/time",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
 # Tests
 # ========================================================================= #
 
@@ -104,5 +115,32 @@ cc_test(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_binary(
+    name = "timestamp_benchmark",
+    testonly = 1,
+    srcs = ["timestamp_benchmark.cc"],
+    copts = TEST_COPTS,
+    #linkopts = ["-pthread"],  # Required for absl/synchronization bits.
+    linkstatic = 1,
+    deps = [
+        ":timestamp",
+        "@com_github_google_benchmark//:benchmark",
+        "@com_google_absl//absl/time",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+cc_test(
+    name = "timestamp_test",
+    srcs = ["timestamp_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":timestamp",
+        "@com_google_absl//absl/time",
+        "@com_google_googletest//:gtest_main",
+        "@com_google_protobuf//:protobuf",
     ],
 )
