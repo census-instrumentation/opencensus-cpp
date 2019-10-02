@@ -18,6 +18,8 @@
 #ifndef OPENCENSUS_STATS_VIEW_H_
 #define OPENCENSUS_STATS_VIEW_H_
 
+#include "absl/time/clock.h"
+#include "absl/time/time.h"
 #include "opencensus/stats/internal/stats_manager.h"
 #include "opencensus/stats/view_data.h"
 #include "opencensus/stats/view_descriptor.h"
@@ -48,8 +50,8 @@ class View {
   // Returns true if this object is valid and data can be collected.
   bool IsValid() const;
 
-  // Returns a snapshot of the View's data.
-  const ViewData GetData();
+  // Returns a snapshot of the View's data with the given time.
+  const ViewData GetData(absl::Time now = absl::Now());
 
   // TODO: Consider a means of querying one tagset to avoid copying.
 

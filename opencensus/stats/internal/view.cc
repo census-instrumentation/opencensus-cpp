@@ -38,13 +38,13 @@ View::~View() {
 
 bool View::IsValid() const { return handle_ != nullptr; }
 
-const ViewData View::GetData() {
+const ViewData View::GetData(absl::Time now) {
   if (!IsValid()) {
     std::cerr << "View::GetData() called on invalid view.\n";
-    ABSL_ASSERT(0);
-    return ViewData(absl::make_unique<ViewDataImpl>(absl::Now(), descriptor_));
+    ABSL_ASSERT(0 && "View::GetData() called on invalid view.");
+    return ViewData(absl::make_unique<ViewDataImpl>(now, descriptor_));
   }
-  return ViewData(handle_->GetData());
+  return ViewData(handle_->GetData(now));
 }
 
 }  // namespace stats

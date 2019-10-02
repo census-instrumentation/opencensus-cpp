@@ -56,6 +56,7 @@ class ViewDataImpl {
   // snapshotting cumulative data; ViewDataImpls for interval views must be
   // converted using the following constructor before snapshotting.
   ViewDataImpl(absl::Time start_time, const ViewDescriptor& descriptor);
+
   // Constructs a ViewDataImpl capturing the state of 'other' at 'now'. Requires
   // 'other' to have an interval aggregation window (and thus type()
   // kStatsObject).
@@ -105,6 +106,9 @@ class ViewDataImpl {
 
   absl::Time start_time() const { return start_time_; }
   absl::Time end_time() const { return end_time_; }
+
+  // If end_time is before now, set it to now.
+  void ExtendEndTime(absl::Time now);
 
   // Merges bulk data for the given tag values at 'now'. tag_values must be
   // ordered according to the order of keys in the ViewDescriptor.

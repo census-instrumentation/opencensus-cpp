@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "opencensus/stats/stats_exporter.h"
-#include "opencensus/stats/internal/stats_exporter_impl.h"
 
 #include <thread>
 #include <utility>
@@ -24,6 +23,7 @@
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
 #include "opencensus/stats/internal/aggregation_window.h"
+#include "opencensus/stats/internal/stats_exporter_impl.h"
 #include "opencensus/stats/view_data.h"
 #include "opencensus/stats/view_descriptor.h"
 
@@ -57,23 +57,25 @@ void StatsExporterImpl::RegisterPushHandler(
 }
 
 std::vector<std::pair<ViewDescriptor, ViewData>>
-StatsExporterImpl::GetViewData() {
-  absl::ReaderMutexLock l(&mu_);
+StatsExporterImpl::GetViewDataLocked() {
+  const absl::Time now = absl::Now();
   std::vector<std::pair<ViewDescriptor, ViewData>> data;
   data.reserve(views_.size());
   for (const auto& view : views_) {
-    data.emplace_back(view.second->descriptor(), view.second->GetData());
+    data.emplace_back(view.second->descriptor(), view.second->GetData(now));
   }
   return data;
 }
 
+std::vector<std::pair<ViewDescriptor, ViewData>>
+StatsExporterImpl::GetViewData() {
+  absl::ReaderMutexLock l(&mu_);
+  return GetViewDataLocked();
+}
+
 void StatsExporterImpl::Export() {
   absl::ReaderMutexLock l(&mu_);
-  std::vector<std::pair<ViewDescriptor, ViewData>> data;
-  data.reserve(views_.size());
-  for (const auto& view : views_) {
-    data.emplace_back(view.second->descriptor(), view.second->GetData());
-  }
+  std::vector<std::pair<ViewDescriptor, ViewData>> data = GetViewDataLocked();
   for (auto& handler : handlers_) {
     handler->ExportViewData(data);
   }
@@ -84,7 +86,7 @@ void StatsExporterImpl::ClearHandlersForTesting() {
   handlers_.clear();
 }
 
-void StatsExporterImpl::StartExportThread() EXCLUSIVE_LOCKS_REQUIRED(mu_) {
+void StatsExporterImpl::StartExportThread() {
   t_ = std::thread(&StatsExporterImpl::RunWorkerLoop, this);
   thread_started_ = true;
 }

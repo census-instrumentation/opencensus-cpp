@@ -83,20 +83,22 @@ void StatsManager::ViewInformation::MergeMeasureData(
   data_.Merge(tag_values, data, now);
 }
 
-std::unique_ptr<ViewDataImpl> StatsManager::ViewInformation::GetData() {
-  absl::ReaderMutexLock l(mu_);
+std::unique_ptr<ViewDataImpl> StatsManager::ViewInformation::GetData(
+    absl::Time now) {
+  absl::MutexLock l(mu_);
   if (data_.type() == ViewDataImpl::Type::kStatsObject) {
-    return absl::make_unique<ViewDataImpl>(data_, absl::Now());
+    return absl::make_unique<ViewDataImpl>(data_, now);
   } else if (descriptor_.aggregation_window_.type() ==
              AggregationWindow::Type::kDelta) {
-    return data_.GetDeltaAndReset(absl::Now());
+    return data_.GetDeltaAndReset(now);
   } else {
+    data_.ExtendEndTime(now);
     return absl::make_unique<ViewDataImpl>(data_);
   }
 }
 
 // ==========================================================================
-// // StatsManager::MeasureInformation
+// StatsManager::MeasureInformation
 
 void StatsManager::MeasureInformation::MergeMeasureData(
     const opencensus::tags::TagMap& tags, const MeasureData& data,
@@ -136,7 +138,7 @@ void StatsManager::MeasureInformation::RemoveView(
 }
 
 // ==========================================================================
-// // StatsManager
+// StatsManager
 
 // static
 StatsManager* StatsManager::Get() {
