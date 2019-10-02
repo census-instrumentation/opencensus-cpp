@@ -62,9 +62,6 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
     const opencensus::stats::ViewData& data, bool add_task_label,
     absl::string_view opencensus_task);
 
-// Populates proto based on the given time.
-void SetTimestamp(absl::Time time, google::protobuf::Timestamp* proto);
-
 }  // namespace stats
 }  // namespace exporters
 }  // namespace opencensus

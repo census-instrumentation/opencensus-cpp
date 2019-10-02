@@ -30,6 +30,7 @@ cc_library(
     deps = [
         "//opencensus/common:version",
         "//opencensus/common/internal:hostname",
+        "//opencensus/common/internal:timestamp",
         "//opencensus/common/internal/grpc:status",
         "//opencensus/common/internal/grpc:with_user_agent",
         "//opencensus/trace",

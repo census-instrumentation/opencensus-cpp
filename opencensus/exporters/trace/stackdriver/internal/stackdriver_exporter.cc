@@ -25,6 +25,7 @@
 #include "google/devtools/cloudtrace/v2/tracing.grpc.pb.h"
 #include "opencensus/common/internal/grpc/status.h"
 #include "opencensus/common/internal/grpc/with_user_agent.h"
+#include "opencensus/common/internal/timestamp.h"
 #include "opencensus/common/version.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/exporter/span_exporter.h"
@@ -41,26 +42,6 @@ constexpr char kGoogleStackdriverTraceAddress[] = "cloudtrace.googleapis.com";
 
 constexpr char kAgentKey[] = "g.co/agent";
 constexpr char kAgentValue[] = "opencensus-cpp [" OPENCENSUS_VERSION "]";
-
-bool Validate(const google::protobuf::Timestamp& t) {
-  const auto sec = t.seconds();
-  const auto ns = t.nanos();
-  // sec must be [0001-01-01T00:00:00Z, 9999-12-31T23:59:59.999999999Z]
-  if (sec < -62135596800 || sec > 253402300799) {
-    return false;
-  }
-  if (ns < 0 || ns > 999999999) {
-    return false;
-  }
-  return true;
-}
-
-bool EncodeTimestampProto(absl::Time t, google::protobuf::Timestamp* proto) {
-  const int64_t s = absl::ToUnixSeconds(t);
-  proto->set_seconds(s);
-  proto->set_nanos((t - absl::FromUnixSeconds(s)) / absl::Nanoseconds(1));
-  return Validate(*proto);
-}
 
 void SetTruncatableString(
     absl::string_view str, size_t max_len,
@@ -140,9 +121,8 @@ void ConvertTimeEvents(const ::opencensus::trace::exporter::SpanData& span,
                        ::google::devtools::cloudtrace::v2::Span* proto_span) {
   for (const auto& annotation : span.annotations().events()) {
     auto event = proto_span->mutable_time_events()->add_time_event();
-
-    // Encode Timestamp
-    EncodeTimestampProto(annotation.timestamp(), event->mutable_time());
+    opencensus::common::SetTimestamp(annotation.timestamp(),
+                                     event->mutable_time());
 
     // Populate annotation.
     SetTruncatableString(annotation.event().description(), kAnnotationStringLen,
@@ -155,9 +135,8 @@ void ConvertTimeEvents(const ::opencensus::trace::exporter::SpanData& span,
 
   for (const auto& message : span.message_events().events()) {
     auto event = proto_span->mutable_time_events()->add_time_event();
-
-    // Encode Timestamp
-    EncodeTimestampProto(message.timestamp(), event->mutable_time());
+    opencensus::common::SetTimestamp(message.timestamp(),
+                                     event->mutable_time());
 
     // Populate message event.
     event->mutable_message_event()->set_type(
@@ -206,10 +185,12 @@ void ConvertSpans(
     to_span->set_parent_span_id(from_span.parent_span_id().ToHex());
 
     // The start time of the span.
-    EncodeTimestampProto(from_span.start_time(), to_span->mutable_start_time());
+    opencensus::common::SetTimestamp(from_span.start_time(),
+                                     to_span->mutable_start_time());
 
     // The end time of the span.
-    EncodeTimestampProto(from_span.end_time(), to_span->mutable_end_time());
+    opencensus::common::SetTimestamp(from_span.end_time(),
+                                     to_span->mutable_end_time());
 
     // Export Attributes
     ConvertAttributes(from_span, to_span);

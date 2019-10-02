@@ -29,6 +29,7 @@
 #include "google/monitoring/v3/common.pb.h"
 #include "google/monitoring/v3/metric.pb.h"
 #include "google/protobuf/timestamp.pb.h"
+#include "opencensus/common/internal/timestamp.h"
 #include "opencensus/stats/stats.h"
 
 namespace opencensus {
@@ -226,9 +227,11 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
   // metrics.
   if (view_descriptor.aggregation().type() !=
       opencensus::stats::Aggregation::Type::kLastValue) {
-    SetTimestamp(data.start_time(), interval->mutable_start_time());
+    opencensus::common::SetTimestamp(data.start_time(),
+                                     interval->mutable_start_time());
   }
-  SetTimestamp(data.end_time(), interval->mutable_end_time());
+  opencensus::common::SetTimestamp(data.end_time(),
+                                   interval->mutable_end_time());
   if (add_task_label) {
     (*base_time_series.mutable_metric()->mutable_labels())[kOpenCensusTaskKey] =
         std::string(opencensus_task);
@@ -246,13 +249,6 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
   }
   ABSL_ASSERT(false && "Bad ViewData.type().");
   return {};
-}
-
-void SetTimestamp(absl::Time time, google::protobuf::Timestamp* proto) {
-  const int64_t seconds = absl::ToUnixSeconds(time);
-  proto->set_seconds(seconds);
-  proto->set_nanos(
-      absl::ToInt64Nanoseconds(time - absl::FromUnixSeconds(seconds)));
 }
 
 }  // namespace stats

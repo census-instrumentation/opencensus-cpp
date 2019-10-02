@@ -50,6 +50,7 @@ cc_library(
     hdrs = ["internal/stackdriver_utils.h"],
     copts = DEFAULT_COPTS,
     deps = [
+        "//opencensus/common/internal:timestamp",
         "//opencensus/stats",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/base:core_headers",
