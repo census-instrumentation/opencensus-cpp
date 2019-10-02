@@ -219,6 +219,11 @@ opencensus_benchmark(trace_cloud_trace_context_benchmark
 opencensus_benchmark(trace_grpc_trace_bin_benchmark
                      internal/grpc_trace_bin_benchmark.cc trace_grpc_trace_bin)
 
+opencensus_benchmark(trace_sampler_benchmark
+                     internal/sampler_benchmark.cc
+                     trace_span_context
+                     trace)
+
 opencensus_benchmark(trace_span_benchmark
                      internal/span_benchmark.cc
                      trace_span_context

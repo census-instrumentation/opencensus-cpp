@@ -492,6 +492,19 @@ cc_binary(
 )
 
 cc_binary(
+    name = "sampler_benchmark",
+    testonly = 1,
+    srcs = ["internal/sampler_benchmark.cc"],
+    copts = TEST_COPTS,
+    linkstatic = 1,
+    deps = [
+        ":span_context",
+        ":trace",
+        "@com_github_google_benchmark//:benchmark",
+    ],
+)
+
+cc_binary(
     name = "span_benchmark",
     testonly = 1,
     srcs = ["internal/span_benchmark.cc"],
