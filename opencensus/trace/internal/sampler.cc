@@ -39,8 +39,7 @@ uint64_t CalculateThreshold(double probability) {
 }
 
 uint64_t CalculateThresholdFromBuffer(const TraceId& trace_id) {
-  uint8_t buf[TraceId::kSize];
-  trace_id.CopyTo(buf);
+  const uint8_t* buf = reinterpret_cast<const uint8_t*>(trace_id.Value());
   uint64_t res = 0;
   // We only use the first 8 bytes of TraceId.
   for (int i = 0; i < 8; ++i) {
