@@ -80,7 +80,7 @@ class ViewData {
   explicit ViewData(std::unique_ptr<ViewDataImpl> data);
 
   const std::unique_ptr<ViewDataImpl> impl_;
-  absl::Time end_time_;
+  const absl::Time end_time_;
 };
 
 }  // namespace stats
