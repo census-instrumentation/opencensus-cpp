@@ -61,8 +61,8 @@ class StatsManager final {
     void MergeMeasureData(const opencensus::tags::TagMap& tags,
                           const MeasureData& data, absl::Time now);
 
-    // Retrieves a copy of the data with the current time.
-    std::unique_ptr<ViewDataImpl> GetData(absl::Time now) LOCKS_EXCLUDED(*mu_);
+    // Retrieves a copy of the data.
+    std::unique_ptr<ViewDataImpl> GetData() LOCKS_EXCLUDED(*mu_);
 
     const ViewDescriptor& view_descriptor() const { return descriptor_; }
 
@@ -70,7 +70,6 @@ class StatsManager final {
     const ViewDescriptor descriptor_;
 
     absl::Mutex* const mu_;  // Not owned.
-
     // The number of View objects backed by this ViewInformation, for
     // reference-counted GC.
     int num_consumers_ GUARDED_BY(*mu_) = 1;

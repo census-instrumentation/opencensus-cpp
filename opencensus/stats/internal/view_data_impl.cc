@@ -182,13 +182,9 @@ ViewDataImpl::ViewDataImpl(const ViewDataImpl& other)
   }
 }
 
-void ViewDataImpl::ExtendEndTime(absl::Time now) {
-  end_time_ = std::max(end_time_, now);
-}
-
 void ViewDataImpl::Merge(const std::vector<std::string>& tag_values,
                          const MeasureData& data, absl::Time now) {
-  ExtendEndTime(now);
+  end_time_ = std::max(end_time_, now);
   switch (type_) {
     case Type::kDouble: {
       if (aggregation_.type() == Aggregation::Type::kSum) {
