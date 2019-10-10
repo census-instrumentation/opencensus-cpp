@@ -92,8 +92,7 @@ ViewDataImpl::ViewDataImpl(const ViewDataImpl& other, absl::Time now)
                 ? Type::kDistribution
                 : Type::kDouble),
       start_time_(std::max(other.start_time(),
-                           now - other.aggregation_window().duration())),
-      end_time_(now) {
+                           now - other.aggregation_window().duration())) {
   ABSL_ASSERT(aggregation_window_.type() == AggregationWindow::Type::kInterval);
   switch (aggregation_.type()) {
     case Aggregation::Type::kSum:
@@ -157,8 +156,7 @@ ViewDataImpl::ViewDataImpl(const ViewDataImpl& other)
     : aggregation_(other.aggregation_),
       aggregation_window_(other.aggregation_window_),
       type_(other.type()),
-      start_time_(other.start_time_),
-      end_time_(other.end_time_) {
+      start_time_(other.start_time_) {
   switch (type_) {
     case Type::kDouble: {
       new (&double_data_) DataMap<double>(other.double_data_);
@@ -184,7 +182,6 @@ ViewDataImpl::ViewDataImpl(const ViewDataImpl& other)
 
 void ViewDataImpl::Merge(const std::vector<std::string>& tag_values,
                          const MeasureData& data, absl::Time now) {
-  end_time_ = std::max(end_time_, now);
   switch (type_) {
     case Type::kDouble: {
       if (aggregation_.type() == Aggregation::Type::kSum) {
@@ -259,8 +256,7 @@ ViewDataImpl::ViewDataImpl(ViewDataImpl* source, absl::Time now)
     : aggregation_(source->aggregation_),
       aggregation_window_(source->aggregation_window_),
       type_(source->type_),
-      start_time_(source->start_time_),
-      end_time_(now) {
+      start_time_(source->start_time_) {
   switch (type_) {
     case Type::kDouble: {
       new (&double_data_) DataMap<double>();
@@ -285,7 +281,6 @@ ViewDataImpl::ViewDataImpl(ViewDataImpl* source, absl::Time now)
     }
   }
   source->start_time_ = now;
-  source->end_time_ = now;
 }
 
 }  // namespace stats
