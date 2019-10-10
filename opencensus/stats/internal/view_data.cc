@@ -18,6 +18,7 @@
 
 #include "absl/base/macros.h"
 #include "absl/memory/memory.h"
+#include "absl/time/clock.h"
 #include "opencensus/stats/internal/view_data_impl.h"
 
 namespace opencensus {
@@ -80,13 +81,14 @@ const ViewData::DataMap<Distribution>& ViewData::distribution_data() const {
 }
 
 absl::Time ViewData::start_time() const { return impl_->start_time(); }
-absl::Time ViewData::end_time() const { return impl_->end_time(); }
+absl::Time ViewData::end_time() const { return end_time_; }
 
 ViewData::ViewData(const ViewData& other)
-    : impl_(absl::make_unique<ViewDataImpl>(*other.impl_)) {}
+    : impl_(absl::make_unique<ViewDataImpl>(*other.impl_)),
+      end_time_(absl::Now()) {}
 
 ViewData::ViewData(std::unique_ptr<ViewDataImpl> data)
-    : impl_(std::move(data)) {
+    : impl_(std::move(data)), end_time_(absl::Now()) {
   ABSL_ASSERT(impl_->type() != ViewDataImpl::Type::kStatsObject);
 }
 
