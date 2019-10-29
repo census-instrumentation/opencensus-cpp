@@ -42,6 +42,7 @@ uint64_t CalculateThresholdFromBuffer(const TraceId& trace_id) {
   const uint8_t* buf = reinterpret_cast<const uint8_t*>(trace_id.Value());
   uint64_t res = 0;
   // We only use the first 8 bytes of TraceId.
+  static_assert(TraceId::kSize >= 8);
   for (int i = 0; i < 8; ++i) {
     res |= (static_cast<uint64_t>(buf[i]) << (i * 8));
   }
