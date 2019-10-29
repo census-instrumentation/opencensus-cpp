@@ -15,10 +15,11 @@
 find_package(Threads REQUIRED)
 
 add_executable(opencensus_examples_helloworld helloworld.cc)
-target_link_libraries(opencensus_examples_helloworld
-                      absl::strings
-                      opencensus-cpp::exporters_stats_stdout
-                      opencensus-cpp::exporters_trace_stdout
-                      opencensus-cpp::stats
-                      opencensus-cpp::trace
-                      Threads::Threads)
+target_link_libraries(
+  opencensus_examples_helloworld
+  absl::strings
+  opencensus-cpp::exporters_stats_stdout
+  opencensus-cpp::exporters_trace_stdout
+  opencensus-cpp::stats
+  opencensus-cpp::trace
+  Threads::Threads)

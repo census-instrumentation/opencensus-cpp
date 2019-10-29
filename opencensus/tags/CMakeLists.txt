@@ -12,52 +12,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-opencensus_lib(tags
-               PUBLIC
-               SRCS
-               internal/tag_key.cc
-               internal/tag_map.cc
-               DEPS
-               absl::strings
-               absl::base
-               absl::hash
-               absl::synchronization)
+opencensus_lib(
+  tags
+  PUBLIC
+  SRCS
+  internal/tag_key.cc
+  internal/tag_map.cc
+  DEPS
+  absl::strings
+  absl::base
+  absl::hash
+  absl::synchronization)
 
-opencensus_lib(tags_context_util
-               PUBLIC
-               SRCS
-               internal/context_util.cc
-               DEPS
-               tags
-               context)
+opencensus_lib(
+  tags_context_util
+  PUBLIC
+  SRCS
+  internal/context_util.cc
+  DEPS
+  tags
+  context)
 
-opencensus_lib(tags_with_tag_map
-               PUBLIC
-               SRCS
-               internal/with_tag_map.cc
-               DEPS
-               tags
-               context
-               absl::strings)
+opencensus_lib(
+  tags_with_tag_map
+  PUBLIC
+  SRCS
+  internal/with_tag_map.cc
+  DEPS
+  tags
+  context
+  absl::strings)
 
-opencensus_test(tags_context_util_test
-                internal/context_util_test.cc
-                tags
-                tags_context_util
-                tags_with_tag_map
-                context)
+opencensus_test(tags_context_util_test internal/context_util_test.cc tags
+                tags_context_util tags_with_tag_map context)
 
 opencensus_test(tags_tag_key_test internal/tag_key_test.cc tags)
 
 opencensus_test(tags_tag_map_test internal/tag_map_test.cc tags)
 
-opencensus_test(tags_with_tag_map_test
-                internal/with_tag_map_test.cc
-                tags
-                tags_with_tag_map
-                context)
+opencensus_test(tags_with_tag_map_test internal/with_tag_map_test.cc tags
+                tags_with_tag_map context)
 
-opencensus_benchmark(tags_tag_map_benchmark
-                     internal/tag_map_benchmark.cc
-                     tags
+opencensus_benchmark(tags_tag_map_benchmark internal/tag_map_benchmark.cc tags
                      absl::strings)

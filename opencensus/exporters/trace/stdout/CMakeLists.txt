@@ -12,17 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-opencensus_lib(exporters_trace_stdout
-               PUBLIC
-               SRCS
-               internal/stdout_exporter.cc
-               DEPS
-               trace
-               absl::base
-               absl::memory)
+opencensus_lib(
+  exporters_trace_stdout
+  PUBLIC
+  SRCS
+  internal/stdout_exporter.cc
+  DEPS
+  trace
+  absl::base
+  absl::memory)
 
-opencensus_test(exporters_trace_stdout_test
-                internal/stdout_exporter_test.cc
-                exporters_trace_stdout
-                trace
-                absl::time)
+opencensus_test(exporters_trace_stdout_test internal/stdout_exporter_test.cc
+                exporters_trace_stdout trace absl::time)

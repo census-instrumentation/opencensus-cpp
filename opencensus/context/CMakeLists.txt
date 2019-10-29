@@ -12,22 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-opencensus_lib(context
-               PUBLIC
-               SRCS
-               internal/context.cc
-               internal/with_context.cc
-               DEPS
-               tags
-               trace)
+opencensus_lib(
+  context
+  PUBLIC
+  SRCS
+  internal/context.cc
+  internal/with_context.cc
+  DEPS
+  tags
+  trace)
 
-opencensus_test(context_context_test
-                internal/context_test.cc
-                context
-                tags_context_util
-                tags_with_tag_map
-                trace_context_util
-                trace_with_span)
+opencensus_test(
+  context_context_test
+  internal/context_test.cc
+  context
+  tags_context_util
+  tags_with_tag_map
+  trace_context_util
+  trace_with_span)
 
 opencensus_test(context_with_context_test internal/with_context_test.cc context)
 
