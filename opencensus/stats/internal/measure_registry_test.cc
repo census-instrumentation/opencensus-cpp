@@ -147,6 +147,20 @@ TEST(MeasureRegistryTest, GetMeasureByNameWithWrongTypeFails) {
   EXPECT_NE(measure_int.GetDescriptor(), measure_int_mistyped.GetDescriptor());
 }
 
+TEST(MeasureRegistryTest, GrowDescriptorVector) {
+  const std::string name = MakeUniqueName();
+  ASSERT_TRUE(MeasureDouble::Register(name, "desc", "units").IsValid());
+  const MeasureDescriptor& md = MeasureRegistry::GetDescriptorByName(name);
+
+  // Add descriptors until the vector of descriptors grows, moves, and
+  // invalidates md above.
+  for (int i = 0; i < 1000; ++i) {
+    EXPECT_EQ(MeasureDescriptor::Type::kDouble, md.type());
+    ASSERT_TRUE(
+        MeasureDouble::Register(MakeUniqueName(), "desc", "units").IsValid());
+  }
+}
+
 }  // namespace
 }  // namespace stats
 }  // namespace opencensus
