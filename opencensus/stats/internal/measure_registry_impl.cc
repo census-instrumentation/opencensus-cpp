@@ -16,6 +16,7 @@
 
 #include <iostream>
 
+#include "absl/memory/memory.h"
 #include "opencensus/stats/internal/delta_producer.h"
 #include "opencensus/stats/internal/stats_manager.h"
 #include "opencensus/stats/measure_descriptor.h"
@@ -83,7 +84,8 @@ uint64_t MeasureRegistryImpl::RegisterImpl(MeasureDescriptor descriptor) {
   const uint64_t id =
       CreateMeasureId(registered_descriptors_.size(), true, descriptor.type());
   id_map_.emplace_hint(it, descriptor.name(), id);
-  registered_descriptors_.push_back(std::move(descriptor));
+  registered_descriptors_.push_back(
+      absl::make_unique<MeasureDescriptor>(std::move(descriptor)));
   return id;
 }
 
@@ -96,7 +98,7 @@ const MeasureDescriptor& MeasureRegistryImpl::GetDescriptorByName(
         MeasureDescriptor("", "", "", MeasureDescriptor::Type::kDouble);
     return default_descriptor;
   } else {
-    return registered_descriptors_[IdToIndex(it->second)];
+    return *registered_descriptors_[IdToIndex(it->second)];
   }
 }
 

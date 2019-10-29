@@ -16,6 +16,7 @@
 #define OPENCENSUS_STATS_INTERNAL_MEASURE_REGISTRY_IMPL_H_
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -74,9 +75,12 @@ class MeasureRegistryImpl {
                                   MeasureDescriptor::Type type);
 
   mutable absl::Mutex mu_;
-  // The registered MeasureDescriptors. Measure id are indexes into this
-  // vector plus some flags in the high bits.
-  std::vector<MeasureDescriptor> registered_descriptors_ GUARDED_BY(mu_);
+  // The registered MeasureDescriptors. Measure ids are indexes into this
+  // vector plus some flags in the high bits. Heap allocated so that the
+  // descriptors themselves don't move around when the vector storage moves due
+  // to resize.
+  std::vector<std::unique_ptr<MeasureDescriptor>> registered_descriptors_
+      GUARDED_BY(mu_);
   // A map from measure names to IDs.
   std::unordered_map<std::string, uint64_t> id_map_ GUARDED_BY(mu_);
 };
@@ -100,7 +104,7 @@ const MeasureDescriptor& MeasureRegistryImpl::GetDescriptor(
         MeasureDescriptor("", "", "", MeasureDescriptor::Type::kDouble);
     return default_descriptor;
   }
-  return registered_descriptors_[IdToIndex(measure.id_)];
+  return *registered_descriptors_[IdToIndex(measure.id_)];
 }
 
 // static
