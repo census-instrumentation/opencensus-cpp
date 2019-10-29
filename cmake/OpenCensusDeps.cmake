@@ -14,18 +14,22 @@
 
 include(FetchContent)
 
-FetchContent_Declare(googletest
-                     GIT_REPOSITORY https://github.com/abseil/googletest
-                     GIT_TAG ed2fe122f8dc9aca844d724986d1d5cf5b65ea4e)
-FetchContent_Declare(abseil
-                     GIT_REPOSITORY https://github.com/abseil/abseil-cpp
-                     GIT_TAG 2c8421e1c6cef0da9e8a20b01c15256ec9ec116d)
-FetchContent_Declare(prometheus
-                     GIT_REPOSITORY https://github.com/jupp0r/prometheus-cpp
-                     GIT_TAG master)
-FetchContent_Declare(benchmark
-                     GIT_REPOSITORY https://github.com/google/benchmark
-                     GIT_TAG master)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/abseil/googletest
+  GIT_TAG ed2fe122f8dc9aca844d724986d1d5cf5b65ea4e)
+FetchContent_Declare(
+  abseil
+  GIT_REPOSITORY https://github.com/abseil/abseil-cpp
+  GIT_TAG 2c8421e1c6cef0da9e8a20b01c15256ec9ec116d)
+FetchContent_Declare(
+  prometheus
+  GIT_REPOSITORY https://github.com/jupp0r/prometheus-cpp
+  GIT_TAG master)
+FetchContent_Declare(
+  benchmark
+  GIT_REPOSITORY https://github.com/google/benchmark
+  GIT_TAG master)
 
 FetchContent_GetProperties(googletest)
 if(BUILD_TESTING)
@@ -60,12 +64,18 @@ endif()
 FetchContent_GetProperties(prometheus)
 if(NOT prometheus_POPULATED)
   message(STATUS "Dependency: prometheus")
-  set(ENABLE_PUSH OFF CACHE BOOL "Build prometheus-cpp push library" FORCE)
-  set(ENABLE_PULL OFF CACHE BOOL "Build prometheus-cpp pull library" FORCE)
+  set(ENABLE_PUSH
+      OFF
+      CACHE BOOL "Build prometheus-cpp push library" FORCE)
+  set(ENABLE_PULL
+      OFF
+      CACHE BOOL "Build prometheus-cpp pull library" FORCE)
   set(ENABLE_COMPRESSION
       OFF
       CACHE BOOL "Enable gzip compression for prometheus-cpp" FORCE)
-  set(ENABLE_TESTING OFF CACHE BOOL "Build test for prometheus-cpp" FORCE)
+  set(ENABLE_TESTING
+      OFF
+      CACHE BOOL "Build test for prometheus-cpp" FORCE)
   FetchContent_Populate(prometheus)
   add_subdirectory(${prometheus_SOURCE_DIR} ${prometheus_BINARY_DIR}
                    EXCLUDE_FROM_ALL)

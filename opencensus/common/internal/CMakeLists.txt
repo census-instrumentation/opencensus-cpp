@@ -12,19 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-opencensus_lib(common_hostname
-               SRCS
-               hostname.cc
-               DEPS
-               absl::strings)
+opencensus_lib(common_hostname SRCS hostname.cc DEPS absl::strings)
 
-opencensus_lib(common_random
-               SRCS
-               random.cc
-               DEPS
-               absl::base
-               absl::synchronization
-               absl::time)
+opencensus_lib(
+  common_random
+  SRCS
+  random.cc
+  DEPS
+  absl::base
+  absl::synchronization
+  absl::time)
 
 opencensus_lib(common_stats_object DEPS absl::time)
 
@@ -40,8 +37,5 @@ opencensus_test(common_random_test random_test.cc common_random)
 
 opencensus_benchmark(common_random_benchmark random_benchmark.cc common_random)
 
-opencensus_test(common_stats_object_test
-                stats_object_test.cc
-                common_stats_object
-                absl::strings
-                absl::span)
+opencensus_test(common_stats_object_test stats_object_test.cc
+                common_stats_object absl::strings absl::span)
