@@ -22,8 +22,8 @@ namespace {
 
 void BM_SetTimestamp(benchmark::State& state) {
   absl::Time t = absl::Now();
+  google::protobuf::Timestamp proto;
   for (auto _ : state) {
-    google::protobuf::Timestamp proto;
     ::opencensus::common::SetTimestamp(t, &proto);
   }
 }
