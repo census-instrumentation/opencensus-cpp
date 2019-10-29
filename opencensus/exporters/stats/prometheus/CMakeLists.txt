@@ -12,25 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-opencensus_lib(exporters_stats_prometheus
-               PUBLIC
-               SRCS
-               internal/prometheus_exporter.cc
-               DEPS
-               exporters_stats_prometheus_utils
-               stats)
+opencensus_lib(
+  exporters_stats_prometheus
+  PUBLIC
+  SRCS
+  internal/prometheus_exporter.cc
+  DEPS
+  exporters_stats_prometheus_utils
+  stats)
 
-opencensus_lib(exporters_stats_prometheus_utils
-               SRCS
-               internal/prometheus_utils.cc
-               DEPS
-               stats
-               absl::strings
-               absl::time
-               prometheus-cpp::core)
+opencensus_lib(
+  exporters_stats_prometheus_utils
+  SRCS
+  internal/prometheus_utils.cc
+  DEPS
+  stats
+  absl::strings
+  absl::time
+  prometheus-cpp::core)
 
-opencensus_test(exporters_stats_prometheus_utils_test
-                internal/prometheus_utils_test.cc
-                exporters_stats_prometheus_utils
-                stats
-                stats_test_utils)
+opencensus_test(
+  exporters_stats_prometheus_utils_test internal/prometheus_utils_test.cc
+  exporters_stats_prometheus_utils stats stats_test_utils)

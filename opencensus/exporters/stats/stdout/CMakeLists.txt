@@ -12,19 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-opencensus_lib(exporters_stats_stdout
-               PUBLIC
-               SRCS
-               internal/stdout_exporter.cc
-               DEPS
-               stats
-               absl::memory
-               absl::strings
-               absl::time)
+opencensus_lib(
+  exporters_stats_stdout
+  PUBLIC
+  SRCS
+  internal/stdout_exporter.cc
+  DEPS
+  stats
+  absl::memory
+  absl::strings
+  absl::time)
 
-opencensus_test(exporters_stats_stdout_test
-                internal/stdout_exporter_test.cc
-                exporters_stats_stdout
-                stats
-                stats_test_utils
-                absl::time)
+opencensus_test(exporters_stats_stdout_test internal/stdout_exporter_test.cc
+                exporters_stats_stdout stats stats_test_utils absl::time)

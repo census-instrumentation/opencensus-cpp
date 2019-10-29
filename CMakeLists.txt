@@ -21,7 +21,10 @@ if(CCACHE_PROGRAM)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CCACHE_PROGRAM}")
 endif()
 
-project(opencensus-cpp VERSION 0.5.0 LANGUAGES CXX)
+project(
+  opencensus-cpp
+  VERSION 0.5.0
+  LANGUAGES CXX)
 
 option(FUZZER "Either OFF or e.g. -fsanitize=fuzzer,address" OFF)
 
