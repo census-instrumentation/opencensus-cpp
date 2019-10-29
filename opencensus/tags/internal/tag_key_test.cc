@@ -15,6 +15,7 @@
 #include "opencensus/tags/tag_key.h"
 
 #include "absl/hash/hash.h"
+#include "absl/strings/str_cat.h"
 #include "gtest/gtest.h"
 
 namespace opencensus {
@@ -38,6 +39,18 @@ TEST(TagKeyTest, Inequality) {
   TagKey k2 = TagKey::Register("k2");
   EXPECT_NE(k1, k2);
   EXPECT_NE(absl::Hash<TagKey>()(k1), absl::Hash<TagKey>()(k2));
+}
+
+// Test that the reference returned by TagKey::name() isn't invalidated when the
+// registry's underlying storage grows and moves.
+TEST(TagKeyTest, GrowRegistry) {
+  TagKey k = TagKey::Register("my_key");
+  const std::string& s = k.name();
+  ASSERT_EQ("my_key", s);
+  for (int i = 0; i < 1000; ++i) {
+    TagKey::Register(absl::StrCat("key_", i));
+    EXPECT_EQ("my_key", s) << "iteration " << i;
+  }
 }
 
 }  // namespace

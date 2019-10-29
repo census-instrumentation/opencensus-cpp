@@ -15,12 +15,14 @@
 #include "opencensus/tags/tag_key.h"
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
 #include "absl/base/thread_annotations.h"
+#include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
 
@@ -38,13 +40,16 @@ class TagKeyRegistry {
 
   const std::string& TagKeyName(TagKey key) const LOCKS_EXCLUDED(mu_) {
     absl::ReaderMutexLock l(&mu_);
-    return registered_tag_keys_[key.id_];
+    return *registered_tag_keys_[key.id_];
   }
 
  private:
   mutable absl::Mutex mu_;
-  // The registered tag keys. Tag key ids are indices into this vector.
-  std::vector<std::string> registered_tag_keys_ GUARDED_BY(mu_);
+  // The registered tag keys. Tag key ids are indices into this vector.  Strings
+  // are allocated individually so that they don't move around when the vector
+  // storage moves due to resize.
+  std::vector<std::unique_ptr<std::string>> registered_tag_keys_
+      GUARDED_BY(mu_);
   // A map from names to IDs.
   // TODO: change to string_view when a suitable hash is available.
   std::unordered_map<std::string, uint64_t> id_map_ GUARDED_BY(mu_);
@@ -56,7 +61,7 @@ TagKey TagKeyRegistry::Register(absl::string_view name) {
   const auto it = id_map_.find(string_name);
   if (it == id_map_.end()) {
     const uint64_t id = registered_tag_keys_.size();
-    registered_tag_keys_.emplace_back(name);
+    registered_tag_keys_.emplace_back(absl::make_unique<std::string>(name));
     id_map_.emplace_hint(it, string_name, id);
     return TagKey(id);
   }
