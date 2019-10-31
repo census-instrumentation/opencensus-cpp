@@ -59,6 +59,8 @@ cc_binary(
         ":exporters",
         ":hello_cc_grpc",
         ":hello_cc_proto",
+        "//opencensus/tags",
+        "//opencensus/tags:with_tag_map",
         "//opencensus/trace",
         "//opencensus/trace:context_util",
         "//opencensus/trace:with_span",

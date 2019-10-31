@@ -25,6 +25,9 @@
 #include "examples/grpc/exporters.h"
 #include "examples/grpc/hello.grpc.pb.h"
 #include "examples/grpc/hello.pb.h"
+#include "opencensus/tags/tag_key.h"
+#include "opencensus/tags/tag_map.h"
+#include "opencensus/tags/with_tag_map.h"
 #include "opencensus/trace/context_util.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/trace_config.h"
@@ -65,8 +68,14 @@ int main(int argc, char **argv) {
       "HelloClient", /*parent=*/nullptr, {&sampler});
   std::cout << "HelloClient span context is " << span.context().ToString()
             << "\n";
+
+  // Create a tag map.
+  static const auto key = opencensus::tags::TagKey::Register("my_key");
+  opencensus::tags::TagMap tags({{key, "my_value"}});
+
   {
     opencensus::trace::WithSpan ws(span);
+    opencensus::tags::WithTagMap wt(tags);
 
     // The client Span ends when ctx falls out of scope.
     grpc::ClientContext ctx;
