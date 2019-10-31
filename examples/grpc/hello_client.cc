@@ -12,20 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <grpcpp/grpcpp.h>
+#include <grpcpp/opencensus.h>
+
 #include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <string>
 
-#include <grpcpp/grpcpp.h>
-#include <grpcpp/opencensus.h>
-
+#include "absl/strings/str_cat.h"
 #include "absl/time/clock.h"
 #include "examples/grpc/exporters.h"
 #include "examples/grpc/hello.grpc.pb.h"
 #include "examples/grpc/hello.pb.h"
+#include "opencensus/trace/context_util.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/trace_config.h"
+#include "opencensus/trace/with_span.h"
 
 namespace {
 
@@ -51,17 +54,20 @@ int main(int argc, char **argv) {
 
   RegisterExporters();
 
-  // Trace all outgoing RPCs.
-  opencensus::trace::TraceConfig::SetCurrentTraceParams(
-      {128, 128, 128, 128, opencensus::trace::ProbabilitySampler(1.0)});
-
   // Create a Channel to send RPCs over.
   std::shared_ptr<grpc::Channel> channel =
       grpc::CreateChannel(hostport, grpc::InsecureChannelCredentials());
   std::unique_ptr<HelloService::Stub> stub = HelloService::NewStub(channel);
 
-  // Send the RPC.
+  // Create a span, this will be the parent of the RPC span.
+  static opencensus::trace::AlwaysSampler sampler;
+  auto span = opencensus::trace::Span::StartSpan(
+      "HelloClient", /*parent=*/nullptr, {&sampler});
+  std::cout << "HelloClient span context is " << span.context().ToString()
+            << "\n";
   {
+    opencensus::trace::WithSpan ws(span);
+
     // The client Span ends when ctx falls out of scope.
     grpc::ClientContext ctx;
     ctx.AddMetadata("key1", "value1");
@@ -70,12 +76,24 @@ int main(int argc, char **argv) {
     HelloReply reply;
     request.set_name(name);
     std::cout << "Sending request: \"" << request.ShortDebugString() << "\"\n";
+    opencensus::trace::GetCurrentSpan().AddAnnotation("Sending request.");
 
+    // Send the RPC.
     grpc::Status status = stub->SayHello(&ctx, request, &reply);
 
     std::cout << "Got status: " << status.error_code() << ": \""
               << status.error_message() << "\"\n";
     std::cout << "Got reply: \"" << reply.ShortDebugString() << "\"\n";
+    opencensus::trace::GetCurrentSpan().AddAnnotation(
+        "Got reply.", {{"status", absl::StrCat(status.error_code(), ": ",
+                                               status.error_message())}});
+    if (!status.ok()) {
+      // TODO: Map grpc::StatusCode to trace::StatusCode.
+      opencensus::trace::GetCurrentSpan().SetStatus(
+          opencensus::trace::StatusCode::UNKNOWN, status.error_message());
+    }
+    // Don't forget to explicitly end the span!
+    opencensus::trace::GetCurrentSpan().End();
   }
 
   // Disable tracing any further RPCs (which will be sent by exporters).
