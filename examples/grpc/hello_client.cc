@@ -25,6 +25,9 @@
 #include "examples/grpc/exporters.h"
 #include "examples/grpc/hello.grpc.pb.h"
 #include "examples/grpc/hello.pb.h"
+#include "opencensus/stats/aggregation.h"
+#include "opencensus/stats/bucket_boundaries.h"
+#include "opencensus/stats/view_descriptor.h"
 #include "opencensus/tags/context_util.h"
 #include "opencensus/tags/tag_key.h"
 #include "opencensus/tags/tag_map.h"
@@ -39,6 +42,32 @@ namespace {
 using examples::HelloReply;
 using examples::HelloRequest;
 using examples::HelloService;
+
+opencensus::tags::TagKey MyKey() {
+  static const auto key = opencensus::tags::TagKey::Register("my_key");
+  return key;
+}
+
+opencensus::stats::Aggregation MillisDistributionAggregation() {
+  return opencensus::stats::Aggregation::Distribution(
+      opencensus::stats::BucketBoundaries::Explicit(
+          {0, 0.1, 1, 10, 100, 1000}));
+}
+
+ABSL_CONST_INIT const absl::string_view kRpcClientRoundtripLatencyMeasureName =
+    "grpc.io/client/roundtrip_latency";
+
+::opencensus::tags::TagKey ClientMethodTagKey() {
+  static const auto method_tag_key =
+      ::opencensus::tags::TagKey::Register("grpc_client_method");
+  return method_tag_key;
+}
+
+::opencensus::tags::TagKey ClientStatusTagKey() {
+  static const auto status_tag_key =
+      ::opencensus::tags::TagKey::Register("grpc_client_status");
+  return status_tag_key;
+}
 
 }  // namespace
 
@@ -55,6 +84,16 @@ int main(int argc, char **argv) {
 
   // Register the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
   grpc::RegisterOpenCensusPlugin();
+
+  // Add a view of client RPC latency broken down by our custom key.
+  opencensus::stats::ViewDescriptor()
+      .set_name("example/client/roundtrip_latency/cumulative")
+      .set_measure(kRpcClientRoundtripLatencyMeasureName)
+      .set_aggregation(MillisDistributionAggregation())
+      .add_column(ClientMethodTagKey())
+      .add_column(ClientStatusTagKey())
+      .add_column(MyKey())
+      .RegisterForExport();
 
   RegisterExporters();
 
