@@ -36,6 +36,7 @@ cc_library(
     deps = [
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/hash",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
     ],
@@ -88,6 +89,7 @@ cc_test(
     deps = [
         ":tags",
         "@com_google_absl//absl/hash",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -135,7 +137,6 @@ cc_binary(
     testonly = 1,
     srcs = ["internal/with_tag_map_benchmark.cc"],
     copts = TEST_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
         ":tags",

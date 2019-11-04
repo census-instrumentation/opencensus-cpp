@@ -98,7 +98,6 @@ cc_binary(
     testonly = 1,
     srcs = ["random_benchmark.cc"],
     copts = TEST_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
         ":random_lib",
@@ -123,7 +122,6 @@ cc_binary(
     testonly = 1,
     srcs = ["timestamp_benchmark.cc"],
     copts = TEST_COPTS,
-    #linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
         ":timestamp",

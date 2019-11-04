@@ -34,7 +34,6 @@ cc_library(
         "//opencensus/trace",
         "@com_github_curl//:curl",
         "@com_github_tencent_rapidjson//:rapidjson",
-        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
