@@ -60,6 +60,7 @@ cc_binary(
         ":hello_cc_grpc",
         ":hello_cc_proto",
         "//opencensus/tags",
+        "//opencensus/tags:context_util",
         "//opencensus/tags:with_tag_map",
         "//opencensus/trace",
         "//opencensus/trace:context_util",

@@ -25,6 +25,7 @@
 #include "examples/grpc/exporters.h"
 #include "examples/grpc/hello.grpc.pb.h"
 #include "examples/grpc/hello.pb.h"
+#include "opencensus/tags/context_util.h"
 #include "opencensus/tags/tag_key.h"
 #include "opencensus/tags/tag_map.h"
 #include "opencensus/tags/with_tag_map.h"
@@ -69,13 +70,18 @@ int main(int argc, char **argv) {
   std::cout << "HelloClient span context is " << span.context().ToString()
             << "\n";
 
-  // Create a tag map.
+  // Extend the current tag map.
+  // (in this example, there are no tags currently present, but in real code we
+  // wouldn't want to drop tags)
   static const auto key = opencensus::tags::TagKey::Register("my_key");
-  opencensus::tags::TagMap tags({{key, "my_value"}});
+  std::vector<std::pair<opencensus::tags::TagKey, std::string>> tags(
+      opencensus::tags::GetCurrentTagMap().tags());
+  tags.emplace_back(key, "my_value");
+  opencensus::tags::TagMap tag_map(std::move(tags));
 
   {
     opencensus::trace::WithSpan ws(span);
-    opencensus::tags::WithTagMap wt(tags);
+    opencensus::tags::WithTagMap wt(tag_map);
 
     // The client Span ends when ctx falls out of scope.
     grpc::ClientContext ctx;
