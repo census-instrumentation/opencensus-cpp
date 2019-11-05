@@ -103,6 +103,10 @@ void Handler::ExportViewData(
   absl::MutexLock l(&mu_);
   std::vector<google::monitoring::v3::TimeSeries> time_series;
   for (const auto& datum : data) {
+    if (IsDayOld(datum.second)) {
+      // Data point cannot be written if it is more than 24h in the past.
+      continue;
+    }
     const opencensus::stats::ViewDescriptor& descriptor = datum.first;
     const std::string metric_type =
         MakeType(opts_.metric_name_prefix, descriptor.name());

@@ -163,6 +163,10 @@ bool IsKnownCustomMetric(absl::string_view metric_type) {
          absl::StartsWith(metric_type, "external.googleapis.com/");
 }
 
+bool IsDayOld(const opencensus::stats::ViewData& view_data) {
+  return absl::Now() - view_data.end_time() >= absl::Hours(24);
+}
+
 const google::api::MonitoredResource* MonitoredResourceForView(
     const opencensus::stats::ViewDescriptor& view_descriptor,
     const google::api::MonitoredResource& monitored_resource,

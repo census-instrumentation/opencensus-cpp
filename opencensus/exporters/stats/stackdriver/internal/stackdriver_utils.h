@@ -38,6 +38,9 @@ std::string MakeType(absl::string_view metric_name_prefix,
 // custom (i.e not built-in) Stackdriver metric.
 bool IsKnownCustomMetric(absl::string_view metric_type);
 
+// Returns true if the given view data is more than 24h in the past.
+bool IsDayOld(const opencensus::stats::ViewData& view_data);
+
 // Returns a pointer to the MonitoredResource proto for this view, or nullptr if
 // the default resource should be used.
 const google::api::MonitoredResource* MonitoredResourceForView(
