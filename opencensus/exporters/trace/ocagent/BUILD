@@ -35,7 +35,6 @@ cc_library(
         "//opencensus/common/internal/grpc:with_user_agent",
         "//opencensus/trace",
         "@com_github_grpc_grpc//:grpc++",
-        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",

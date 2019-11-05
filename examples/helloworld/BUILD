@@ -22,7 +22,6 @@ cc_binary(
     name = "helloworld",
     srcs = ["helloworld.cc"],
     copts = DEFAULT_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     deps = [
         "//opencensus/exporters/stats/stdout:stdout_exporter",
         "//opencensus/exporters/trace/stdout:stdout_exporter",
