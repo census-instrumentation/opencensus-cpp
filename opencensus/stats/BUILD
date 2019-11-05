@@ -252,7 +252,6 @@ cc_binary(
     testonly = 1,
     srcs = ["internal/stats_manager_benchmark.cc"],
     copts = TEST_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
         ":core",

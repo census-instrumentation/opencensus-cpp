@@ -78,7 +78,6 @@ cc_binary(
     testonly = 1,
     srcs = ["internal/context_benchmark.cc"],
     copts = TEST_COPTS,
-    linkopts = ["-pthread"],  # Required for absl/synchronization bits.
     linkstatic = 1,
     deps = [
         ":context",
