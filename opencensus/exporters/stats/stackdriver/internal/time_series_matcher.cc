@@ -124,6 +124,8 @@ bool TimeSeriesMatcher::MatchAndExplain(
       return true;
     }
   }
+  *listener << "has unknown type";
+  return false;
 }
 
 void TimeSeriesMatcher::DescribeTo(::std::ostream* os) const {
