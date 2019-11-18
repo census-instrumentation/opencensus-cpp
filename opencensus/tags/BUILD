@@ -15,6 +15,7 @@
 # limitations under the License.
 
 load("//opencensus:copts.bzl", "DEFAULT_COPTS", "TEST_COPTS")
+load("//bazel:cc_fuzz_target.bzl", "cc_fuzz_target")
 
 licenses(["notice"])  # Apache License 2.0
 
@@ -55,6 +56,18 @@ cc_library(
 )
 
 cc_library(
+    name = "grpc_tags_bin",
+    srcs = ["internal/grpc_tags_bin.cc"],
+    hdrs = ["propagation/grpc_tags_bin.h"],
+    copts = DEFAULT_COPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":tags",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "with_tag_map",
     srcs = ["internal/with_tag_map.cc"],
     hdrs = ["with_tag_map.h"],
@@ -78,6 +91,18 @@ cc_test(
         ":tags",
         ":with_tag_map",
         "//opencensus/context",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "grpc_tags_bin_test",
+    srcs = ["internal/grpc_tags_bin_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":grpc_tags_bin",
+        ":tags",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -142,5 +167,18 @@ cc_binary(
         ":tags",
         ":with_tag_map",
         "@com_github_google_benchmark//:benchmark",
+    ],
+)
+
+# Fuzzers
+# ========================================================================= #
+
+cc_fuzz_target(
+    name = "grpc_tags_bin_fuzzer",
+    srcs = ["internal/grpc_tags_bin_fuzzer.cc"],
+    corpus = glob(["internal/grpc_tags_bin_corpus/*"]),
+    deps = [
+        ":grpc_tags_bin",
+        "@com_google_absl//absl/strings",
     ],
 )
