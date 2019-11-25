@@ -53,7 +53,7 @@ bool ParseVarint(absl::string_view* input, int* out) {
   int i = 0;
   uint8_t c;
   do {
-    if (s.length() < 1) {
+    if (s.empty()) {
       return false;  // Too short.
     }
     c = s[0];
@@ -81,9 +81,6 @@ bool FromGrpcTagsBinHeader(absl::string_view header, TagMap* out) {
   header = header.substr(1);
   while (header.length() > 0) {
     // Parse tag field id.
-    if (header.length() < 1) {
-      return false;  // Too short.
-    }
     if (header[0] != kTagFieldId) {
       return false;  // Wrong field id.
     }
