@@ -14,13 +14,13 @@
 
 // Example RPC server using gRPC.
 
+#include <grpcpp/grpcpp.h>
+#include <grpcpp/opencensus.h>
+
 #include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <string>
-
-#include <grpcpp/grpcpp.h>
-#include <grpcpp/opencensus.h>
 
 #include "absl/strings/escaping.h"
 #include "absl/strings/numbers.h"
@@ -30,6 +30,9 @@
 #include "examples/grpc/hello.pb.h"
 #include "opencensus/exporters/stats/prometheus/prometheus_exporter.h"
 #include "opencensus/stats/stats.h"
+#include "opencensus/tags/context_util.h"
+#include "opencensus/tags/tag_map.h"
+#include "opencensus/trace/context_util.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/trace_config.h"
@@ -89,8 +92,13 @@ class HelloServiceImpl final : public HelloService::Service {
         {{LettersMeasure(), request->name().size()}},
         {{CaseKey(), isupper(request->name()[0]) ? "upper" : "lower"}});
     // Give feedback on stderr.
-    std::cerr << "SayHello RPC handled.\n";
-    std::cerr << "  Metadata:\n";
+    std::cerr << "SayHello RPC handler:\n";
+    std::cerr << "  Current context: "
+              << opencensus::trace::GetCurrentSpan().context().ToString()
+              << "\n";
+    std::cerr << "  Current tags: "
+              << opencensus::tags::GetCurrentTagMap().DebugString() << "\n";
+    std::cerr << "  gRPC metadata:\n";
     auto metadata = context->client_metadata();
     for (const auto &mdpair : metadata) {
       std::cerr << "    \"" << absl::CEscape(ToStringView(mdpair.first))
