@@ -145,6 +145,20 @@ cc_test(
 # ========================================================================= #
 
 cc_binary(
+    name = "grpc_tags_bin_benchmark",
+    testonly = 1,
+    srcs = ["internal/grpc_tags_bin_benchmark.cc"],
+    copts = TEST_COPTS,
+    linkstatic = 1,
+    deps = [
+        ":grpc_tags_bin",
+        ":tags",
+        "@com_github_google_benchmark//:benchmark",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_binary(
     name = "tag_map_benchmark",
     testonly = 1,
     srcs = ["internal/tag_map_benchmark.cc"],

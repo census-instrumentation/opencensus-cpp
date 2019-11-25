@@ -65,6 +65,10 @@ opencensus_test(tags_tag_map_test internal/tag_map_test.cc tags)
 opencensus_test(tags_with_tag_map_test internal/with_tag_map_test.cc tags
                 tags_with_tag_map context)
 
+opencensus_benchmark(
+  tags_grpc_tags_bin_benchmark internal/grpc_tags_bin_benchmark.cc tags
+  tags_grpc_tags_bin absl::strings)
+
 opencensus_benchmark(tags_tag_map_benchmark internal/tag_map_benchmark.cc tags
                      absl::strings)
 
