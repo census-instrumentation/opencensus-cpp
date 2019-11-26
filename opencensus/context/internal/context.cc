@@ -16,6 +16,7 @@
 
 #include <functional>
 #include <utility>
+#include <memory>
 
 #include "absl/strings/str_cat.h"
 #include "opencensus/context/with_context.h"
@@ -24,6 +25,20 @@
 
 namespace opencensus {
 namespace context {
+
+// Wrapper for per-thread Context, frees the Context on thread shutdown.
+class ContextWrapper {
+ public:
+  ContextWrapper() : ptr_(new Context) {}
+  Context* get() { return ptr_.get(); }
+
+private:
+  std::unique_ptr<Context> ptr_;
+};
+
+namespace {
+thread_local ContextWrapper g_wrapper;
+}  // namespace
 
 Context::Context()
     : tags_(opencensus::tags::TagMap({})),
@@ -48,9 +63,7 @@ std::string Context::DebugString() const {
 
 // static
 Context* Context::InternalMutableCurrent() {
-  static thread_local Context* thread_ctx = nullptr;
-  if (thread_ctx == nullptr) thread_ctx = new Context;
-  return thread_ctx;
+  return g_wrapper.get();
 }
 
 void swap(Context& a, Context& b) {
