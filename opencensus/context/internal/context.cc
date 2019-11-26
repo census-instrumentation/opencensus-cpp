@@ -15,8 +15,8 @@
 #include "opencensus/context/context.h"
 
 #include <functional>
-#include <utility>
 #include <memory>
+#include <utility>
 
 #include "absl/strings/str_cat.h"
 #include "opencensus/context/with_context.h"
@@ -32,7 +32,7 @@ class ContextWrapper {
   ContextWrapper() : ptr_(new Context) {}
   Context* get() { return ptr_.get(); }
 
-private:
+ private:
   std::unique_ptr<Context> ptr_;
 };
 
@@ -62,9 +62,7 @@ std::string Context::DebugString() const {
 }
 
 // static
-Context* Context::InternalMutableCurrent() {
-  return g_wrapper.get();
-}
+Context* Context::InternalMutableCurrent() { return g_wrapper.get(); }
 
 void swap(Context& a, Context& b) {
   using std::swap;
