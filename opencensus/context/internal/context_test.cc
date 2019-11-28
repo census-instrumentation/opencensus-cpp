@@ -16,6 +16,7 @@
 
 #include <functional>
 #include <iostream>
+#include <thread>
 
 #include "gtest/gtest.h"
 #include "opencensus/tags/context_util.h"
@@ -84,6 +85,18 @@ TEST(ContextTest, WrapDoesNotLeak) {
         [span]() { Callback1(span); });
   }
   // We never call fn().
+  span.End();
+}
+
+TEST(ContextTest, ThreadDoesNotLeak) {
+  auto span = opencensus::trace::Span::StartSpan("MySpan");
+  std::thread t([span]() {
+    // Leak-sanitizer (part of ASAN) throws an error if this leaks.
+    opencensus::tags::WithTagMap wt(ExampleTagMap());
+    opencensus::trace::WithSpan ws(span);
+  });
+  t.join();
+  ExpectEmptyContext();
   span.End();
 }
 

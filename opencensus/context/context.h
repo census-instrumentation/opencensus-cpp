@@ -67,6 +67,7 @@ class Context {
 
   friend class ContextTestPeer;
   friend class WithContext;
+  friend class ContextWrapper;
   friend class ::opencensus::tags::ContextPeer;
   friend class ::opencensus::tags::WithTagMap;
   friend class ::opencensus::trace::ContextPeer;
