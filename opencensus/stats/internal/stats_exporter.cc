@@ -37,6 +37,12 @@ StatsExporterImpl* StatsExporterImpl::Get() {
   return global_stats_exporter_impl;
 }
 
+// static
+void StatsExporterImpl::SetInterval(absl::Duration interval) {
+  absl::MutexLock l(&mu_);
+  export_interval_ = interval;
+}
+
 void StatsExporterImpl::AddView(const ViewDescriptor& view) {
   absl::MutexLock l(&mu_);
   views_[view.name()] = absl::make_unique<opencensus::stats::View>(view);
@@ -90,31 +96,51 @@ void StatsExporterImpl::StartExportThread() EXCLUSIVE_LOCKS_REQUIRED(mu_) {
 }
 
 void StatsExporterImpl::RunWorkerLoop() {
-  absl::Time next_export_time = absl::Now() + export_interval_;
+  absl::Time next_export_time;
+  {
+    absl::MutexLock l(&mu_);
+    next_export_time = absl::Now() + export_interval_;
+  }
   while (true) {
     // SleepFor() returns immediately when given a negative duration.
     absl::SleepFor(next_export_time - absl::Now());
     // In case the last export took longer than the export interval, we
     // calculate the next time from now.
-    next_export_time = absl::Now() + export_interval_;
+    {
+      absl::MutexLock l(&mu_);
+      next_export_time = absl::Now() + export_interval_;
+    }
     Export();
   }
 }
 
+// StatsExporter
+// -------------
+
+// static
+void StatsExporter::SetInterval(absl::Duration interval) {
+  StatsExporterImpl::Get()->SetInterval(interval);
+}
+
+// static
 void StatsExporter::RemoveView(absl::string_view name) {
   StatsExporterImpl::Get()->RemoveView(name);
 }
 
+// static
 void StatsExporter::RegisterPushHandler(std::unique_ptr<Handler> handler) {
   StatsExporterImpl::Get()->RegisterPushHandler(std::move(handler));
 }
 
+// static
 std::vector<std::pair<ViewDescriptor, ViewData>> StatsExporter::GetViewData() {
   return StatsExporterImpl::Get()->GetViewData();
 }
 
+// static
 void StatsExporter::ExportForTesting() { StatsExporterImpl::Get()->Export(); }
 
+// static
 void StatsExporter::ClearHandlersForTesting() {
   StatsExporterImpl::Get()->ClearHandlersForTesting();
 }
