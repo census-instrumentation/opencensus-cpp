@@ -39,4 +39,8 @@ du -sk $HOME/bazel-cache || true
 bazel build $BAZEL_OPTIONS -k //...
 bazel test $BAZEL_OPTIONS -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)")
 
-du -sk $HOME/bazel-cache || true
+# Clean up bazel cache.
+set +e
+echo "Deleting $(find $HOME/bazel-cache -type f -atime +7 | wc -l) old files."
+find $HOME/bazel-cache -type f -atime +7 -delete
+du -sk $HOME/bazel-cache
