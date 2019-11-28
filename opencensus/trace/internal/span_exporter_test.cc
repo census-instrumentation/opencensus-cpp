@@ -17,6 +17,7 @@
 #include "absl/memory/memory.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/time/clock.h"
+#include "absl/time/time.h"
 #include "gtest/gtest.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/sampler.h"
@@ -63,6 +64,9 @@ class MyExporter : public exporter::SpanExporter::Handler {
 class SpanExporterTest : public ::testing::Test {
  protected:
   static void SetUpTestSuite() {
+    exporter::SpanExporter::SetBatchSize(1);
+    exporter::SpanExporter::SetInterval(absl::Seconds(1));
+
     // Only register once.
     MyExporter::Register();
   }
