@@ -41,6 +41,6 @@ bazel test $BAZEL_OPTIONS -k $(bazel query "kind(test, //...) except attr('tags'
 
 # Clean up bazel cache.
 set +e
-echo "Deleting $(find $HOME/bazel-cache -type f -atime +7 | wc -l) old files."
-find $HOME/bazel-cache -type f -atime +7 -delete
+echo "Deleting $(find $HOME/bazel-cache -type f -mtime +7 | wc -l) old files."
+find $HOME/bazel-cache -type f -mtime +7 -delete
 du -sk $HOME/bazel-cache
