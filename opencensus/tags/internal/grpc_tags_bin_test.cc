@@ -72,6 +72,39 @@ TEST(GrpcTagsBinTest, DeserializeDupeKey) {
   EXPECT_EQ("v2", m.tags()[0].second);
 }
 
+TEST(GrpcTagsBinTest, DeserializeEmptyKey) {
+  constexpr char tagsbin[] = {
+      0,                 // Version
+      0,                 // Tag field
+      3, 'k', 'e', 'y',  // k1
+      2, 'v', '1',       // v1
+      0,                 // Tag field
+      0,                 // k2
+      2, 'v', '2',       // v2
+  };
+  TagMap m({});
+  ASSERT_TRUE(
+      FromGrpcTagsBinHeader(absl::string_view(tagsbin, sizeof(tagsbin)), &m));
+  ASSERT_EQ(1, m.tags().size()) << "Empty key is dropped.";
+  EXPECT_EQ("key", m.tags()[0].first.name());
+  EXPECT_EQ("v1", m.tags()[0].second);
+}
+
+TEST(GrpcTagsBinTest, DeserializeEmptyValue) {
+  constexpr char tagsbin[] = {
+      0,                 // Version
+      0,                 // Tag field
+      3, 'k', 'e', 'y',  // k1
+      0,                 // v1
+  };
+  TagMap m({});
+  ASSERT_TRUE(
+      FromGrpcTagsBinHeader(absl::string_view(tagsbin, sizeof(tagsbin)), &m));
+  ASSERT_EQ(1, m.tags().size());
+  EXPECT_EQ("key", m.tags()[0].first.name());
+  EXPECT_TRUE(m.tags()[0].second.empty());
+}
+
 TEST(GrpcTagsBinTest, DeserializeTooShort) {
   constexpr char tagsbin[] = {
       0,  // Version
@@ -121,9 +154,6 @@ TEST(GrpcTagsBinTest, SerializeTooLong) {
   EXPECT_EQ("", ToGrpcTagsBinHeader(m))
       << "Serialization failed due to value being too long.";
 }
-
-// TODO: empty value?
-// TODO: empty key name?
 
 }  // namespace
 }  // namespace propagation

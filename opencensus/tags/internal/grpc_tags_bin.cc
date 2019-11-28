@@ -114,13 +114,11 @@ bool FromGrpcTagsBinHeader(absl::string_view header, TagMap* out) {
       header = header.substr(val_len);
     }
 
-    // TODO: check key is valid.
-    if (key.empty()) {
-      return false;  // Key cannot be empty string.
+    // Drop empty keys.
+    if (!key.empty()) {
+      // For duplicate keys, last wins.
+      keys_vals[std::string(key)] = val;
     }
-
-    // For duplicate keys, last wins.
-    keys_vals[std::string(key)] = val;
   }
 
   // Convert to tagmap.
