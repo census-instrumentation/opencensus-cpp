@@ -35,8 +35,15 @@ chmod +x bazel-${BAZEL_VERSION}-installer-${BAZEL_OS}-x86_64.sh
 echo "build --disk_cache=$HOME/bazel-cache" > ~/.bazelrc
 echo "build --experimental_strict_action_env" >> ~/.bazelrc
 du -sk $HOME/bazel-cache || true
+touch $HOME/start-time
 
 bazel build $BAZEL_OPTIONS -k //...
 bazel test $BAZEL_OPTIONS -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)")
 
-du -sk $HOME/bazel-cache || true
+set +e
+# Travis doesn't restore atime, so update mtime of files accessed during build.
+find $HOME/bazel-cache -type f -anewer $HOME/start-time -print0 | xargs -0 touch
+# Clean up cache.
+echo "Deleting $(find $HOME/bazel-cache -type f -mtime +7 | wc -l) old files."
+find $HOME/bazel-cache -type f -mtime +7 -delete
+du -sk $HOME/bazel-cache
