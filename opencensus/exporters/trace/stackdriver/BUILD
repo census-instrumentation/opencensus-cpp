@@ -38,7 +38,7 @@ cc_library(
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
-        "@com_google_googleapis//google/devtools/cloudtrace/v2:trace_cc_grpc",
-        "@com_google_googleapis//google/devtools/cloudtrace/v2:trace_cc_proto",
+        "@com_google_googleapis//google/devtools/cloudtrace/v2:cloudtrace_cc_grpc",
+        "@com_google_googleapis//google/devtools/cloudtrace/v2:cloudtrace_cc_proto",
     ],
 )
