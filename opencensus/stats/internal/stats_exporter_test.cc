@@ -31,29 +31,38 @@
 namespace opencensus {
 namespace stats {
 
+struct ExportedData {
+  std::vector<std::pair<ViewDescriptor, ViewData>> Get() const {
+    absl::MutexLock l(&mu);
+    return data;
+  }
+
+  mutable absl::Mutex mu;
+  std::vector<std::pair<ViewDescriptor, ViewData>> data GUARDED_BY(mu);
+};
+
 // A mock exporter that assigns exported data to the provided pointer.
 class MockExporter : public StatsExporter::Handler {
  public:
-  static void Register(
-      std::vector<std::pair<ViewDescriptor, ViewData>>* output) {
+  static void Register(ExportedData* output) {
     opencensus::stats::StatsExporter::RegisterPushHandler(
         absl::make_unique<MockExporter>(output));
   }
 
-  MockExporter(std::vector<std::pair<ViewDescriptor, ViewData>>* output)
-      : output_(output) {}
+  MockExporter(ExportedData* output) : output_(output) {}
 
   void ExportViewData(
       const std::vector<std::pair<ViewDescriptor, ViewData>>& data) override {
+    absl::MutexLock l(&output_->mu);
     // Looping because ViewData is (intentionally) copy-constructable but not
     // copy_assignable.
     for (const auto& datum : data) {
-      output_->emplace_back(datum.first, datum.second);
+      output_->data.emplace_back(datum.first, datum.second);
     }
   }
 
  private:
-  std::vector<std::pair<ViewDescriptor, ViewData>>* output_;
+  ExportedData* output_;
 };
 
 constexpr char kMeasureId[] = "test_measure_id";
@@ -96,7 +105,7 @@ class StatsExporterTest : public ::testing::Test {
 };
 
 TEST_F(StatsExporterTest, AddView) {
-  std::vector<std::pair<ViewDescriptor, ViewData>> exported_data;
+  ExportedData exported_data;
   MockExporter::Register(&exported_data);
   descriptor1_.RegisterForExport();
   descriptor2_.RegisterForExport();
@@ -104,13 +113,13 @@ TEST_F(StatsExporterTest, AddView) {
               ::testing::UnorderedElementsAre(::testing::Key(descriptor1_),
                                               ::testing::Key(descriptor2_)));
   Export();
-  EXPECT_THAT(exported_data,
+  EXPECT_THAT(exported_data.Get(),
               ::testing::UnorderedElementsAre(::testing::Key(descriptor1_),
                                               ::testing::Key(descriptor2_)));
 }
 
 TEST_F(StatsExporterTest, UpdateView) {
-  std::vector<std::pair<ViewDescriptor, ViewData>> exported_data;
+  ExportedData exported_data;
   MockExporter::Register(&exported_data);
   descriptor1_.RegisterForExport();
   descriptor2_.RegisterForExport();
@@ -120,13 +129,13 @@ TEST_F(StatsExporterTest, UpdateView) {
       ::testing::UnorderedElementsAre(::testing::Key(descriptor1_edited_),
                                       ::testing::Key(descriptor2_)));
   Export();
-  EXPECT_THAT(exported_data, ::testing::UnorderedElementsAre(
-                                 ::testing::Key(descriptor1_edited_),
-                                 ::testing::Key(descriptor2_)));
+  EXPECT_THAT(exported_data.Get(), ::testing::UnorderedElementsAre(
+                                       ::testing::Key(descriptor1_edited_),
+                                       ::testing::Key(descriptor2_)));
 }
 
 TEST_F(StatsExporterTest, RemoveView) {
-  std::vector<std::pair<ViewDescriptor, ViewData>> exported_data;
+  ExportedData exported_data;
   MockExporter::Register(&exported_data);
   descriptor1_.RegisterForExport();
   descriptor2_.RegisterForExport();
@@ -134,25 +143,25 @@ TEST_F(StatsExporterTest, RemoveView) {
   EXPECT_THAT(StatsExporter::GetViewData(),
               ::testing::UnorderedElementsAre(::testing::Key(descriptor2_)));
   Export();
-  EXPECT_THAT(exported_data,
+  EXPECT_THAT(exported_data.Get(),
               ::testing::UnorderedElementsAre(::testing::Key(descriptor2_)));
 }
 
 TEST_F(StatsExporterTest, MultipleExporters) {
-  std::vector<std::pair<ViewDescriptor, ViewData>> exported_data_1;
+  ExportedData exported_data_1;
   MockExporter::Register(&exported_data_1);
-  std::vector<std::pair<ViewDescriptor, ViewData>> exported_data_2;
+  ExportedData exported_data_2;
   MockExporter::Register(&exported_data_2);
   descriptor1_.RegisterForExport();
   Export();
-  EXPECT_THAT(exported_data_1,
+  EXPECT_THAT(exported_data_1.Get(),
               ::testing::UnorderedElementsAre(::testing::Key(descriptor1_)));
-  EXPECT_THAT(exported_data_2,
+  EXPECT_THAT(exported_data_2.Get(),
               ::testing::UnorderedElementsAre(::testing::Key(descriptor1_)));
 }
 
 TEST_F(StatsExporterTest, IntervalViewRejected) {
-  std::vector<std::pair<ViewDescriptor, ViewData>> exported_data;
+  ExportedData exported_data;
   MockExporter::Register(&exported_data);
   ViewDescriptor interval_descriptor = ViewDescriptor().set_name("interval");
   SetAggregationWindow(AggregationWindow::Interval(absl::Hours(1)),
@@ -160,15 +169,15 @@ TEST_F(StatsExporterTest, IntervalViewRejected) {
   interval_descriptor.RegisterForExport();
   EXPECT_TRUE(StatsExporter::GetViewData().empty());
   Export();
-  EXPECT_TRUE(exported_data.empty());
+  EXPECT_TRUE(exported_data.Get().empty());
 }
 
 TEST_F(StatsExporterTest, TimedExport) {
-  std::vector<std::pair<ViewDescriptor, ViewData>> exported_data;
+  ExportedData exported_data;
   MockExporter::Register(&exported_data);
   descriptor1_.RegisterForExport();
   absl::SleepFor(absl::Seconds(6));
-  EXPECT_THAT(exported_data,
+  EXPECT_THAT(exported_data.Get(),
               ::testing::UnorderedElementsAre(::testing::Key(descriptor1_)));
 }
 
