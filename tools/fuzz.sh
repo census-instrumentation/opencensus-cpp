@@ -22,7 +22,7 @@ set -e
 set -x
 cmake -H. -B.build -DBUILD_TESTING=OFF -DCMAKE_CXX_COMPILER=clang-6.0 \
   -DFUZZER=-fsanitize=fuzzer \
-  -DCMAKE_CXX_FLAGS="-fsanitize=fuzzer-no-link,address -g -O2 -fno-exceptions"
+  -DCMAKE_CXX_FLAGS="-fsanitize=fuzzer-no-link,address -g -O2"
 cmake --build .build
 ./.build/opencensus/tags/opencensus_tags_grpc_tags_bin_fuzzer \
   opencensus/tags/internal/grpc_tags_bin_corpus -runs=0
