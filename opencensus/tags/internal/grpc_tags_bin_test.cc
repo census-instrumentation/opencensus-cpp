@@ -140,6 +140,14 @@ TEST(GrpcTagsBinTest, Serialize) {
             ToGrpcTagsBinHeader(m));
 }
 
+TEST(GrpcTagsBinTest, SerializeLong) {
+  TagMap m1({{TagKey::Register(std::string(300, 'A')), std::string(400, 'B')}});
+  const std::string s = ToGrpcTagsBinHeader(m1);
+  TagMap m2({});
+  EXPECT_TRUE(FromGrpcTagsBinHeader(s, &m2));
+  EXPECT_THAT(m1.tags(), ::testing::ContainerEq(m2.tags()));
+}
+
 TEST(GrpcTagsBinTest, SerializeTooLong) {
   std::vector<std::pair<opencensus::tags::TagKey, std::string>> tags;
   constexpr int kValLen = 20;
