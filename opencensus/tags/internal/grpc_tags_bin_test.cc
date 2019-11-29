@@ -147,7 +147,7 @@ TEST(GrpcTagsBinTest, SerializeTooLong) {
   int key_n = 0;
   while (out_len < 8192) {
     const std::string k = absl::StrCat("key_", key_n++);
-    tags.emplace_back(TagKey::Register(k), std::string('A', kValLen));
+    tags.emplace_back(TagKey::Register(k), std::string(kValLen, 'A'));
     out_len += 1 + 1 + k.size() + 1 + kValLen;
   }
   TagMap m(std::move(tags));
