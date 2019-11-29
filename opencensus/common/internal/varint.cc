@@ -21,7 +21,7 @@
 namespace opencensus {
 namespace common {
 
-void AppendVarint(unsigned int i, std::string* out) {
+void AppendVarint32(uint32_t i, std::string* out) {
   do {
     // Encode 7 bits.
     uint8_t c = i & 0x7F;
@@ -33,17 +33,22 @@ void AppendVarint(unsigned int i, std::string* out) {
   } while (i != 0);
 }
 
-bool ParseVarint(absl::string_view* input, int* out) {
+bool ParseVarint32(absl::string_view* input, uint32_t* out) {
   absl::string_view s = *input;
-  int i = 0;
+  uint32_t i = 0;
   uint8_t c;
+  int shift = 0;
   do {
     if (s.empty()) {
       return false;  // Too short.
     }
     c = s[0];
     s = s.substr(1);
-    i = (i << 7) | (c & 0x7F);
+    if (shift == 28 && c > 0x0f) {
+      return false;  // Out of range for uint32_t.
+    }
+    i |= (c & 0x7F) << shift;
+    shift += 7;
   } while (c & 0x80);
   *input = s;
   *out = i;

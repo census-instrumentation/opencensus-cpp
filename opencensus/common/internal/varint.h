@@ -24,11 +24,11 @@ namespace opencensus {
 namespace common {
 
 // Appends a variable-length encoded integer to the destination string.
-void AppendVarint(unsigned int i, std::string* out);
+void AppendVarint32(uint32_t i, std::string* out);
 
 // Parses a variable-length encoded integer from the input. Returns false on
 // failure. Returns true and consumes the bytes from the input, on success.
-bool ParseVarint(absl::string_view* input, int* out);
+bool ParseVarint32(absl::string_view* input, uint32_t* out);
 
 }  // namespace common
 }  // namespace opencensus
