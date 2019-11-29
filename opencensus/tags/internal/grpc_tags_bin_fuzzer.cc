@@ -17,7 +17,7 @@
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
   absl::string_view input(reinterpret_cast<const char *>(Data), Size);
-  TagMap m({});
+  opencensus::tags::TagMap m({});
   opencensus::tags::propagation::FromGrpcTagsBinHeader(input, &m);
   return 0;
 }
