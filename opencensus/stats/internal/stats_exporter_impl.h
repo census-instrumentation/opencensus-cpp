@@ -34,6 +34,7 @@ class StatsExporterImpl {
  public:
   static StatsExporterImpl* Get();
   void SetInterval(absl::Duration interval);
+  absl::Time GetNextExportTime() const;
   void AddView(const ViewDescriptor& view);
   void RemoveView(absl::string_view name);
 
