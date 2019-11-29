@@ -14,6 +14,7 @@
 
 #include "opencensus/trace/internal/span_exporter_impl.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "absl/synchronization/mutex.h"
@@ -24,17 +25,20 @@ namespace opencensus {
 namespace trace {
 namespace exporter {
 
-SpanExporterImpl* SpanExporterImpl::span_exporter_ = nullptr;
-
 SpanExporterImpl* SpanExporterImpl::Get() {
-  static SpanExporterImpl* global_span_exporter_impl = new SpanExporterImpl(
-      kDefaultBufferSize, absl::Milliseconds(kIntervalWaitTimeInMillis));
+  static SpanExporterImpl* global_span_exporter_impl = new SpanExporterImpl;
   return global_span_exporter_impl;
 }
 
-SpanExporterImpl::SpanExporterImpl(uint32_t buffer_size,
-                                   absl::Duration interval)
-    : buffer_size_(buffer_size), interval_(interval) {}
+void SpanExporterImpl::SetBatchSize(int size) {
+  absl::MutexLock l(&handler_mu_);
+  batch_size_ = std::max(1, size);
+}
+
+void SpanExporterImpl::SetInterval(absl::Duration interval) {
+  absl::MutexLock l(&handler_mu_);
+  interval_ = std::max(absl::Seconds(1), interval);
+}
 
 void SpanExporterImpl::RegisterHandler(
     std::unique_ptr<SpanExporter::Handler> handler) {
@@ -59,36 +63,43 @@ void SpanExporterImpl::StartExportThread() {
   collect_spans_ = true;
 }
 
-bool SpanExporterImpl::IsBufferFull() const {
+bool SpanExporterImpl::IsBatchFull() const {
   span_mu_.AssertHeld();
-  return spans_.size() >= buffer_size_;
+  return spans_.size() >= cached_batch_size_;
 }
 
 void SpanExporterImpl::RunWorkerLoop() {
-  std::vector<opencensus::trace::exporter::SpanData> span_data_;
-  std::vector<std::shared_ptr<opencensus::trace::SpanImpl>> batch_;
+  std::vector<opencensus::trace::exporter::SpanData> span_data;
+  std::vector<std::shared_ptr<opencensus::trace::SpanImpl>> batch;
   // Thread loops forever.
   // TODO: Add in shutdown mechanism.
-  absl::Time next_forced_export_time = absl::Now() + interval_;
   while (true) {
+    int size;
+    absl::Time next_forced_export_time;
+    {
+      // Start of loop, update batch size and interval.
+      absl::MutexLock l(&handler_mu_);
+      size = batch_size_;
+      next_forced_export_time = absl::Now() + interval_;
+    }
     {
       absl::MutexLock l(&span_mu_);
+      cached_batch_size_ = size;
       // Wait until batch is full or interval time has been exceeded.
       span_mu_.AwaitWithDeadline(
-          absl::Condition(this, &SpanExporterImpl::IsBufferFull),
+          absl::Condition(this, &SpanExporterImpl::IsBatchFull),
           next_forced_export_time);
-      next_forced_export_time = absl::Now() + interval_;
       if (spans_.empty()) {
         continue;
       }
-      std::swap(batch_, spans_);
+      std::swap(batch, spans_);
     }
-    for (const auto& span : batch_) {
-      span_data_.emplace_back(span->ToSpanData());
+    for (const auto& span : batch) {
+      span_data.emplace_back(span->ToSpanData());
     }
-    batch_.clear();
-    Export(span_data_);
-    span_data_.clear();
+    batch.clear();
+    Export(span_data);
+    span_data.clear();
   }
 }
 

@@ -44,6 +44,9 @@ class SpanExporterImpl {
   // Returns the global instance of SpanExporterImpl.
   static SpanExporterImpl* Get();
 
+  void SetBatchSize(int size);
+  void SetInterval(absl::Duration interval);
+
   // A shared_ptr to the span is added to a list. The actual conversion to
   // SpanData will take place at a later time via the background thread. This
   // is intended to be called at the Span::End().
@@ -53,11 +56,8 @@ class SpanExporterImpl {
   // initialization.
   void RegisterHandler(std::unique_ptr<SpanExporter::Handler> handler);
 
-  static constexpr uint32_t kDefaultBufferSize = 64;
-  static constexpr uint32_t kIntervalWaitTimeInMillis = 5000;
-
  private:
-  SpanExporterImpl(uint32_t buffer_size, absl::Duration interval);
+  SpanExporterImpl() = default;
   SpanExporterImpl(const SpanExporterImpl&) = delete;
   SpanExporterImpl(SpanExporterImpl&&) = delete;
   SpanExporterImpl& operator=(const SpanExporterImpl&) = delete;
@@ -75,14 +75,15 @@ class SpanExporterImpl {
   // returns when complete.
   void ExportForTesting();
 
-  // Returns true if the spans_ buffer has filled up.
-  bool IsBufferFull() const;
+  // Returns true if the spans_ batch is full.
+  bool IsBatchFull() const;
 
-  static SpanExporterImpl* span_exporter_;
-  const uint32_t buffer_size_;
-  const absl::Duration interval_;
   mutable absl::Mutex span_mu_;
   mutable absl::Mutex handler_mu_;
+  int batch_size_ GUARDED_BY(handler_mu_) = 64;
+  absl::Duration interval_ GUARDED_BY(handler_mu_) = absl::Seconds(5);
+  // Updated in RunWorkerLoop and protected by span_mu_ instead of handler_mu_.
+  int cached_batch_size_ GUARDED_BY(span_mu_);
   std::vector<std::shared_ptr<opencensus::trace::SpanImpl>> spans_
       GUARDED_BY(span_mu_);
   std::vector<std::unique_ptr<SpanExporter::Handler>> handlers_

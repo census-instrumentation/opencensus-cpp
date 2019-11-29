@@ -17,11 +17,22 @@
 #include <memory>
 #include <utility>
 
+#include "absl/time/time.h"
 #include "opencensus/trace/internal/span_exporter_impl.h"
 
 namespace opencensus {
 namespace trace {
 namespace exporter {
+
+// static
+void SpanExporter::SetBatchSize(int size) {
+  SpanExporterImpl::Get()->SetBatchSize(size);
+}
+
+// static
+void SpanExporter::SetInterval(absl::Duration interval) {
+  SpanExporterImpl::Get()->SetInterval(interval);
+}
 
 // static
 void SpanExporter::RegisterHandler(std::unique_ptr<Handler> handler) {
