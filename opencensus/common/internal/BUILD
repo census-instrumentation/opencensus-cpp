@@ -70,6 +70,14 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "varint",
+    srcs = ["varint.cc"],
+    hdrs = ["varint.h"],
+    copts = DEFAULT_COPTS,
+    deps = ["@com_google_absl//absl/strings"],
+)
+
 # Tests
 # ========================================================================= #
 
@@ -140,5 +148,16 @@ cc_test(
         "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",
         "@com_google_protobuf//:protobuf",
+    ],
+)
+
+cc_test(
+    name = "varint_test",
+    srcs = ["varint_test.cc"],
+    copts = TEST_COPTS,
+    deps = [
+        ":varint",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
     ],
 )
