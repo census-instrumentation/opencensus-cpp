@@ -31,11 +31,19 @@ target_compile_definitions(opencensus_common_stats_object INTERFACE
 
 opencensus_lib(common_string_vector_hash DEPS absl::hash)
 
+opencensus_lib(common_varint SRCS varint.cc DEPS absl::strings)
+
+# Tests.
+
 opencensus_test(common_hostname_test hostname_test.cc common_hostname)
 
 opencensus_test(common_random_test random_test.cc common_random)
 
-opencensus_benchmark(common_random_benchmark random_benchmark.cc common_random)
-
 opencensus_test(common_stats_object_test stats_object_test.cc
                 common_stats_object absl::strings absl::span)
+
+opencensus_test(common_varint_test varint_test.cc common_varint)
+
+# Benchmarks.
+
+opencensus_benchmark(common_random_benchmark random_benchmark.cc common_random)
