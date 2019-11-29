@@ -20,50 +20,21 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
+#include "opencensus/common/internal/varint.h"
 #include "opencensus/tags/tag_key.h"
 #include "opencensus/tags/tag_map.h"
+
+using opencensus::common::AppendVarint32;
+using opencensus::common::ParseVarint32;
 
 namespace opencensus {
 namespace tags {
 namespace propagation {
-
 namespace {
 
 constexpr char kVersionId = '\0';
 constexpr char kTagFieldId = '\0';
 constexpr int kMaxLen = 8192;
-
-// Appends a variable-length encoded integer to the destination string.
-void AppendVarint(unsigned int i, std::string* out) {
-  do {
-    // Encode 7 bits.
-    uint8_t c = i & 0x7F;
-    i = i >> 7;
-    if (i != 0) {
-      c |= 0x80;
-    }
-    out->push_back(c);
-  } while (i != 0);
-}
-
-// Parses a variable-length encoded integer from the input. Returns false on
-// failure. Returns true and consumes the bytes from the input, on success.
-bool ParseVarint(absl::string_view* input, int* out) {
-  absl::string_view s = *input;
-  int i = 0;
-  uint8_t c;
-  do {
-    if (s.empty()) {
-      return false;  // Too short.
-    }
-    c = s[0];
-    s = s.substr(1);
-    i = (i << 7) | (c & 0x7F);
-  } while (c & 0x80);
-  *input = s;
-  *out = i;
-  return true;
-}
 
 }  // namespace
 
@@ -89,8 +60,8 @@ bool FromGrpcTagsBinHeader(absl::string_view header, TagMap* out) {
     // Parse key.
     absl::string_view key;
     {
-      int key_len;
-      if (!ParseVarint(&header, &key_len)) {
+      uint32_t key_len;
+      if (!ParseVarint32(&header, &key_len)) {
         return false;  // Invalid key_len.
       }
       if (key_len > header.length()) {
@@ -103,8 +74,8 @@ bool FromGrpcTagsBinHeader(absl::string_view header, TagMap* out) {
     // Parse val.
     absl::string_view val;
     {
-      int val_len;
-      if (!ParseVarint(&header, &val_len)) {
+      uint32_t val_len;
+      if (!ParseVarint32(&header, &val_len)) {
         return false;  // Invalid val_len.
       }
       if (val_len > header.length()) {
@@ -138,9 +109,9 @@ std::string ToGrpcTagsBinHeader(const TagMap& tags) {
     const auto& key = key_val.first;
     const auto& val = key_val.second;
     out.push_back(kTagFieldId);
-    AppendVarint(key.name().length(), &out);
+    AppendVarint32(key.name().length(), &out);
     out.append(key.name());
-    AppendVarint(val.length(), &out);
+    AppendVarint32(val.length(), &out);
     // Encoded value must be UTF-8.
     out.append(val);
     if (out.size() > kMaxLen) {

@@ -63,6 +63,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":tags",
+        "//opencensus/common/internal:varint",
         "@com_google_absl//absl/strings",
     ],
 )
