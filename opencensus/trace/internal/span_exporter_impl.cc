@@ -37,7 +37,7 @@ void SpanExporterImpl::SetBatchSize(int size) {
 
 void SpanExporterImpl::SetInterval(absl::Duration interval) {
   absl::MutexLock l(&handler_mu_);
-  interval_ = interval;
+  interval_ = std::max(absl::Seconds(1), interval);
 }
 
 void SpanExporterImpl::RegisterHandler(
