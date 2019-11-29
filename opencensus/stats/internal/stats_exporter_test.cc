@@ -65,6 +65,8 @@ MeasureDouble TestMeasure() {
 
 class StatsExporterTest : public ::testing::Test {
  protected:
+  static void SetUpTestSuite() { StatsExporter::SetInterval(absl::Seconds(5)); }
+
   void SetUp() {
     // Access the measure to ensure it has been registered.
     TestMeasure();
@@ -165,7 +167,7 @@ TEST_F(StatsExporterTest, TimedExport) {
   std::vector<std::pair<ViewDescriptor, ViewData>> exported_data;
   MockExporter::Register(&exported_data);
   descriptor1_.RegisterForExport();
-  absl::SleepFor(absl::Seconds(11));
+  absl::SleepFor(absl::Seconds(6));
   EXPECT_THAT(exported_data,
               ::testing::UnorderedElementsAre(::testing::Key(descriptor1_)));
 }

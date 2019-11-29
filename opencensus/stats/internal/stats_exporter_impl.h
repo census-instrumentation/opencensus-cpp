@@ -33,9 +33,9 @@ namespace stats {
 class StatsExporterImpl {
  public:
   static StatsExporterImpl* Get();
-
+  void SetInterval(absl::Duration interval);
+  absl::Time GetNextExportTime() const;
   void AddView(const ViewDescriptor& view);
-
   void RemoveView(absl::string_view name);
 
   // Adds a handler, which cannot be subsequently removed (except by
@@ -44,27 +44,22 @@ class StatsExporterImpl {
   void RegisterPushHandler(std::unique_ptr<StatsExporter::Handler> handler);
 
   std::vector<std::pair<ViewDescriptor, ViewData>> GetViewData();
-
   void Export();
-
   void ClearHandlersForTesting();
 
  private:
-  StatsExporterImpl() {}
+  StatsExporterImpl() = default;
 
   void StartExportThread() EXCLUSIVE_LOCKS_REQUIRED(mu_);
 
   // Loops forever, calling Export() every export_interval_.
   void RunWorkerLoop();
 
-  const absl::Duration export_interval_ = absl::Seconds(10);
-
   mutable absl::Mutex mu_;
-
+  absl::Duration export_interval_ GUARDED_BY(mu_) = absl::Seconds(10);
   std::vector<std::unique_ptr<StatsExporter::Handler>> handlers_
       GUARDED_BY(mu_);
   std::unordered_map<std::string, std::unique_ptr<View>> views_ GUARDED_BY(mu_);
-
   bool thread_started_ GUARDED_BY(mu_) = false;
   std::thread t_ GUARDED_BY(mu_);
 };

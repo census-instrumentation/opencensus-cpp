@@ -35,6 +35,13 @@ namespace stats {
 // StatsExporter is thread-safe.
 class StatsExporter final {
  public:
+  // Sets the interval between exports. Takes effect after the current export
+  // finishes.
+  //
+  // Warning: this API may be removed in future, in favor of configuring this
+  // per-exporter.
+  static void SetInterval(absl::Duration interval);
+
   // Removes the view with 'name' from the registry, if one is registered.
   static void RemoveView(absl::string_view name);
 
@@ -59,10 +66,12 @@ class StatsExporter final {
   static std::vector<std::pair<ViewDescriptor, ViewData>> GetViewData();
 
  private:
+  StatsExporter() = delete;
   friend class StatsExporterTest;
 
   // Forces immediate export of data.
   static void ExportForTesting();
+
   static void ClearHandlersForTesting();
 };
 
