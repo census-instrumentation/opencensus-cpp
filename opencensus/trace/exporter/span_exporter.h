@@ -18,6 +18,7 @@
 #include <memory>
 #include <vector>
 
+#include "absl/time/time.h"
 #include "opencensus/trace/exporter/span_data.h"
 
 namespace opencensus {
@@ -27,6 +28,22 @@ namespace exporter {
 // SpanExporter allows Exporters to register. Thread-safe.
 class SpanExporter final {
  public:
+  // Sets the batch size when exporting traces. Takes effect after the next
+  // batch starts. This is not a strict limit, the generated batch may be
+  // slightly larger. If the interval expires before the batch fills up, the
+  // batch will be smaller.
+  //
+  // Warning: this API may be removed in future, in favor of configuring this
+  // per-exporter.
+  static void SetBatchSize(int size);
+
+  // Sets the interval between exporting batches of traces. Takes effect after
+  // the next batch starts.
+  //
+  // Warning: this API may be removed in future, in favor of configuring this
+  // per-exporter.
+  static void SetInterval(absl::Duration interval);
+
   // Handlers allow different tracing services to export recorded data for
   // sampled spans in their own format. Every exporter must provide a static
   // Register() method that takes any arguments needed by the exporter (e.g. a
@@ -41,6 +58,7 @@ class SpanExporter final {
   static void RegisterHandler(std::unique_ptr<Handler> handler);
 
  private:
+  SpanExporter() = delete;
   friend class SpanExporterTestPeer;
 
   // Forces an export, only for testing purposes.
