@@ -40,6 +40,7 @@ opencensus_lib(
   internal/grpc_tags_bin.cc
   DEPS
   tags
+  common_varint
   absl::strings)
 
 opencensus_lib(
