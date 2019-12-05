@@ -20,7 +20,7 @@ export BAZEL_OPTIONS="--local_resources=4096,2,1.0"
 
 # Limit the amount of progress output. We can't use --noshow_progress because
 # Travis terminates the build after 10 mins without output.
-export BAZEL_OPTIONS="$BAZEL_OPTIONS --experimental_ui_actions_shown=1"
+export BAZEL_OPTIONS="$BAZEL_OPTIONS --curses=no"
 
 # Enable thread safety analysis (only works with clang).
 if [[ "$TRAVIS_COMPILER" = "clang" ]]; then
