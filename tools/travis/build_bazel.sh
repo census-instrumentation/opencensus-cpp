@@ -38,7 +38,7 @@ du -sk $HOME/bazel-cache || true
 touch $HOME/start-time
 
 bazel build $BAZEL_OPTIONS -k //...
-bazel test $BAZEL_OPTIONS -k $(bazel query "kind(test, //...) except attr('tags', 'manual|noci', //...)")
+bazel test $BAZEL_OPTIONS -k //... --test_tag_filters=-noci
 
 set +e
 # Travis doesn't restore atime, so update mtime of files accessed during build.
