@@ -25,7 +25,7 @@ namespace opencensus {
 namespace exporters {
 namespace stats {
 
-std::vector<prometheus::MetricFamily> PrometheusExporter::Collect() {
+std::vector<prometheus::MetricFamily> PrometheusExporter::Collect() const {
   const auto data = opencensus::stats::StatsExporter::GetViewData();
   std::vector<prometheus::MetricFamily> output(data.size());
   for (int i = 0; i < data.size(); ++i) {
