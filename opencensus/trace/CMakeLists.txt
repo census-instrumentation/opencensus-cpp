@@ -50,8 +50,8 @@ opencensus_lib(
   absl::span)
 
 # Define NOMINMAX to fix build errors when compiling with MSVC.
-target_compile_definitions(opencensus_trace PUBLIC
-                           $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>)
+target_compile_definitions(opencensus_trace
+                           PUBLIC $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>)
 
 opencensus_lib(
   trace_b3
