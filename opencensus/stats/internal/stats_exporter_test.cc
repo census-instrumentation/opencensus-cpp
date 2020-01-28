@@ -38,7 +38,7 @@ struct ExportedData {
   }
 
   mutable absl::Mutex mu;
-  std::vector<std::pair<ViewDescriptor, ViewData>> data GUARDED_BY(mu);
+  std::vector<std::pair<ViewDescriptor, ViewData>> data ABSL_GUARDED_BY(mu);
 };
 
 // A mock exporter that assigns exported data to the provided pointer.

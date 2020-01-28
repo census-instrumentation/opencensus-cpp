@@ -21,7 +21,7 @@ FetchContent_Declare(
 FetchContent_Declare(
   abseil
   GIT_REPOSITORY https://github.com/abseil/abseil-cpp
-  GIT_TAG 2c8421e1c6cef0da9e8a20b01c15256ec9ec116d)
+  GIT_TAG master)
 FetchContent_Declare(
   prometheus
   GIT_REPOSITORY https://github.com/jupp0r/prometheus-cpp

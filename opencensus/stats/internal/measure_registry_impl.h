@@ -39,23 +39,23 @@ class MeasureRegistryImpl {
   template <typename MeasureT>
   Measure<MeasureT> Register(absl::string_view name,
                              absl::string_view description,
-                             absl::string_view units) LOCKS_EXCLUDED(mu_);
+                             absl::string_view units) ABSL_LOCKS_EXCLUDED(mu_);
 
   const MeasureDescriptor& GetDescriptorByName(absl::string_view name) const
-      LOCKS_EXCLUDED(mu_);
+      ABSL_LOCKS_EXCLUDED(mu_);
 
   MeasureDouble GetMeasureDoubleByName(absl::string_view name) const
-      LOCKS_EXCLUDED(mu_);
+      ABSL_LOCKS_EXCLUDED(mu_);
   MeasureInt64 GetMeasureInt64ByName(absl::string_view name) const
-      LOCKS_EXCLUDED(mu_);
+      ABSL_LOCKS_EXCLUDED(mu_);
 
   // The following methods are for internal use by the library, and not exposed
   // in the public MeasureRegistry.
-  uint64_t GetIdByName(absl::string_view name) const LOCKS_EXCLUDED(mu_);
+  uint64_t GetIdByName(absl::string_view name) const ABSL_LOCKS_EXCLUDED(mu_);
 
   template <typename MeasureT>
   const MeasureDescriptor& GetDescriptor(Measure<MeasureT> measure) const
-      LOCKS_EXCLUDED(mu_);
+      ABSL_LOCKS_EXCLUDED(mu_);
 
   // Measure ids contain a sequential index, a validity bit, and a
   // type bit; these functions access the individual parts.
@@ -69,7 +69,7 @@ class MeasureRegistryImpl {
  private:
   MeasureRegistryImpl() = default;
 
-  uint64_t RegisterImpl(MeasureDescriptor descriptor) LOCKS_EXCLUDED(mu_);
+  uint64_t RegisterImpl(MeasureDescriptor descriptor) ABSL_LOCKS_EXCLUDED(mu_);
 
   static uint64_t CreateMeasureId(uint64_t index, bool is_valid,
                                   MeasureDescriptor::Type type);
@@ -80,9 +80,9 @@ class MeasureRegistryImpl {
   // descriptors themselves don't move around when the vector storage moves due
   // to resize.
   std::vector<std::unique_ptr<MeasureDescriptor>> registered_descriptors_
-      GUARDED_BY(mu_);
+      ABSL_GUARDED_BY(mu_);
   // A map from measure names to IDs.
-  std::unordered_map<std::string, uint64_t> id_map_ GUARDED_BY(mu_);
+  std::unordered_map<std::string, uint64_t> id_map_ ABSL_GUARDED_BY(mu_);
 };
 
 template <>

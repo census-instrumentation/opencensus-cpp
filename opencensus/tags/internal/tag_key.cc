@@ -36,9 +36,9 @@ class TagKeyRegistry {
     return global_tag_key_registry;
   }
 
-  TagKey Register(absl::string_view name) LOCKS_EXCLUDED(mu_);
+  TagKey Register(absl::string_view name) ABSL_LOCKS_EXCLUDED(mu_);
 
-  const std::string& TagKeyName(TagKey key) const LOCKS_EXCLUDED(mu_) {
+  const std::string& TagKeyName(TagKey key) const ABSL_LOCKS_EXCLUDED(mu_) {
     absl::ReaderMutexLock l(&mu_);
     return *registered_tag_keys_[key.id_];
   }
@@ -49,10 +49,10 @@ class TagKeyRegistry {
   // are allocated individually so that they don't move around when the vector
   // storage moves due to resize.
   std::vector<std::unique_ptr<std::string>> registered_tag_keys_
-      GUARDED_BY(mu_);
+      ABSL_GUARDED_BY(mu_);
   // A map from names to IDs.
   // TODO: change to string_view when a suitable hash is available.
-  std::unordered_map<std::string, uint64_t> id_map_ GUARDED_BY(mu_);
+  std::unordered_map<std::string, uint64_t> id_map_ ABSL_GUARDED_BY(mu_);
 };
 
 TagKey TagKeyRegistry::Register(absl::string_view name) {

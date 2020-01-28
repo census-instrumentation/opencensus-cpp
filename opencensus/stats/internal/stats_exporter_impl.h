@@ -50,18 +50,19 @@ class StatsExporterImpl {
  private:
   StatsExporterImpl() = default;
 
-  void StartExportThread() EXCLUSIVE_LOCKS_REQUIRED(mu_);
+  void StartExportThread() ABSL_EXCLUSIVE_LOCKS_REQUIRED(mu_);
 
   // Loops forever, calling Export() every export_interval_.
   void RunWorkerLoop();
 
   mutable absl::Mutex mu_;
-  absl::Duration export_interval_ GUARDED_BY(mu_) = absl::Seconds(10);
+  absl::Duration export_interval_ ABSL_GUARDED_BY(mu_) = absl::Seconds(10);
   std::vector<std::unique_ptr<StatsExporter::Handler>> handlers_
-      GUARDED_BY(mu_);
-  std::unordered_map<std::string, std::unique_ptr<View>> views_ GUARDED_BY(mu_);
-  bool thread_started_ GUARDED_BY(mu_) = false;
-  std::thread t_ GUARDED_BY(mu_);
+      ABSL_GUARDED_BY(mu_);
+  std::unordered_map<std::string, std::unique_ptr<View>> views_
+      ABSL_GUARDED_BY(mu_);
+  bool thread_started_ ABSL_GUARDED_BY(mu_) = false;
+  std::thread t_ ABSL_GUARDED_BY(mu_);
 };
 
 }  // namespace stats
