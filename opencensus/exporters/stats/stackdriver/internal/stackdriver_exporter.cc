@@ -53,7 +53,7 @@ class Handler : public ::opencensus::stats::StatsExporter::Handler {
   void ExportViewData(
       const std::vector<std::pair<opencensus::stats::ViewDescriptor,
                                   opencensus::stats::ViewData>>& data)
-      LOCKS_EXCLUDED(mu_) override;
+      ABSL_LOCKS_EXCLUDED(mu_) override;
 
  private:
   // Registers 'descriptor' with Stackdriver if no view by that name has been
@@ -62,12 +62,13 @@ class Handler : public ::opencensus::stats::StatsExporter::Handler {
   // successful, and false if the registration fails or the name has already
   // been registered with different parameters.
   bool MaybeRegisterView(const opencensus::stats::ViewDescriptor& descriptor,
-                         bool add_task_label) EXCLUSIVE_LOCKS_REQUIRED(mu_);
+                         bool add_task_label)
+      ABSL_EXCLUSIVE_LOCKS_REQUIRED(mu_);
 
   const StackdriverOptions opts_;
   mutable absl::Mutex mu_;
   std::unordered_map<std::string, opencensus::stats::ViewDescriptor>
-      registered_descriptors_ GUARDED_BY(mu_);
+      registered_descriptors_ ABSL_GUARDED_BY(mu_);
 };
 
 StackdriverOptions SetOptionDefaults(StackdriverOptions&& o) {

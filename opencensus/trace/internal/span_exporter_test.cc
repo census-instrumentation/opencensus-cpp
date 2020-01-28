@@ -47,7 +47,7 @@ class Counter {
  private:
   Counter() = default;
   mutable absl::Mutex mu_;
-  int value_ GUARDED_BY(mu_) = 0;
+  int value_ ABSL_GUARDED_BY(mu_) = 0;
 };
 
 class MyExporter : public exporter::SpanExporter::Handler {

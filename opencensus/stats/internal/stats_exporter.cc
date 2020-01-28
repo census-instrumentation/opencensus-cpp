@@ -94,7 +94,7 @@ void StatsExporterImpl::ClearHandlersForTesting() {
   handlers_.clear();
 }
 
-void StatsExporterImpl::StartExportThread() EXCLUSIVE_LOCKS_REQUIRED(mu_) {
+void StatsExporterImpl::StartExportThread() ABSL_EXCLUSIVE_LOCKS_REQUIRED(mu_) {
   t_ = std::thread(&StatsExporterImpl::RunWorkerLoop, this);
   thread_started_ = true;
 }

@@ -31,13 +31,13 @@ class Generator {
   Generator() : rng_(absl::GetCurrentTimeNanos()) {}
   explicit Generator(uint64_t seed) : rng_(seed) {}
 
-  uint64_t Random64() LOCKS_EXCLUDED(mu_);
+  uint64_t Random64() ABSL_LOCKS_EXCLUDED(mu_);
 
  private:
   friend class Random;
 
   absl::Mutex mu_;
-  std::mt19937_64 rng_ GUARDED_BY(mu_);
+  std::mt19937_64 rng_ ABSL_GUARDED_BY(mu_);
 };
 
 class Random {

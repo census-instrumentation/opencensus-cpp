@@ -62,7 +62,7 @@ class StatsManager final {
                           const MeasureData& data, absl::Time now);
 
     // Retrieves a copy of the data.
-    std::unique_ptr<ViewDataImpl> GetData() LOCKS_EXCLUDED(*mu_);
+    std::unique_ptr<ViewDataImpl> GetData() ABSL_LOCKS_EXCLUDED(*mu_);
 
     const ViewDescriptor& view_descriptor() const { return descriptor_; }
 
@@ -72,33 +72,33 @@ class StatsManager final {
     absl::Mutex* const mu_;  // Not owned.
     // The number of View objects backed by this ViewInformation, for
     // reference-counted GC.
-    int num_consumers_ GUARDED_BY(*mu_) = 1;
+    int num_consumers_ ABSL_GUARDED_BY(*mu_) = 1;
 
     // Possible types of stored data.
     enum class DataType { kDouble, kUint64, kDistribution, kInterval };
     static DataType DataTypeForDescriptor(const ViewDescriptor& descriptor);
 
-    ViewDataImpl data_ GUARDED_BY(*mu_);
+    ViewDataImpl data_ ABSL_GUARDED_BY(*mu_);
   };
 
  public:
   static StatsManager* Get();
 
   // Merges all data from 'delta' at the present time.
-  void MergeDelta(const Delta& delta) LOCKS_EXCLUDED(mu_);
+  void MergeDelta(const Delta& delta) ABSL_LOCKS_EXCLUDED(mu_);
 
   // Adds a measure--this is necessary for views to be added under that measure.
   template <typename MeasureT>
-  void AddMeasure(Measure<MeasureT> measure) LOCKS_EXCLUDED(mu_);
+  void AddMeasure(Measure<MeasureT> measure) ABSL_LOCKS_EXCLUDED(mu_);
 
   // Returns a handle that can be used to retrieve data for 'descriptor' (which
   // may point to a new or re-used ViewInformation).
   ViewInformation* AddConsumer(const ViewDescriptor& descriptor)
-      LOCKS_EXCLUDED(mu_);
+      ABSL_LOCKS_EXCLUDED(mu_);
 
   // Removes a consumer from the ViewInformation 'handle', and deletes it if
   // that was the last consumer.
-  void RemoveConsumer(ViewInformation* handle) LOCKS_EXCLUDED(mu_);
+  void RemoveConsumer(ViewInformation* handle) ABSL_LOCKS_EXCLUDED(mu_);
 
  private:
   // MeasureInformation stores all ViewInformation objects for a given measure.
@@ -118,7 +118,7 @@ class StatsManager final {
     absl::Mutex* const mu_;  // Not owned.
     // View objects hold a pointer to ViewInformation directly, so we do not
     // need fast lookup--lookup is only needed for view removal.
-    std::vector<std::unique_ptr<ViewInformation>> views_ GUARDED_BY(*mu_);
+    std::vector<std::unique_ptr<ViewInformation>> views_ ABSL_GUARDED_BY(*mu_);
   };
 
   // TODO: PERF: Global synchronization is only needed for adding or
@@ -127,7 +127,7 @@ class StatsManager final {
   mutable absl::Mutex mu_;
 
   // All registered measures.
-  std::vector<MeasureInformation> measures_ GUARDED_BY(mu_);
+  std::vector<MeasureInformation> measures_ ABSL_GUARDED_BY(mu_);
 };
 
 extern template void StatsManager::AddMeasure(MeasureDouble measure);
