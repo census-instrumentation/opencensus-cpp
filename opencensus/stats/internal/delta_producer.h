@@ -79,10 +79,10 @@ class DeltaProducer final {
   void AddBoundaries(uint64_t index, const BucketBoundaries& boundaries);
 
   void Record(std::initializer_list<Measurement> measurements,
-              opencensus::tags::TagMap tags) LOCKS_EXCLUDED(delta_mu_);
+              opencensus::tags::TagMap tags) ABSL_LOCKS_EXCLUDED(delta_mu_);
 
   // Flushes the active delta and blocks until it is harvested.
-  void Flush() LOCKS_EXCLUDED(delta_mu_, harvester_mu_);
+  void Flush() ABSL_LOCKS_EXCLUDED(delta_mu_, harvester_mu_);
 
  private:
   DeltaProducer();
@@ -92,9 +92,9 @@ class DeltaProducer final {
   // ConsumeLastDelta so that Record() is blocked for as little time as
   // possible. SwapDeltas should never be called without then calling
   // ConsumeLastDelta--otherwise the delta will be lost.
-  void SwapDeltas() EXCLUSIVE_LOCKS_REQUIRED(delta_mu_, harvester_mu_);
-  void ConsumeLastDelta() EXCLUSIVE_LOCKS_REQUIRED(harvester_mu_)
-      LOCKS_EXCLUDED(delta_mu_);
+  void SwapDeltas() ABSL_EXCLUSIVE_LOCKS_REQUIRED(delta_mu_, harvester_mu_);
+  void ConsumeLastDelta() ABSL_EXCLUSIVE_LOCKS_REQUIRED(harvester_mu_)
+      ABSL_LOCKS_EXCLUDED(delta_mu_);
 
   // Loops flushing the active delta (calling SwapDeltas and ConsumeLastDelta())
   // every harvest_interval_.
@@ -112,16 +112,16 @@ class DeltaProducer final {
   // The BucketBoundaries of each registered view with Distribution aggregation,
   // by measure. Array indices in the outer array correspond to measure indices.
   std::vector<std::vector<BucketBoundaries>> registered_boundaries_
-      GUARDED_BY(delta_mu_);
-  Delta active_delta_ GUARDED_BY(delta_mu_);
+      ABSL_GUARDED_BY(delta_mu_);
+  Delta active_delta_ ABSL_GUARDED_BY(delta_mu_);
 
   // Guards the last_delta_; acquired by the main thread when triggering a
   // flush.
-  mutable absl::Mutex harvester_mu_ ACQUIRED_AFTER(delta_mu_);
+  mutable absl::Mutex harvester_mu_ ABSL_ACQUIRED_AFTER(delta_mu_);
   // TODO: consider making this a lockless queue to avoid blocking the main
   // thread when calling a flush during harvesting.
-  Delta last_delta_ GUARDED_BY(harvester_mu_);
-  std::thread harvester_thread_ GUARDED_BY(harvester_mu_);
+  Delta last_delta_ ABSL_GUARDED_BY(harvester_mu_);
+  std::thread harvester_thread_ ABSL_GUARDED_BY(harvester_mu_);
 };
 
 }  // namespace stats

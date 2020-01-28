@@ -38,18 +38,19 @@ class RunningSpanStoreImpl {
   static RunningSpanStoreImpl* Get();
 
   // Adds a new running Span.
-  void AddSpan(const std::shared_ptr<SpanImpl>& span) LOCKS_EXCLUDED(mu_);
+  void AddSpan(const std::shared_ptr<SpanImpl>& span) ABSL_LOCKS_EXCLUDED(mu_);
 
   // Removes a Span that's no longer running. Returns true on success, false if
   // that Span was not being tracked.
-  bool RemoveSpan(const std::shared_ptr<SpanImpl>& span) LOCKS_EXCLUDED(mu_);
+  bool RemoveSpan(const std::shared_ptr<SpanImpl>& span)
+      ABSL_LOCKS_EXCLUDED(mu_);
 
   // Returns a summary of the data available in the RunningSpanStore.
-  RunningSpanStore::Summary GetSummary() const LOCKS_EXCLUDED(mu_);
+  RunningSpanStore::Summary GetSummary() const ABSL_LOCKS_EXCLUDED(mu_);
 
   // Returns the running spans that match the filter.
   std::vector<SpanData> GetRunningSpans(
-      const RunningSpanStore::Filter& filter) const LOCKS_EXCLUDED(mu_);
+      const RunningSpanStore::Filter& filter) const ABSL_LOCKS_EXCLUDED(mu_);
 
  private:
   friend class RunningSpanStoreImplTestPeer;
@@ -57,13 +58,13 @@ class RunningSpanStoreImpl {
   RunningSpanStoreImpl() {}
 
   // Clears all currently active spans from the store.
-  void ClearForTesting() LOCKS_EXCLUDED(mu_);
+  void ClearForTesting() ABSL_LOCKS_EXCLUDED(mu_);
 
   mutable absl::Mutex mu_;
 
   // The key is the memory address of the underlying SpanImpl object.
   std::unordered_map<uintptr_t, std::shared_ptr<SpanImpl>> spans_
-      GUARDED_BY(mu_);
+      ABSL_GUARDED_BY(mu_);
 };
 
 }  // namespace exporter

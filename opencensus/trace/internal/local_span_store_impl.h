@@ -50,19 +50,20 @@ class LocalSpanStoreImpl {
   static LocalSpanStoreImpl* Get();
 
   // Adds a new running Span. Only Span::End should call this.
-  void AddSpan(const std::shared_ptr<SpanImpl>& span) LOCKS_EXCLUDED(mu_);
+  void AddSpan(const std::shared_ptr<SpanImpl>& span) ABSL_LOCKS_EXCLUDED(mu_);
 
   // Returns a summary of the data available in the LocalSpanStore.
-  LocalSpanStore::Summary GetSummary() const LOCKS_EXCLUDED(mu_);
+  LocalSpanStore::Summary GetSummary() const ABSL_LOCKS_EXCLUDED(mu_);
 
   // Returns the running spans that match the filter.
   std::vector<SpanData> GetLatencySampledSpans(
-      const LocalSpanStore::LatencyFilter& filter) const LOCKS_EXCLUDED(mu_);
+      const LocalSpanStore::LatencyFilter& filter) const
+      ABSL_LOCKS_EXCLUDED(mu_);
 
   std::vector<SpanData> GetErrorSampledSpans(
-      const LocalSpanStore::ErrorFilter& filter) const LOCKS_EXCLUDED(mu_);
+      const LocalSpanStore::ErrorFilter& filter) const ABSL_LOCKS_EXCLUDED(mu_);
 
-  std::vector<SpanData> GetSpans() const LOCKS_EXCLUDED(mu_);
+  std::vector<SpanData> GetSpans() const ABSL_LOCKS_EXCLUDED(mu_);
 
  private:
   friend class LocalSpanStoreImplTestPeer;
@@ -71,10 +72,10 @@ class LocalSpanStoreImpl {
   LocalSpanStoreImpl() {}
 
   // Clears all currently active spans from the store.
-  void ClearForTesting() LOCKS_EXCLUDED(mu_);
+  void ClearForTesting() ABSL_LOCKS_EXCLUDED(mu_);
 
   mutable absl::Mutex mu_;
-  std::deque<SpanData> spans_ GUARDED_BY(mu_);
+  std::deque<SpanData> spans_ ABSL_GUARDED_BY(mu_);
 };
 
 }  // namespace exporter
