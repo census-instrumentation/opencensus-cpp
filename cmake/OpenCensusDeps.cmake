@@ -16,8 +16,8 @@ include(FetchContent)
 
 FetchContent_Declare(
   googletest
-  GIT_REPOSITORY https://github.com/abseil/googletest
-  GIT_TAG ed2fe122f8dc9aca844d724986d1d5cf5b65ea4e)
+  GIT_REPOSITORY https://github.com/google/googletest
+  GIT_TAG master)
 FetchContent_Declare(
   abseil
   GIT_REPOSITORY https://github.com/abseil/abseil-cpp
