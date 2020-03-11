@@ -17,7 +17,7 @@ set -x
 
 ccache -s
 ccache -z
-cmake -H. -B.build
+cmake -H. -B.build -DCMAKE_CXX_FLAGS=-Wno-unused-command-line-argument
 cmake --build .build
 (cd .build && ctest --output-on-failure)
 ccache -s
