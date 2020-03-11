@@ -57,8 +57,11 @@ endif()
 FetchContent_GetProperties(abseil)
 if(NOT abseil_POPULATED)
   message(STATUS "Dependency: abseil")
+  set(orig_BUILD_TESTING "${BUILD_TESTING}")
+  set(BUILD_TESTING OFF) # Don't include abseil tests.
   FetchContent_Populate(abseil)
   add_subdirectory(${abseil_SOURCE_DIR} ${abseil_BINARY_DIR} EXCLUDE_FROM_ALL)
+  set(BUILD_TESTING "${orig_BUILD_TESTING}") # Restore value.
 endif()
 
 FetchContent_GetProperties(prometheus)
