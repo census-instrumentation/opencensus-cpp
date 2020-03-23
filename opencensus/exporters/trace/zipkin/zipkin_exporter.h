@@ -46,7 +46,7 @@ struct ZipkinExporterOptions {
   std::string service_name;
   // Address family to be reported to zipkin collector.
   enum class AddressFamily : uint8_t { kIpv4, kIpv6 };
-  AddressFamily af_type;
+  AddressFamily af_type = AddressFamily::kIpv4;
 
   struct Service {
     Service() : af_type(AddressFamily::kIpv4) {}
