@@ -16,7 +16,7 @@ set -e
 set -x
 
 # Install buildifier.
-curl -o $HOME/bin/buildifier https://github.com/bazelbuild/buildtools/releases/tag/2.2.1/buildifier
+curl -o $HOME/bin/buildifier https://github.com/bazelbuild/buildtools/releases/download/2.2.1/buildifier
 chmod +x $HOME/bin/buildifier
 ls -l $HOME/bin/buildifier
 buildifier --version
