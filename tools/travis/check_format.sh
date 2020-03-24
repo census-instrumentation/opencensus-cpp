@@ -15,11 +15,9 @@
 set -e
 set -x
 
-# Install buildifier if it's not present. It needs at least go 1.8.
-if ! which buildifier >/dev/null; then
-  eval "$(gimme 1.11)"
-  go get -v github.com/bazelbuild/buildtools/buildifier
-fi
+# Install buildifier.
+wget -O $HOME/bin/buildifier https://github.com/bazelbuild/buildtools/releases/download/2.2.1/buildifier
+chmod +x $HOME/bin/buildifier
 # Install cmake-format.
 pip install --user 'cmake_format>=0.5.2'
 # Check format.
