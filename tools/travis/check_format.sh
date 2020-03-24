@@ -15,6 +15,7 @@
 set -e
 set -x
 
+sudo apt install -y clang-format-7 || true
 # Install buildifier.
 wget -O $HOME/bin/buildifier https://github.com/bazelbuild/buildtools/releases/download/2.2.1/buildifier
 chmod +x $HOME/bin/buildifier
