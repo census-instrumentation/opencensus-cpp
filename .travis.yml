@@ -4,23 +4,23 @@ compiler: clang
 matrix:
   include:
     - os: linux
-      dist: trusty
+      dist: xenial
       sudo: false
       name: "check format"
       script: tools/travis/check_format.sh
     - os: linux
-      dist: trusty
+      dist: xenial
       sudo: false
       env: BAZEL_OS=linux
       script: tools/travis/build_bazel.sh
     - os: linux
-      dist: trusty
+      dist: xenial
       sudo: false
       compiler: gcc
       env: BAZEL_OS=linux
       script: tools/travis/build_bazel.sh
     - os: linux
-      dist: trusty
+      dist: xenial
       sudo: false
       env: CMAKE_OS=linux
       script: tools/travis/build_cmake.sh
