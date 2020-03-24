@@ -58,7 +58,10 @@ fi
 
 if [[ "$tools_check" == "y" ]]; then
   # For easier debugging: print the version because it affects the formatting.
-  CMD=clang-format-7
+  CMD=clang-format
+  if which clang-format-7 >/dev/null; then
+    CMD=clang-format-7
+  fi
   $CMD -version
   $CMD -i -style=Google \
     $($FIND -name '*.cc' -print -o -name '*.h' -print)
