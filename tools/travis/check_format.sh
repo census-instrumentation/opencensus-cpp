@@ -18,8 +18,6 @@ set -x
 # Install buildifier.
 wget -O $HOME/bin/buildifier https://github.com/bazelbuild/buildtools/releases/download/2.2.1/buildifier
 chmod +x $HOME/bin/buildifier
-ls -l $HOME/bin/buildifier
-buildifier --version
 # Install cmake-format.
 pip install --user 'cmake_format>=0.5.2'
 # Check format.
