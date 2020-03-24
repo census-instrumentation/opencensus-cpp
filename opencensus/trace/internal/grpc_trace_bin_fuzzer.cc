@@ -18,8 +18,8 @@
 
 using ::opencensus::trace::SpanContext;
 using ::opencensus::trace::propagation::FromGrpcTraceBinHeader;
-using ::opencensus::trace::propagation::ToGrpcTraceBinHeader;
 using ::opencensus::trace::propagation::kGrpcTraceBinHeaderLen;
+using ::opencensus::trace::propagation::ToGrpcTraceBinHeader;
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
   absl::string_view header(reinterpret_cast<const char *>(Data), Size);
