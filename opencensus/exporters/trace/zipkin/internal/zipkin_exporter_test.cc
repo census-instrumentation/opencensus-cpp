@@ -29,7 +29,6 @@ class ZipkinExporterTestPeer : public ::testing::Test {
   ZipkinExporterTestPeer() {
     // Register zipkin exporter
     ZipkinExporterOptions options("http://127.0.0.1:9411/api/v2/spans");
-    options.af_type = ZipkinExporterOptions::AddressFamily::kIpv4;
     options.service_name = "TestService";
     ZipkinExporter::Register(options);
   }

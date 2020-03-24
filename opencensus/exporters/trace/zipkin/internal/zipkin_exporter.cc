@@ -102,15 +102,15 @@ void SerializeJson(const ::opencensus::trace::exporter::SpanData& span,
   writer->Key("id");
   writer->String(span.context().span_id().ToHex());
 
-  // Write endpoint.  OpenCensus does not support this by default.
+  // Write localEndpoint. OpenCensus does not support this by default.
   writer->Key("localEndpoint");
   writer->StartObject();
   writer->Key("serviceName");
   writer->String(service.service_name);
-  if (service.af_type == ZipkinExporterOptions::AddressFamily::kIpv6) {
-    writer->Key("ipv6");
-  } else {
+  if (service.af_type == ZipkinExporterOptions::AddressFamily::kIpv4) {
     writer->Key("ipv4");
+  } else {
+    writer->Key("ipv6");
   }
   writer->String(service.ip_address);
   writer->EndObject();
