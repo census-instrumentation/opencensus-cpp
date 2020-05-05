@@ -227,7 +227,14 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
   // metrics.
   if (view_descriptor.aggregation().type() !=
       opencensus::stats::Aggregation::Type::kLastValue) {
-    opencensus::common::SetTimestamp(data.start_time(),
+    // Ensure that each of the start time is not equal to the end time of
+    // the previous point. For cumulative metrics, this wipes out the previous
+    // point. As a result, taking a delta on the internal metric only returns
+    // the 0 based on the last end point.
+    std::cerr << "ajamato_ MakeTimeSeries, adjust the timestamp\n";
+    absl::Time start_time_adjusted = data.start_time() + absl::Milliseconds(1);
+    // Adjust the start time, by adding one millisecond to avoid this.
+    opencensus::common::SetTimestamp(start_time_adjusted,
                                      interval->mutable_start_time());
   }
   opencensus::common::SetTimestamp(data.end_time(),
