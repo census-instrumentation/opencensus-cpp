@@ -12,16 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
+#include "third_party/opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
 
 #include <string>
 
-#include "absl/base/internal/sysinfo.h"
-#include "absl/base/macros.h"
-#include "absl/strings/match.h"
-#include "absl/strings/str_cat.h"
-#include "absl/strings/string_view.h"
-#include "absl/time/time.h"
 #include "google/api/distribution.pb.h"
 #include "google/api/label.pb.h"
 #include "google/api/metric.pb.h"
@@ -29,8 +23,14 @@
 #include "google/monitoring/v3/common.pb.h"
 #include "google/monitoring/v3/metric.pb.h"
 #include "google/protobuf/timestamp.pb.h"
-#include "opencensus/common/internal/timestamp.h"
-#include "opencensus/stats/stats.h"
+#include "third_party/absl/base/internal/sysinfo.h"
+#include "third_party/absl/base/macros.h"
+#include "third_party/absl/strings/match.h"
+#include "third_party/absl/strings/str_cat.h"
+#include "third_party/absl/strings/string_view.h"
+#include "third_party/absl/time/time.h"
+#include "third_party/opencensus/common/internal/timestamp.h"
+#include "third_party/opencensus/stats/stats.h"
 
 namespace opencensus {
 namespace exporters {
@@ -227,7 +227,13 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
   // metrics.
   if (view_descriptor.aggregation().type() !=
       opencensus::stats::Aggregation::Type::kLastValue) {
-    opencensus::common::SetTimestamp(data.start_time(),
+    // Ensure that each of the start time is not equal to the end time of
+    // the previous point. For cumulative metrics, this wipes out the previous
+    // point. As a result, taking a delta on the internal metric only returns
+    // the 0 based on the last end point.
+    absl::Time start_time_adjusted = data.start_time() + absl::Milliseconds(1);
+    // Adjust the start time, by adding one millisecond to avoid this.
+    opencensus::common::SetTimestamp(start_time_adjusted,
                                      interval->mutable_start_time());
   }
   opencensus::common::SetTimestamp(data.end_time(),
