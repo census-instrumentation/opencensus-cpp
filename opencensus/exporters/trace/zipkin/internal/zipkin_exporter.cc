@@ -15,14 +15,15 @@
 #include "opencensus/exporters/trace/zipkin/zipkin_exporter.h"
 
 #include <arpa/inet.h>
-#include <ifaddrs.h>
-#include <iostream>
-
 #include <curl/curl.h>
+#include <ifaddrs.h>
+
+#include <iostream>
 #undef RAPIDJSON_HAS_STDSTRING
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "opencensus/trace/exporter/attribute_value.h"

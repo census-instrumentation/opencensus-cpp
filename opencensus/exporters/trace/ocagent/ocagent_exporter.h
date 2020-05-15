@@ -18,7 +18,6 @@
 #include <string>
 
 #include "absl/time/time.h"
-
 #include "opencensus/proto/agent/trace/v1/trace_service.grpc.pb.h"
 #include "opencensus/proto/agent/trace/v1/trace_service.pb.h"
 

@@ -14,10 +14,11 @@
 
 #include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
 
+#include <grpcpp/grpcpp.h>
+
 #include <cstdint>
 #include <iostream>
 
-#include <grpcpp/grpcpp.h>
 #include "absl/base/macros.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"

@@ -14,13 +14,14 @@
 
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 
+#include <grpcpp/grpcpp.h>
+
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <memory>
 #include <vector>
 
-#include <grpcpp/grpcpp.h>
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"

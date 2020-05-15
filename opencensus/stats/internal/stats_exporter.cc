@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "opencensus/stats/stats_exporter.h"
-#include "opencensus/stats/internal/stats_exporter_impl.h"
 
 #include <thread>
 #include <utility>
@@ -24,6 +23,7 @@
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
 #include "opencensus/stats/internal/aggregation_window.h"
+#include "opencensus/stats/internal/stats_exporter_impl.h"
 #include "opencensus/stats/view_data.h"
 #include "opencensus/stats/view_descriptor.h"
 

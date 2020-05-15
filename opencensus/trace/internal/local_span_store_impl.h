@@ -15,8 +15,6 @@
 #ifndef OPENCENSUS_TRACE_INTERNAL_LOCAL_SPAN_STORE_IMPL_H_
 #define OPENCENSUS_TRACE_INTERNAL_LOCAL_SPAN_STORE_IMPL_H_
 
-#include "opencensus/trace/internal/local_span_store.h"
-
 #include <cstdint>
 #include <deque>
 #include <memory>
@@ -32,6 +30,7 @@
 #include "absl/time/time.h"
 #include "opencensus/trace/exporter/span_data.h"
 #include "opencensus/trace/exporter/status.h"
+#include "opencensus/trace/internal/local_span_store.h"
 #include "opencensus/trace/internal/span_impl.h"
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/span_context.h"

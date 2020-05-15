@@ -14,14 +14,13 @@
 
 #include "opencensus/trace/propagation/trace_context.h"
 
+#include "absl/strings/ascii.h"
+#include "absl/strings/escaping.h"
+#include "absl/strings/str_cat.h"
 #include "opencensus/trace/span_context.h"
 #include "opencensus/trace/span_id.h"
 #include "opencensus/trace/trace_id.h"
 #include "opencensus/trace/trace_options.h"
-
-#include "absl/strings/ascii.h"
-#include "absl/strings/escaping.h"
-#include "absl/strings/str_cat.h"
 
 namespace opencensus {
 namespace trace {

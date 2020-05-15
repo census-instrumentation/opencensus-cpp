@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/trace/with_span.h"
-
 #include <cstdlib>
 
 #include "benchmark/benchmark.h"
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"
+#include "opencensus/trace/with_span.h"
 
 namespace opencensus {
 namespace trace {

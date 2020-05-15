@@ -16,16 +16,15 @@
 
 #include <cstdint>
 
-#include "opencensus/trace/span_context.h"
-#include "opencensus/trace/span_id.h"
-#include "opencensus/trace/trace_id.h"
-#include "opencensus/trace/trace_options.h"
-
 #include "absl/base/internal/endian.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
+#include "opencensus/trace/span_context.h"
+#include "opencensus/trace/span_id.h"
+#include "opencensus/trace/trace_id.h"
+#include "opencensus/trace/trace_options.h"
 
 namespace opencensus {
 namespace trace {

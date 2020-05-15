@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/trace/propagation/trace_context.h"
-
 #include "benchmark/benchmark.h"
+#include "opencensus/trace/propagation/trace_context.h"
 
 namespace opencensus {
 namespace trace {

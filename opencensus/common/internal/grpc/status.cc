@@ -14,9 +14,10 @@
 
 #include "opencensus/common/internal/grpc/status.h"
 
+#include <grpcpp/support/status.h>
+
 #include <string>
 
-#include <grpcpp/support/status.h>
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 

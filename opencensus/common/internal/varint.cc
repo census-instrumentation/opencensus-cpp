@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "opencensus/common/internal/varint.h"
+
 #include <cstdint>
 #include <string>
 
 #include "absl/strings/string_view.h"
-#include "opencensus/common/internal/varint.h"
 
 namespace opencensus {
 namespace common {

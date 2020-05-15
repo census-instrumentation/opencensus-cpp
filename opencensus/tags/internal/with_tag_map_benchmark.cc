@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "opencensus/tags/with_tag_map.h"
-
 #include <cstdlib>
 
 #include "benchmark/benchmark.h"
 #include "opencensus/tags/tag_key.h"
 #include "opencensus/tags/tag_map.h"
+#include "opencensus/tags/with_tag_map.h"
 
 namespace opencensus {
 namespace tags {

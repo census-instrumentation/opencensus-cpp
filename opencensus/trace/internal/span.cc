@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "opencensus/trace/span.h"
+
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -31,7 +33,6 @@
 #include "opencensus/trace/internal/span_impl.h"
 #include "opencensus/trace/internal/trace_config_impl.h"
 #include "opencensus/trace/sampler.h"
-#include "opencensus/trace/span.h"
 #include "opencensus/trace/span_context.h"
 #include "opencensus/trace/span_id.h"
 #include "opencensus/trace/status_code.h"

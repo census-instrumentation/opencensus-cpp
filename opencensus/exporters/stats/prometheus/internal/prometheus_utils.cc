@@ -38,8 +38,9 @@ namespace {
 // Prometheus's name requirements.
 std::string SanitizeName(absl::string_view name) {
   std::string sanitized(name);
-  std::replace_if(sanitized.begin(), sanitized.end(),
-                  [](char c) { return !::isalnum(c); }, '_');
+  std::replace_if(
+      sanitized.begin(), sanitized.end(), [](char c) { return !::isalnum(c); },
+      '_');
   return sanitized;
 }
 

@@ -14,9 +14,8 @@
 
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
-#include "opencensus/stats/stats.h"
-
 #include "gtest/gtest.h"
+#include "opencensus/stats/stats.h"
 
 namespace {
 

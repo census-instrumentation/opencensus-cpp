@@ -13,10 +13,11 @@
 // limitations under the License.
 
 #include "opencensus/common/internal/hostname.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
 
 #include <string>
+
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 namespace opencensus {
 namespace common {

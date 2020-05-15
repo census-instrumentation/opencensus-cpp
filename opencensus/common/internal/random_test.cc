@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "opencensus/common/internal/random.h"
+
 #include "gtest/gtest.h"
 
 namespace opencensus {

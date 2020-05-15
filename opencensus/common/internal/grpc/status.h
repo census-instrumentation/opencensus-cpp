@@ -15,9 +15,9 @@
 #ifndef OPENCENSUS_COMMON_INTERNAL_GRPC_STATUS_H_
 #define OPENCENSUS_COMMON_INTERNAL_GRPC_STATUS_H_
 
-#include <string>
-
 #include <grpcpp/support/status.h>
+
+#include <string>
 
 namespace opencensus {
 namespace common {

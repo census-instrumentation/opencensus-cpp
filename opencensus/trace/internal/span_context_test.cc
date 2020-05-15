@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include "opencensus/trace/span_context.h"
-#include "opencensus/trace/span_id.h"
-#include "opencensus/trace/trace_id.h"
 
 #include "gtest/gtest.h"
+#include "opencensus/trace/span_id.h"
+#include "opencensus/trace/trace_id.h"
 
 namespace opencensus {
 namespace trace {
