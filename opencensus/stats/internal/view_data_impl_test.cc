@@ -55,6 +55,8 @@ TEST(ViewDataImplTest, Sum) {
   EXPECT_EQ(Aggregation::Sum(), data.aggregation());
   EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
   EXPECT_EQ(start_time, data.start_time());
+  EXPECT_EQ(start_time, data.start_times().at(tags1));
+  EXPECT_EQ(end_time, data.start_times().at(tags2));
   EXPECT_THAT(data.double_data(),
               ::testing::UnorderedElementsAre(::testing::Pair(tags1, 3),
                                               ::testing::Pair(tags2, 5)));
@@ -76,6 +78,8 @@ TEST(ViewDataImplTest, Count) {
   EXPECT_EQ(Aggregation::Count(), data.aggregation());
   EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
   EXPECT_EQ(start_time, data.start_time());
+  EXPECT_EQ(start_time, data.start_times().at(tags1));
+  EXPECT_EQ(end_time, data.start_times().at(tags2));
   EXPECT_THAT(data.int_data(),
               ::testing::UnorderedElementsAre(::testing::Pair(tags1, 2),
                                               ::testing::Pair(tags2, 1)));
@@ -98,6 +102,8 @@ TEST(ViewDataImplTest, Distribution) {
   EXPECT_EQ(Aggregation::Distribution(buckets), data.aggregation());
   EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
   EXPECT_EQ(start_time, data.start_time());
+  EXPECT_EQ(start_time, data.start_times().at(tags1));
+  EXPECT_EQ(end_time, data.start_times().at(tags2));
   EXPECT_EQ(data.distribution_data().size(), 2);
   EXPECT_THAT(data.distribution_data().find(tags1)->second.bucket_counts(),
               ::testing::ElementsAre(2, 0));
@@ -124,6 +130,8 @@ TEST(ViewDataImplTest, LastValueDouble) {
   EXPECT_EQ(Aggregation::LastValue(), data.aggregation());
   EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
   EXPECT_EQ(start_time, data.start_time());
+  EXPECT_EQ(start_time, data.start_times().at(tags1));
+  EXPECT_EQ(end_time, data.start_times().at(tags2));
   EXPECT_THAT(data.double_data(),
               ::testing::UnorderedElementsAre(::testing::Pair(tags1, 5.0),
                                               ::testing::Pair(tags2, 15.0)));
@@ -148,6 +156,8 @@ TEST(ViewDataImplTest, LastValueInt64) {
   EXPECT_EQ(Aggregation::LastValue(), data.aggregation());
   EXPECT_EQ(AggregationWindow::Cumulative(), data.aggregation_window());
   EXPECT_EQ(start_time, data.start_time());
+  EXPECT_EQ(start_time, data.start_times().at(tags1));
+  EXPECT_EQ(end_time, data.start_times().at(tags2));
   EXPECT_THAT(data.int_data(),
               ::testing::UnorderedElementsAre(::testing::Pair(tags1, 5),
                                               ::testing::Pair(tags2, 15)));
@@ -174,12 +184,16 @@ TEST(ViewDataImplTest, StatsObjectToCount) {
   EXPECT_EQ(AggregationWindow::Interval(interval),
             export_data1.aggregation_window());
   EXPECT_EQ(start_time, export_data1.start_time());
+  EXPECT_EQ(start_time, export_data1.start_times().at(tags1));
+  EXPECT_EQ(start_time, export_data1.start_times().at(tags2));
   EXPECT_THAT(export_data1.double_data(),
               ::testing::UnorderedElementsAre(::testing::Pair(tags1, 3),
                                               ::testing::Pair(tags2, 1)));
 
   const ViewDataImpl export_data2(data, time + interval);
   EXPECT_EQ(time, export_data2.start_time());
+  EXPECT_EQ(start_time, export_data1.start_times().at(tags1));
+  EXPECT_EQ(start_time, export_data1.start_times().at(tags2));
   EXPECT_THAT(export_data2.double_data(),
               ::testing::UnorderedElementsAre(::testing::Pair(tags1, 1),
                                               ::testing::Pair(tags2, 0)));
@@ -206,12 +220,16 @@ TEST(ViewDataImplTest, StatsObjectToSum) {
   EXPECT_EQ(AggregationWindow::Interval(interval),
             export_data1.aggregation_window());
   EXPECT_EQ(start_time, export_data1.start_time());
+  EXPECT_EQ(start_time, export_data1.start_times().at(tags1));
+  EXPECT_EQ(start_time, export_data1.start_times().at(tags2));
   EXPECT_THAT(export_data1.double_data(),
               ::testing::UnorderedElementsAre(::testing::Pair(tags1, 6),
                                               ::testing::Pair(tags2, 2)));
 
   const ViewDataImpl export_data2(data, time + interval);
   EXPECT_EQ(time, export_data2.start_time());
+  EXPECT_EQ(start_time, export_data1.start_times().at(tags1));
+  EXPECT_EQ(start_time, export_data1.start_times().at(tags2));
   EXPECT_THAT(export_data2.double_data(),
               ::testing::UnorderedElementsAre(::testing::Pair(tags1, 2),
                                               ::testing::Pair(tags2, 0)));
@@ -240,6 +258,8 @@ TEST(ViewDataImplTest, StatsObjectToDistribution) {
   EXPECT_EQ(AggregationWindow::Interval(interval),
             export_data1.aggregation_window());
   EXPECT_EQ(start_time, export_data1.start_time());
+  EXPECT_EQ(start_time, export_data1.start_times().at(tags1));
+  EXPECT_EQ(start_time, export_data1.start_times().at(tags2));
   EXPECT_EQ(2, export_data1.distribution_data().size());
   const Distribution& distribution_1_1 =
       export_data1.distribution_data().find(tags1)->second;
@@ -260,6 +280,8 @@ TEST(ViewDataImplTest, StatsObjectToDistribution) {
 
   const ViewDataImpl export_data2(data, time + interval);
   EXPECT_EQ(time, export_data2.start_time());
+  EXPECT_EQ(time, export_data2.start_times().at(tags1));
+  EXPECT_EQ(time, export_data2.start_times().at(tags2));
   EXPECT_EQ(2, export_data2.distribution_data().size());
   const Distribution& distribution_1_2 =
       export_data2.distribution_data().find(tags1)->second;

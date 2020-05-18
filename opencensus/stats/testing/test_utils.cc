@@ -33,13 +33,28 @@ namespace testing {
 ViewData TestUtils::MakeViewData(
     const ViewDescriptor& descriptor,
     std::initializer_list<std::pair<std::vector<std::string>, double>> values) {
+  std::vector<TestViewValue> view_values;
+  for (const auto& value : values) {
+    TestViewValue view_value;
+    view_value.tag_values = value.first;
+    view_value.value = value.second;
+    view_value.start_time = absl::UnixEpoch();
+    view_values.push_back(view_value);
+  }
+  return TestUtils::MakeViewDataWithStartTimes(descriptor, view_values);
+}
+
+// static
+ViewData TestUtils::MakeViewDataWithStartTimes(
+    const ViewDescriptor& descriptor,
+    const std::vector<TestViewValue>& view_values) {
   auto impl = absl::make_unique<ViewDataImpl>(absl::UnixEpoch(), descriptor);
   std::vector<BucketBoundaries> boundaries = {
       descriptor.aggregation().bucket_boundaries()};
-  for (const auto& value : values) {
+  for (const auto& view_value : view_values) {
     MeasureData measure_data = MeasureData(boundaries);
-    measure_data.Add(value.second);
-    impl->Merge(value.first, measure_data, absl::UnixEpoch());
+    measure_data.Add(view_value.value);
+    impl->Merge(view_value.tag_values, measure_data, view_value.start_time);
   }
   if (impl->type() == ViewDataImpl::Type::kStatsObject) {
     return ViewData(absl::make_unique<ViewDataImpl>(*impl, absl::UnixEpoch()));

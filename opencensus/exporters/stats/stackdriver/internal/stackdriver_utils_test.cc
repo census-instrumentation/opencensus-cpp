@@ -31,6 +31,7 @@
 #include "opencensus/stats/testing/test_utils.h"
 
 using opencensus::stats::testing::TestUtils;
+using opencensus::stats::testing::TestViewValue;
 
 namespace opencensus {
 namespace exporters {
@@ -65,6 +66,19 @@ google::api::MonitoredResource GceResource() {
 std::unordered_map<std::string, google::api::MonitoredResource>
 DefaultPerMetricResource() {
   return std::unordered_map<std::string, google::api::MonitoredResource>();
+}
+
+std::vector<std::string> ToDataMapKeys(
+    const std::initializer_list<std::string> label_names,
+    const google::monitoring::v3::TimeSeries& time_series) {
+  // label_names defines the key order and is needed because
+  // time_series.metric().labels() does not maintain the original order.
+  std::vector<std::string> data_map_keys;
+  const auto& label_map = time_series.metric().labels();
+  for (const auto& label_name : label_names) {
+    data_map_keys.push_back(label_map.at(label_name));
+  }
+  return data_map_keys;
 }
 
 // TODO: MonitoredResourceForView
@@ -368,6 +382,9 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumDoubleAndTypes) {
   for (const auto& ts : time_series) {
     EXPECT_EQ("custom.googleapis.com/test/test_view", ts.metric().type());
     ASSERT_EQ(1, ts.points_size());
+    const auto& tags = ToDataMapKeys({"foo", "bar"}, ts);
+    EXPECT_EQ(absl::ToUnixSeconds(data.start_times().at(tags)),
+              ts.points(0).interval().start_time().seconds());
     EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
               ts.points(0).interval().start_time().seconds());
     EXPECT_EQ(absl::ToUnixSeconds(data.end_time()),
@@ -400,19 +417,42 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesSumInt) {
           .set_aggregation(opencensus::stats::Aggregation::Sum())
           .add_column(tag_key_1)
           .add_column(tag_key_2);
-  const opencensus::stats::ViewData data = TestUtils::MakeViewData(
-      view_descriptor, {{{"v1", "v1"}, 1.0}, {{"v1", "v2"}, 2.0}});
+  absl::Time t1 = absl::UnixEpoch();
+  absl::Time t2 = t1 + absl::Seconds(15);
+  std::map<std::vector<std::string>, absl::Time> start_times{
+      {{"v1", "v1"}, t1},
+      {{"v1", "v2"}, t2},
+  };
+
+  std::vector<TestViewValue> view_values;
+  TestViewValue view_value1;
+  view_value1.tag_values = {"v1", "v1"};
+  view_value1.value = 1.0;
+  view_value1.start_time = t1;
+  view_values.push_back(view_value1);
+
+  TestViewValue view_value2;
+  view_value2.tag_values = {"v1", "v2"};
+  view_value2.value = 2.0;
+  view_value2.start_time = t2;
+  view_values.push_back(view_value2);
+
+  const opencensus::stats::ViewData data =
+      TestUtils::MakeViewDataWithStartTimes(view_descriptor, view_values);
   const std::vector<google::monitoring::v3::TimeSeries> time_series =
       MakeTimeSeries(kMetricNamePrefix, kDefaultResource, view_descriptor, data,
                      kAddTaskLabel, task);
 
   for (const auto& ts : time_series) {
     ASSERT_EQ(1, ts.points_size());
-    EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
+    const auto& tags = ToDataMapKeys({"foo", "bar"}, ts);
+    EXPECT_EQ(absl::ToUnixSeconds(start_times[tags]),
               ts.points(0).interval().start_time().seconds());
     EXPECT_EQ(absl::ToUnixSeconds(data.end_time()),
               ts.points(0).interval().end_time().seconds());
   }
+  EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
+            absl::ToUnixSeconds(absl::UnixEpoch()));
 
   EXPECT_THAT(time_series,
               ::testing::UnorderedElementsAre(
@@ -449,6 +489,9 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesCountDouble) {
 
   for (const auto& ts : time_series) {
     ASSERT_EQ(1, ts.points_size());
+    const auto& tags = ToDataMapKeys({"foo", "bar"}, ts);
+    EXPECT_EQ(absl::ToUnixSeconds(data.start_times().at(tags)),
+              ts.points(0).interval().start_time().seconds());
     EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
               ts.points(0).interval().start_time().seconds());
     EXPECT_EQ(absl::ToUnixSeconds(data.end_time()),
@@ -493,6 +536,9 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesDistributionDouble) {
 
   for (const auto& ts : time_series) {
     ASSERT_EQ(1, ts.points_size());
+    const auto& tags = ToDataMapKeys({"foo", "bar"}, ts);
+    EXPECT_EQ(absl::ToUnixSeconds(data.start_times().at(tags)),
+              ts.points(0).interval().start_time().seconds());
     EXPECT_EQ(absl::ToUnixSeconds(data.start_time()),
               ts.points(0).interval().start_time().seconds());
     EXPECT_EQ(absl::ToUnixSeconds(data.end_time()),
@@ -540,6 +586,9 @@ TEST(StackdriverUtilsTest, MakeTimeSeriesLastValueInt) {
 
   for (const auto& ts : time_series) {
     ASSERT_EQ(1, ts.points_size());
+    const auto& tags = ToDataMapKeys({"foo", "bar"}, ts);
+    EXPECT_EQ(absl::ToUnixSeconds(data.start_times().at(tags)),
+              ts.points(0).interval().start_time().seconds());
     EXPECT_FALSE(ts.points(0).interval().has_start_time());
     EXPECT_EQ(absl::ToUnixSeconds(data.end_time()),
               ts.points(0).interval().end_time().seconds());
