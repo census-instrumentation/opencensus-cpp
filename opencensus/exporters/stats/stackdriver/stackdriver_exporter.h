@@ -80,6 +80,14 @@ struct StackdriverOptions {
   // instead. Useful for testing.
   std::unique_ptr<google::monitoring::v3::MetricService::StubInterface>
       metric_service_stub;
+
+  // Optional: A function which can be used to modify the grpc::ClientContext
+  // before making API requests. For example, to add custom credentials.
+  // This function will be called by the exporter before every CreateTimeSeries
+  // and CreateMetricDescriptor RPC.
+  // This function will not be called in parallel.
+  std::function<void(grpc::ClientContext*)> prepare_client_context =
+      [](grpc::ClientContext*) {};
 };
 
 // Exports stats for registered views (see opencensus/stats/stats_exporter.h) to
