@@ -14,13 +14,14 @@
 
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 
+#include <grpcpp/grpcpp.h>
+
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <memory>
 #include <vector>
 
-#include <grpcpp/grpcpp.h>
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
@@ -156,6 +157,7 @@ void Handler::ExportViewData(
     }
     ctx[rpc_index].set_deadline(
         absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
+    opts_.prepare_client_context(&ctx[rpc_index]);
     auto rpc(opts_.metric_service_stub->AsyncCreateTimeSeries(&ctx[rpc_index],
                                                               request, &cq));
     rpc->Finish(&response, &status[rpc_index], (void*)(uintptr_t)rpc_index);
@@ -198,6 +200,7 @@ bool Handler::MaybeRegisterView(
   ::grpc::ClientContext context;
   context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
   google::api::MetricDescriptor response;
+  opts_.prepare_client_context(&context);
   ::grpc::Status status = opts_.metric_service_stub->CreateMetricDescriptor(
       &context, request, &response);
   if (!status.ok()) {
