@@ -15,6 +15,7 @@
 #ifndef OPENCENSUS_EXPORTERS_TRACE_STACKDRIVER_STACKDRIVER_EXPORTER_H_
 #define OPENCENSUS_EXPORTERS_TRACE_STACKDRIVER_STACKDRIVER_EXPORTER_H_
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -39,6 +40,13 @@ struct StackdriverOptions {
   // instead. Useful for testing.
   std::unique_ptr<google::devtools::cloudtrace::v2::TraceService::StubInterface>
       trace_service_stub;
+
+  // (optional) A function which can be used to modify the grpc::ClientContext
+  // before making API requests. For example, to add custom credentials.
+  // This function will be called by the exporter before every BatchWriteSpans
+  // RPC. This function will not be called in parallel.
+  std::function<void(grpc::ClientContext*)> prepare_client_context =
+      [](grpc::ClientContext*) {};
 };
 
 class StackdriverExporter {
