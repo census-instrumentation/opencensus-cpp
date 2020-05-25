@@ -237,6 +237,7 @@ void Handler::Export(
   ::google::protobuf::Empty response;
   grpc::ClientContext context;
   context.set_deadline(absl::ToChronoTime(absl::Now() + opts_.rpc_deadline));
+  opts_.prepare_client_context(&context);
   grpc::Status status =
       opts_.trace_service_stub->BatchWriteSpans(&context, request, &response);
   if (!status.ok()) {
