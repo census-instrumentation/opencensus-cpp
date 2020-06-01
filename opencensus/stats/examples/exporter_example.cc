@@ -60,10 +60,12 @@ class ExampleExporter : public opencensus::stats::StatsExporter::Handler {
         return;
       }
       std::string output;
-      absl::StrAppend(&output, "\nData for view \"", descriptor.name(),
-                      "\" from ", absl::FormatTime(view_data.start_time()),
-                      " to ", absl::FormatTime(view_data.end_time()), ":\n");
+      absl::StrAppend(&output, "\nData for view \"", descriptor.name(), "\n");
       for (const auto& row : view_data.double_data()) {
+        auto start_time = view_data.start_times().at(row.first);
+        absl::StrAppend(&output, "\nRow data from ",
+                        absl::FormatTime(start_time), " to ",
+                        absl::FormatTime(view_data.end_time()), ":\n");
         for (int i = 0; i < descriptor.columns().size(); ++i) {
           absl::StrAppend(&output, descriptor.columns()[i].name(), ":",
                           row.first[i], ", ");

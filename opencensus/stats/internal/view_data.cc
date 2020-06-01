@@ -81,6 +81,11 @@ const ViewData::DataMap<Distribution>& ViewData::distribution_data() const {
 }
 
 absl::Time ViewData::start_time() const { return impl_->start_time(); }
+
+const ViewData::DataMap<absl::Time>& ViewData::start_times() const {
+  return impl_->start_times();
+}
+
 absl::Time ViewData::end_time() const { return end_time_; }
 
 ViewData::ViewData(const ViewData& other)

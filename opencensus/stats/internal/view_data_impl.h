@@ -103,6 +103,12 @@ class ViewDataImpl {
     return interval_data_;
   }
 
+  // Returns a start time for each timeseries/tag map.
+  const DataMap<absl::Time>& start_times() const { return start_times_; }
+
+  // DEPRECATED: Legacy start_time_ for the entire view.
+  // This should be deleted if custom exporters are updated to
+  // use start_times_ and stop depending on this field.
   absl::Time start_time() const { return start_time_; }
 
   // Merges bulk data for the given tag values at 'now'. tag_values must be
@@ -120,6 +126,14 @@ class ViewDataImpl {
 
   Type TypeForDescriptor(const ViewDescriptor& descriptor);
 
+  void SetStartTimeIfUnset(const std::vector<std::string>& tag_values,
+                           absl::Time now) {
+    // If the time is not set.
+    if (start_times_.find(tag_values) == start_times_.end()) {
+      start_times_[tag_values] = now;
+    }
+  }
+
   const Aggregation aggregation_;
   const AggregationWindow aggregation_window_;
   const Type type_;
@@ -129,6 +143,13 @@ class ViewDataImpl {
     DataMap<Distribution> distribution_data_;
     DataMap<IntervalStatsObject> interval_data_;
   };
+
+  // A start time for each timeseries/tag map.
+  DataMap<absl::Time> start_times_;
+
+  // DEPRECATED: Legacy start_time_ for the entire view.
+  // This should be deleted if custom exporters are updated to
+  // use start_times_ and stop depending on this field
   absl::Time start_time_;
 };
 

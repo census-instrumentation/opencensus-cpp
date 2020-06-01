@@ -132,6 +132,7 @@ template <typename DataValueT>
 std::vector<google::monitoring::v3::TimeSeries> DataToTimeSeries(
     const opencensus::stats::ViewDescriptor& view_descriptor,
     const opencensus::stats::ViewData::DataMap<DataValueT>& data,
+    const opencensus::stats::ViewData::DataMap<absl::Time>& start_times,
     const google::monitoring::v3::TimeSeries& base_time_series) {
   const google::api::MetricDescriptor::ValueType type =
       GetValueType(view_descriptor);
@@ -147,6 +148,17 @@ std::vector<google::monitoring::v3::TimeSeries> DataToTimeSeries(
     // The point is already created in the base_time_series to set the times.
     SetTypedValue(row.second, type,
                   time_series.mutable_points(0)->mutable_value());
+
+    // Stackdriver doesn't like start_time and end_time being different for
+    // GAUGE metrics. Don't set the start time for GAUGE.
+    if (view_descriptor.aggregation().type() !=
+        opencensus::stats::Aggregation::Type::kLastValue) {
+      // Use the start time stored for the specific row's tags.
+      auto* interval = time_series.mutable_points(0)->mutable_interval();
+      absl::Time start_time = start_times.at(row.first);
+      opencensus::common::SetTimestamp(start_time,
+                                       interval->mutable_start_time());
+    }
   }
   return vector;
 }
@@ -223,13 +235,6 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
     *base_time_series.mutable_resource() = *monitored_resource_for_view;
   }
   auto* interval = base_time_series.add_points()->mutable_interval();
-  // Stackdriver doesn't like start_time and end_time being different for GAUGE
-  // metrics.
-  if (view_descriptor.aggregation().type() !=
-      opencensus::stats::Aggregation::Type::kLastValue) {
-    opencensus::common::SetTimestamp(data.start_time(),
-                                     interval->mutable_start_time());
-  }
   opencensus::common::SetTimestamp(data.end_time(),
                                    interval->mutable_end_time());
   if (add_task_label) {
@@ -239,13 +244,13 @@ std::vector<google::monitoring::v3::TimeSeries> MakeTimeSeries(
   switch (data.type()) {
     case opencensus::stats::ViewData::Type::kDouble:
       return DataToTimeSeries(view_descriptor, data.double_data(),
-                              base_time_series);
+                              data.start_times(), base_time_series);
     case opencensus::stats::ViewData::Type::kInt64:
       return DataToTimeSeries(view_descriptor, data.int_data(),
-                              base_time_series);
+                              data.start_times(), base_time_series);
     case opencensus::stats::ViewData::Type::kDistribution:
       return DataToTimeSeries(view_descriptor, data.distribution_data(),
-                              base_time_series);
+                              data.start_times(), base_time_series);
   }
   ABSL_ASSERT(false && "Bad ViewData.type().");
   return {};

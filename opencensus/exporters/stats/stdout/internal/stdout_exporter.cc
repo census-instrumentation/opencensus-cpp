@@ -61,7 +61,8 @@ class Handler : public opencensus::stats::StatsExporter::Handler {
   template <typename DataValueT>
   void ExportViewDataImpl(
       const opencensus::stats::ViewDescriptor& descriptor,
-      absl::Time start_time, absl::Time end_time,
+      const ::opencensus::stats::ViewData::DataMap<absl::Time>& start_times,
+      absl::Time end_time,
       const opencensus::stats::ViewData::DataMap<DataValueT>& data);
 
   std::ostream* stream_;
@@ -74,15 +75,15 @@ void Handler::ExportViewData(
     const auto& view_data = datum.second;
     switch (view_data.type()) {
       case opencensus::stats::ViewData::Type::kDouble:
-        ExportViewDataImpl(datum.first, view_data.start_time(),
+        ExportViewDataImpl(datum.first, view_data.start_times(),
                            view_data.end_time(), view_data.double_data());
         break;
       case opencensus::stats::ViewData::Type::kInt64:
-        ExportViewDataImpl(datum.first, view_data.start_time(),
+        ExportViewDataImpl(datum.first, view_data.start_times(),
                            view_data.end_time(), view_data.int_data());
         break;
       case opencensus::stats::ViewData::Type::kDistribution:
-        ExportViewDataImpl(datum.first, view_data.start_time(),
+        ExportViewDataImpl(datum.first, view_data.start_times(),
                            view_data.end_time(), view_data.distribution_data());
         break;
     }
@@ -92,20 +93,23 @@ void Handler::ExportViewData(
 
 template <typename DataValueT>
 void Handler::ExportViewDataImpl(
-    const opencensus::stats::ViewDescriptor& descriptor, absl::Time start_time,
+    const opencensus::stats::ViewDescriptor& descriptor,
+    const ::opencensus::stats::ViewData::DataMap<absl::Time>& start_times,
     absl::Time end_time,
     const opencensus::stats::ViewData::DataMap<DataValueT>& data) {
   if (data.empty()) {
-    *stream_ << absl::StrCat("No data for view \"", descriptor.name(),
-                             "\" from ", absl::FormatTime(start_time), ".\n\n");
+    *stream_ << absl::StrCat("No data for view \"", descriptor.name(), "\".\n");
     return;
   }
   // Build a string so we can write it in one shot to minimize crosstalk if
   // multiple threads write to stream_ simultaneously.
-  std::string output = absl::StrCat("Data for view \"", descriptor.name(),
-                                    "\" from ", absl::FormatTime(start_time),
-                                    " to ", absl::FormatTime(end_time), ":\n");
+  std::string output =
+      absl::StrCat("Data for view \"", descriptor.name(), "\":\n");
+
   for (const auto& row : data) {
+    auto start_time = start_times.at(row.first);
+    absl::StrAppend(&output, "Row data from ", absl::FormatTime(start_time),
+                    " to ", absl::FormatTime(end_time), ":\n");
     absl::StrAppend(&output, "  ");
     for (int i = 0; i < descriptor.columns().size(); ++i) {
       absl::StrAppend(&output, descriptor.columns()[i].name(), "=",

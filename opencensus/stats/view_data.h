@@ -69,7 +69,15 @@ class ViewData {
   const DataMap<int64_t>& int_data() const;
   const DataMap<Distribution>& distribution_data() const;
 
+  // DEPRECATED: Returns a start time for the view data.
   absl::Time start_time() const;
+
+  // A map from tag values (corresponding to the keys in the ViewDescriptor, in
+  // that order) to the start time for those tags.
+  // The start time stored represents the first time a point was seen with
+  // that combination of tag values.
+  const DataMap<absl::Time>& start_times() const;
+
   absl::Time end_time() const;
 
   ViewData(const ViewData& other);

@@ -29,12 +29,25 @@ namespace opencensus {
 namespace stats {
 namespace testing {
 
+// Struct to be used as parameters to MakeViewData functions.
+struct TestViewValue {
+  std::vector<std::string> tag_values;
+  double value;
+  absl::Time start_time;
+};
+
 class TestUtils final {
  public:
+  // Makes a ViewData, using absl::UnixEpoch() as the start time.
   static ViewData MakeViewData(
       const ViewDescriptor& descriptor,
       std::initializer_list<std::pair<std::vector<std::string>, double>>
           values);
+
+  // Makes a ViewData, using the specified start times for each timeseries.
+  static ViewData MakeViewDataWithStartTimes(
+      const ViewDescriptor& descriptor,
+      const std::vector<TestViewValue>& view_values);
 
   static Distribution MakeDistribution(const BucketBoundaries* buckets);
 
