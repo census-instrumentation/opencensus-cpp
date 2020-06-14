@@ -12,7 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# add_subdirectory(stackdriver) TODO
+
+find_package( googleapis COMPONENTS   googleapis_cpp_devtools_cloudtrace_v2_protos )
+if (  googleapis_FOUND )
+
+  add_subdirectory(stackdriver)
+
+endif()
 
 add_subdirectory(stdout)
 

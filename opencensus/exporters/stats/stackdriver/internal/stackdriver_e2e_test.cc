@@ -29,6 +29,8 @@
 #include "opencensus/exporters/stats/stackdriver/internal/time_series_matcher.h"
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 #include "opencensus/stats/stats.h"
+#include "opencensus/common/internal/timestamp.h"
+
 
 namespace opencensus {
 namespace exporters {
@@ -110,9 +112,9 @@ StackdriverE2eTest::RetrieveData(
   request.set_filter(
       absl::StrCat("metric.type = \"custom.googleapis.com/opencensus/",
                    descriptor.name(), "\""));
-  SetTimestamp(absl::Now() - absl::Hours(1),
+  opencensus::common::SetTimestamp(absl::Now() - absl::Hours(1),
                request.mutable_interval()->mutable_start_time());
-  SetTimestamp(absl::Now() + absl::Hours(1),
+  opencensus::common::SetTimestamp(absl::Now() + absl::Hours(1),
                request.mutable_interval()->mutable_end_time());
 
   while (true) {

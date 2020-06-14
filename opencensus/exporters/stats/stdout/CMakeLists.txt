@@ -15,6 +15,8 @@
 opencensus_lib(
   exporters_stats_stdout
   PUBLIC
+  HDRS
+  stdout_exporter.h
   SRCS
   internal/stdout_exporter.cc
   DEPS

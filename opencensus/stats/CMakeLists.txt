@@ -12,11 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-opencensus_lib(stats PUBLIC DEPS stats_core stats_recording)
+opencensus_lib(
+  stats
+  PUBLIC
+  HDRS
+  aggregation.h
+  bucket_boundaries.h
+  distribution.h
+  measure.h
+  measure_descriptor.h
+  measure_registry.h
+  recording.h
+  stats.h
+  stats_exporter.h
+  tag_key.h
+  tag_set.h
+  view.h
+  view_data.h
+  view_descriptor.h
+  DEPS
+  stats_core
+  stats_recording
+  )
 
 opencensus_lib(
   stats_test_utils
   PUBLIC
+  HRDS
+  testing/test_utils.h
   SRCS
   testing/test_utils.cc
   DEPS
@@ -26,6 +49,27 @@ opencensus_lib(
 
 opencensus_lib(
   stats_core
+  HDRS
+  aggregation.h
+  bucket_boundaries.h
+  distribution.h
+  internal/aggregation_window.h
+  internal/delta_producer.h
+  internal/measure_data.h
+  internal/measure_registry_impl.h
+  internal/set_aggregation_window.h
+  internal/stats_exporter_impl.h
+  internal/stats_manager.h
+  internal/view_data_impl.h
+  measure.h
+  measure_descriptor.h
+  measure_registry.h
+  stats_exporter.h
+  tag_key.h
+  tag_set.h
+  view.h
+  view_data.h
+  view_descriptor.h
   SRCS
   internal/aggregation.cc
   internal/aggregation_window.cc
@@ -62,6 +106,8 @@ target_compile_definitions(opencensus_stats_core
 
 opencensus_lib(
   stats_recording
+  HDRS
+  recording.h
   SRCS
   internal/recording.cc
   DEPS

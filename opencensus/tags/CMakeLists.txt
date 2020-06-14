@@ -15,6 +15,9 @@
 opencensus_lib(
   tags
   PUBLIC
+  HDRS
+  tag_key.h
+  tag_map.h
   SRCS
   internal/tag_key.cc
   internal/tag_map.cc
@@ -27,6 +30,8 @@ opencensus_lib(
 opencensus_lib(
   tags_context_util
   PUBLIC
+  HDRS
+  context_util.h
   SRCS
   internal/context_util.cc
   DEPS
@@ -36,6 +41,8 @@ opencensus_lib(
 opencensus_lib(
   tags_grpc_tags_bin
   PUBLIC
+  HDRS
+  propagation/grpc_tags_bin.h
   SRCS
   internal/grpc_tags_bin.cc
   DEPS
@@ -46,6 +53,8 @@ opencensus_lib(
 opencensus_lib(
   tags_with_tag_map
   PUBLIC
+  HDRS
+  with_tag_map.h
   SRCS
   internal/with_tag_map.cc
   DEPS

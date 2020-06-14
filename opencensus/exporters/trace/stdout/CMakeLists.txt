@@ -15,10 +15,13 @@
 opencensus_lib(
   exporters_trace_stdout
   PUBLIC
+  HDRS
+  stdout_exporter.h
   SRCS
   internal/stdout_exporter.cc
   DEPS
   trace
+  context
   absl::base
   absl::memory)
 

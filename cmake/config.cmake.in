@@ -1,0 +1,60 @@
+# 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+
+find_package( gRPC )
+find_package( googleapis )
+
+include ( "${CMAKE_CURRENT_LIST_DIR}/opencensus-cpp-targets.cmake" )
+
+# FIXME : can I obtain this list via pre-processing of targets file variable ?
+foreach( _target  
+         # FIXME : this makes no diference between internal libraries and
+	 #         and public ones
+	 #         this is because of a bug makeing / exporting static libs 
+         opencensus_common_hostname
+         opencensus_common_random
+         opencensus_common_grpc_status
+         opencensus_common_grpc_with_user_agent
+         opencensus_common_stats_object
+         opencensus_common_string_vector_hash
+         opencensus_common_varint
+         opencensus_common_timestamp
+         opencensus_context
+         opencensus_exporters_stats_prometheus
+         opencensus_exporters_stats_prometheus_utils
+         opencensus_exporters_stats_stackdriver
+         opencensus_exporters_stats_stackdriver_utils
+         opencensus_time_series_matcher
+         opencensus_exporters_stats_stdout
+         opencensus_exporters_trace_stackdriver
+         opencensus_exporters_trace_stdout
+         opencensus_stats
+         opencensus_stats_test_utils
+         opencensus_stats_core
+         opencensus_stats_recording
+         opencensus_tags
+         opencensus_tags_context_util
+         opencensus_tags_grpc_tags_bin
+         opencensus_tags_with_tag_map
+         opencensus_trace
+         opencensus_trace_b3
+         opencensus_trace_cloud_trace_context
+         opencensus_trace_context_util
+         opencensus_trace_grpc_trace_bin
+         opencensus_trace_span_context
+         opencensus_trace_trace_context
+         opencensus_trace_with_span
+       )
+
+    string( REPLACE "opencensus_" "" _target_suffix "${_target}" ) 
+
+    set(scoped_name   "opencensus-c++::${_target_suffix}")
+    set(imported_name "${_target}")
+
+    if (NOT TARGET ${scoped_name})
+        add_library(${scoped_name} IMPORTED INTERFACE)
+        set_target_properties(${scoped_name}
+                              PROPERTIES INTERFACE_LINK_LIBRARIES
+                              ${imported_name})
+    endif()
+endforeach()

@@ -14,6 +14,12 @@
 
 add_subdirectory(prometheus)
 
-# add_subdirectory(stackdriver) TODO
+find_package( googleapis COMPONENTS googleapis_cpp_monitoring_v3 )
+if ( googleapis_FOUND )
+
+  add_subdirectory(stackdriver)
+
+endif()
+
 
 add_subdirectory(stdout)
