@@ -1,4 +1,4 @@
-# 
+#
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
 find_package( gRPC )
@@ -7,10 +7,10 @@ find_package( googleapis )
 include ( "${CMAKE_CURRENT_LIST_DIR}/opencensus-cpp-targets.cmake" )
 
 # FIXME : can I obtain this list via pre-processing of targets file variable ?
-foreach( _target  
+foreach( _target
          # FIXME : this makes no diference between internal libraries and
 	 #         and public ones
-	 #         this is because of a bug makeing / exporting static libs 
+	 #         this is because of a bug makeing / exporting static libs
          opencensus_common_hostname
          opencensus_common_random
          opencensus_common_grpc_status
@@ -24,7 +24,6 @@ foreach( _target
          opencensus_exporters_stats_prometheus_utils
          opencensus_exporters_stats_stackdriver
          opencensus_exporters_stats_stackdriver_utils
-         opencensus_time_series_matcher
          opencensus_exporters_stats_stdout
          opencensus_exporters_trace_stackdriver
          opencensus_exporters_trace_stdout
@@ -46,7 +45,7 @@ foreach( _target
          opencensus_trace_with_span
        )
 
-    string( REPLACE "opencensus_" "" _target_suffix "${_target}" ) 
+    string( REPLACE "opencensus_" "" _target_suffix "${_target}" )
 
     set(scoped_name   "opencensus-c++::${_target_suffix}")
     set(imported_name "${_target}")
