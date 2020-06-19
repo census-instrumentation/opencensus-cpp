@@ -1,6 +1,4 @@
-
-find_package( protobuf CONFIG REQUIRED)  # for now, I need that and protobuf_MODULE_COMPATIBLE=ON
-find_package( gRPC CONFIG REQUIRED) 
+find_package( gRPC CONFIG REQUIRED)
 
 opencensus_lib(common_grpc_status
               HDRS
