@@ -43,8 +43,12 @@ ABSL_FLAG(int, period_seconds, 60, "perform a measurement every N seconds");
 ABSL_FLAG(bool, meminfo, true, "parse /proc/meminfo ( creates ~20 metrics )");
 ABSL_FLAG(bool, vmstat, false, "parse /proc/vmstat ( creates 130+ metrics! )");
 
-#ifdef USE_STACKDRIVER_EXPORTER
 namespace {
+
+constexpr char kBytesUnits[] = "bytes";
+constexpr char kNoUnits[] = "";
+
+#ifdef USE_STACKDRIVER_EXPORTER
 // Monitored resource
 // FIXME : how do I detect if I am on a gce instance, a container inside a
 // k8s_pod in gke ? a container in gce ?
@@ -61,9 +65,6 @@ constexpr char kClusterNameLabel[] = "cluster_name";
 constexpr char kNamespaceNameLabel[] = "namespace_name";
 constexpr char kPodNameLabel[] = "pod_name";
 
-constexpr char kBytesUnits[] = "bytes";
-constexpr char kNoUnits[] = "";
-
 std::string ConvertMessageToJson(google::protobuf::Message const* poMsg) {
   std::string strMsg;
 
@@ -77,9 +78,8 @@ std::string ConvertMessageToJson(google::protobuf::Message const* poMsg) {
 
   return strMsg;
 }
-
-}  // namespace
 #endif
+}  // namespace
 
 /*
    The purpose of this executable is to collect /proc/meminfo and /proc/vmstat
