@@ -380,9 +380,8 @@ int main(int argc, char** argv) {
            std::pair<opencensus::stats::MeasureInt64, std::int64_t> >
       meminfoByteMeasures, meminfoCountMeasures, vmstatCountMeasures;
 
-
-  std::regex static const  countRe("(.+):[[:space:]]+([[:digit:]]+)");
-  std::regex static const   byteRe("(.+):[[:space:]]+([[:digit:]]+) kB");
+  std::regex static const countRe("(.+):[[:space:]]+([[:digit:]]+)");
+  std::regex static const byteRe("(.+):[[:space:]]+([[:digit:]]+) kB");
   std::regex static const vmstatRe("(.+) ([[:alnum:]]+)");
 
   bool const doMemInfo = absl::GetFlag(FLAGS_meminfo);
@@ -401,19 +400,19 @@ int main(int argc, char** argv) {
       ifile.open("/proc/meminfo");
 
       std::smatch match;
-      
+
       for (std::string line; std::getline(ifile, line);) {
         std::string label;
         std::int64_t count;
 
-        if (std::regex_match(line, match, byteRe)){
-	  label = match[1].str();
-	  count = 1024 * std::stoll(match[2].str());
+        if (std::regex_match(line, match, byteRe)) {
+          label = match[1].str();
+          count = 1024 * std::stoll(match[2].str());
 
           meminfoByteValues[label] = count;
-        } else if (std::regex_match(line, match, countRe)){
-	  label = match[1].str();
-	  count = std::stoll(match[2].str());	  
+        } else if (std::regex_match(line, match, countRe)) {
+          label = match[1].str();
+          count = std::stoll(match[2].str());
 
           meminfoCountValues[label] = count;
         }
@@ -431,9 +430,9 @@ int main(int argc, char** argv) {
         std::string label;
         std::int64_t count;
 
-	if (std::regex_match(line, match, vmstatRe)){
-	  label = match[1].str();
-	  count = std::stoll(match[2].str());	  
+        if (std::regex_match(line, match, vmstatRe)) {
+          label = match[1].str();
+          count = std::stoll(match[2].str());
 
           vmstatCountValues[label] = count;
         }

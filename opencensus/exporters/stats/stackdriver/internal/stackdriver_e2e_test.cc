@@ -25,12 +25,11 @@
 #include "google/monitoring/v3/metric_service.grpc.pb.h"
 #include "google/protobuf/empty.pb.h"
 #include "gtest/gtest.h"
+#include "opencensus/common/internal/timestamp.h"
 #include "opencensus/exporters/stats/stackdriver/internal/stackdriver_utils.h"
 #include "opencensus/exporters/stats/stackdriver/internal/time_series_matcher.h"
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
 #include "opencensus/stats/stats.h"
-#include "opencensus/common/internal/timestamp.h"
-
 
 namespace opencensus {
 namespace exporters {
@@ -112,10 +111,12 @@ StackdriverE2eTest::RetrieveData(
   request.set_filter(
       absl::StrCat("metric.type = \"custom.googleapis.com/opencensus/",
                    descriptor.name(), "\""));
-  opencensus::common::SetTimestamp(absl::Now() - absl::Hours(1),
-               request.mutable_interval()->mutable_start_time());
-  opencensus::common::SetTimestamp(absl::Now() + absl::Hours(1),
-               request.mutable_interval()->mutable_end_time());
+  opencensus::common::SetTimestamp(
+      absl::Now() - absl::Hours(1),
+      request.mutable_interval()->mutable_start_time());
+  opencensus::common::SetTimestamp(
+      absl::Now() + absl::Hours(1),
+      request.mutable_interval()->mutable_end_time());
 
   while (true) {
     google::monitoring::v3::ListTimeSeriesResponse response;

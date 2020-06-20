@@ -39,7 +39,7 @@ opencensus_lib(
   status_code.h
   trace_config.h
   trace_params.h
-  SRCS  
+  SRCS
   internal/annotation.cc
   internal/attribute_list.cc
   internal/attribute_value.cc
