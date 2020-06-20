@@ -28,6 +28,8 @@ project(
 
 option(FUZZER "Either OFF or e.g. -fsanitize=fuzzer,address" OFF)
 
+option(BUILD_STACKDRIVER_EXPORTER "Build the stackdriver exporter" OFF )
+
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 11)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -72,7 +74,7 @@ endif()
 
 install( EXPORT opencensus-cpp-targets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/opencensus-cpp )
 
-# we still need to create and export opencensus-cpp-config.cmake 
+# we still need to create and export opencensus-cpp-config.cmake
 
 # Create and install the CMake configuration files.
 configure_file("${CMAKE_CURRENT_LIST_DIR}/cmake/config.cmake.in"

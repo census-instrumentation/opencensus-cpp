@@ -16,27 +16,34 @@
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
 
+#ifdef USE_STACKDRIVER_EXPORTER
 #include "cpr/cpr.h"
 
 #include "google/protobuf/util/json_util.h"
 
 #include "opencensus/exporters/stats/stackdriver/stackdriver_exporter.h"
+#endif
+
 #include "opencensus/exporters/stats/stdout/stdout_exporter.h"
 #include "opencensus/stats/stats.h"
 
 #include "re2/re2.h"
 
+#ifdef USE_STACKDRIVER_EXPORTER
 ABSL_FLAG(std::string, metric_product_prefix, "OpenCensus",
           "product specifc prefix in google monitoring metric name ( "
           "custom.googleapis.com/[PREFIX]/[METRIC])");
 ABSL_FLAG(std::string, project_id, "", "stackdriver project id");
 ABSL_FLAG(std::string, instance_id, "", "local GCE instance id");
 ABSL_FLAG(std::string, zone, "", "local instance zone");
+#endif
+
 ABSL_FLAG(bool, debug, false, "debug : print to stdout");
 ABSL_FLAG(int, period_seconds, 60, "perform a measurement every N seconds");
 ABSL_FLAG(bool, meminfo, true, "parse /proc/meminfo ( creates ~20 metrics )");
 ABSL_FLAG(bool, vmstat, false, "parse /proc/vmstat ( creates 130+ metrics! )");
 
+#ifdef USE_STACKDRIVER_EXPORTER
 namespace {
 // Monitored resource
 // FIXME : how do I detect if I am on a gce instance, a container inside a
@@ -72,6 +79,7 @@ std::string ConvertMessageToJson(google::protobuf::Message const* poMsg) {
 }
 
 }  // namespace
+#endif
 
 /*
    The purpose of this executable is to collect /proc/meminfo and /proc/vmstat
@@ -105,6 +113,7 @@ int main(int argc, char** argv) {
 
   std::vector<char*> positionalArgs = absl::ParseCommandLine(argc, argv);
 
+#ifdef USE_STACKDRIVER_EXPORTER
   if (absl::GetFlag(FLAGS_debug)) {
     std::cout << "DEBUG MODE: registering an stdout stats exporter only"
               << std::endl;
@@ -216,6 +225,11 @@ int main(int argc, char** argv) {
     opencensus::exporters::stats::StackdriverExporter::Register(
         std::move(statsOps));
   }
+#else
+
+  opencensus::exporters::stats::StdoutExporter::Register();
+
+#endif
 
   std::cout << "parsing /proc/meminfo and /proc/vmstat every "
             << absl::GetFlag(FLAGS_period_seconds) << " seconds " << std::endl;

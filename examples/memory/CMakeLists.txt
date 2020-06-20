@@ -27,6 +27,8 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
   endif()
 
+  if( BUILD_STACKDRIVER_EXPORTER )
+
   set ( USE_SYSTEM_CURL YES )
   include(FetchContent)
   FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/whoshuu/cpr.git)
@@ -49,6 +51,8 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
   add_executable(linux_memory_stats_to_stackdriver memory_stats.cc )
   target_include_directories( linux_memory_stats_to_stackdriver PRIVATE "${re2_SOURCE_DIR}" )
+  target_compile_definitions( linux_memory_stats_to_stackdriver PRIVATE USE_STACKDRIVER_EXPORTER )
+
   target_link_libraries(
     linux_memory_stats_to_stackdriver
     absl::flags
@@ -62,4 +66,21 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     cpr::cpr
     )
 
-endif()
+endif( BUILD_STACKDRIVER_EXPORTER )
+
+
+  add_executable(linux_memory_stats_to_stdout memory_stats.cc )
+  target_include_directories( linux_memory_stats_to_stdout PRIVATE "${re2_SOURCE_DIR}" )
+  target_link_libraries(
+    linux_memory_stats_to_stdout
+    absl::flags
+    absl::flags_parse
+    absl::strings
+    absl::time
+    opencensus-cpp::exporters_stats_stdout
+    opencensus-cpp::stats
+    re2
+    )
+
+
+endif() # Linux

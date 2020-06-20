@@ -14,12 +14,17 @@
 
 add_subdirectory(prometheus)
 
-find_package( googleapis COMPONENTS googleapis_cpp_monitoring_v3 )
-if ( googleapis_FOUND )
+if ( BUILD_STACKDRIVER_EXPORTER )
 
-  add_subdirectory(stackdriver)
+  # unless magic is perfomed default builds of google-cloud-cpp or cpp-makefiles do not export this
+  find_package( googleapis COMPONENTS googleapis_cpp_monitoring_v3 )
+  if ( googleapis_FOUND )
 
-endif()
+    add_subdirectory(stackdriver)
+
+  endif()
+
+endif( BUILD_STACKDRIVER_EXPORTER )
 
 
 add_subdirectory(stdout)
