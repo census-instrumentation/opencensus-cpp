@@ -37,11 +37,6 @@ opencensus_lib(common_string_vector_hash HDRS string_vector_hash.h DEPS absl::ha
 
 opencensus_lib(common_varint HDRS varint.h SRCS varint.cc DEPS absl::strings)
 
-find_package( protobuf REQUIRED )
-
-opencensus_lib( common_timestamp HDRS timestamp.h SRCS timestamp.cc DEPS absl::time  )
-
-target_link_libraries( opencensus_common_timestamp PUBLIC protobuf::libprotobuf )
 # Tests.
 
 opencensus_test(common_hostname_test hostname_test.cc common_hostname)
@@ -53,10 +48,22 @@ opencensus_test(common_stats_object_test stats_object_test.cc
 
 opencensus_test(common_varint_test varint_test.cc common_varint)
 
-opencensus_test(common_timestamp_test timestamp_test.cc common_timestamp)
-
 # Benchmarks.
 
 opencensus_benchmark(common_random_benchmark random_benchmark.cc common_random)
 
-opencensus_benchmark(common_timestamp_benchmark timestamp_benchmark.cc common_timestamp)
+
+#
+if ( BUILD_STACKDRIVER_EXPORTER )
+
+  find_package( protobuf REQUIRED )
+
+  opencensus_lib( common_timestamp HDRS timestamp.h SRCS timestamp.cc DEPS absl::time  )
+
+  target_link_libraries( opencensus_common_timestamp PUBLIC protobuf::libprotobuf )
+
+  opencensus_test(common_timestamp_test timestamp_test.cc common_timestamp)
+
+  opencensus_benchmark(common_timestamp_benchmark timestamp_benchmark.cc common_timestamp)
+
+endif()
