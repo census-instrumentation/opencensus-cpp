@@ -34,7 +34,7 @@ opencensus_lib(
   stats
   absl::strings
   absl::time
-  $<BUILD_INTERFACE:prometheus-cpp::core> )
+  $<BUILD_INTERFACE:prometheus-cpp::core>)
 
 opencensus_test(
   exporters_stats_prometheus_utils_test internal/prometheus_utils_test.cc

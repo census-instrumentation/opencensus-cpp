@@ -28,7 +28,7 @@ project(
 
 option(FUZZER "Either OFF or e.g. -fsanitize=fuzzer,address" OFF)
 
-option(BUILD_STACKDRIVER_EXPORTER "Build the stackdriver exporter" OFF )
+option(BUILD_STACKDRIVER_EXPORTER "Build the stackdriver exporter" OFF)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 11)
@@ -40,17 +40,19 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-# There are cyclical dependencies ( betwen libopencensus_trace.so and libopencensus_context.so )
-# that prevent from building the code as is as shared libraries without undefined symbols...
+# There are cyclical dependencies ( betwen libopencensus_trace.so and
+# libopencensus_context.so ) that prevent from building the code as is as shared
+# libraries without undefined symbols...
 #
-# Moreover, because of the way I built gRPC c++ apis within google-cloud-cpp as shared libs, with a specific abseil version _as shared lib_
+# Moreover, because of the way I built gRPC c++ apis within google-cloud-cpp as
+# shared libs, with a specific abseil version _as shared lib_
 
-if ( BUILD_SHARED_LIBS )
-  set( POSITION_INDEPENDENT_CODE ON )
-  set( BUILD_SHARED_LIBS NO )
+if(BUILD_SHARED_LIBS)
+  set(POSITION_INDEPENDENT_CODE ON)
+  set(BUILD_SHARED_LIBS NO)
 endif()
 # clearly there are problems with cyclical deps in this code ( context, trace )
-if ( BUILD_SHARED_LIBS )
+if(BUILD_SHARED_LIBS)
   add_link_options("LINKER:--no-undefined")
 endif()
 
@@ -60,7 +62,7 @@ include(OpenCensusDeps)
 
 include(OpenCensusHelpers)
 
-if ( BUILD_SHARED_LIBS )
+if(BUILD_SHARED_LIBS)
   add_link_options("LINKER:--no-undefined")
 endif()
 
@@ -72,7 +74,8 @@ if(BUILD_TESTING)
   add_subdirectory(examples)
 endif()
 
-install( EXPORT opencensus-cpp-targets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/opencensus-cpp )
+install(EXPORT opencensus-cpp-targets
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/opencensus-cpp)
 
 # we still need to create and export opencensus-cpp-config.cmake
 
@@ -82,7 +85,6 @@ configure_file("${CMAKE_CURRENT_LIST_DIR}/cmake/config.cmake.in"
 configure_file("${CMAKE_CURRENT_LIST_DIR}/cmake/config-version.cmake.in"
                "opencensus-cpp-config-version.cmake" @ONLY)
 
-install(
-    FILES "${CMAKE_CURRENT_BINARY_DIR}/opencensus-cpp-config.cmake"
-          "${CMAKE_CURRENT_BINARY_DIR}/opencensus-cpp-config-version.cmake"
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/opencensus-cpp")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/opencensus-cpp-config.cmake"
+              "${CMAKE_CURRENT_BINARY_DIR}/opencensus-cpp-config-version.cmake"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/opencensus-cpp")

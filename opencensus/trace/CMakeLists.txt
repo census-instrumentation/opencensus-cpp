@@ -167,13 +167,13 @@ opencensus_lib(
 # Tests
 # ----------------------------------------------------------------------
 
-opencensus_test(trace_annotation_test internal/annotation_test.cc trace context )
+opencensus_test(trace_annotation_test internal/annotation_test.cc trace context)
 
 opencensus_test(trace_attribute_value_ref_test
-                internal/attribute_value_ref_test.cc trace context )
+                internal/attribute_value_ref_test.cc trace context)
 
 opencensus_test(trace_attribute_value_test internal/attribute_value_test.cc
-                trace context )
+                trace context)
 
 opencensus_test(trace_b3_test internal/b3_test.cc trace_b3)
 
@@ -186,24 +186,36 @@ opencensus_test(trace_context_util_test internal/context_util_test.cc trace
 opencensus_test(trace_grpc_trace_bin_test internal/grpc_trace_bin_test.cc
                 trace_grpc_trace_bin)
 
-opencensus_test(trace_link_test internal/link_test.cc trace context )
+opencensus_test(trace_link_test internal/link_test.cc trace context)
 
 opencensus_test(trace_local_span_store_test internal/local_span_store_test.cc
                 context trace absl::memory absl::synchronization)
 
 opencensus_test(
-  trace_running_span_store_test internal/running_span_store_test.cc context trace
-  absl::base absl::memory absl::synchronization)
+  trace_running_span_store_test
+  internal/running_span_store_test.cc
+  context
+  trace
+  absl::base
+  absl::memory
+  absl::synchronization)
 
-opencensus_test(trace_sampler_test internal/sampler_test.cc context trace absl::strings
-                absl::synchronization absl::time)
+opencensus_test(
+  trace_sampler_test
+  internal/sampler_test.cc
+  context
+  trace
+  absl::strings
+  absl::synchronization
+  absl::time)
 
-opencensus_test(trace_span_test internal/span_test.cc context trace absl::strings)
+opencensus_test(trace_span_test internal/span_test.cc context trace
+                absl::strings)
 
 opencensus_test(trace_span_id_test internal/span_id_test.cc context trace)
 
-opencensus_test(trace_span_options_test internal/span_options_test.cc context trace
-                absl::strings absl::synchronization)
+opencensus_test(trace_span_options_test internal/span_options_test.cc context
+                trace absl::strings absl::synchronization)
 
 opencensus_test(trace_span_context_test internal/span_context_test.cc
                 trace_span_context absl::strings absl::span)
@@ -218,12 +230,14 @@ opencensus_test(
   absl::synchronization
   absl::time)
 
-opencensus_test(trace_status_test internal/status_test.cc context trace absl::strings)
+opencensus_test(trace_status_test internal/status_test.cc context trace
+                absl::strings)
 
-opencensus_test(trace_trace_config_test internal/trace_config_test.cc context trace
-                absl::time)
+opencensus_test(trace_trace_config_test internal/trace_config_test.cc context
+                trace absl::time)
 
-opencensus_test(trace_trace_options_test internal/trace_options_test.cc context trace)
+opencensus_test(trace_trace_options_test internal/trace_options_test.cc context
+                trace)
 
 opencensus_test(trace_trace_context_test internal/trace_context_test.cc
                 trace_trace_context)

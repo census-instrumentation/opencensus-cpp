@@ -32,8 +32,7 @@ opencensus_lib(
   view_descriptor.h
   DEPS
   stats_core
-  stats_recording
-  )
+  stats_recording)
 
 opencensus_lib(
   stats_test_utils

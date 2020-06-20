@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if ( BUILD_STACKDRIVER_EXPORTER )
-  find_package( googleapis COMPONENTS   googleapis_cpp_devtools_cloudtrace_v2_protos )
-  if (  googleapis_FOUND )
+if(BUILD_STACKDRIVER_EXPORTER)
+  find_package(googleapis
+               COMPONENTS googleapis_cpp_devtools_cloudtrace_v2_protos)
+  if(googleapis_FOUND)
 
     add_subdirectory(stackdriver)
 
   endif()
-endif( BUILD_STACKDRIVER_EXPORTER )
+endif(BUILD_STACKDRIVER_EXPORTER)
 
 add_subdirectory(stdout)
 
