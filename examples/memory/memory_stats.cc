@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <regex>
 #include <string>
 
 #include "absl/flags/flag.h"
@@ -26,8 +27,6 @@
 
 #include "opencensus/exporters/stats/stdout/stdout_exporter.h"
 #include "opencensus/stats/stats.h"
-
-#include "re2/re2.h"
 
 #ifdef USE_STACKDRIVER_EXPORTER
 ABSL_FLAG(std::string, metric_product_prefix, "OpenCensus",
@@ -103,7 +102,7 @@ std::string ConvertMessageToJson(google::protobuf::Message const* poMsg) {
       - build as a separate CMake project
       - build as a Bazel example
       - build as a separate Bazel project
-      - review all the licenses (re2, cpr, opencensus-cpp, protobuf and abseil)
+      - review all the licenses (cpr, opencensus-cpp, protobuf and abseil)
  */
 
 int main(int argc, char** argv) {
@@ -381,13 +380,10 @@ int main(int argc, char** argv) {
            std::pair<opencensus::stats::MeasureInt64, std::int64_t> >
       meminfoByteMeasures, meminfoCountMeasures, vmstatCountMeasures;
 
-  // use libre2 because CentOS 7 devtoolset packages a gcc 7+ which reuses the
-  // default GCC 4.8.x libstdc++ which has buggy / incomplete support for
-  // regex as a result, unix-style regular expression are buggy...
 
-  re2::RE2 static const countRe("(.+):\\s+([[:alnum:]]+)");
-  re2::RE2 static const byteRe("(.+):\\s+([[:alnum:]]+) kB");
-  re2::RE2 static const vmstatRe("(.+)\\s+([[:alnum:]]+)");
+  std::regex static const  countRe("(.+):[[:space:]]+([[:digit:]]+)");
+  std::regex static const   byteRe("(.+):[[:space:]]+([[:digit:]]+) kB");
+  std::regex static const vmstatRe("(.+) ([[:alnum:]]+)");
 
   bool const doMemInfo = absl::GetFlag(FLAGS_meminfo);
   bool const doVmStat = absl::GetFlag(FLAGS_vmstat);
@@ -404,13 +400,21 @@ int main(int argc, char** argv) {
     if (doMemInfo) {
       ifile.open("/proc/meminfo");
 
+      std::smatch match;
+      
       for (std::string line; std::getline(ifile, line);) {
         std::string label;
         std::int64_t count;
 
-        if (re2::RE2::FullMatch(line, byteRe, &label, &count)) {
-          meminfoByteValues[label] = count * 1024;
-        } else if (re2::RE2::FullMatch(line, countRe, &label, &count)) {
+        if (std::regex_match(line, match, byteRe)){
+	  label = match[1].str();
+	  count = 1024 * std::stoll(match[2].str());
+
+          meminfoByteValues[label] = count;
+        } else if (std::regex_match(line, match, countRe)){
+	  label = match[1].str();
+	  count = std::stoll(match[2].str());	  
+
           meminfoCountValues[label] = count;
         }
       }
@@ -421,11 +425,16 @@ int main(int argc, char** argv) {
     if (doVmStat) {
       ifile.open("/proc/vmstat");
 
+      std::smatch match;
+
       for (std::string line; std::getline(ifile, line);) {
         std::string label;
         std::int64_t count;
 
-        if (re2::RE2::FullMatch(line, vmstatRe, &label, &count)) {
+	if (std::regex_match(line, match, vmstatRe)){
+	  label = match[1].str();
+	  count = std::stoll(match[2].str());	  
+
           vmstatCountValues[label] = count;
         }
       }
