@@ -55,10 +55,6 @@ load(
 
 apple_support_dependencies()
 
-load("@upb//bazel:repository_defs.bzl", "bazel_version_repository")
-
-bazel_version_repository(name = "upb_bazel_version")
-
 # Used by prometheus-cpp.
 local_repository(
     name = "net_zlib_zlib",
