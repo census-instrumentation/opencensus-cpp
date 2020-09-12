@@ -134,6 +134,11 @@ class ViewDataImpl {
     }
   }
 
+  // If expiry duration is set, keep track of the last update time of each view
+  // data and remove data that has not been updated during the expiry duration.
+  void SetUpdateTime(const std::vector<std::string>& tag_values,
+                     absl::Time now);
+
   const Aggregation aggregation_;
   const AggregationWindow aggregation_window_;
   const Type type_;
@@ -146,6 +151,16 @@ class ViewDataImpl {
 
   // A start time for each timeseries/tag map.
   DataMap<absl::Time> start_times_;
+
+  using UpdateTimeList =
+      std::list<std::pair<absl::Time, std::vector<std::string>>>;
+
+  // A list of last update time for each timeseries.
+  UpdateTimeList update_times_;
+  // A map from view data tags to the last update time list iterator.
+  DataMap<UpdateTimeList::iterator> update_time_entries_;
+
+  absl::Duration expiry_duration_;
 
   // DEPRECATED: Legacy start_time_ for the entire view.
   // This should be deleted if custom exporters are updated to
