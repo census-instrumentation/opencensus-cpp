@@ -197,7 +197,7 @@ void ViewDataImpl::Merge(const std::vector<std::string>& tag_values,
   // A value is set here. Set a start time if it is unset.
   SetStartTimeIfUnset(tag_values, now);
   SetUpdateTime(tag_values, now);
-  RemoveExpired(now);
+  PurgeExpired(now);
   switch (type_) {
     case Type::kDouble: {
       if (aggregation_.type() == Aggregation::Type::kSum) {
@@ -327,7 +327,7 @@ void ViewDataImpl::SetUpdateTime(const std::vector<std::string>& tag_values,
   }
 }
 
-void ViewDataImpl::RemoveExpired(absl::Time now) {
+void ViewDataImpl::PurgeExpired(absl::Time now) {
   if (expiry_duration_ == absl::ZeroDuration() || update_times_.empty()) {
     // No need to remove expired entries since either expiry is not set or there
     // is no data entry yet.
