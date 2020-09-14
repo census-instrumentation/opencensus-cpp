@@ -139,6 +139,9 @@ class ViewDataImpl {
   void SetUpdateTime(const std::vector<std::string>& tag_values,
                      absl::Time now);
 
+  // Remove view data that has not been updated for expiry duration.
+  void RemoveExpired(absl::Time now);
+
   const Aggregation aggregation_;
   const AggregationWindow aggregation_window_;
   const Type type_;
