@@ -85,7 +85,7 @@ class ViewDescriptor final {
   // Sets the desired lifetime of the view's data. If the view data is not
   // updated at any point during this duration, it will be removed from the set
   // of data recorded by the view when periodic aggregation happens.
-  ViewDescriptor& set_expiry_duration(const absl::Duration& expiry_duration);
+  ViewDescriptor& set_expiry_duration(absl::Duration expiry_duration);
 
   //////////////////////////////////////////////////////////////////////////////
   // View registration

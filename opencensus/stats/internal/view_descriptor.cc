@@ -75,7 +75,7 @@ ViewDescriptor& ViewDescriptor::set_description(absl::string_view description) {
 }
 
 ViewDescriptor& ViewDescriptor::set_expiry_duration(
-    const absl::Duration& expiry_duration) {
+    absl::Duration expiry_duration) {
   expiry_duration_ = expiry_duration;
   return *this;
 }

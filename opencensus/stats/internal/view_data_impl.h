@@ -135,7 +135,7 @@ class ViewDataImpl {
   }
 
   // If expiry duration is set, keep track of the last update time of each view
-  // data and remove data that has not been updated during the expiry duration.
+  // data.
   void SetUpdateTime(const std::vector<std::string>& tag_values,
                      absl::Time now);
 
@@ -163,7 +163,7 @@ class ViewDataImpl {
   // A map from view data tags to the last update time list iterator.
   DataMap<UpdateTimeList::iterator> update_time_entries_;
 
-  absl::Duration expiry_duration_;
+  const absl::Duration expiry_duration_;
 
   // DEPRECATED: Legacy start_time_ for the entire view.
   // This should be deleted if custom exporters are updated to
