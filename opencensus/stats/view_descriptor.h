@@ -82,6 +82,11 @@ class ViewDescriptor final {
   ViewDescriptor& set_description(absl::string_view description);
   const std::string& description() const { return description_; }
 
+  // Sets the desired lifetime of the view's data. If the view data is not
+  // updated at any point during this duration, it will be removed from the set
+  // of data recorded by the view when periodic aggregation happens.
+  ViewDescriptor& set_expiry_duration(absl::Duration expiry_duration);
+
   //////////////////////////////////////////////////////////////////////////////
   // View registration
 
@@ -113,6 +118,7 @@ class ViewDescriptor final {
   AggregationWindow aggregation_window_;
   std::vector<opencensus::tags::TagKey> columns_;
   std::string description_;
+  absl::Duration expiry_duration_;
 };
 
 }  // namespace stats

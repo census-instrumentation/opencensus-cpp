@@ -301,6 +301,28 @@ TEST(ViewDataImplTest, StatsObjectToDistribution) {
   EXPECT_THAT(distribution_2_2.bucket_counts(), ::testing::ElementsAre(0, 0));
 }
 
+TEST(ViewDataImplTest, ViewDataExpiry) {
+  const absl::Time start_time = absl::UnixEpoch();
+  const auto descriptor = ViewDescriptor()
+                              .set_aggregation(Aggregation::Sum())
+                              .set_expiry_duration(absl::Seconds(1));
+  ViewDataImpl data(start_time, descriptor);
+  const std::vector<std::string> tags1({"value1", "value2a"});
+  const std::vector<std::string> tags2({"value1", "value2b"});
+
+  AddToViewDataImpl(1, tags1, start_time, {}, &data);
+  AddToViewDataImpl(1, tags2, start_time, {}, &data);
+
+  EXPECT_THAT(data.double_data(),
+              ::testing::UnorderedElementsAre(::testing::Pair(tags1, 1),
+                                              ::testing::Pair(tags2, 1)));
+
+  AddToViewDataImpl(1, tags1, start_time + absl::Seconds(2), {}, &data);
+
+  EXPECT_THAT(data.double_data(),
+              ::testing::UnorderedElementsAre(::testing::Pair(tags1, 2)));
+}
+
 }  // namespace
 }  // namespace stats
 }  // namespace opencensus

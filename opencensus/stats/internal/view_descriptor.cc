@@ -74,6 +74,12 @@ ViewDescriptor& ViewDescriptor::set_description(absl::string_view description) {
   return *this;
 }
 
+ViewDescriptor& ViewDescriptor::set_expiry_duration(
+    absl::Duration expiry_duration) {
+  expiry_duration_ = expiry_duration;
+  return *this;
+}
+
 void ViewDescriptor::RegisterForExport() const {
   if (aggregation_window_.type() == AggregationWindow::Type::kCumulative) {
     StatsExporterImpl::Get()->AddView(*this);
@@ -93,14 +99,16 @@ std::string ViewDescriptor::DebugString() const {
                     [](std::string* out, opencensus::tags::TagKey key) {
                       return out->append(key.name());
                     }),
-      "\n  description: \"", description_, "\"");
+      "\n  description: \"", description_, "\"",
+      "\n  expiry duration: ", absl::FormatDuration(expiry_duration_));
 }
 
 bool ViewDescriptor::operator==(const ViewDescriptor& other) const {
   return name_ == other.name_ && measure_id_ == other.measure_id_ &&
          aggregation_ == other.aggregation_ &&
          aggregation_window_ == other.aggregation_window_ &&
-         columns_ == other.columns_ && description_ == other.description_;
+         columns_ == other.columns_ && description_ == other.description_ &&
+         expiry_duration_ == other.expiry_duration_;
 }
 
 }  // namespace stats
