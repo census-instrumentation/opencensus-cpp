@@ -32,15 +32,16 @@ load(
 )
 
 WERROR = ["-Werror=return-type", "-Werror=switch"]
+WARN_FLAGS = ["-Wno-sign-compare"]
 
 DEFAULT_COPTS = select({
-    "//opencensus:llvm_compiler": ABSL_LLVM_FLAGS + WERROR,
+    "//opencensus:llvm_compiler": ABSL_LLVM_FLAGS + WERROR + WARN_FLAGS,
     "//opencensus:windows": ABSL_MSVC_FLAGS,
-    "//conditions:default": ABSL_GCC_FLAGS + WERROR,
+    "//conditions:default": ABSL_GCC_FLAGS + WERROR + WARN_FLAGS,
 })
 
 TEST_COPTS = DEFAULT_COPTS + select({
-    "//opencensus:llvm_compiler": ABSL_LLVM_TEST_FLAGS + WERROR,
+    "//opencensus:llvm_compiler": ABSL_LLVM_TEST_FLAGS + WERROR + WARN_FLAGS,
     "//opencensus:windows": ABSL_MSVC_TEST_FLAGS,
-    "//conditions:default": ABSL_GCC_TEST_FLAGS + WERROR,
+    "//conditions:default": ABSL_GCC_TEST_FLAGS + WERROR + WARN_FLAGS,
 })
