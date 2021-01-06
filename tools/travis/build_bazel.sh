@@ -16,7 +16,7 @@ set -e
 set -x
 
 # Limit memory.
-export BAZEL_OPTIONS="--local_resources=4096,2,1.0"
+export BAZEL_OPTIONS="--local_ram_resources=4096"
 
 # Limit the amount of progress output. We can't use --noshow_progress because
 # Travis terminates the build after 10 mins without output.
