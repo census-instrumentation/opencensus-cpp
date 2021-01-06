@@ -16,7 +16,7 @@ set -e
 set -x
 
 # Limit memory.
-export BAZEL_OPTIONS="--local_resources=4096,2,1.0"
+export BAZEL_OPTIONS="--local_ram_resources=4096"
 
 # Limit the amount of progress output. We can't use --noshow_progress because
 # Travis terminates the build after 10 mins without output.
@@ -27,7 +27,7 @@ if [[ "$TRAVIS_COMPILER" = "clang" ]]; then
   export BAZEL_OPTIONS="$BAZEL_OPTIONS --copt=-Werror=thread-safety --copt=-Werror=thread-safety-reference"
 fi
 
-export BAZEL_VERSION="1.1.0"
+export BAZEL_VERSION="3.7.2"
 
 wget https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-${BAZEL_OS}-x86_64.sh
 chmod +x bazel-${BAZEL_VERSION}-installer-${BAZEL_OS}-x86_64.sh
