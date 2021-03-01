@@ -12,10 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-opencensus_lib(common_hostname SRCS hostname.cc DEPS absl::strings)
+opencensus_lib(
+  common_hostname
+  HDRS
+  hostname.h
+  SRCS
+  hostname.cc
+  DEPS
+  absl::strings)
 
 opencensus_lib(
   common_random
+  HDRS
+  random.h
   SRCS
   random.cc
   DEPS
@@ -23,15 +32,25 @@ opencensus_lib(
   absl::synchronization
   absl::time)
 
-opencensus_lib(common_stats_object DEPS absl::time)
+add_subdirectory(grpc)
+
+opencensus_lib(common_stats_object HDRS stats_object.h DEPS absl::time)
 
 # Define NOMINMAX to fix build errors when compiling with MSVC.
 target_compile_definitions(opencensus_common_stats_object
                            INTERFACE $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>)
 
-opencensus_lib(common_string_vector_hash DEPS absl::hash)
+opencensus_lib(common_string_vector_hash HDRS string_vector_hash.h DEPS
+               absl::hash)
 
-opencensus_lib(common_varint SRCS varint.cc DEPS absl::strings)
+opencensus_lib(
+  common_varint
+  HDRS
+  varint.h
+  SRCS
+  varint.cc
+  DEPS
+  absl::strings)
 
 # Tests.
 
@@ -47,3 +66,27 @@ opencensus_test(common_varint_test varint_test.cc common_varint)
 # Benchmarks.
 
 opencensus_benchmark(common_random_benchmark random_benchmark.cc common_random)
+
+#
+if(BUILD_STACKDRIVER_EXPORTER)
+
+  find_package(protobuf REQUIRED)
+
+  opencensus_lib(
+    common_timestamp
+    HDRS
+    timestamp.h
+    SRCS
+    timestamp.cc
+    DEPS
+    absl::time)
+
+  target_link_libraries(opencensus_common_timestamp
+                        PUBLIC protobuf::libprotobuf)
+
+  opencensus_test(common_timestamp_test timestamp_test.cc common_timestamp)
+
+  opencensus_benchmark(common_timestamp_benchmark timestamp_benchmark.cc
+                       common_timestamp)
+
+endif()

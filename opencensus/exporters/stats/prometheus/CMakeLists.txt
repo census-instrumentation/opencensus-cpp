@@ -15,21 +15,26 @@
 opencensus_lib(
   exporters_stats_prometheus
   PUBLIC
+  HDRS
+  prometheus_exporter.h
   SRCS
   internal/prometheus_exporter.cc
   DEPS
   exporters_stats_prometheus_utils
   stats)
 
+# internal library exposed only through the previous one _implementation
 opencensus_lib(
   exporters_stats_prometheus_utils
+  HDRS
+  internal/prometheus_utils.h
   SRCS
   internal/prometheus_utils.cc
   DEPS
   stats
   absl::strings
   absl::time
-  prometheus-cpp::core)
+  $<BUILD_INTERFACE:prometheus-cpp::core>)
 
 opencensus_test(
   exporters_stats_prometheus_utils_test internal/prometheus_utils_test.cc

@@ -15,3 +15,5 @@
 # add_subdirectory(grpc) TODO
 
 add_subdirectory(helloworld)
+
+add_subdirectory(memory)

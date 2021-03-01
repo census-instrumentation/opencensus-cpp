@@ -14,55 +14,66 @@
 
 include(FetchContent)
 
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest
-  GIT_TAG master)
-FetchContent_Declare(
-  abseil
-  GIT_REPOSITORY https://github.com/abseil/abseil-cpp
-  GIT_TAG master)
+find_package(googletest)
+if(NOT googletest_FOUND)
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest
+    GIT_TAG master)
+
+  FetchContent_GetProperties(googletest)
+  if(BUILD_TESTING)
+    message(STATUS "Dependency: googletest (BUILD_TESTING=${BUILD_TESTING})")
+    if(NOT googletest_POPULATED)
+      if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+        # All the libraries in the build must use either /MD or /MT (runtime
+        # library to link)
+        #
+        # force this option to ON so that Google Test will use /MD instead of
+        # /MT /MD is now the default for Visual Studio, so it should be our
+        # default, too
+        option(
+          gtest_force_shared_crt
+          "Use shared (DLL) run-time lib even when Google Test is built as static lib."
+          ON)
+      endif()
+
+      FetchContent_Populate(googletest)
+      add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR}
+                       EXCLUDE_FROM_ALL)
+    endif()
+  endif()
+endif()
+
+# the right thing to do would be to _always_ build abseil as a static library
+# with -fPIC in case BUILD_SHARED_LIBS is on. it is problematic with the way I
+# currently build googleapis cpp files within google-cloud-cpp
+#
+# the crux of the matter is that I need to link opencensus-cpp shared libs into
+# applications that already have their own libcurl, libgrpc* ...
+
+find_package(absl)
+if(NOT absl_FOUND)
+  FetchContent_Declare(
+    abseil
+    GIT_REPOSITORY https://github.com/abseil/abseil-cpp
+    GIT_TAG master)
+
+  FetchContent_GetProperties(abseil)
+  if(NOT abseil_POPULATED)
+    message(STATUS "Dependency: abseil")
+    set(orig_BUILD_TESTING "${BUILD_TESTING}")
+    set(BUILD_TESTING OFF) # Don't include abseil tests.
+    FetchContent_Populate(abseil)
+    add_subdirectory(${abseil_SOURCE_DIR} ${abseil_BINARY_DIR} EXCLUDE_FROM_ALL)
+    set(BUILD_TESTING "${orig_BUILD_TESTING}") # Restore value.
+  endif()
+endif()
+
 FetchContent_Declare(
   prometheus
   GIT_REPOSITORY https://github.com/jupp0r/prometheus-cpp
   GIT_TAG master)
-FetchContent_Declare(
-  benchmark
-  GIT_REPOSITORY https://github.com/google/benchmark
-  GIT_TAG master)
-
-FetchContent_GetProperties(googletest)
-if(BUILD_TESTING)
-  message(STATUS "Dependency: googletest (BUILD_TESTING=${BUILD_TESTING})")
-  if(NOT googletest_POPULATED)
-    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-      # All the libraries in the build must use either /MD or /MT (runtime
-      # library to link)
-      #
-      # force this option to ON so that Google Test will use /MD instead of /MT
-      # /MD is now the default for Visual Studio, so it should be our default,
-      # too
-      option(
-        gtest_force_shared_crt
-        "Use shared (DLL) run-time lib even when Google Test is built as static lib."
-        ON)
-    endif()
-
-    FetchContent_Populate(googletest)
-    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR}
-                     EXCLUDE_FROM_ALL)
-  endif()
-endif()
-
-FetchContent_GetProperties(abseil)
-if(NOT abseil_POPULATED)
-  message(STATUS "Dependency: abseil")
-  set(orig_BUILD_TESTING "${BUILD_TESTING}")
-  set(BUILD_TESTING OFF) # Don't include abseil tests.
-  FetchContent_Populate(abseil)
-  add_subdirectory(${abseil_SOURCE_DIR} ${abseil_BINARY_DIR} EXCLUDE_FROM_ALL)
-  set(BUILD_TESTING "${orig_BUILD_TESTING}") # Restore value.
-endif()
 
 FetchContent_GetProperties(prometheus)
 if(NOT prometheus_POPULATED)
@@ -84,18 +95,26 @@ if(NOT prometheus_POPULATED)
                    EXCLUDE_FROM_ALL)
 endif()
 
-FetchContent_GetProperties(benchmark)
-if(BUILD_TESTING)
-  message(STATUS "Dependency: benchmark (BUILD_TESTING=${BUILD_TESTING})")
-  if(NOT benchmark_POPULATED)
-    set(BENCHMARK_ENABLE_TESTING
-        OFF
-        CACHE BOOL "Enable testing of the benchmark library." FORCE)
-    set(BENCHMARK_ENABLE_GTEST_TESTS
-        OFF
-        CACHE BOOL "Enable building the unit tests which depend on gtest" FORCE)
-    FetchContent_Populate(benchmark)
-    add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR}
-                     EXCLUDE_FROM_ALL)
+find_package(benchmark)
+if(NOT benchmark_FOUND)
+  FetchContent_Declare(
+    benchmark
+    GIT_REPOSITORY https://github.com/google/benchmark
+    GIT_TAG master)
+  FetchContent_GetProperties(benchmark)
+  if(BUILD_TESTING)
+    message(STATUS "Dependency: benchmark (BUILD_TESTING=${BUILD_TESTING})")
+    if(NOT benchmark_POPULATED)
+      set(BENCHMARK_ENABLE_TESTING
+          OFF
+          CACHE BOOL "Enable testing of the benchmark library." FORCE)
+      set(BENCHMARK_ENABLE_GTEST_TESTS
+          OFF
+          CACHE BOOL "Enable building the unit tests which depend on gtest"
+                FORCE)
+      FetchContent_Populate(benchmark)
+      add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR}
+                       EXCLUDE_FROM_ALL)
+    endif()
   endif()
 endif()

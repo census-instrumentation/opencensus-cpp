@@ -15,6 +15,9 @@
 opencensus_lib(
   context
   PUBLIC
+  HDRS
+  context.h
+  with_context.h
   SRCS
   internal/context.cc
   internal/with_context.cc
