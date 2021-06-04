@@ -29,7 +29,7 @@ FetchContent_Declare(
 FetchContent_Declare(
   benchmark
   GIT_REPOSITORY https://github.com/google/benchmark
-  GIT_TAG master)
+  GIT_TAG main)
 
 FetchContent_GetProperties(googletest)
 if(BUILD_TESTING)
