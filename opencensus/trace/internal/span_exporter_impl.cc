@@ -65,7 +65,7 @@ void SpanExporterImpl::StartExportThread() {
 
 bool SpanExporterImpl::IsBatchFull() const {
   span_mu_.AssertHeld();
-  return spans_.size() >= cached_batch_size_;
+  return spans_.size() >= static_cast<size_t>(cached_batch_size_);
 }
 
 void SpanExporterImpl::RunWorkerLoop() {
