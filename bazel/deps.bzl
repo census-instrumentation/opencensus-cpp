@@ -7,8 +7,8 @@ def opencensus_cpp_deps():
     maybe(
         http_archive,
         name = "rules_cc",
-        strip_prefix = "rules_cc-master",
-        urls = ["https://github.com/bazelbuild/rules_cc/archive/master.zip"],
+        strip_prefix = "rules_cc-main",
+        urls = ["https://github.com/bazelbuild/rules_cc/archive/main.zip"],
     )
 
     # We depend on Abseil.
