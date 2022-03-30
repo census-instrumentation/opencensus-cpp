@@ -23,8 +23,8 @@ opencensus_cpp_deps()
 # Only needed for tests, not to build the OpenCensus library.
 http_archive(
     name = "com_google_googletest",
-    strip_prefix = "googletest-master",
-    urls = ["https://github.com/google/googletest/archive/master.zip"],
+    strip_prefix = "googletest-main",
+    urls = ["https://github.com/google/googletest/archive/main.zip"],
 )
 
 # Google Benchmark library.
@@ -38,6 +38,12 @@ http_archive(
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
 grpc_deps()
+
+http_archive(
+    name = "rules_python",
+    strip_prefix = "rules_python-main",
+    url = "https://github.com/bazelbuild/rules_python/archive/main.zip",
+)
 
 # grpc_deps() cannot load() its deps, this WORKSPACE has to do it.
 # See also: https://github.com/bazelbuild/bazel/issues/1943
