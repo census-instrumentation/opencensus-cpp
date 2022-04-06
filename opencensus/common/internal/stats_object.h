@@ -78,7 +78,7 @@ class StatsObject {
 
   // Create a new StatsObject keeping num_stats distinct stats over the past
   // 'interval'. 'interval' will be rounded to 1 second if it is smaller.
-  StatsObject<N>(uint16_t num_stats, absl::Duration interval, absl::Time now);
+  StatsObject(uint16_t num_stats, absl::Duration interval, absl::Time now);
 
   // The number of distinct stats we keep data for.
   uint16_t num_stats() const { return num_stats_; }
