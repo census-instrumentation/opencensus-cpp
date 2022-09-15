@@ -172,7 +172,8 @@ std::string MakeType(absl::string_view metric_name_prefix,
 
 bool IsKnownCustomMetric(absl::string_view metric_type) {
   return absl::StartsWith(metric_type, "custom.googleapis.com/") ||
-         absl::StartsWith(metric_type, "external.googleapis.com/");
+         absl::StartsWith(metric_type, "external.googleapis.com/") ||
+         absl::StartsWith(metric_type, "workload.googleapis.com/");
 }
 
 const google::api::MonitoredResource* MonitoredResourceForView(
