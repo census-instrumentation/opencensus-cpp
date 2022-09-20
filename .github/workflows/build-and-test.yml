@@ -1,0 +1,9 @@
+name: Build and test
+on: push
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: env BAZEL_CXXOPTS=-std=c++14 bazel build -k //...
+      - run: env BAZEL_CXXOPTS=-std=c++14 bazel test -k //... --test_tag_filters=-noci
