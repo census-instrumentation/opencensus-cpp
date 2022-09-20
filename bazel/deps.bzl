@@ -4,19 +4,20 @@ load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 def opencensus_cpp_deps():
     """Loads dependencies need to compile the opencensus-cpp library."""
 
-    maybe(
-        http_archive,
-        name = "rules_cc",
-        strip_prefix = "rules_cc-main",
-        urls = ["https://github.com/bazelbuild/rules_cc/archive/main.zip"],
-    )
-
     # We depend on Abseil.
     maybe(
         http_archive,
         name = "com_google_absl",
         strip_prefix = "abseil-cpp-master",
         urls = ["https://github.com/abseil/abseil-cpp/archive/master.zip"],
+    )
+
+    # Abseil depends on skylib.
+    maybe(
+        http_archive,
+        name = "bazel_skylib",
+        strip_prefix = "bazel-skylib-main",
+        urls = ["https://github.com/bazelbuild/bazel-skylib/archive/main.zip"],
     )
 
     # gRPC
@@ -59,17 +60,6 @@ def opencensus_cpp_deps():
         name = "com_google_googleapis",
         strip_prefix = "googleapis-master",
         urls = ["https://github.com/googleapis/googleapis/archive/master.zip"],
-    )
-
-    # Needed by opencensus-proto.
-    maybe(
-        http_archive,
-        name = "io_bazel_rules_go",
-        sha256 = "9fb16af4d4836c8222142e54c9efa0bb5fc562ffc893ce2abeac3e25daead144",
-        urls = [
-            "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/0.19.0/rules_go-0.19.0.tar.gz",
-            "https://github.com/bazelbuild/rules_go/releases/download/0.19.0/rules_go-0.19.0.tar.gz",
-        ],
     )
 
     # OpenCensus proto - used by OcAgent exporter.
