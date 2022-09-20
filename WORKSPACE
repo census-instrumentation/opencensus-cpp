@@ -31,59 +31,19 @@ http_archive(
 # Only needed for benchmarks, not to build the OpenCensus library.
 http_archive(
     name = "com_github_google_benchmark",
-    strip_prefix = "benchmark-master",
-    urls = ["https://github.com/google/benchmark/archive/master.zip"],
+    strip_prefix = "benchmark-main",
+    urls = ["https://github.com/google/benchmark/archive/main.zip"],
 )
 
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
 grpc_deps()
 
-http_archive(
-    name = "rules_python",
-    strip_prefix = "rules_python-main",
-    url = "https://github.com/bazelbuild/rules_python/archive/main.zip",
-)
+load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
 
-# grpc_deps() cannot load() its deps, this WORKSPACE has to do it.
-# See also: https://github.com/bazelbuild/bazel/issues/1943
-load(
-    "@build_bazel_rules_apple//apple:repositories.bzl",
-    "apple_rules_dependencies",
-)
-
-apple_rules_dependencies()
-
-load(
-    "@build_bazel_apple_support//lib:repositories.bzl",
-    "apple_support_dependencies",
-)
-
-apple_support_dependencies()
-
-# Used by prometheus-cpp.
-local_repository(
-    name = "net_zlib_zlib",
-    path = "tools/zlib",
-)
+grpc_extra_deps()
 
 # Load Prometheus dependencies.
 load("@com_github_jupp0r_prometheus_cpp//bazel:repositories.bzl", "prometheus_cpp_repositories")
 
 prometheus_cpp_repositories()
-
-# Google APIs - used by Stackdriver exporter.
-load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
-
-switched_rules_by_language(
-    name = "com_google_googleapis_imports",
-    cc = True,
-    grpc = True,
-)
-
-# Needed by @opencensus_proto.
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-
-go_rules_dependencies()
-
-go_register_toolchains()
