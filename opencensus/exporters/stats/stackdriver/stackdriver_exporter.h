@@ -90,6 +90,7 @@ struct StackdriverOptions {
       [](grpc::ClientContext*) {};
 };
 
+
 // Exports stats for registered views (see opencensus/stats/stats_exporter.h) to
 // Stackdriver. StackdriverExporter is thread-safe.
 class StackdriverExporter {
