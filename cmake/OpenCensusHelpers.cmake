@@ -12,31 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Prepends opencensus_ to all deps that aren't in a :: namespace.
-function(prepend_opencensus OUT DEPS)
-  set(_DEPS "")
-  foreach(dep ${DEPS})
-    if("${dep}" MATCHES "::")
-      list(APPEND _DEPS "${dep}")
-    else()
-      list(APPEND _DEPS "opencensus_${dep}")
-    endif()
-  endforeach()
-  set(${OUT}
-      ${_DEPS}
-      PARENT_SCOPE)
-endfunction()
-
 # Helper function like bazel's cc_test. Usage:
 #
 # opencensus_test(trace_some_test internal/some_test.cc dep1 dep2...)
 function(opencensus_test NAME SRC)
-  if(BUILD_TESTING)
-    set(_NAME "opencensus_${NAME}")
-    add_executable(${_NAME} ${SRC})
-    prepend_opencensus(DEPS "${ARGN}")
-    target_link_libraries(${_NAME} "${DEPS}" gmock gtest_main)
-    add_test(NAME ${_NAME} COMMAND ${_NAME})
+  if(BUILD_TESTING AND OpenCensus_BUILD_TESTING)
+    add_executable(${NAME} ${SRC})
+    target_include_directories(${NAME}
+      PUBLIC
+      "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    target_link_libraries(${NAME} "${ARGN}" gmock gtest_main)
+    add_test(NAME ${NAME} COMMAND ${NAME})
   endif()
 endfunction()
 
@@ -45,11 +32,13 @@ endfunction()
 # opencensus_benchmark(trace_some_benchmark internal/some_benchmark.cc dep1
 # dep2...)
 function(opencensus_benchmark NAME SRC)
-  if(BUILD_TESTING)
-    set(_NAME "opencensus_${NAME}")
-    add_executable(${_NAME} ${SRC})
-    prepend_opencensus(DEPS "${ARGN}")
-    target_link_libraries(${_NAME} "${DEPS}" benchmark)
+  if(BUILD_TESTING AND OpenCensus_BUILD_TESTING)
+    add_executable(${NAME} ${SRC})
+    target_include_directories(${NAME}
+      PUBLIC
+      "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    target_link_libraries(${NAME} "${ARGN}" benchmark)
   endif()
 endfunction()
 
@@ -57,19 +46,27 @@ endfunction()
 # opencensus_* and public libraries are also aliased as opencensus-cpp::*.
 function(opencensus_lib NAME)
   cmake_parse_arguments(ARG "PUBLIC" "" "SRCS;DEPS" ${ARGN})
-  set(_NAME "opencensus_${NAME}")
-  prepend_opencensus(ARG_DEPS "${ARG_DEPS}")
   if(ARG_SRCS)
-    add_library(${_NAME} ${ARG_SRCS})
-    target_link_libraries(${_NAME} PUBLIC ${ARG_DEPS})
-    target_include_directories(${_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
+    add_library(${NAME} ${ARG_SRCS})
+    target_link_libraries(${NAME} PUBLIC ${ARG_DEPS})
+    target_include_directories(${NAME}
+      PUBLIC
+      "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
   else()
-    add_library(${_NAME} INTERFACE)
-    target_link_libraries(${_NAME} INTERFACE ${ARG_DEPS})
-    target_include_directories(${_NAME} INTERFACE ${PROJECT_SOURCE_DIR})
+    add_library(${NAME} INTERFACE)
+    target_link_libraries(${NAME} INTERFACE ${ARG_DEPS})
+    target_include_directories(${NAME}
+      INTERFACE
+      "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
   endif()
+  install(TARGETS ${NAME} EXPORT OpenCensusTargets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
   if(ARG_PUBLIC)
-    add_library(${PROJECT_NAME}::${NAME} ALIAS ${_NAME})
+    add_library(${PROJECT_NAME}::${NAME} ALIAS ${NAME})
   endif()
 endfunction()
 
@@ -78,10 +75,12 @@ endfunction()
 # opencensus_fuzzer(trace_some_fuzzer internal/some_fuzzer.cc dep1 dep2...)
 function(opencensus_fuzzer NAME SRC)
   if(FUZZER)
-    set(_NAME "opencensus_${NAME}")
-    add_executable(${_NAME} ${SRC})
-    prepend_opencensus(DEPS "${ARGN}")
-    target_link_libraries(${_NAME} "${DEPS}" ${FUZZER})
-    target_compile_options(${_NAME} PRIVATE ${FUZZER})
+    add_executable(${NAME} ${SRC})
+    target_link_libraries(${NAME} "${DEPS}" ${FUZZER})
+    target_compile_options(${NAME} PRIVATE ${FUZZER})
+    target_include_directories(${NAME}
+      PUBLIC
+      "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>"
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
   endif()
 endfunction()
