@@ -17,23 +17,23 @@ include(FetchContent)
 FetchContent_Declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest
-  GIT_TAG master)
+  GIT_TAG v1.13.0)
 FetchContent_Declare(
   abseil
   GIT_REPOSITORY https://github.com/abseil/abseil-cpp
-  GIT_TAG master)
+  GIT_TAG 20220623.1)
 FetchContent_Declare(
   prometheus
   GIT_REPOSITORY https://github.com/jupp0r/prometheus-cpp
-  GIT_TAG master)
+  GIT_TAG v1.1.0)
 FetchContent_Declare(
   benchmark
   GIT_REPOSITORY https://github.com/google/benchmark
-  GIT_TAG main)
+  GIT_TAG v1.5.6)
 
 FetchContent_GetProperties(googletest)
-if(BUILD_TESTING)
-  message(STATUS "Dependency: googletest (BUILD_TESTING=${BUILD_TESTING})")
+if(BUILD_TESTING AND OpenCensus_BUILD_TESTING)
+  message(STATUS "Dependency: download googletest")
   if(NOT googletest_POPULATED)
     if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
       # All the libraries in the build must use either /MD or /MT (runtime
@@ -54,39 +54,49 @@ if(BUILD_TESTING)
   endif()
 endif()
 
-FetchContent_GetProperties(abseil)
-if(NOT abseil_POPULATED)
-  message(STATUS "Dependency: abseil")
-  set(orig_BUILD_TESTING "${BUILD_TESTING}")
-  set(BUILD_TESTING OFF) # Don't include abseil tests.
-  FetchContent_Populate(abseil)
-  add_subdirectory(${abseil_SOURCE_DIR} ${abseil_BINARY_DIR} EXCLUDE_FROM_ALL)
-  set(BUILD_TESTING "${orig_BUILD_TESTING}") # Restore value.
+find_package(absl CONFIG QUIET)
+if(NOT TARGET absl::config AND NOT absl_FOUND)
+  FetchContent_GetProperties(abseil)
+  if(NOT abseil_POPULATED)
+    message(STATUS "Dependency: download abseil")
+    set(ABSL_BUILD_TESTING OFF) # Don't include abseil tests.
+    set(ABSL_PROPAGATE_CXX_STD ON)
+    set(ABSL_ENABLE_INSTALL ON)
+    FetchContent_Populate(abseil)
+    add_subdirectory(${abseil_SOURCE_DIR} ${abseil_BINARY_DIR} EXCLUDE_FROM_ALL)
+  endif()
+else()
+  message("Using external abseil")
 endif()
 
-FetchContent_GetProperties(prometheus)
-if(NOT prometheus_POPULATED)
-  message(STATUS "Dependency: prometheus")
-  set(ENABLE_PUSH
-      OFF
-      CACHE BOOL "Build prometheus-cpp push library" FORCE)
-  set(ENABLE_PULL
-      OFF
-      CACHE BOOL "Build prometheus-cpp pull library" FORCE)
-  set(ENABLE_COMPRESSION
-      OFF
-      CACHE BOOL "Enable gzip compression for prometheus-cpp" FORCE)
-  set(ENABLE_TESTING
-      OFF
-      CACHE BOOL "Build test for prometheus-cpp" FORCE)
-  FetchContent_Populate(prometheus)
-  add_subdirectory(${prometheus_SOURCE_DIR} ${prometheus_BINARY_DIR}
-                   EXCLUDE_FROM_ALL)
+find_package(prometheus-cpp CONFIG QUIET)
+if(NOT TARGET prometheus-cpp::core AND NOT prometheus-cpp_FOUND)
+  FetchContent_GetProperties(prometheus)
+  if(NOT prometheus_POPULATED)
+    message(STATUS "Dependency: download prometheus")
+    set(ENABLE_PUSH
+        OFF
+        CACHE BOOL "Build prometheus-cpp push library" FORCE)
+    set(ENABLE_PULL
+        OFF
+        CACHE BOOL "Build prometheus-cpp pull library" FORCE)
+    set(ENABLE_COMPRESSION
+        OFF
+        CACHE BOOL "Enable gzip compression for prometheus-cpp" FORCE)
+    set(ENABLE_TESTING
+        OFF
+        CACHE BOOL "Build test for prometheus-cpp" FORCE)
+    FetchContent_Populate(prometheus)
+    add_subdirectory(${prometheus_SOURCE_DIR} ${prometheus_BINARY_DIR}
+                     EXCLUDE_FROM_ALL)
+  endif()
+else()
+  message("Using external prometheus-cpp")
 endif()
 
 FetchContent_GetProperties(benchmark)
-if(BUILD_TESTING)
-  message(STATUS "Dependency: benchmark (BUILD_TESTING=${BUILD_TESTING})")
+if(BUILD_TESTING AND OpenCensus_BUILD_TESTING)
+  message(STATUS "Dependency: download benchmark")
   if(NOT benchmark_POPULATED)
     set(BENCHMARK_ENABLE_TESTING
         OFF

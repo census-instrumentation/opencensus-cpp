@@ -27,6 +27,7 @@ project(
   LANGUAGES CXX)
 
 option(FUZZER "Either OFF or e.g. -fsanitize=fuzzer,address" OFF)
+option(OpenCensus_BUILD_TESTING "build test and example" OFF)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 11)
@@ -46,6 +47,21 @@ include(OpenCensusHelpers)
 add_subdirectory(opencensus)
 
 # Example code only if testing is enabled.
-if(BUILD_TESTING)
+if(BUILD_TESTING AND OpenCensus_BUILD_TESTING)
   add_subdirectory(examples)
 endif()
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/opencensus TYPE INCLUDE FILES_MATCHING PATTERN "*.h")
+
+install(EXPORT OpenCensusTargets
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/OpenCensus
+  NAMESPACE ${PROJECT_NAME}::)
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(cmake/OpenCensusConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/OpenCensusConfig.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/OpenCensus)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/OpenCensusConfig.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/OpenCensus)
