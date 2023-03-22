@@ -116,12 +116,7 @@ void Handler::ExportViewData(
 
     // If this is a custom metric, add the opencensus_task label so that
     // different processes produce different timeseries instead of colliding.
-    //
-    // However, if there is a non-default MonitoredResource for this view, it
-    // must already uniquely identify the timeseries, so don't add the
-    // opencensus_task label.
-    const bool add_task_label =
-        is_known_custom_metric && (monitored_resource_for_view == nullptr);
+    const bool add_task_label = is_known_custom_metric;
 
     // Builtin metrics are already defined, skip registration.
     if (is_known_custom_metric) {
